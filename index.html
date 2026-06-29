@@ -1,5 +1,636 @@
-js/config.local.js
-.env
-.env.local
-.DS_Store
-Thumbs.db
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Aurix — Türkiye kuyumculuk sektörünün B2B platformu. Atölyeler, tedarikçiler ve üreticiler tek çatı altında.">
+    <title>AURIX | Kuyumculuk B2B Platformu</title>
+    <link rel="icon" type="image/png" href="assets/logo.png">
+    <link rel="apple-touch-icon" href="assets/logo.png">
+    <link rel="preload" href="assets/logo.png" as="image">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+    <!-- NAV -->
+    <header class="nav" id="siteNav">
+        <div class="nav__inner">
+            <div class="nav__marka" data-nav="ana-sayfa" role="button" tabindex="0" aria-label="Ana sayfa — AURIX Kuyumculuk B2B Platformu">
+                <img src="assets/logo.png" alt="" class="nav__logo" width="48" height="48" decoding="async" aria-hidden="true">
+                <div class="nav__yazi">
+                    <span class="nav__isim">AURIX</span>
+                    <span class="nav__tagline">Kuyumculuk B2B Platformu</span>
+                </div>
+            </div>
+            <nav class="nav__menu" id="navMenu" aria-label="Ana menü">
+                <a href="#" class="nav__link nav__link--aktif" data-nav="ana-sayfa">Ana Sayfa</a>
+                <a href="#" class="nav__link" data-nav="firmalar">Firmalar</a>
+                <a href="#" class="nav__link nav__link--cta" data-nav="kayit">Firma Girişi / Kayıt</a>
+            </nav>
+            <button type="button" class="nav__toggle" id="menuToggle" aria-label="Menüyü aç" aria-expanded="false" aria-controls="navMenu">
+                <span class="nav__toggle-bar" aria-hidden="true"></span>
+                <span class="nav__toggle-bar" aria-hidden="true"></span>
+                <span class="nav__toggle-bar" aria-hidden="true"></span>
+            </button>
+        </div>
+    </header>
+    <div class="nav__backdrop" id="navBackdrop" hidden aria-hidden="true"></div>
+
+    <!-- ===================== ANA SAYFA ===================== -->
+    <div class="sayfa sayfa--aktif" data-sayfa="ana-sayfa">
+
+        <!-- 1. HERO + CANLI PIYASA -->
+        <section class="hero hero--fuar">
+            <div class="kapsayici hero-fuar-grid">
+                <div class="hero__icerik">
+                    <span class="hero__badge">Beta v0.1 — Demo Sürüm</span>
+                    <h1 class="hero__baslik">
+                        <span class="hero__baslik-satir">Kuyumculuk Sektörünü</span>
+                        <span class="hero__baslik-satir hero__baslik-satir--vurgu">Tek Platformda Birleştiriyoruz.</span>
+                    </h1>
+                    <p class="hero__metin">Atölyeler, tedarikçiler ve üreticiler için kurumsal B2B ağ. Dökümcüden taş tedarikçisine — sektör Aurix'te buluşuyor.</p>
+                    <div class="hero__aksiyon">
+                        <button type="button" class="btn btn--primary" data-nav="firmalar">Firmaları Keşfet</button>
+                        <button type="button" class="btn btn--ghost" data-nav="kayit">Firma Kaydı Yap</button>
+                    </div>
+                    <div class="hero__istatistik">
+                        <div class="hero__istat"><strong>20+</strong><span>Branş</span></div>
+                        <div class="hero__istat"><strong>7</strong><span>Şehir</span></div>
+                        <div class="hero__istat"><strong>B2B</strong><span>Doğrudan iletişim</span></div>
+                    </div>
+                </div>
+
+                <div class="hero-fuar-piyasa">
+                    <div class="hero__terminal-wrap">
+                        <div class="hero-terminal" id="heroTerminal">
+                            <div class="hero-terminal__header">
+                                <div class="hero-terminal__title">
+                                    <span class="hero-terminal__logo">AURIX</span>
+                                    <span class="hero-terminal__subtitle">Market Terminal</span>
+                                </div>
+                                <div class="hero-terminal__meta">
+                                    <span class="hero-terminal__canli"><span class="hero-terminal__dot"></span>LIVE</span>
+                                    <span class="hero-terminal__saat" id="heroTerminalSaat">--:--:--</span>
+                                </div>
+                            </div>
+                            <div class="hero-terminal__toolbar" id="heroTerminalTabs" role="tablist" aria-label="Piyasa sekmeleri">
+                                <button type="button" class="hero-terminal__tab hero-terminal__tab--aktif" data-piyasa-tab="kuyumcu" role="tab" aria-selected="true">Kuyumcu</button>
+                                <button type="button" class="hero-terminal__tab" data-piyasa-tab="doviz" role="tab" aria-selected="false">Döviz</button>
+                                <button type="button" class="hero-terminal__tab" data-piyasa-tab="altin" role="tab" aria-selected="false">Altın</button>
+                            </div>
+                            <div class="hero-terminal__thead">
+                                <span>Enstrüman</span>
+                                <span>Fiyat</span>
+                                <span>Değişim</span>
+                            </div>
+                            <div class="hero-terminal__body" id="heroTerminalBody">
+                                <div class="hero-terminal__yukleniyor">Piyasa verileri yükleniyor…</div>
+                            </div>
+                            <div class="hero-terminal__footer">
+                                <span>Kaynak: Kapalıçarşı Demo</span>
+                                <span id="heroTerminalGuncelleme">—</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="piyasa-wrap piyasa-wrap--fuar" id="piyasaSection">
+                        <div class="piyasa-wrap__header">
+                            <div class="piyasa-wrap__baslik-grup">
+                                <h2 class="piyasa-wrap__baslik">Canlı Piyasa</h2>
+                                <p class="piyasa-wrap__not">Demo Canlı Piyasa — Gerçek veri bağlantısı v1.0'da eklenecektir.</p>
+                            </div>
+                            <span class="piyasa-wrap__canli" aria-hidden="true"><span class="piyasa-wrap__dot"></span> CANLI</span>
+                        </div>
+                        <div class="piyasa-page-tabs" id="piyasaPageTabs" role="tablist" aria-label="Canlı piyasa sekmeleri">
+                            <button type="button" class="piyasa-page-tab piyasa-page-tab--aktif" data-piyasa-tab="kuyumcu" role="tab" aria-selected="true">Kuyumcu</button>
+                            <button type="button" class="piyasa-page-tab" data-piyasa-tab="doviz" role="tab" aria-selected="false">Döviz</button>
+                            <button type="button" class="piyasa-page-tab" data-piyasa-tab="altin" role="tab" aria-selected="false">Altın</button>
+                        </div>
+                        <div class="piyasa-ticker">
+                            <div class="piyasa-ticker__track" id="piyasaBandi" aria-live="polite" aria-label="Canlı piyasa fiyatları">
+                                <div class="piyasa-yukleniyor">Piyasa verileri yükleniyor…</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. ESNAF KATEGORİLERİ -->
+        <section class="bolum bolum--fuar bolum--kategori bolum--koyu">
+            <div class="kapsayici">
+                <div class="bolum__ust bolum__ust--fuar bolum__ust--merkez">
+                    <div>
+                        <span class="bolum-fuar-badge">Esnaf Kategorileri</span>
+                        <h2 class="bolum__baslik bolum__baslik--merkez">Branşlara Göre Keşfet</h2>
+                        <p class="bolum__alt bolum__alt--merkez bolum__alt--fuar">Dökümden ambalaja — sektörün temel hizmet kategorileri.</p>
+                    </div>
+                </div>
+                <div class="esnaf-kategori-grid kategori-gruplar--fuar" id="kategoriGruplari"></div>
+            </div>
+        </section>
+
+        <!-- 3. ÜRETİCİ / FİRMA VİTRİNİ -->
+        <section class="bolum bolum--fuar bolum--vitrin bolum--ana-vitrin">
+            <div class="kapsayici">
+                <div class="bolum__ust bolum__ust--fuar">
+                    <div>
+                        <span class="bolum-fuar-badge">Üretici / Firma Vitrini</span>
+                        <h2 class="bolum__baslik">Doğrulanmış Atölyeler</h2>
+                        <p class="bolum__alt bolum__alt--fuar">Onaylı firmalar — WhatsApp ve profil üzerinden doğrudan iletişim.</p>
+                    </div>
+                    <button type="button" class="btn btn--ghost btn--sm" data-nav="firmalar">Tümünü Gör</button>
+                </div>
+                <div class="firma-grid firma-grid--esit firma-grid--ana-vitrin" id="ureticilerGrid"></div>
+            </div>
+        </section>
+
+        <!-- 4. NEDEN AURIX? -->
+        <section class="bolum bolum--fuar bolum--neden-aurix bolum--neden">
+            <div class="kapsayici">
+                <div class="bolum__ust bolum__ust--fuar bolum__ust--merkez">
+                    <div>
+                        <h2 class="bolum__baslik bolum__baslik--merkez">Neden Aurix?</h2>
+                        <p class="bolum__alt bolum__alt--merkez bolum__alt--fuar">Kuyumculuk B2B'sinde hız, güven ve erişilebilirlik tek çatı altında.</p>
+                    </div>
+                </div>
+                <div class="neden-grid neden-grid--aurix" id="nedenGrid"></div>
+            </div>
+        </section>
+
+        <!-- 5. SPONSOR FİRMALAR -->
+        <section class="bolum bolum--fuar bolum--sponsor-premium">
+            <div class="kapsayici">
+                <div class="bolum__ust bolum__ust--fuar bolum__ust--merkez">
+                    <div>
+                        <h2 class="bolum__baslik bolum__baslik--merkez">Sponsor Firmalar</h2>
+                        <p class="bolum__alt bolum__alt--merkez bolum__alt--fuar">Platformu destekleyen premium firmalar.</p>
+                    </div>
+                </div>
+                <div class="sponsor-premium-grid">
+                    <article class="sponsor-premium-kart">
+                        <span class="sponsor-premium-kart__rozet">SPONSOR</span>
+                        <div class="sponsor-premium-kart__logo" aria-hidden="true"><span>L</span></div>
+                        <h3 class="sponsor-premium-kart__ad">Levent Kuyumculuk</h3>
+                        <p class="sponsor-premium-kart__aciklama">Kapalıçarşı köklü kuyumcu atölyesi ve toptan tedarik.</p>
+                        <p class="sponsor-premium-kart__sehir">İstanbul</p>
+                        <button type="button" class="btn btn--ghost btn--sm sponsor-premium-kart__btn" data-nav="firmalar">Profili Gör</button>
+                    </article>
+                    <article class="sponsor-premium-kart">
+                        <span class="sponsor-premium-kart__rozet">SPONSOR</span>
+                        <div class="sponsor-premium-kart__logo" aria-hidden="true"><span>L</span></div>
+                        <h3 class="sponsor-premium-kart__ad">Lidya Kuyumculuk</h3>
+                        <p class="sponsor-premium-kart__aciklama">Alyans ve bilezik üretiminde uzman atölye.</p>
+                        <p class="sponsor-premium-kart__sehir">İzmir</p>
+                        <button type="button" class="btn btn--ghost btn--sm sponsor-premium-kart__btn" data-nav="firmalar">Profili Gör</button>
+                    </article>
+                    <article class="sponsor-premium-kart">
+                        <span class="sponsor-premium-kart__rozet">SPONSOR</span>
+                        <div class="sponsor-premium-kart__logo" aria-hidden="true"><span>S</span></div>
+                        <h3 class="sponsor-premium-kart__ad">Serhat Bilezik</h3>
+                        <p class="sponsor-premium-kart__aciklama">Bilezik ve zincir üretiminde yüksek hacim kapasitesi.</p>
+                        <p class="sponsor-premium-kart__sehir">Kahramanmaraş</p>
+                        <button type="button" class="btn btn--ghost btn--sm sponsor-premium-kart__btn" data-nav="firmalar">Profili Gör</button>
+                    </article>
+                    <article class="sponsor-premium-kart">
+                        <span class="sponsor-premium-kart__rozet">SPONSOR</span>
+                        <div class="sponsor-premium-kart__logo" aria-hidden="true"><span>E</span></div>
+                        <h3 class="sponsor-premium-kart__ad">Elif Alyans</h3>
+                        <p class="sponsor-premium-kart__aciklama">Alyans ve tektaş model tasarım stüdyosu.</p>
+                        <p class="sponsor-premium-kart__sehir">Denizli</p>
+                        <button type="button" class="btn btn--ghost btn--sm sponsor-premium-kart__btn" data-nav="firmalar">Profili Gör</button>
+                    </article>
+                    <article class="sponsor-premium-kart">
+                        <span class="sponsor-premium-kart__rozet">SPONSOR</span>
+                        <div class="sponsor-premium-kart__logo" aria-hidden="true"><span>A</span></div>
+                        <h3 class="sponsor-premium-kart__ad">Arıcan Atölye</h3>
+                        <p class="sponsor-premium-kart__aciklama">El işçiliği polisaj ve montaj atölyesi.</p>
+                        <p class="sponsor-premium-kart__sehir">Ankara</p>
+                        <button type="button" class="btn btn--ghost btn--sm sponsor-premium-kart__btn" data-nav="firmalar">Profili Gör</button>
+                    </article>
+                    <article class="sponsor-premium-kart">
+                        <span class="sponsor-premium-kart__rozet">SPONSOR</span>
+                        <div class="sponsor-premium-kart__logo" aria-hidden="true"><span>Z</span></div>
+                        <h3 class="sponsor-premium-kart__ad">Zirve Lazer</h3>
+                        <p class="sponsor-premium-kart__aciklama">Hassas lazer kesim ve kazıma hizmetleri.</p>
+                        <p class="sponsor-premium-kart__sehir">Kahramanmaraş</p>
+                        <button type="button" class="btn btn--ghost btn--sm sponsor-premium-kart__btn" data-nav="firmalar">Profili Gör</button>
+                    </article>
+                    <article class="sponsor-premium-kart">
+                        <span class="sponsor-premium-kart__rozet">SPONSOR</span>
+                        <div class="sponsor-premium-kart__logo" aria-hidden="true"><span>M</span></div>
+                        <h3 class="sponsor-premium-kart__ad">Mikro Mıhlama</h3>
+                        <p class="sponsor-premium-kart__aciklama">Mikroskop altında pırlanta mıhlamada uzman atölye.</p>
+                        <p class="sponsor-premium-kart__sehir">İzmir</p>
+                        <button type="button" class="btn btn--ghost btn--sm sponsor-premium-kart__btn" data-nav="firmalar">Profili Gör</button>
+                    </article>
+                    <article class="sponsor-premium-kart">
+                        <span class="sponsor-premium-kart__rozet">SPONSOR</span>
+                        <div class="sponsor-premium-kart__logo" aria-hidden="true"><span>A</span></div>
+                        <h3 class="sponsor-premium-kart__ad">Altın İş Döküm</h3>
+                        <p class="sponsor-premium-kart__aciklama">Vakumlu döküm ve yüksek hacimli üretim merkezi.</p>
+                        <p class="sponsor-premium-kart__sehir">İstanbul</p>
+                        <button type="button" class="btn btn--ghost btn--sm sponsor-premium-kart__btn" data-nav="firmalar">Profili Gör</button>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <!-- Gizli — JS uyumluluğu -->
+        <div class="sr-only-grids" aria-hidden="true" hidden>
+            <div id="sponsorAlaniGrid"></div>
+            <div id="tasarimGrid"></div>
+            <div id="tasGrid"></div>
+            <div id="uretimDestekGrid"></div>
+            <div id="vitrinMagazaGrid"></div>
+            <div id="makineGrid"></div>
+            <div id="malzemeGrid"></div>
+        </div>
+    </div>
+
+    <!-- ===================== FIRMALAR / VITRIN ===================== -->
+    <div class="sayfa" data-sayfa="firmalar">
+        <section class="bolum bolum--firma-vitrin">
+            <div class="kapsayici vitrin-kapsayici">
+                <header class="vitrin-hero">
+                    <span class="bolum-fuar-badge">B2B Firma Ağı</span>
+                    <h2 class="bolum__baslik vitrin-hero__baslik">Firma Vitrini</h2>
+                    <p class="bolum__alt vitrin-hero__alt">Onaylı atölye ve tedarikçileri keşfedin; profil inceleyin veya WhatsApp ile doğrudan iletişime geçin.</p>
+                </header>
+
+                <div class="vitrin-filtre" role="search">
+                    <div class="vitrin-filtre__arama">
+                        <label class="vitrin-sr-only" for="aramaInput">Firma adı veya anahtar kelime</label>
+                        <input type="search" class="filtre-input vitrin-filtre__input" id="aramaInput" placeholder="Firma adı, branş veya anahtar kelime..." autocomplete="off">
+                    </div>
+                    <div class="vitrin-filtre__sehir-select">
+                        <label class="filtre-grup__etiket" for="filtreSehir">Şehir</label>
+                        <select class="filtre-select vitrin-filtre__select" id="filtreSehir" aria-label="Şehir filtresi">
+                            <option value="">Tüm Şehirler</option>
+                        </select>
+                    </div>
+                    <div class="vitrin-filtre__chip-gruplar">
+                        <div class="vitrin-filtre__chip-blok vitrin-filtre__chip-blok--sehir">
+                            <span class="filtre-grup__etiket">Şehir</span>
+                            <div class="filtre-chips vitrin-filtre__chip-list vitrin-filtre__chip-list--sehir" id="filtreSehirChips"></div>
+                        </div>
+                        <div class="vitrin-filtre__chip-blok vitrin-filtre__chip-blok--kategori">
+                            <span class="filtre-grup__etiket">Kategori</span>
+                            <div class="filtre-chips vitrin-filtre__chip-list" id="filtreGrupChips"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="vitrin-sonuc-bar">
+                    <span class="vitrin-sayac" id="vitrinSayac">0 firma listeleniyor</span>
+                </div>
+
+                <div class="firma-grid firma-grid--vitrin" id="vitrinGrid"></div>
+
+                <div class="vitrin-alt-bar">
+                    <div class="vitrin-siralama">
+                        <label class="vitrin-siralama__etiket" for="vitrinSiralama">Sırala</label>
+                        <select class="filtre-select vitrin-siralama__select" id="vitrinSiralama" aria-label="Sıralama">
+                            <option value="onerilen">Önerilen</option>
+                            <option value="puan">En Yüksek Puan</option>
+                            <option value="yeni">En Yeni</option>
+                            <option value="ad">A → Z</option>
+                        </select>
+                    </div>
+                    <nav class="vitrin-sayfalama" id="vitrinSayfalama" aria-label="Sayfalama"></nav>
+                </div>
+
+                <div class="vitrin-guven-bar" aria-label="Platform güven göstergeleri">
+                    <div class="vitrin-guven-bar__oge">
+                        <span class="vitrin-guven-bar__ikon" aria-hidden="true">✓</span>
+                        <span class="vitrin-guven-bar__metin">Doğrulanmış Firmalar</span>
+                    </div>
+                    <div class="vitrin-guven-bar__oge">
+                        <span class="vitrin-guven-bar__ikon" aria-hidden="true">★</span>
+                        <span class="vitrin-guven-bar__metin">Gerçek Yorumlar</span>
+                    </div>
+                    <div class="vitrin-guven-bar__oge">
+                        <span class="vitrin-guven-bar__ikon" aria-hidden="true">◆</span>
+                        <span class="vitrin-guven-bar__metin">Güvenli İletişim</span>
+                    </div>
+                    <div class="vitrin-guven-bar__oge">
+                        <span class="vitrin-guven-bar__ikon" aria-hidden="true">⚡</span>
+                        <span class="vitrin-guven-bar__metin">Hızlı Erişim</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- ===================== KAYIT ===================== -->
+    <div class="sayfa" data-sayfa="kayit">
+        <section class="bolum">
+            <div class="kapsayici">
+                <h2 class="bolum__baslik" style="text-align:center">Firma Kaydı</h2>
+                <p class="bolum__alt" style="text-align:center;margin:0 auto 32px">Atölyenizi Aurix havuzuna ekleyin. Onay sonrası vitrinde yer alırsınız.</p>
+
+                <div class="form-kutu">
+                    <form id="kayitForm">
+                        <div class="form-grup">
+                            <label class="form-label" for="kayitAd">Firma / Atölye Adı</label>
+                            <input class="form-input" type="text" id="kayitAd" required maxlength="200" placeholder="Ticari unvanınız">
+                        </div>
+                        <div class="form-grup">
+                            <label class="form-label" for="kayitKategori">Branş</label>
+                            <select class="form-select" id="kayitKategori" required></select>
+                        </div>
+                        <div class="form-grup">
+                            <label class="form-label" for="kayitSehir">Şehir</label>
+                            <select class="form-select" id="kayitSehir" required></select>
+                        </div>
+                        <div class="form-grup">
+                            <label class="form-label" for="kayitTel">WhatsApp Numarası</label>
+                            <input class="form-input" type="tel" id="kayitTel" required placeholder="905321112233" pattern="90[0-9]{10}">
+                            <p class="form-yardim">Ülke kodu ile birlikte 12 hane (90XXXXXXXXXX)</p>
+                        </div>
+                        <div class="form-grup">
+                            <label class="form-label" for="kayitAciklama">Hizmet Detayları</label>
+                            <textarea class="form-textarea" id="kayitAciklama" rows="4" required maxlength="2000" placeholder="Makine parkuru, kapasite, uzmanlık alanları..."></textarea>
+                        </div>
+                        <button type="submit" class="btn btn--primary" style="width:100%">Başvuruyu Gönder</button>
+                    </form>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- ===================== ADMIN DEMO ===================== -->
+    <div class="sayfa" data-sayfa="admin">
+        <section class="bolum bolum--admin">
+            <div class="kapsayici">
+                <header class="admin-header">
+                    <div class="admin-header__sol">
+                        <h2 class="admin-header__baslik">Admin Dashboard</h2>
+                        <p class="admin-header__alt">Aurix Beta v0.1 • Demo Yönetim Paneli</p>
+                    </div>
+                    <div class="admin-header__sag" id="adminHeaderSag" hidden>
+                        <span class="admin-header__merhaba">Merhaba Admin</span>
+                        <button type="button" class="btn btn--ghost btn--sm" id="adminPanelCikisBtn">Çıkış</button>
+                    </div>
+                </header>
+
+                <div class="admin-demo-bar">
+                    <p class="admin-demo-bar__metin">Demo modu — veriler tarayıcıda (localStorage) saklanır. Giriş: <strong>demo@aurix.com</strong> / <strong>aurix2026</strong></p>
+                    <div class="admin-demo-bar__aksiyon">
+                        <button type="button" class="btn btn--danger-outline btn--xs" id="demoSifirlaBtn">Verileri Sıfırla</button>
+                        <span class="admin-demo-bar__not">Demo verileri yeniden yüklenir.</span>
+                    </div>
+                </div>
+
+                <div class="admin-ozet">
+                    <div class="admin-kart">
+                        <div class="admin-kart__ikon" aria-hidden="true">🏢</div>
+                        <div class="admin-kart__etiket">Toplam Firma</div>
+                        <div class="admin-kart__sayi" id="adminToplam">0</div>
+                    </div>
+                    <div class="admin-kart admin-kart--uyari">
+                        <div class="admin-kart__ikon" aria-hidden="true">⏳</div>
+                        <div class="admin-kart__etiket">Onay Bekleyen</div>
+                        <div class="admin-kart__sayi" id="adminBekleyen">0</div>
+                    </div>
+                    <div class="admin-kart admin-kart--yesil">
+                        <div class="admin-kart__ikon" aria-hidden="true">✓</div>
+                        <div class="admin-kart__etiket">Onaylı</div>
+                        <div class="admin-kart__sayi" id="adminOnayli">0</div>
+                    </div>
+                    <div class="admin-kart">
+                        <div class="admin-kart__ikon" aria-hidden="true">◆</div>
+                        <div class="admin-kart__etiket">Partner</div>
+                        <div class="admin-kart__sayi" id="adminPartner">0</div>
+                    </div>
+                    <div class="admin-kart admin-kart--premium">
+                        <div class="admin-kart__ikon" aria-hidden="true">★</div>
+                        <div class="admin-kart__etiket">Premium</div>
+                        <div class="admin-kart__sayi" id="adminPremium">0</div>
+                    </div>
+                </div>
+
+                <section class="admin-gelir" aria-labelledby="adminGelirBaslik">
+                    <div class="admin-gelir__ust">
+                        <h3 class="admin-gelir__baslik" id="adminGelirBaslik">Gelir Özeti</h3>
+                        <p class="admin-gelir__not">Beta demo: Gelirler tahmini hesaplanır, gerçek ödeme entegrasyonu v1.0’da eklenecektir.</p>
+                    </div>
+
+                    <div class="admin-gelir__kartlar">
+                        <div class="admin-gelir-kart">
+                            <div class="admin-gelir-kart__ikon" aria-hidden="true">📋</div>
+                            <div class="admin-gelir-kart__etiket">Aylık Üyelik Geliri</div>
+                            <div class="admin-gelir-kart__tutar" id="adminGelirUyelik">₺0</div>
+                        </div>
+                        <div class="admin-gelir-kart admin-gelir-kart--premium">
+                            <div class="admin-gelir-kart__ikon" aria-hidden="true">★</div>
+                            <div class="admin-gelir-kart__etiket">Premium Üyelik Geliri</div>
+                            <div class="admin-gelir-kart__tutar" id="adminGelirPremium">₺0</div>
+                        </div>
+                        <div class="admin-gelir-kart admin-gelir-kart--partner">
+                            <div class="admin-gelir-kart__ikon" aria-hidden="true">◆</div>
+                            <div class="admin-gelir-kart__etiket">Partner/Sponsor Geliri</div>
+                            <div class="admin-gelir-kart__tutar" id="adminGelirPartner">₺0</div>
+                        </div>
+                        <div class="admin-gelir-kart">
+                            <div class="admin-gelir-kart__ikon" aria-hidden="true">%</div>
+                            <div class="admin-gelir-kart__etiket">Komisyon Geliri</div>
+                            <div class="admin-gelir-kart__tutar" id="adminGelirKomisyon">₺0</div>
+                        </div>
+                    </div>
+
+                    <div class="admin-gelir__toplam">
+                        <div class="admin-gelir-toplam">
+                            <span class="admin-gelir-toplam__etiket">Toplam Tahmini Aylık Gelir</span>
+                            <span class="admin-gelir-toplam__tutar" id="adminGelirAylik">₺0</span>
+                        </div>
+                        <div class="admin-gelir-toplam admin-gelir-toplam--yillik">
+                            <span class="admin-gelir-toplam__etiket">Toplam Tahmini Yıllık Gelir</span>
+                            <span class="admin-gelir-toplam__tutar" id="adminGelirYillik">₺0</span>
+                        </div>
+                    </div>
+                </section>
+
+                <div class="admin-toolbar">
+                    <input type="text" class="admin-arama filtre-input" id="adminAramaInput" placeholder="Firma ara...">
+                    <button type="button" class="btn btn--primary btn--sm" id="adminYeniFirmaBtn">+ Yeni Firma</button>
+                </div>
+
+                <div class="admin-tablo-wrap">
+                    <table class="admin-tablo">
+                        <thead>
+                            <tr>
+                                <th>Firma</th>
+                                <th>Branş</th>
+                                <th>Şehir</th>
+                                <th>Kategori</th>
+                                <th>WhatsApp</th>
+                                <th>Durum</th>
+                                <th>İşlem</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminTbody"></tbody>
+                    </table>
+                </div>
+
+                <aside class="admin-demo-info">
+                    <h3 class="admin-demo-info__baslik">Demo Bilgisi</h3>
+                    <p class="admin-demo-info__metin">Bu panel yalnızca Beta v0.1 gösterimi içindir. Kimlik doğrulama ve veritabanı bağlantısı v1.0 sürümünde Supabase ile sağlanacaktır.</p>
+                </aside>
+            </div>
+        </section>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="footer footer--wireframe">
+        <div class="kapsayici footer__ust">
+            <div class="footer__marka">
+                <div class="footer__marka-ust">
+                    <img src="assets/logo.png" class="footer__logo" alt="" width="48" height="48" decoding="async" aria-hidden="true">
+                    <div class="footer__marka-yazi">
+                        <span class="footer__isim">AURIX</span>
+                        <span class="footer__alt-baslik">Kuyumculuk B2B Platformu</span>
+                    </div>
+                </div>
+                <p class="footer__tagline">Türkiye kuyumculuk sektörünün B2B platformu. Atölyeler, tedarikçiler ve üreticiler tek çatı altında.</p>
+            </div>
+            <div class="footer__kolon">
+                <h4 class="footer__baslik">Hızlı Bağlantılar</h4>
+                <nav class="footer__nav">
+                    <a href="#" data-nav="ana-sayfa">Ana Sayfa</a>
+                    <a href="#" data-nav="firmalar">Firma Vitrini</a>
+                    <a href="#" data-nav="kayit">Firma Girişi / Kayıt</a>
+                    <a href="#" data-nav="firmalar">Firmaları Keşfet</a>
+                </nav>
+            </div>
+            <div class="footer__kolon">
+                <h4 class="footer__baslik">Kurumsal</h4>
+                <nav class="footer__nav">
+                    <a href="#" data-nav="ana-sayfa">Hakkımızda</a>
+                    <a href="#">KVKK</a>
+                    <a href="#">Gizlilik Politikası</a>
+                </nav>
+            </div>
+            <div class="footer__kolon">
+                <h4 class="footer__baslik">İletişim</h4>
+                <p class="footer__metin"><a href="mailto:info@aurix.com">info@aurix.com</a></p>
+                <p class="footer__metin"><a href="https://wa.me/905321112233" target="_blank" rel="noopener noreferrer">WhatsApp Destek</a></p>
+                <p class="footer__metin">İstanbul, Türkiye</p>
+                <div class="footer__sosyal" aria-label="Sosyal medya">
+                    <a href="https://instagram.com" class="footer__sosyal-link" target="_blank" rel="noopener noreferrer" aria-label="Instagram">Instagram</a>
+                    <a href="https://linkedin.com" class="footer__sosyal-link" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">LinkedIn</a>
+                    <a href="https://wa.me/905321112233" class="footer__sosyal-link" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp">WhatsApp</a>
+                </div>
+            </div>
+        </div>
+        <div class="footer__alt">
+            <div class="kapsayici footer__alt-inner">
+                <p class="footer__not">© 2026 Aurix Platform. Tüm hakları saklıdır.</p>
+                <div class="footer__alt-orta">
+                    <a href="#">KVKK</a>
+                    <span aria-hidden="true">·</span>
+                    <a href="#">Gizlilik</a>
+                    <span aria-hidden="true">·</span>
+                    <a href="#" data-nav="kayit">İletişim</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- DETAY MODAL -->
+    <div class="modal" id="detayModal">
+        <div class="modal__kutu modal__kutu--genis">
+            <div class="modal__baslik">
+                <h3 id="detayAd">Firma Detayı</h3>
+                <button class="modal__kapat" data-modal-kapat="detayModal" aria-label="Kapat">×</button>
+            </div>
+            <img class="detay-gorsel" id="detayGorsel" alt="">
+            <div id="detayRozetler"></div>
+            <div class="detay-meta">
+                <span id="detayKat"></span>
+                <span id="detaySehir"></span>
+                <span id="detayPuan"></span>
+            </div>
+            <p class="detay-aciklama" id="detayAciklama"></p>
+            <a class="btn btn--primary" id="detayWa" href="#" target="_blank" rel="noopener" style="width:100%">💬 WhatsApp ile İletişim</a>
+        </div>
+    </div>
+
+    <!-- ADMIN LOGIN MODAL -->
+    <div class="modal" id="adminLoginModal">
+        <div class="modal__kutu">
+            <div class="modal__baslik">
+                <h3>Admin Demo Girişi</h3>
+                <button class="modal__kapat" data-modal-kapat="adminLoginModal" aria-label="Kapat">×</button>
+            </div>
+            <div class="form-grup">
+                <label class="form-label" for="adminEmail">E-posta</label>
+                <input class="form-input" type="email" id="adminEmail" value="demo@aurix.com">
+            </div>
+            <div class="form-grup">
+                <label class="form-label" for="adminSifre">Şifre</label>
+                <input class="form-input" type="password" id="adminSifre" placeholder="••••••••">
+            </div>
+            <button type="button" class="btn btn--primary" id="adminLoginBtn" style="width:100%">Giriş Yap</button>
+        </div>
+    </div>
+
+    <!-- ADMIN KAYIT MODAL -->
+    <div class="modal" id="adminKayitModal">
+        <div class="modal__kutu modal__kutu--genis">
+            <div class="modal__baslik">
+                <h3>Yeni Firma Ekle</h3>
+                <button class="modal__kapat" data-modal-kapat="adminKayitModal" aria-label="Kapat">×</button>
+            </div>
+            <form id="adminKayitForm">
+                <div class="form-grup">
+                    <label class="form-label" for="adminKayitAd">Firma / Atölye Adı</label>
+                    <input class="form-input" type="text" id="adminKayitAd" required maxlength="200" placeholder="Ticari unvanınız">
+                </div>
+                <div class="form-grup">
+                    <label class="form-label" for="adminKayitKategori">Branş</label>
+                    <select class="form-select" id="adminKayitKategori" required></select>
+                </div>
+                <div class="form-grup">
+                    <label class="form-label" for="adminKayitSehir">Şehir</label>
+                    <select class="form-select" id="adminKayitSehir" required></select>
+                </div>
+                <div class="form-grup">
+                    <label class="form-label" for="adminKayitTel">WhatsApp Numarası</label>
+                    <input class="form-input" type="tel" id="adminKayitTel" required placeholder="905321112233" pattern="90[0-9]{10}">
+                    <p class="form-yardim">Ülke kodu ile birlikte 12 hane (90XXXXXXXXXX)</p>
+                </div>
+                <div class="form-grup">
+                    <label class="form-label" for="adminKayitAciklama">Hizmet Detayları</label>
+                    <textarea class="form-textarea" id="adminKayitAciklama" rows="4" required maxlength="2000" placeholder="Makine parkuru, kapasite, uzmanlık alanları..."></textarea>
+                </div>
+                <button type="submit" class="btn btn--primary" style="width:100%">Kaydı Oluştur</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ADMIN SIL MODAL -->
+    <div class="modal" id="adminSilModal">
+        <div class="modal__kutu">
+            <div class="modal__baslik">
+                <h3>Firmayı Sil</h3>
+                <button class="modal__kapat" data-modal-kapat="adminSilModal" aria-label="Kapat">×</button>
+            </div>
+            <p class="admin-sil-metin">Bu firmayı silmek istediğinize emin misiniz?</p>
+            <div class="admin-sil-aksiyon">
+                <button type="button" class="btn btn--ghost" data-modal-kapat="adminSilModal">İptal</button>
+                <button type="button" class="btn btn--danger" id="adminSilOnayBtn">Sil</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toastWrap"></div>
+
+    <script src="js/data.js"></script>
+    <script src="js/market-service.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
