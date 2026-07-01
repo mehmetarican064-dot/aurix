@@ -45,11 +45,11 @@
     <!-- ===================== ANA SAYFA ===================== -->
     <div class="sayfa sayfa--aktif" data-sayfa="ana-sayfa">
 
-        <!-- 1. HERO — Mobile-first ticaret platformu girişi -->
+        <!-- 1. HERO -->
         <section class="hero hero--ticaret" aria-labelledby="heroBaslik">
-            <div class="kapsayici hero--ticaret__grid">
+            <div class="kapsayici hero--ticaret__wrap">
                 <div class="hero--ticaret__icerik">
-                    <span class="hero--ticaret__rozet">Profesyonel İş Ağı</span>
+                    <span class="hero--ticaret__rozet">Profesyonel B2B Ağ</span>
                     <h1 id="heroBaslik" class="hero--ticaret__baslik">Kuyumculuk Sektörünün Profesyonel İş Platformu</h1>
                     <p class="hero--ticaret__metin">AURIX; kuyumcular, üreticiler, atölyeler ve tedarikçiler için iş talebi oluşturma, firma bulma ve teklif alma platformudur.</p>
                     <div class="hero--ticaret__aksiyon">
@@ -58,23 +58,7 @@
                         <button type="button" class="btn btn--outline-gold btn--lg hero--ticaret__btn" data-nav="kayit">Firma Kaydı Aç</button>
                     </div>
                 </div>
-                <!-- Masaüstü özet paneli — mobilde gizli -->
-                <aside class="hero--ticaret__ozet" aria-hidden="true">
-                    <ul class="hero--ticaret__ozet-liste">
-                        <li class="hero--ticaret__ozet-oge">
-                            <span class="hero--ticaret__ozet-ikon" aria-hidden="true">◇</span>
-                            <span class="hero--ticaret__ozet-metin">İş talebi oluştur</span>
-                        </li>
-                        <li class="hero--ticaret__ozet-oge">
-                            <span class="hero--ticaret__ozet-ikon" aria-hidden="true">◆</span>
-                            <span class="hero--ticaret__ozet-metin">Firma bul, teklif al</span>
-                        </li>
-                        <li class="hero--ticaret__ozet-oge">
-                            <span class="hero--ticaret__ozet-ikon" aria-hidden="true">◎</span>
-                            <span class="hero--ticaret__ozet-metin">Firma kaydı aç</span>
-                        </li>
-                    </ul>
-                </aside>
+                <div class="hero--ticaret__istatistik" id="heroIstatistikler" role="list" aria-label="Platform istatistikleri"></div>
             </div>
         </section>
 
@@ -115,7 +99,7 @@
                     </div>
                     <button type="button" class="btn btn--ghost btn--sm" data-nav="firmalar">Tümünü Gör</button>
                 </div>
-                <div class="firma-grid firma-grid--esit firma-grid--ana-vitrin" id="ureticilerGrid"></div>
+                <div class="firma-grid firma-grid--esit firma-grid--ana-vitrin firma-grid--pro" id="ureticilerGrid"></div>
             </div>
         </section>
 
@@ -127,73 +111,81 @@
                         <h2 class="bolum__baslik bolum__baslik--merkez">Neden AURIX?</h2>
                     </div>
                 </div>
-                <div class="neden-grid neden-grid--aurix" id="nedenGrid"></div>
+                <div class="neden-grid neden-grid--aurix neden-grid--reveal" id="nedenGrid"></div>
             </div>
         </section>
 
-        <!-- 6. PİYASA KISA GÖRÜNÜM -->
-        <section class="bolum bolum--fuar bolum--piyasa-kisa" id="piyasa-kisa">
+        <!-- 5b. CANLI AKTİVİTE -->
+        <section class="bolum bolum--canli-aktivite" id="canli-aktivite">
             <div class="kapsayici">
-                <div class="bolum__ust bolum__ust--fuar bolum__ust--merkez">
+                <div class="bolum__ust bolum__ust--fuar">
                     <div>
-                        <span class="bolum-fuar-badge">Canlı Veriler</span>
-                        <h2 class="bolum__baslik bolum__baslik--merkez">Piyasa</h2>
-                        <p class="bolum__alt bolum__alt--merkez bolum__alt--fuar">Güncel kuyumcu, döviz ve altın fiyatları.</p>
+                        <span class="bolum-fuar-badge">Platform Hareketi</span>
+                        <h2 class="bolum__baslik">Canlı Aktivite</h2>
+                        <p class="bolum__alt bolum__alt--fuar">AURIX ağında gerçekleşen son işlemler ve ticaret hareketleri.</p>
                     </div>
                 </div>
-                <div class="piyasa-kisa-grid">
-                    <div class="hero__terminal-wrap piyasa-kisa-terminal">
-                        <div class="hero-terminal" id="heroTerminal">
-                            <div class="hero-terminal__header">
-                                <div class="hero-terminal__title">
-                                    <span class="hero-terminal__logo">AURIX</span>
-                                    <span class="hero-terminal__subtitle">Piyasa Terminali</span>
-                                </div>
-                                <div class="hero-terminal__meta">
-                                    <span class="hero-terminal__canli"><span class="hero-terminal__dot"></span>CANLI</span>
-                                    <span class="hero-terminal__saat" id="heroTerminalSaat">--:--:--</span>
-                                </div>
-                            </div>
-                            <div class="hero-terminal__toolbar" id="heroTerminalTabs" role="tablist" aria-label="Piyasa sekmeleri">
-                                <button type="button" class="hero-terminal__tab hero-terminal__tab--aktif" data-piyasa-tab="kuyumcu" role="tab" aria-selected="true">Kuyumcu</button>
-                                <button type="button" class="hero-terminal__tab" data-piyasa-tab="doviz" role="tab" aria-selected="false">Döviz</button>
-                                <button type="button" class="hero-terminal__tab" data-piyasa-tab="altin" role="tab" aria-selected="false">Altın</button>
-                            </div>
-                            <div class="hero-terminal__thead">
-                                <span>Enstrüman</span>
-                                <span>Fiyat</span>
-                                <span>Değişim</span>
-                            </div>
-                            <div class="hero-terminal__body" id="heroTerminalBody">
-                                <div class="hero-terminal__yukleniyor">Piyasa verileri yükleniyor…</div>
-                            </div>
-                            <div class="hero-terminal__footer">
-                                <span>AURIX Piyasa</span>
-                                <span id="heroTerminalGuncelleme">—</span>
-                            </div>
-                        </div>
+                <ul class="canli-aktivite-liste" id="canliAktiviteListe" aria-live="polite"></ul>
+            </div>
+        </section>
+
+        <!-- 6. PİYASA — yardımcı araç (kompakt) -->
+        <section class="bolum bolum--piyasa-yardimci" id="piyasa-kisa">
+            <div class="kapsayici piyasa-yardimci__kapsayici">
+                <div class="piyasa-yardimci__ust">
+                    <div class="piyasa-yardimci__baslik-grup">
+                        <span class="piyasa-yardimci__etiket">Yardımcı Araç</span>
+                        <h2 class="piyasa-yardimci__baslik">Canlı Piyasa</h2>
                     </div>
-                    <div class="piyasa-wrap piyasa-wrap--fuar piyasa-wrap--kisa" id="piyasaSection">
-                        <div class="piyasa-wrap__header">
-                            <div class="piyasa-wrap__baslik-grup">
-                                <h3 class="piyasa-wrap__baslik">Canlı Fiyat Bandı</h3>
-                            </div>
-                            <span class="piyasa-wrap__canli" aria-hidden="true"><span class="piyasa-wrap__dot"></span> CANLI</span>
-                        </div>
-                        <div class="piyasa-page-tabs" id="piyasaPageTabs" role="tablist" aria-label="Canlı piyasa sekmeleri">
-                            <button type="button" class="piyasa-page-tab piyasa-page-tab--aktif" data-piyasa-tab="kuyumcu" role="tab" aria-selected="true">Kuyumcu</button>
-                            <button type="button" class="piyasa-page-tab" data-piyasa-tab="doviz" role="tab" aria-selected="false">Döviz</button>
-                            <button type="button" class="piyasa-page-tab" data-piyasa-tab="altin" role="tab" aria-selected="false">Altın</button>
-                        </div>
-                        <div class="piyasa-ticker">
-                            <div class="piyasa-ticker__track" id="piyasaBandi" aria-live="polite" aria-label="Canlı piyasa fiyatları">
-                                <div class="piyasa-yukleniyor">Piyasa verileri yükleniyor…</div>
-                            </div>
+                    <span class="piyasa-yardimci__canli" aria-hidden="true"><span class="piyasa-yardimci__dot"></span> CANLI</span>
+                </div>
+                <div class="piyasa-wrap piyasa-wrap--yardimci" id="piyasaSection">
+                    <div class="piyasa-page-tabs piyasa-page-tabs--yardimci" id="piyasaPageTabs" role="tablist" aria-label="Canlı piyasa sekmeleri">
+                        <button type="button" class="piyasa-page-tab piyasa-page-tab--aktif" data-piyasa-tab="kuyumcu" role="tab" aria-selected="true">Kuyumcu</button>
+                        <button type="button" class="piyasa-page-tab" data-piyasa-tab="doviz" role="tab" aria-selected="false">Döviz</button>
+                        <button type="button" class="piyasa-page-tab" data-piyasa-tab="altin" role="tab" aria-selected="false">Altın</button>
+                    </div>
+                    <div class="piyasa-ticker piyasa-ticker--yardimci">
+                        <div class="piyasa-ticker__track" id="piyasaBandi" aria-live="polite" aria-label="Canlı piyasa fiyatları">
+                            <div class="piyasa-yukleniyor">Piyasa verileri yükleniyor…</div>
                         </div>
                     </div>
                 </div>
             </div>
         </section>
+
+        <!-- JS uyumluluğu — terminal gizli tutulur -->
+        <div class="piyasa-js-gizli" hidden aria-hidden="true">
+            <div class="hero-terminal" id="heroTerminal">
+                <div class="hero-terminal__header">
+                    <div class="hero-terminal__title">
+                        <span class="hero-terminal__logo">AURIX</span>
+                        <span class="hero-terminal__subtitle">Piyasa Terminali</span>
+                    </div>
+                    <div class="hero-terminal__meta">
+                        <span class="hero-terminal__canli"><span class="hero-terminal__dot"></span>CANLI</span>
+                        <span class="hero-terminal__saat" id="heroTerminalSaat">--:--:--</span>
+                    </div>
+                </div>
+                <div class="hero-terminal__toolbar" id="heroTerminalTabs" role="tablist" aria-label="Piyasa sekmeleri">
+                    <button type="button" class="hero-terminal__tab hero-terminal__tab--aktif" data-piyasa-tab="kuyumcu" role="tab" aria-selected="true">Kuyumcu</button>
+                    <button type="button" class="hero-terminal__tab" data-piyasa-tab="doviz" role="tab" aria-selected="false">Döviz</button>
+                    <button type="button" class="hero-terminal__tab" data-piyasa-tab="altin" role="tab" aria-selected="false">Altın</button>
+                </div>
+                <div class="hero-terminal__thead">
+                    <span>Enstrüman</span>
+                    <span>Fiyat</span>
+                    <span>Değişim</span>
+                </div>
+                <div class="hero-terminal__body" id="heroTerminalBody">
+                    <div class="hero-terminal__yukleniyor">Piyasa verileri yükleniyor…</div>
+                </div>
+                <div class="hero-terminal__footer">
+                    <span>AURIX Piyasa</span>
+                    <span id="heroTerminalGuncelleme">—</span>
+                </div>
+            </div>
+        </div>
 
         <!-- Gizli — JS uyumluluğu -->
         <div class="sr-only-grids" aria-hidden="true" hidden>
@@ -465,12 +457,29 @@
                 </nav>
             </div>
             <div class="footer__kolon">
-                <h4 class="footer__baslik">Kurumsal</h4>
+                <h4 class="footer__baslik">Destek</h4>
                 <nav class="footer__nav">
-                    <a href="#" data-nav="ana-sayfa">Hakkımızda</a>
-                    <a href="#">KVKK</a>
-                    <a href="#">Gizlilik Politikası</a>
+                    <a href="#">Yardım Merkezi</a>
+                    <a href="#">SSS</a>
+                    <a href="#">Blog</a>
                 </nav>
+            </div>
+            <div class="footer__kolon">
+                <h4 class="footer__baslik">Yasal</h4>
+                <nav class="footer__nav">
+                    <a href="#">Komisyon Politikası</a>
+                    <a href="#">Kullanım Şartları</a>
+                    <a href="#">Gizlilik Politikası</a>
+                    <a href="#">KVKK</a>
+                </nav>
+            </div>
+            <div class="footer__kolon footer__kolon--mobil">
+                <h4 class="footer__baslik">Mobil Uygulama</h4>
+                <p class="footer__metin footer__metin--vurgu">Yakında</p>
+                <div class="footer__magaza">
+                    <a href="#" class="footer__magaza-link" aria-label="Google Play — Yakında">Google Play</a>
+                    <a href="#" class="footer__magaza-link" aria-label="App Store — Yakında">App Store</a>
+                </div>
             </div>
             <div class="footer__kolon">
                 <h4 class="footer__baslik">İletişim</h4>

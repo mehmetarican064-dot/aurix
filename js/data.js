@@ -149,23 +149,11 @@ window.AURIX_DATA = {
         }
     ],
 
-    /* Ana sayfa kategorileri */
-    ESNAF_ANA_KATEGORILER: [
-        { id: 'cizimci', ad: 'CAD Çizim', sembol: '◇' },
-        { id: 'mumcu', ad: 'Mum Basım', sembol: '◆' },
-        { id: 'dokumcu', ad: 'Döküm', sembol: '⚙' },
-        { id: 'mihlamaci', ad: 'Mıhlama', sembol: '◈' },
-        { id: 'polisaj', ad: 'Rodaj', sembol: '◎' },
-        { id: 'lazer', ad: 'Lazer', sembol: '⚡' },
-        { id: 'tas', ad: 'Taş', sembol: '✦' },
-        { id: 'kaplama', ad: 'Kaplama', sembol: '◉' },
-        { id: 'tamir', ad: 'Tamir', sembol: '⊕' }
-    ],
-
     /* Açık iş talepleri — ana sayfa */
     ACIK_IS_TALEPLERI: [
         {
             id: 'it001',
+            kategoriId: 'dokumcu',
             baslik: '925 Gümüş Kolye Dökümü',
             sehir: 'İstanbul',
             detay: '300 adet',
@@ -174,6 +162,7 @@ window.AURIX_DATA = {
         },
         {
             id: 'it002',
+            kategoriId: 'cizimci',
             baslik: 'CAD Model Çizimi',
             sehir: 'İzmir',
             detay: '1 model',
@@ -182,6 +171,7 @@ window.AURIX_DATA = {
         },
         {
             id: 'it003',
+            kategoriId: 'mumcu',
             baslik: 'Mum Basımı',
             sehir: 'Kahramanmaraş',
             detay: '120 adet · 2 gün termin',
@@ -190,11 +180,38 @@ window.AURIX_DATA = {
         }
     ],
 
+    /* Ana sayfa kategorileri — isSayisi: aktif talep tabanı */
+    ESNAF_ANA_KATEGORILER: [
+        { id: 'cizimci', ad: 'CAD Çizim', sembol: '◇', isSayisi: 14, firmaTaban: 280, aciklama: '3D model, teknik çizim ve STL teslimi.' },
+        { id: 'mumcu', ad: 'Mum Basım', sembol: '◆', isSayisi: 9, firmaTaban: 190, aciklama: 'Kuyumcu mum basım ve model hazırlığı.' },
+        { id: 'dokumcu', ad: 'Döküm', sembol: '⚙', isSayisi: 22, firmaTaban: 420, aciklama: 'Altın, gümüş ve fantezi döküm üretimi.' },
+        { id: 'mihlamaci', ad: 'Mıhlama', sembol: '◈', isSayisi: 11, firmaTaban: 310, aciklama: 'Taş kitleme ve mikro mıhlama işleri.' },
+        { id: 'polisaj', ad: 'Rodaj', sembol: '◎', isSayisi: 8, firmaTaban: 240, aciklama: 'Parlatma, rodaj ve yüzey işleme.' },
+        { id: 'lazer', ad: 'Lazer', sembol: '⚡', isSayisi: 6, firmaTaban: 165, aciklama: 'Lazer kesim, kazıma ve markalama.' },
+        { id: 'tas', ad: 'Taş', sembol: '✦', isSayisi: 10, firmaTaban: 350, aciklama: 'Pırlanta ve değerli taş tedariki.' },
+        { id: 'kaplama', ad: 'Kaplama', sembol: '◉', isSayisi: 5, firmaTaban: 120, aciklama: 'Rodaj sonrası kaplama ve finish.' },
+        { id: 'tamir', ad: 'Tamir', sembol: '⊕', isSayisi: 7, firmaTaban: 200, aciklama: 'Bakım, ölçü ve tamir hizmetleri.' }
+    ],
+
+    PLATFORM_ISTATISTIK: [
+        { deger: '2.500+', etiket: 'Firma' },
+        { deger: '7.000+', etiket: 'İş Talebi' },
+        { deger: '15.000+', etiket: 'Teklif' },
+        { deger: '4.9', etiket: 'Ortalama Puan' }
+    ],
+
+    CANLI_AKTIVITE: [
+        { tip: 'is', sehir: 'İstanbul', metin: 'yeni CAD işi oluşturuldu.' },
+        { tip: 'teklif', sehir: 'İzmir', metin: 'teklif kabul edildi.' },
+        { tip: 'firma', sehir: 'Ankara', metin: 'yeni firma doğrulandı.' },
+        { tip: 'is', sehir: 'Kahramanmaraş', metin: 'döküm işi yayınlandı.' }
+    ],
+
     NEDEN_AURIX: [
-        { ikon: '✓', baslik: 'Doğrulanmış Firmalar', metin: 'Onaylı profiller ve şeffaf firma bilgileri.' },
-        { ikon: '◆', baslik: 'Teklif Toplama', metin: 'Birden fazla firmadan hızlı teklif alın.' },
-        { ikon: '◈', baslik: 'Güvenli İş Süreci', metin: 'Doğrudan iletişim ve güvenilir eşleşme.' },
-        { ikon: '◎', baslik: 'Profesyonel Ağ', metin: 'Tüm kuyumculuk ekosistemi tek çatıda.' }
+        { ikon: 'shield', baslik: 'Doğrulanmış Firmalar', metin: 'Onaylı profiller ve şeffaf firma bilgileri.' },
+        { ikon: 'teklif', baslik: 'Teklif Toplama', metin: 'Birden fazla firmadan hızlı teklif alın.' },
+        { ikon: 'guven', baslik: 'Güvenli İş Süreci', metin: 'Doğrudan iletişim ve güvenilir eşleşme.' },
+        { ikon: 'ag', baslik: 'Profesyonel Ağ', metin: 'Tüm kuyumculuk ekosistemi tek çatıda.' }
     ],
 
     VARSAYILAN_GORSEL: 'https://images.unsplash.com/photo-1617032210775-8a046a4a4899?auto=format&fit=crop&w=600&q=80',
@@ -205,6 +222,7 @@ window.AURIX_DATA = {
             sehir: 'İSTANBUL', tel: '905321112233',
             aciklama: 'Vakumlu döküm, yüksek hacimli altın ve gümüş üretim. Günlük 500+ parça kapasite.',
             premium: true, sponsor: true, durum: 'onaylandi', puan: 4.8,
+            tamamlananIs: 186, cevapSuresi: '< 2 saat',
             eklenmeTarihi: '2026-01-10T10:00:00.000Z',
             gorsel: 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=600&q=80'
         },
