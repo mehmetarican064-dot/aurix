@@ -93,6 +93,36 @@
         return s + ' ' + puan.toFixed(1);
     }
 
+    function varsayilanFirmaGorseli() {
+        return AURIX_DATA.VARSAYILAN_GORSEL || '';
+    }
+
+    function firmaKapakGorsel(firma) {
+        if (firma && firma.gorsel) return firma.gorsel;
+        var map = AURIX_DATA.KATEGORI_KAPAK_GORSELLERI || {};
+        if (firma && map[firma.kategoriId]) return map[firma.kategoriId];
+        return varsayilanFirmaGorseli();
+    }
+
+    function firmaKapakImgHtml(firma, alt) {
+        var src = firmaKapakGorsel(firma);
+        var yedek = varsayilanFirmaGorseli();
+        return '<img class="firma-kart__kapak-img" src="' + src + '" alt="' + (alt || '') + '" width="400" height="200" loading="lazy" decoding="async" onerror="if(this.dataset.fallback!==\'1\'){this.dataset.fallback=\'1\';this.src=\'' + yedek + '\';}">';
+    }
+
+    function heroKategoriFiltre(kategoriId, aramaMetni) {
+        var grup = kategoriGrupBul(kategoriId);
+        state.filtre.kategoriId = kategoriId;
+        state.filtre.grupId = grup ? grup.id : '';
+        state.filtre.arama = aramaMetni || '';
+        guncelleFiltreChipAktif();
+        vitrinSayfaSifirla();
+        var aramaInput = $('aramaInput');
+        if (aramaInput) aramaInput.value = state.filtre.arama;
+        renderVitrin();
+        sayfaGoster('firmalar');
+    }
+
     function onayliFirmalar() {
         return state.firmalar.filter(function (f) { return f.durum === 'onaylandi'; });
     }
@@ -389,34 +419,33 @@
 
     function firmaKartAnaProHtml(firma) {
         var kat = kategoriBul(firma.kategoriId);
-        var tel = telTemizle(firma.tel);
         var guven = firmaGuvenVerisi(firma);
         var puanMetin = firma.puan ? firma.puan.toFixed(1) : '—';
-        var gorselIcerik = firma.gorsel
-            ? '<img src="' + firma.gorsel + '" alt="" width="400" height="200" loading="lazy" decoding="async">'
-            : '<div class="firma-kart__placeholder" aria-hidden="true"></div>';
         var logoIcerik = firma.logo
             ? '<img src="' + firma.logo + '" alt="" width="44" height="44" loading="lazy" decoding="async">'
             : '<span class="firma-kart__logo-harf">' + firmaBasHarfleri(firma.ad) + '</span>';
 
         return '<article class="firma-kart firma-kart--ana firma-kart--pro" data-id="' + firma.id + '">' +
-            '<div class="firma-kart__kapak">' + gorselIcerik +
+            '<div class="firma-kart__kapak">' + firmaKapakImgHtml(firma, firma.ad) +
             '<span class="firma-kart__dogrulandi">Doğrulandı</span>' +
             '<div class="firma-kart__logo-wrap">' + logoIcerik + '</div></div>' +
             '<div class="firma-kart__govde">' +
             '<div class="firma-kart__ust">' +
             '<h3 class="firma-kart__ad">' + firma.ad + '</h3>' +
-            '<p class="firma-kart__brans">' + kat.ad + ' · ' + firma.sehir + '</p></div>' +
+            '<div class="firma-kart__bilgi-satir">' +
+            '<span class="firma-kart__sehir">' + firma.sehir + '</span>' +
+            '<span class="firma-kart__hizmet">' + kat.ad + '</span>' +
+            '</div></div>' +
             '<div class="firma-kart__metrik-grid">' +
             '<span class="firma-kart__metrik"><strong>★ ' + puanMetin + '</strong> Puan</span>' +
-            '<span class="firma-kart__metrik"><strong>' + guven.tamamlananIs + '</strong> İş</span>' +
-            '<span class="firma-kart__metrik"><strong>' + guven.cevapSuresi + '</strong></span>' +
+            '<span class="firma-kart__metrik"><strong>' + guven.tamamlananIs + '</strong> Tamamlanan iş</span>' +
+            '<span class="firma-kart__metrik"><strong>' + guven.cevapSuresi + '</strong> Ort. cevap</span>' +
             '<span class="firma-kart__metrik"><strong>' + guven.uyelikYili + '</strong> Üyelik</span>' +
-            '<span class="firma-kart__metrik firma-kart__metrik--aktif">Aktif: ' + guven.sonAktif + '</span>' +
+            '<span class="firma-kart__metrik firma-kart__metrik--aktif">Son aktif: ' + guven.sonAktif + '</span>' +
             '</div>' +
             '<div class="firma-kart__aksiyon">' +
             '<button type="button" class="btn btn--primary btn--sm" data-teklif="' + firma.id + '">Teklif Al</button>' +
-            '<a class="btn btn--ghost btn--sm" href="https://wa.me/' + tel + '" target="_blank" rel="noopener">İletişim</a>' +
+            '<button type="button" class="btn btn--ghost btn--sm" data-detay="' + firma.id + '">Profili Gör</button>' +
             '</div></div></article>';
     }
 
@@ -453,9 +482,7 @@
             ? '<span class="firma-kart__dogrulandi">Doğrulandı</span>'
             : (anaSayfa ? '' : '');
         var premiumEtiket = (!anaSayfa && firma.premium) ? '<span class="firma-kart__premium">PREMIUM</span>' : '';
-        var gorselIcerik = firma.gorsel
-            ? '<img src="' + firma.gorsel + '" alt="' + firma.ad + '" width="400" height="220" loading="lazy" decoding="async">'
-            : '<div class="firma-kart__placeholder" aria-hidden="true"><span class="firma-kart__placeholder-mark">A</span></div>';
+        var gorselIcerik = firmaKapakImgHtml(firma, firma.ad).replace('firma-kart__kapak-img', 'firma-kart__gorsel-img');
         var guvenHtml = firmaGuvenHtml(firma, anaSayfa);
         var birincilBtn = anaSayfa
             ? '<button type="button" class="btn btn--primary btn--sm" data-teklif="' + firma.id + '">Teklif Al</button>'
@@ -486,9 +513,7 @@
         var tel = telTemizle(firma.tel);
         var premiumCls = firma.premium ? ' firma-kart--premium' : '';
         var partnerBadge = firma.sponsor ? '<span class="firma-kart__partner">PARTNER</span>' : '';
-        var gorselIcerik = firma.gorsel
-            ? '<img src="' + firma.gorsel + '" alt="' + firma.ad + '" width="480" height="260" loading="lazy" decoding="async">'
-            : '<div class="firma-kart__placeholder" aria-hidden="true"><span class="firma-kart__placeholder-mark">A</span></div>';
+        var gorselIcerik = firmaKapakImgHtml(firma, firma.ad).replace('firma-kart__kapak-img', 'firma-kart__gorsel-img');
         var logoIcerik = firma.logo
             ? '<img src="' + firma.logo + '" alt="" width="48" height="48" loading="lazy" decoding="async">'
             : '<span class="firma-kart__logo-harf">' + firmaBasHarfleri(firma.ad) + '</span>';
@@ -750,10 +775,17 @@
         if (!el || !AURIX_DATA.ACIK_IS_TALEPLERI) return;
         el.innerHTML = AURIX_DATA.ACIK_IS_TALEPLERI.map(function (talep) {
             var durumCls = 'is-talep-kart__durum--' + (talep.durumTip || 'bekliyor');
-            return '<article class="is-talep-kart">' +
+            return '<article class="is-talep-kart is-talep-kart--pro">' +
+                '<div class="is-talep-kart__ust">' +
                 '<h3 class="is-talep-kart__baslik">' + talep.baslik + '</h3>' +
-                '<p class="is-talep-kart__meta">' + talep.sehir + ' · ' + talep.detay + '</p>' +
-                '<span class="is-talep-kart__durum ' + durumCls + '">' + talep.durum + '</span>' +
+                '<span class="is-talep-kart__durum ' + durumCls + '">' + talep.durum + '</span></div>' +
+                '<ul class="is-talep-kart__detaylar">' +
+                '<li><span>Şehir</span><strong>' + talep.sehir + '</strong></li>' +
+                '<li><span>Adet</span><strong>' + (talep.adet || '—') + '</strong></li>' +
+                '<li><span>Termin</span><strong>' + (talep.termin || '—') + '</strong></li>' +
+                '<li><span>Bütçe</span><strong>' + (talep.butce || '—') + '</strong></li>' +
+                '<li><span>Teklif</span><strong>' + (talep.teklifSayisi != null ? talep.teklifSayisi + ' teklif' : '—') + '</strong></li>' +
+                '</ul>' +
                 '<button type="button" class="btn btn--primary btn--sm is-talep-kart__btn" data-teklif-is="' + talep.id + '">Teklif Ver</button>' +
                 '</article>';
         }).join('');
@@ -770,7 +802,7 @@
         el.innerHTML = AURIX_DATA.CANLI_AKTIVITE.map(function (a) {
             return '<li class="canli-aktivite-oge canli-aktivite-oge--' + a.tip + '">' +
                 '<span class="canli-aktivite-oge__nokta" aria-hidden="true"></span>' +
-                '<span class="canli-aktivite-oge__metin"><strong>' + a.sehir + '</strong>\'da ' + a.metin + '</span></li>';
+                '<span class="canli-aktivite-oge__metin">' + a.metin + '</span></li>';
         }).join('');
     }
 
@@ -1049,8 +1081,17 @@
         $('detaySehir').textContent = firma.sehir;
         $('detayAciklama').textContent = firma.aciklama;
         $('detayPuan').textContent = firma.puan ? yildizGoster(firma.puan) : 'Henüz puan yok';
-        $('detayGorsel').src = firma.gorsel || '';
-        $('detayGorsel').style.display = firma.gorsel ? '' : 'none';
+        var detayImg = $('detayGorsel');
+        if (detayImg) {
+            detayImg.onerror = function () {
+                if (this.dataset.fallback !== '1') {
+                    this.dataset.fallback = '1';
+                    this.src = varsayilanFirmaGorseli();
+                }
+            };
+            detayImg.src = firmaKapakGorsel(firma);
+            detayImg.style.display = '';
+        }
         $('detayWa').href = 'https://wa.me/' + tel;
         var rozetler = $('detayRozetler');
         if (rozetler) {
@@ -1276,6 +1317,30 @@
             el.addEventListener('click', function (e) {
                 e.preventDefault();
                 scrollToBolum(el.getAttribute('data-scroll'));
+            });
+        });
+
+        var heroArama = $('heroArama');
+        if (heroArama) {
+            heroArama.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    state.filtre.arama = heroArama.value.trim();
+                    state.filtre.kategoriId = '';
+                    state.filtre.grupId = '';
+                    guncelleFiltreChipAktif();
+                    vitrinSayfaSifirla();
+                    var aramaInput = $('aramaInput');
+                    if (aramaInput) aramaInput.value = state.filtre.arama;
+                    renderVitrin();
+                    sayfaGoster('firmalar');
+                }
+            });
+        }
+
+        document.querySelectorAll('[data-hero-kat]').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                heroKategoriFiltre(btn.getAttribute('data-hero-kat'), $('heroArama') ? $('heroArama').value.trim() : '');
             });
         });
 

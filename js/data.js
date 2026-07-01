@@ -156,7 +156,10 @@ window.AURIX_DATA = {
             kategoriId: 'dokumcu',
             baslik: '925 Gümüş Kolye Dökümü',
             sehir: 'İstanbul',
-            detay: '300 adet',
+            adet: '300 adet',
+            termin: '10 gün',
+            butce: '₺45.000 – ₺60.000',
+            teklifSayisi: 4,
             durum: 'Teklif bekliyor',
             durumTip: 'bekliyor'
         },
@@ -165,7 +168,10 @@ window.AURIX_DATA = {
             kategoriId: 'cizimci',
             baslik: 'CAD Model Çizimi',
             sehir: 'İzmir',
-            detay: '1 model',
+            adet: '1 model',
+            termin: '3 gün',
+            butce: '₺2.500 – ₺4.000',
+            teklifSayisi: 7,
             durum: 'Acil',
             durumTip: 'acil'
         },
@@ -174,7 +180,10 @@ window.AURIX_DATA = {
             kategoriId: 'mumcu',
             baslik: 'Mum Basımı',
             sehir: 'Kahramanmaraş',
-            detay: '120 adet · 2 gün termin',
+            adet: '120 adet',
+            termin: '2 gün',
+            butce: '₺8.000 – ₺12.000',
+            teklifSayisi: 3,
             durum: 'Teklif bekliyor',
             durumTip: 'bekliyor'
         }
@@ -201,10 +210,10 @@ window.AURIX_DATA = {
     ],
 
     CANLI_AKTIVITE: [
-        { tip: 'is', sehir: 'İstanbul', metin: 'yeni CAD işi oluşturuldu.' },
-        { tip: 'teklif', sehir: 'İzmir', metin: 'teklif kabul edildi.' },
-        { tip: 'firma', sehir: 'Ankara', metin: 'yeni firma doğrulandı.' },
-        { tip: 'is', sehir: 'Kahramanmaraş', metin: 'döküm işi yayınlandı.' }
+        { tip: 'is', metin: "İstanbul'da yeni CAD işi oluşturuldu." },
+        { tip: 'teklif', metin: "İzmir'de teklif kabul edildi." },
+        { tip: 'is', metin: "Kahramanmaraş'ta döküm işi yayınlandı." },
+        { tip: 'firma', metin: "Ankara'da yeni firma doğrulandı." }
     ],
 
     NEDEN_AURIX: [
@@ -214,7 +223,21 @@ window.AURIX_DATA = {
         { ikon: 'ag', baslik: 'Profesyonel Ağ', metin: 'Tüm kuyumculuk ekosistemi tek çatıda.' }
     ],
 
-    VARSAYILAN_GORSEL: 'https://images.unsplash.com/photo-1617032210775-8a046a4a4899?auto=format&fit=crop&w=600&q=80',
+    VARSAYILAN_GORSEL: 'https://images.unsplash.com/photo-1617032210775-8a046a4a4899?auto=format&fit=crop&w=800&q=80',
+
+    /* Kategori bazlı yerel kapak görselleri (yedek) */
+    KATEGORI_KAPAK_GORSELLERI: {
+        cizimci: 'assets/cizim.png',
+        matrix: 'assets/cizim.png',
+        rhino: 'assets/cizim.png',
+        dokumcu: 'assets/dokum.png',
+        mumcu: 'assets/mum.png',
+        tas: 'assets/tas.png',
+        mihlamaci: 'assets/tas.png',
+        polisaj: 'assets/toptan.jpg',
+        lazer: 'assets/dokum.png',
+        toptanci: 'assets/toptan.jpg'
+    },
 
     ORNEK_FIRMALAR: [
         {
@@ -320,7 +343,7 @@ window.AURIX_DATA = {
             aciklama: 'Hurda altın, gümüş ve değerli metal ramat işlemleri. Şeffaf tartım ve ödeme.',
             premium: false, sponsor: false, durum: 'onaylandi', puan: 4.5,
             eklenmeTarihi: '2026-03-24T09:00:00.000Z',
-            gorsel: null
+            gorsel: 'https://images.unsplash.com/photo-1617032210775-8a046a4a4899?auto=format&fit=crop&w=800&q=80'
         },
         {
             id: 'f014', ad: 'Altın Tel & Lehim Merkezi', kategoriId: 'lehim',
@@ -328,7 +351,7 @@ window.AURIX_DATA = {
             aciklama: 'Altın lehim, kaynak teli ve flux kimyasalları. Toptan ve perakende.',
             premium: false, sponsor: false, durum: 'onaylandi', puan: 4.2,
             eklenmeTarihi: '2026-03-19T12:00:00.000Z',
-            gorsel: null
+            gorsel: 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80'
         }
     ]
 };

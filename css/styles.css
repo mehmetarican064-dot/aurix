@@ -5533,3 +5533,256 @@ a { color: inherit; text-decoration: none; }
     }
 }
 
+/* ================================================================
+   DÜZELTMELER — görseller, hero arama, iş kartları, kompakt piyasa
+   ================================================================ */
+
+[data-sayfa="ana-sayfa"] {
+    overflow-x: clip;
+    max-width: 100%;
+}
+
+.hero-sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+}
+
+.hero--ticaret__arama-blok {
+    margin-bottom: 18px;
+    min-width: 0;
+}
+
+.hero--ticaret__arama-input {
+    width: 100%;
+    padding: 14px 16px;
+    font-size: 15px;
+    font-family: inherit;
+    color: var(--aurix-white);
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(201, 169, 98, 0.22);
+    border-radius: var(--aurix-radius);
+    outline: none;
+    min-height: 48px;
+}
+
+.hero--ticaret__arama-input::placeholder {
+    color: var(--aurix-muted);
+}
+
+.hero--ticaret__arama-input:focus {
+    border-color: rgba(201, 169, 98, 0.45);
+    box-shadow: 0 0 0 2px rgba(201, 169, 98, 0.12);
+}
+
+.hero--ticaret__hizli-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.hero-hizli-chip {
+    padding: 8px 12px;
+    min-height: 36px;
+    font-size: 11px;
+    font-weight: 600;
+    font-family: inherit;
+    color: var(--aurix-muted);
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(201, 169, 98, 0.16);
+    border-radius: 20px;
+    cursor: pointer;
+    transition: border-color var(--aurix-transition), color var(--aurix-transition), background var(--aurix-transition);
+}
+
+.hero-hizli-chip:hover {
+    color: var(--aurix-gold-light);
+    border-color: rgba(201, 169, 98, 0.35);
+    background: rgba(201, 169, 98, 0.08);
+}
+
+.hero-hizli-chip:active {
+    transform: translateY(0);
+    background: rgba(201, 169, 98, 0.14);
+}
+
+.hero--ticaret__kayit-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+    width: 100%;
+}
+
+.hero--ticaret__guven-metin {
+    margin: 0;
+    font-size: 11px;
+    color: var(--aurix-muted);
+    text-align: center;
+    line-height: 1.4;
+}
+
+/* Firma kapak görselleri */
+.firma-kart__kapak-img,
+.firma-kart__gorsel-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    background: linear-gradient(145deg, #1a1a1c 0%, #121214 100%);
+}
+
+.firma-kart--pro .firma-kart__kapak {
+    background: linear-gradient(145deg, #1a1a1c 0%, #121214 100%);
+}
+
+.firma-kart__bilgi-satir {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+    margin-top: 4px;
+}
+
+.firma-kart--pro .firma-kart__sehir {
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(201, 169, 98, 0.12);
+}
+
+.firma-kart__hizmet {
+    font-size: 10px;
+    color: var(--aurix-gold-light);
+    font-weight: 500;
+}
+
+.firma-kart--pro .firma-kart__gorsel {
+    height: 160px;
+    overflow: hidden;
+}
+
+/* İş talebi kartları — pro */
+.is-talep-kart--pro {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    height: 100%;
+}
+
+.is-talep-kart__ust {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.is-talep-kart__detaylar {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    flex: 1;
+}
+
+.is-talep-kart__detaylar li {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 8px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(201, 169, 98, 0.08);
+    border-radius: 6px;
+    min-width: 0;
+}
+
+.is-talep-kart__detaylar li span {
+    font-size: 9px;
+    color: var(--aurix-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.is-talep-kart__detaylar li strong {
+    font-size: 12px;
+    color: var(--aurix-white);
+    font-weight: 600;
+    overflow-wrap: break-word;
+}
+
+.is-talepleri-grid {
+    align-items: stretch;
+}
+
+/* Canlı aktivite — daha ciddi */
+.canli-aktivite-oge__metin {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.78);
+}
+
+.bolum--canli-aktivite {
+    padding-top: 36px;
+    padding-bottom: 36px;
+}
+
+/* Piyasa — daha kompakt yardımcı */
+.bolum--piyasa-yardimci {
+    padding: 16px 0 20px !important;
+}
+
+.piyasa-yardimci__ust {
+    margin-bottom: 8px;
+}
+
+.piyasa-yardimci__baslik {
+    font-size: 14px !important;
+}
+
+.piyasa-wrap--yardimci {
+    padding: 8px 10px !important;
+}
+
+.piyasa-page-tabs--yardimci {
+    margin-bottom: 6px !important;
+}
+
+.piyasa-ticker--yardimci .piyasa-ticker__track {
+    min-height: 40px !important;
+}
+
+@media (min-width: 768px) {
+    .hero--ticaret__kayit-wrap {
+        width: auto;
+        min-width: 168px;
+    }
+
+    .hero--ticaret__guven-metin {
+        text-align: left;
+    }
+
+    .is-talep-kart__detaylar {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 389px) {
+    .hero--ticaret__hizli-chips {
+        gap: 6px;
+    }
+
+    .hero-hizli-chip {
+        font-size: 10px;
+        padding: 7px 10px;
+    }
+
+    .is-talep-kart__detaylar {
+        grid-template-columns: 1fr;
+    }
+}
+

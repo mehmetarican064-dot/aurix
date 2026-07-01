@@ -52,10 +52,24 @@
                     <span class="hero--ticaret__rozet">Profesyonel B2B Ağ</span>
                     <h1 id="heroBaslik" class="hero--ticaret__baslik">Kuyumculuk Sektörünün Profesyonel İş Platformu</h1>
                     <p class="hero--ticaret__metin">AURIX; kuyumcular, üreticiler, atölyeler ve tedarikçiler için iş talebi oluşturma, firma bulma ve teklif alma platformudur.</p>
+                    <div class="hero--ticaret__arama-blok">
+                        <label class="hero-sr-only" for="heroArama">Ne yaptırmak istiyorsunuz?</label>
+                        <input type="search" class="hero--ticaret__arama-input" id="heroArama" placeholder="Ne yaptırmak istiyorsunuz?" autocomplete="off">
+                        <div class="hero--ticaret__hizli-chips" role="group" aria-label="Hızlı kategori seçimi">
+                            <button type="button" class="hero-hizli-chip" data-hero-kat="cizimci">CAD Çizim</button>
+                            <button type="button" class="hero-hizli-chip" data-hero-kat="dokumcu">Döküm</button>
+                            <button type="button" class="hero-hizli-chip" data-hero-kat="mumcu">Mum Basım</button>
+                            <button type="button" class="hero-hizli-chip" data-hero-kat="mihlamaci">Mıhlama</button>
+                            <button type="button" class="hero-hizli-chip" data-hero-kat="lazer">Lazer</button>
+                        </div>
+                    </div>
                     <div class="hero--ticaret__aksiyon">
                         <button type="button" class="btn btn--primary btn--lg hero--ticaret__btn" data-scroll="acik-is-talepleri">İş Talebi Oluştur</button>
                         <button type="button" class="btn btn--ghost btn--lg hero--ticaret__btn" data-nav="firmalar">Firma Bul</button>
-                        <button type="button" class="btn btn--outline-gold btn--lg hero--ticaret__btn" data-nav="kayit">Firma Kaydı Aç</button>
+                        <div class="hero--ticaret__kayit-wrap">
+                            <button type="button" class="btn btn--outline-gold btn--lg hero--ticaret__btn" data-nav="kayit">Firma Kaydı Aç</button>
+                            <p class="hero--ticaret__guven-metin">2 dakikada ücretsiz kayıt olun.</p>
+                        </div>
                     </div>
                 </div>
                 <div class="hero--ticaret__istatistik" id="heroIstatistikler" role="list" aria-label="Platform istatistikleri"></div>
@@ -122,7 +136,7 @@
                     <div>
                         <span class="bolum-fuar-badge">Platform Hareketi</span>
                         <h2 class="bolum__baslik">Canlı Aktivite</h2>
-                        <p class="bolum__alt bolum__alt--fuar">AURIX ağında gerçekleşen son işlemler ve ticaret hareketleri.</p>
+                        <p class="bolum__alt bolum__alt--fuar">Son platform hareketleri — gerçek zamanlı iş ve teklif akışı.</p>
                     </div>
                 </div>
                 <ul class="canli-aktivite-liste" id="canliAktiviteListe" aria-live="polite"></ul>
