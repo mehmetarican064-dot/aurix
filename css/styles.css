@@ -7227,3 +7227,584 @@ a { color: inherit; text-decoration: none; }
     }
 }
 
+/* ================================================================
+   MOBİL SIkIŞTIRMA v2 (≤767px) — genel + bölüm + footer ultra kompakt
+   Masaüstü/tablet (768+) etkilenmez. Hero arama kutusuna dokunulmaz.
+   ================================================================ */
+
+@media (max-width: 767px) {
+    /* — Genel — */
+    .kapsayici {
+        padding-left: 14px;
+        padding-right: 14px;
+    }
+
+    .bolum {
+        padding: 20px 0;
+    }
+
+    [data-sayfa="ana-sayfa"] .bolum--fuar {
+        padding: 20px 0;
+    }
+
+    [data-sayfa="ana-sayfa"] .bolum--neden-aurix {
+        padding: 18px 0;
+    }
+
+    .bolum--canli-aktivite,
+    .bolum--piyasa-serit,
+    .bolum--ana-vitrin {
+        padding-top: 18px;
+        padding-bottom: 18px;
+    }
+
+    .bolum--kategori {
+        padding-top: 18px;
+        padding-bottom: 18px;
+    }
+
+    .bolum__ust--fuar {
+        margin-bottom: 12px;
+        gap: 8px;
+    }
+
+    .bolum__baslik {
+        font-size: 1.125rem;
+        line-height: 1.3;
+    }
+
+    .bolum__baslik--merkez {
+        font-size: 1.0625rem;
+    }
+
+    .bolum__alt,
+    .bolum__alt--fuar {
+        font-size: 12px;
+        line-height: 1.45;
+        margin-top: 4px;
+    }
+
+    .bolum-fuar-badge {
+        font-size: 9px;
+        padding: 3px 8px;
+        margin-bottom: 4px;
+    }
+
+    /* — İş talepleri kartları — */
+    .is-talepleri-grid {
+        gap: 10px;
+    }
+
+    .is-talep-kart--pro {
+        padding: 12px;
+    }
+
+    .is-talep-kart__baslik {
+        font-size: 13px;
+    }
+
+    .is-talep-kart__detaylar--odak {
+        gap: 6px;
+    }
+
+    .is-talep-kart__detaylar--odak li {
+        padding: 6px 8px;
+        font-size: 10px;
+    }
+
+    /* — Kategori: Hangi işi yaptırmak istiyorsunuz? — */
+    .bolum--kategori .esnaf-kategori-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 9px;
+    }
+
+    .esnaf-kategori-kutu--pro {
+        padding: 8px 6px 7px;
+        gap: 4px;
+        min-height: 0;
+    }
+
+    .esnaf-kategori-kutu__ikon-buyuk {
+        width: 34px;
+        height: 34px;
+        font-size: 16px;
+        border-radius: 8px;
+        margin-bottom: 0;
+    }
+
+    .esnaf-kategori-kutu--pro .esnaf-kategori-kutu__ad {
+        font-size: 10px;
+        line-height: 1.25;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .esnaf-kategori-kutu--pro .esnaf-kategori-kutu__sayilar {
+        font-size: 8px;
+        gap: 4px;
+    }
+
+    .esnaf-kategori-kutu__aciklama {
+        font-size: 8px;
+        line-height: 1.35;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    /* — Doğrulanmış Firmalar — */
+    [data-sayfa="ana-sayfa"] .firma-grid--ana-vitrin,
+    [data-sayfa="ana-sayfa"] .firma-grid--ana-vitrin.firma-grid--kompakt {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 12px;
+        overflow: visible;
+        flex-wrap: unset;
+        padding-bottom: 0;
+    }
+
+    [data-sayfa="ana-sayfa"] .firma-grid--ana-vitrin .firma-kart,
+    [data-sayfa="ana-sayfa"] .firma-grid--ana-vitrin.firma-grid--kompakt .firma-kart {
+        flex: unset;
+        width: 100%;
+        min-width: 0;
+        max-width: none;
+    }
+
+    .firma-kart--kompakt .firma-kart__thumb {
+        height: 44px;
+    }
+
+    .firma-kart--kompakt .firma-kart__govde {
+        padding: 8px 8px 8px;
+        gap: 3px;
+    }
+
+    .firma-kart--kompakt .firma-kart__ad {
+        font-size: 12px;
+    }
+
+    .firma-kart--kompakt .firma-kart__hizmet {
+        font-size: 10px;
+    }
+
+    .firma-kart--kompakt .firma-kart__sehir,
+    .firma-kart--kompakt .firma-kart__puan-etiket {
+        font-size: 9px;
+    }
+
+    .firma-kart--kompakt .firma-kart__puan-deger {
+        font-size: 12px;
+    }
+
+    .firma-kart--kompakt .firma-kart__metrik {
+        font-size: 8px;
+        padding: 3px 5px;
+    }
+
+    .firma-kart--kompakt .firma-kart__aksiyon--kompakt {
+        flex-direction: row;
+        gap: 6px;
+        padding-top: 6px;
+    }
+
+    .firma-kart--kompakt .firma-kart__aksiyon--kompakt .btn {
+        flex: 1;
+        min-height: 32px;
+        font-size: 10px;
+        padding: 5px 6px;
+    }
+
+    /* — Neden AURIX: 2x2 grid — */
+    [data-sayfa="ana-sayfa"] .neden-grid--aurix {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+        overflow: visible;
+        width: 100%;
+    }
+
+    [data-sayfa="ana-sayfa"] .neden-grid--aurix .neden-kart {
+        padding: 10px 8px;
+        min-width: 0;
+    }
+
+    [data-sayfa="ana-sayfa"] .neden-grid--aurix .neden-kart__ikon {
+        width: 28px;
+        height: 28px;
+        margin: 0 auto 6px;
+        font-size: 13px;
+        border-radius: 7px;
+    }
+
+    [data-sayfa="ana-sayfa"] .neden-grid--aurix .neden-kart__baslik {
+        font-size: 11px;
+        margin-bottom: 4px;
+        line-height: 1.25;
+        -webkit-line-clamp: 2;
+    }
+
+    [data-sayfa="ana-sayfa"] .neden-grid--aurix .neden-kart__metin {
+        font-size: 10px;
+        line-height: 1.4;
+        -webkit-line-clamp: 3;
+    }
+
+    [data-sayfa="ana-sayfa"] .bolum--neden-aurix .bolum__ust--fuar {
+        margin-bottom: 10px;
+    }
+
+    /* — Canlı Aktivite — */
+    .canli-aktivite-liste,
+    .canli-aktivite-liste--canli {
+        gap: 6px;
+        grid-template-columns: 1fr;
+    }
+
+    .canli-aktivite-oge,
+    .canli-aktivite-liste--canli .canli-aktivite-oge {
+        padding: 8px 10px;
+        gap: 8px;
+    }
+
+    .canli-aktivite-oge__nokta,
+    .canli-aktivite-liste--canli .canli-aktivite-oge__nokta {
+        width: 6px;
+        height: 6px;
+        margin-top: 4px;
+    }
+
+    .canli-aktivite-oge__metin {
+        font-size: 11px;
+        line-height: 1.4;
+    }
+
+    .canli-aktivite-oge__zaman {
+        font-size: 10px;
+    }
+
+    /* — Canlı Piyasa — */
+    .bolum--piyasa-serit {
+        padding: 16px 0;
+        overflow-x: hidden;
+    }
+
+    .piyasa-serit__ust {
+        margin-bottom: 8px;
+    }
+
+    .piyasa-wrap--serit {
+        padding: 8px 10px;
+        overflow: hidden;
+    }
+
+    .piyasa-page-tabs--serit {
+        margin-bottom: 6px;
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+    }
+
+    .piyasa-page-tabs--serit::-webkit-scrollbar {
+        display: none;
+    }
+
+    .piyasa-page-tabs--serit .piyasa-page-tab {
+        flex-shrink: 0;
+        padding: 5px 10px;
+        font-size: 10px;
+    }
+
+    .piyasa-ticker--serit {
+        overflow-x: auto;
+        overflow-y: hidden;
+        mask-image: none;
+        -webkit-mask-image: none;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+    }
+
+    .piyasa-ticker--serit::-webkit-scrollbar {
+        display: none;
+    }
+
+    .piyasa-ticker--serit .piyasa-ticker__track {
+        animation: none;
+        width: max-content;
+        min-height: 0;
+        padding: 4px 0;
+        gap: 8px;
+    }
+
+    .piyasa-ticker--serit .piyasa-kart {
+        min-width: 82px;
+        padding: 6px 8px;
+    }
+
+    .piyasa-ticker--serit .piyasa-kart__deger {
+        font-size: 12px;
+    }
+
+    .piyasa-ticker--serit .piyasa-kart__etiket {
+        font-size: 8px;
+    }
+
+    /* — Footer ultra kompakt (180–220px hedef) — */
+    .footer.footer--wireframe {
+        max-height: none;
+    }
+
+    .footer--wireframe .footer__ust {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 12px 6px;
+        max-height: none;
+        grid-template-columns: unset;
+    }
+
+    .footer--wireframe .footer__marka {
+        width: 100%;
+        text-align: center;
+    }
+
+    .footer--wireframe .footer__marka-ust {
+        justify-content: center;
+        margin-bottom: 4px;
+        gap: 6px;
+    }
+
+    .footer--wireframe .footer__logo {
+        width: 28px;
+        height: 28px;
+        max-width: 28px;
+        max-height: 28px;
+    }
+
+    .footer--wireframe .footer__isim {
+        font-size: 13px;
+    }
+
+    .footer--wireframe .footer__alt-baslik {
+        font-size: 8px;
+    }
+
+    .footer--wireframe .footer__tagline {
+        font-size: 10px;
+        line-height: 1.35;
+        max-width: 100%;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    /* Destek + İletişim sütunlarını gizle */
+    .footer--wireframe .footer__kolon:nth-child(3),
+    .footer--wireframe .footer__kolon:nth-child(6) {
+        display: none;
+    }
+
+    .footer--wireframe .footer__kolon:nth-child(2),
+    .footer--wireframe .footer__kolon:nth-child(4) {
+        width: 100%;
+        padding: 0;
+        border: none;
+    }
+
+    .footer--wireframe .footer__kolon:nth-child(2) .footer__baslik,
+    .footer--wireframe .footer__kolon:nth-child(4) .footer__baslik {
+        display: none;
+    }
+
+    .footer--wireframe .footer__kolon:nth-child(2) .footer__nav,
+    .footer--wireframe .footer__kolon:nth-child(4) .footer__nav {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: center;
+        gap: 6px 11px;
+    }
+
+    .footer--wireframe .footer__kolon:nth-child(2) .footer__nav a,
+    .footer--wireframe .footer__kolon:nth-child(4) .footer__nav a {
+        font-size: 10px;
+        line-height: 1.2;
+        white-space: nowrap;
+        padding: 0;
+    }
+
+    /* Yasal: sadece Gizlilik + KVKK */
+    .footer--wireframe .footer__kolon:nth-child(4) .footer__nav a:nth-child(1),
+    .footer--wireframe .footer__kolon:nth-child(4) .footer__nav a:nth-child(2) {
+        display: none;
+    }
+
+    /* Mobil uygulama rozetleri */
+    .footer__kolon--mobil {
+        width: 100%;
+        justify-content: center;
+        gap: 6px;
+        padding: 0;
+    }
+
+    .footer__kolon--mobil .footer__baslik,
+    .footer__kolon--mobil .footer__metin--vurgu {
+        display: none;
+    }
+
+    .footer__kolon--mobil .footer__magaza {
+        flex: unset;
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        gap: 6px;
+        margin: 0;
+    }
+
+    .footer__magaza-link {
+        flex: unset;
+        padding: 4px 8px;
+        font-size: 9px;
+        font-weight: 600;
+        border-radius: 4px;
+        white-space: nowrap;
+        color: var(--aurix-muted);
+    }
+
+    .footer__kolon--mobil .footer__magaza-link {
+        font-size: 0;
+        line-height: 1;
+    }
+
+    .footer__kolon--mobil .footer__magaza-link::after {
+        font-size: 9px;
+        color: var(--aurix-muted);
+    }
+
+    .footer__kolon--mobil .footer__magaza-link:first-child::after {
+        content: "Android Yakında";
+    }
+
+    .footer__kolon--mobil .footer__magaza-link:last-child::after {
+        content: "iOS Yakında";
+    }
+
+    /* Sosyal — marka altına taşımak için kolon 6 gizli; sosyal marka içinde değil */
+    .footer--wireframe .footer__sosyal {
+        display: flex;
+        flex-wrap: nowrap;
+        justify-content: center;
+        gap: 6px;
+        margin: 0;
+        overflow-x: auto;
+        scrollbar-width: none;
+        width: 100%;
+    }
+
+    .footer--wireframe .footer__sosyal-link {
+        font-size: 9px;
+        padding: 3px 7px;
+        flex-shrink: 0;
+    }
+
+    /* İletişim linki + telif — alt şerit */
+    .footer--wireframe .footer__alt {
+        border-top: 1px solid rgba(201, 169, 98, 0.06);
+    }
+
+    .footer--wireframe .footer__alt-inner {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: center;
+        gap: 8px 12px;
+        padding: 6px 12px 8px;
+    }
+
+    .footer--wireframe .footer__not {
+        font-size: 9px;
+        font-weight: 400;
+        opacity: 0.65;
+        margin: 0;
+        order: 2;
+        flex: 1 1 100%;
+        text-align: center;
+    }
+
+    .footer--wireframe .footer__alt-orta {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 6px 11px;
+        font-size: 10px;
+        order: 1;
+    }
+
+    .footer--wireframe .footer__alt-orta span {
+        display: none;
+    }
+
+    .footer--wireframe .footer__alt-orta a:not([data-nav="kayit"]) {
+        display: none;
+    }
+
+    .footer--wireframe .footer__alt-orta a {
+        font-size: 10px;
+        white-space: nowrap;
+    }
+
+    /* Link satırlarını tek grupta birleştir */
+    .footer--wireframe .footer__kolon:nth-child(4) {
+        margin-top: -6px;
+    }
+}
+
+@media (max-width: 767px) {
+    /* Sosyal linkler: gizlenen iletişim kolonundan kopyalanamaz; marka altına pseudo yok — kolon 6'daki sosyali göster */
+    .footer--wireframe .footer__kolon:nth-child(6) {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        width: 100%;
+        padding: 0;
+        border: none;
+    }
+
+    .footer--wireframe .footer__kolon:nth-child(6) .footer__baslik,
+    .footer--wireframe .footer__kolon:nth-child(6) .footer__metin {
+        display: none;
+    }
+
+    .footer--wireframe .footer__kolon:nth-child(6) .footer__sosyal {
+        margin-top: 0;
+    }
+}
+
+@media (max-width: 430px) {
+    .bolum--kategori .esnaf-kategori-grid {
+        gap: 8px;
+    }
+
+    .esnaf-kategori-kutu--pro {
+        padding: 7px 5px 6px;
+    }
+
+    .esnaf-kategori-kutu__ikon-buyuk {
+        width: 30px;
+        height: 30px;
+        font-size: 14px;
+    }
+
+    .footer--wireframe .footer__kolon:nth-child(2) .footer__nav a,
+    .footer--wireframe .footer__kolon:nth-child(4) .footer__nav a,
+    .footer--wireframe .footer__alt-orta a {
+        font-size: 9px;
+    }
+}
+
