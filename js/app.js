@@ -309,15 +309,17 @@
     }
 
     function renderPiyasaBandi() {
-        var wrap = $('piyasaBandi');
-        if (!wrap) return;
         var quotes = piyasaFiltreliKotasyonlar();
-        if (!quotes.length) {
-            wrap.innerHTML = '<div class="piyasa-yukleniyor">Piyasa verileri yükleniyor…</div>';
-            return;
-        }
-        var kartlar = quotes.map(piyasaKartHtml).join('');
-        wrap.innerHTML = kartlar + kartlar;
+        var html = !quotes.length
+            ? '<div class="piyasa-yukleniyor">Piyasa verileri yükleniyor…</div>'
+            : (function () {
+                var kartlar = quotes.map(piyasaKartHtml).join('');
+                return kartlar + kartlar;
+            }());
+        ['piyasaBandi', 'piyasaBandiAna'].forEach(function (id) {
+            var wrap = $(id);
+            if (wrap) wrap.innerHTML = html;
+        });
     }
 
     function renderHeroTerminal(quotes) {
