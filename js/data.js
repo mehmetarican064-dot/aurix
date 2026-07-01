@@ -160,8 +160,10 @@ window.AURIX_DATA = {
             termin: '10 gün',
             butce: '₺45.000 – ₺60.000',
             teklifSayisi: 4,
+            acilisTarihi: '12 Haz 2026',
             durum: 'Teklif bekliyor',
-            durumTip: 'bekliyor'
+            durumTip: 'bekliyor',
+            sonGuncelleme: '2 saat önce'
         },
         {
             id: 'it002',
@@ -172,8 +174,10 @@ window.AURIX_DATA = {
             termin: '3 gün',
             butce: '₺2.500 – ₺4.000',
             teklifSayisi: 7,
+            acilisTarihi: '14 Haz 2026',
             durum: 'Acil',
-            durumTip: 'acil'
+            durumTip: 'acil',
+            sonGuncelleme: '45 dk önce'
         },
         {
             id: 'it003',
@@ -184,8 +188,10 @@ window.AURIX_DATA = {
             termin: '2 gün',
             butce: '₺8.000 – ₺12.000',
             teklifSayisi: 3,
+            acilisTarihi: '10 Haz 2026',
             durum: 'Teklif bekliyor',
-            durumTip: 'bekliyor'
+            durumTip: 'bekliyor',
+            sonGuncelleme: '5 saat önce'
         }
     ],
 
@@ -199,7 +205,8 @@ window.AURIX_DATA = {
         { id: 'lazer', ad: 'Lazer', sembol: '⚡', isSayisi: 6, firmaTaban: 165, aciklama: 'Lazer kesim, kazıma ve markalama.' },
         { id: 'tas', ad: 'Taş', sembol: '✦', isSayisi: 10, firmaTaban: 350, aciklama: 'Pırlanta ve değerli taş tedariki.' },
         { id: 'kaplama', ad: 'Kaplama', sembol: '◉', isSayisi: 5, firmaTaban: 120, aciklama: 'Rodaj sonrası kaplama ve finish.' },
-        { id: 'tamir', ad: 'Tamir', sembol: '⊕', isSayisi: 7, firmaTaban: 200, aciklama: 'Bakım, ölçü ve tamir hizmetleri.' }
+        { id: 'tamir', ad: 'Tamir', sembol: '⊕', isSayisi: 7, firmaTaban: 200, aciklama: 'Bakım, ölçü ve tamir hizmetleri.' },
+        { id: 'malzeme-tedarik', ad: 'Malzeme Tedarik', sembol: '▣', isSayisi: 18, firmaTaban: 320, aciklama: 'Takı ekipmanları, makineler, sarf malzemeleri, el aletleri ve yedek parçalar.', ozelSayfa: 'malzeme' }
     ],
 
     PLATFORM_ISTATISTIK: [
@@ -210,10 +217,60 @@ window.AURIX_DATA = {
     ],
 
     CANLI_AKTIVITE: [
-        { tip: 'is', metin: "İstanbul'da yeni CAD işi oluşturuldu." },
-        { tip: 'teklif', metin: "İzmir'de teklif kabul edildi." },
-        { tip: 'is', metin: "Kahramanmaraş'ta döküm işi yayınlandı." },
-        { tip: 'firma', metin: "Ankara'da yeni firma doğrulandı." }
+        { tip: 'is', metin: "İstanbul'da yeni CAD işi oluşturuldu.", zaman: '2 dakika önce' },
+        { tip: 'firma', metin: "Ankara'da yeni firma doğrulandı.", zaman: '5 dakika önce' },
+        { tip: 'teklif', metin: "İzmir'de teklif kabul edildi.", zaman: '5 dakika önce' },
+        { tip: 'is', metin: "Kahramanmaraş'ta döküm işi yayınlandı.", zaman: '20 dakika önce' }
+    ],
+
+    /* Firma profili güven alanları — v1.0 backend ile doldurulacak */
+    DOGRULAMA_ALANLARI: [
+        { id: 'vergi', etiket: 'Vergi doğrulandı' },
+        { id: 'telefon', etiket: 'Telefon doğrulandı' },
+        { id: 'adres', etiket: 'Adres doğrulandı' },
+        { id: 'whatsapp', etiket: 'WhatsApp doğrulandı' }
+    ],
+
+    /* Malzeme Pazarı kategorileri */
+    MALZEME_KATEGORILER: [
+        { id: 'lazer-makine', ad: 'Lazer Makineleri', ikon: '⚡' },
+        { id: 'dokum-makine', ad: 'Döküm Makineleri', ikon: '⚙' },
+        { id: 'polisaj', ad: 'Polisaj', ikon: '✨' },
+        { id: 'rodaj', ad: 'Rodaj', ikon: '◎' },
+        { id: 'mihlama-alet', ad: 'Mıhlama Aletleri', ikon: '◈' },
+        { id: 'el-alet', ad: 'El Aletleri', ikon: '🔧' },
+        { id: 'matkap-uc', ad: 'Matkap Uçları', ikon: '⬡' },
+        { id: 'freze', ad: 'Frezeler', ikon: '◆' },
+        { id: 'motor', ad: 'Motorlar', ikon: '⚡' },
+        { id: 'mikromotor', ad: 'Mikromotor', ikon: '◉' },
+        { id: 'terazi', ad: 'Hassas Teraziler', ikon: '⚖' },
+        { id: 'kalem', ad: 'Kalemler', ikon: '✎' },
+        { id: 'pense', ad: 'Penseler', ikon: '⊃' },
+        { id: 'cimoz', ad: 'Cımbızlar', ikon: '⊥' },
+        { id: 'kimyasal', ad: 'Kimyasallar', ikon: '🧪' },
+        { id: 'sarf', ad: 'Sarf Malzemeleri', ikon: '📋' },
+        { id: 'yedek-parca', ad: 'Yedek Parçalar', ikon: '⚙' }
+    ],
+
+    MALZEME_URUNLER: [
+        { id: 'mu001', kategoriId: 'lazer-makine', baslik: 'Fiber Lazer Kesim 30W', fiyat: '₺185.000', satici: 'Tekno Lazer Ltd.', sehir: 'İstanbul', durum: 'Stokta', dogrulandi: true, gorsel: 'https://images.unsplash.com/photo-1611591437281-460bf24535ce?auto=format&fit=crop&w=600&q=80' },
+        { id: 'mu002', kategoriId: 'dokum-makine', baslik: 'Vakum Döküm Makinesi 1kg', fiyat: '₺420.000', satici: 'Altın Makina', sehir: 'Kahramanmaraş', durum: 'Stokta', dogrulandi: true, gorsel: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=600&q=80' },
+        { id: 'mu003', kategoriId: 'mikromotor', baslik: 'Saeshin Strong 210 Mikromotor', fiyat: '₺12.500', satici: 'Nova Kuyumculuk Malzeme', sehir: 'İstanbul', durum: 'Stokta', dogrulandi: true, gorsel: 'https://images.unsplash.com/photo-1586075010923-2dd4570fb338?auto=format&fit=crop&w=600&q=80' },
+        { id: 'mu004', kategoriId: 'terazi', baslik: 'Hassas Dijital Terazi 0,001g', fiyat: '₺8.900', satici: 'Precision Tools TR', sehir: 'Ankara', durum: 'Stokta', dogrulandi: true, gorsel: 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=600&q=80' },
+        { id: 'mu005', kategoriId: 'mihlama-alet', baslik: 'Mikro Mıhlama Pens Seti', fiyat: '₺2.400', satici: 'Elmas Mikro Mıhlama', sehir: 'İzmir', durum: 'Stokta', dogrulandi: true, gorsel: 'https://images.unsplash.com/photo-1515562141203-7a88fb7ce338?auto=format&fit=crop&w=600&q=80' },
+        { id: 'mu006', kategoriId: 'polisaj', baslik: 'Profesyonel Polisaj Fırça Seti', fiyat: '₺1.850', satici: 'Rodaj Pro', sehir: 'Bursa', durum: 'Stokta', dogrulandi: false, gorsel: 'https://images.unsplash.com/photo-1617032210775-8a046a4a4899?auto=format&fit=crop&w=600&q=80' },
+        { id: 'mu007', kategoriId: 'rodaj', baslik: 'Rodaj Diski Seti 120–3000 grit', fiyat: '₺950', satici: 'Rodaj Pro', sehir: 'Bursa', durum: 'Stokta', dogrulandi: true, gorsel: 'https://images.unsplash.com/photo-1617032210775-8a046a4a4899?auto=format&fit=crop&w=600&q=80' },
+        { id: 'mu008', kategoriId: 'el-alet', baslik: 'Kuyumcu El Aleti Seti 12 Parça', fiyat: '₺3.200', satici: 'Nova Kuyumculuk Malzeme', sehir: 'İstanbul', durum: 'Stokta', dogrulandi: true, gorsel: 'https://images.unsplash.com/photo-1586075010923-2dd4570fb338?auto=format&fit=crop&w=600&q=80' },
+        { id: 'mu009', kategoriId: 'matkap-uc', baslik: 'HSS Matkap Ucu Seti 0,5–3mm', fiyat: '₺680', satici: 'Precision Tools TR', sehir: 'Ankara', durum: 'Stokta', dogrulandi: true, gorsel: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=600&q=80' },
+        { id: 'mu010', kategoriId: 'freze', baslik: 'Carbide Freze Seti 20 Parça', fiyat: '₺1.450', satici: 'Precision Tools TR', sehir: 'Ankara', durum: 'Stokta', dogrulandi: true, gorsel: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=600&q=80' },
+        { id: 'mu011', kategoriId: 'motor', baslik: 'Hanging Motor 1/4 HP', fiyat: '₺6.800', satici: 'Altın Makina', sehir: 'Kahramanmaraş', durum: 'Stokta', dogrulandi: true, gorsel: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=600&q=80' },
+        { id: 'mu012', kategoriId: 'kalem', baslik: 'Graver Kalemi Seti', fiyat: '₺520', satici: 'Nova Kuyumculuk Malzeme', sehir: 'İstanbul', durum: 'Stokta', dogrulandi: true, gorsel: 'https://images.unsplash.com/photo-1586075010923-2dd4570fb338?auto=format&fit=crop&w=600&q=80' },
+        { id: 'mu013', kategoriId: 'pense', baslik: 'Flat Nose Pense Seti', fiyat: '₺780', satici: 'Nova Kuyumculuk Malzeme', sehir: 'İstanbul', durum: 'Stokta', dogrulandi: true, gorsel: 'https://images.unsplash.com/photo-1586075010923-2dd4570fb338?auto=format&fit=crop&w=600&q=80' },
+        { id: 'mu014', kategoriId: 'cimoz', baslik: 'Anti-Manyetik Cımbız Seti', fiyat: '₺640', satici: 'Precision Tools TR', sehir: 'Ankara', durum: 'Stokta', dogrulandi: true, gorsel: 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=600&q=80' },
+        { id: 'mu015', kategoriId: 'kimyasal', baslik: 'Ultrasonik Temizlik Solüsyonu 5L', fiyat: '₺420', satici: 'Kimya Gold', sehir: 'İzmir', durum: 'Stokta', dogrulandi: true, gorsel: 'https://images.unsplash.com/photo-1617032210775-8a046a4a4899?auto=format&fit=crop&w=600&q=80' },
+        { id: 'mu016', kategoriId: 'sarf', baslik: 'Lehim Teli 0,5mm 50g', fiyat: '₺380', satici: 'Kimya Gold', sehir: 'İzmir', durum: 'Stokta', dogrulandi: true, gorsel: 'https://images.unsplash.com/photo-1617032210775-8a046a4a4899?auto=format&fit=crop&w=600&q=80' },
+        { id: 'mu017', kategoriId: 'yedek-parca', baslik: 'Mikromotor Kollet Seti', fiyat: '₺290', satici: 'Nova Kuyumculuk Malzeme', sehir: 'İstanbul', durum: 'Stokta', dogrulandi: true, gorsel: 'https://images.unsplash.com/photo-1586075010923-2dd4570fb338?auto=format&fit=crop&w=600&q=80' },
+        { id: 'mu018', kategoriId: 'lazer-makine', baslik: 'CO2 Lazer Kazıma 40W', fiyat: '₺95.000', satici: 'Tekno Lazer Ltd.', sehir: 'İstanbul', durum: 'Sipariş', dogrulandi: true, gorsel: 'https://images.unsplash.com/photo-1611591437281-460bf24535ce?auto=format&fit=crop&w=600&q=80' }
     ],
 
     NEDEN_AURIX: [
