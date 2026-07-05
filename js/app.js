@@ -8,6 +8,8 @@
     var STORAGE_KEY = 'aurix_beta_v01_firms';
     // Admin panel v1.0'da Supabase Auth + profiles.role='admin' ile etkinleştirilecek.
     var ADMIN_PANEL_ENABLED = false;
+    // TODO: Supabase Auth sonrası devAdmin parametresi tamamen kaldırılacak.
+    var devAdminMode = false;
 
     var esc = AurixUtils.escapeHtml;
     var safeUrl = AurixUtils.safeUrl;
@@ -25,8 +27,32 @@
         malzeme: { arama: '', kategoriId: '' }
     };
 
+    function initDevAdminMode() {
+        var params = new URLSearchParams(window.location.search);
+        devAdminMode = params.get('devAdmin') === '1';
+    }
+
     function isAdminSession() {
-        return ADMIN_PANEL_ENABLED && AuthService.isAdmin();
+        return devAdminMode || (ADMIN_PANEL_ENABLED && AuthService.isAdmin());
+    }
+
+    function renderDevAdminBanner() {
+        var el = $('devAdminBanner');
+        if (el) el.hidden = !devAdminMode;
+    }
+
+    function devAdminCikis() {
+        devAdminMode = false;
+        renderDevAdminBanner();
+        renderAdminUI();
+        try {
+            var url = new URL(window.location.href);
+            url.searchParams.delete('devAdmin');
+            var temiz = url.pathname + (url.search ? url.search : '') + url.hash;
+            window.history.replaceState({}, '', temiz);
+        } catch (e) { /* demo */ }
+        sayfaGoster('ana-sayfa');
+        toast('Geliştirme modu kapatıldı.', 'info');
     }
 
     var marketService = null;
@@ -1270,16 +1296,19 @@
         var link = $('navAdmin');
         var btn = $('adminGirisBtn');
         var headerSag = $('adminHeaderSag');
+        var merhaba = headerSag ? headerSag.querySelector('.panel-header__merhaba, .admin-header__merhaba') : null;
         var adminSayfa = document.querySelector('[data-sayfa="admin"]');
+        var adminBetaBar = document.querySelector('[data-sayfa="admin"] .panel-beta-bar--admin');
         if (link) link.hidden = true;
         if (btn) btn.hidden = true;
+        renderDevAdminBanner();
         if (adminSayfa) adminSayfa.hidden = !isAdminSession();
+        if (adminBetaBar) adminBetaBar.hidden = devAdminMode;
         if (!isAdminSession()) {
             if (headerSag) headerSag.hidden = true;
             return;
         }
-        if (link) link.style.display = '';
-        if (btn) { btn.textContent = 'Çıkış'; btn.classList.add('btn--danger-outline'); }
+        if (merhaba) merhaba.textContent = devAdminMode ? 'Geliştirme modu' : 'Merhaba Admin';
         if (headerSag) headerSag.hidden = false;
     }
 
@@ -1549,6 +1578,10 @@
     }
 
     function adminCikis() {
+        if (devAdminMode) {
+            devAdminCikis();
+            return;
+        }
         AuthService.signOut();
         renderAdminUI();
         sayfaGoster('ana-sayfa');
@@ -1568,6 +1601,7 @@
     // ================================================================
 
     function init() {
+        initDevAdminMode();
         StorageAdapter.init();
 
         AurixUtils.initImageFallbackHandler();
@@ -1757,6 +1791,10 @@
         if (navBackdrop) navBackdrop.addEventListener('click', navMenuKapat);
 
         renderAdminUI();
+
+        if (devAdminMode) {
+            sayfaGoster('admin');
+        }
     }
 
     // Global (HTML onclick yerine event delegation tercih edildi; geriye dönük)

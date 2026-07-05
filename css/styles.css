@@ -5918,6 +5918,24 @@ a { color: inherit; text-decoration: none; }
     line-height: 1.5;
 }
 
+.dev-admin-banner {
+    position: sticky;
+    top: 0;
+    z-index: 900;
+    padding: 8px 14px;
+    text-align: center;
+    background: rgba(255, 69, 58, 0.15);
+    border-bottom: 1px solid rgba(255, 69, 58, 0.45);
+}
+
+.dev-admin-banner__metin {
+    margin: 0;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.4;
+    color: #ff6b6b;
+}
+
 .admin-ozet--rapor {
     margin-bottom: 12px;
 }
