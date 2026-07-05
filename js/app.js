@@ -7,7 +7,13 @@
 
     var STORAGE_KEY = 'aurix_beta_v01_firms';
     var ADMIN_KEY = 'aurix_beta_admin_session';
-    var DEMO_ADMIN = { email: 'demo@aurix.com', sifre: 'aurix2026' };
+    // Admin panel v1.0'da Supabase Auth + profiles.role='admin' ile etkinleştirilecek.
+    var ADMIN_PANEL_ENABLED = false;
+
+    var esc = AurixUtils.escapeHtml;
+    var safeUrl = AurixUtils.safeUrl;
+    var safeWaHref = AurixUtils.safeWhatsAppHref;
+    var safeCss = AurixUtils.safeCssClass;
 
     var state = {
         firmalar: [],
@@ -107,15 +113,17 @@
 
     function firmaAnaKapakHtml(firma, alt) {
         if (!firma || !firma.gorsel) return '';
+        var src = safeUrl(firma.gorsel, '');
+        if (!src) return '';
         return '<div class="firma-kart__thumb">' +
-            '<img class="firma-kart__thumb-img" src="' + firma.gorsel + '" alt="' + (alt || '') + '" width="320" height="64" loading="lazy" decoding="async" onerror="this.closest(\'.firma-kart__thumb\').remove()">' +
+            '<img class="firma-kart__thumb-img aurix-img-fallback" src="' + esc(src) + '" alt="' + esc(alt || '') + '" width="320" height="64" loading="lazy" decoding="async" data-remove-parent=".firma-kart__thumb">' +
             '</div>';
     }
 
     function firmaKapakImgHtml(firma, alt) {
-        var src = firmaKapakGorsel(firma);
-        var yedek = varsayilanFirmaGorseli();
-        return '<img class="firma-kart__kapak-img" src="' + src + '" alt="' + (alt || '') + '" width="400" height="200" loading="lazy" decoding="async" onerror="if(this.dataset.fallback!==\'1\'){this.dataset.fallback=\'1\';this.src=\'' + yedek + '\';}">';
+        var yedek = safeUrl(varsayilanFirmaGorseli(), '');
+        var src = safeUrl(firmaKapakGorsel(firma), yedek);
+        return '<img class="firma-kart__kapak-img aurix-img-fallback" src="' + esc(src) + '" alt="' + esc(alt || '') + '" width="400" height="200" loading="lazy" decoding="async" data-fallback-src="' + esc(yedek) + '">';
     }
 
     function heroKategoriFiltre(kategoriId, aramaMetni) {
@@ -149,8 +157,8 @@
         return '<div class="firma-dogrulama' + (kompakt ? ' firma-dogrulama--kompakt' : '') + '">' +
             alanlar.map(function (a) {
                 var aktif = d[a.id];
-                return '<span class="firma-dogrulama__rozet' + (aktif ? ' firma-dogrulama__rozet--aktif' : '') + '" title="' + a.etiket + '">' +
-                    (aktif ? '✓ ' : '') + a.etiket + '</span>';
+                return '<span class="firma-dogrulama__rozet' + (aktif ? ' firma-dogrulama__rozet--aktif' : '') + '" title="' + esc(a.etiket) + '">' +
+                    (aktif ? '✓ ' : '') + esc(a.etiket) + '</span>';
             }).join('') +
             '</div>';
     }
@@ -162,8 +170,8 @@
             '<div class="detay-guven__metrikler">' +
             '<div class="detay-guven__metrik"><span>Tamamlanan iş</span><strong>' + guven.tamamlananIs + '</strong></div>' +
             '<div class="detay-guven__metrik"><span>Ortalama puan</span><strong>★ ' + puanMetin + '</strong></div>' +
-            '<div class="detay-guven__metrik"><span>Son aktif</span><strong>' + guven.sonAktif + '</strong></div>' +
-            '<div class="detay-guven__metrik"><span>Ort. cevap</span><strong>' + guven.cevapSuresi + '</strong></div>' +
+            '<div class="detay-guven__metrik"><span>Son aktif</span><strong>' + esc(guven.sonAktif) + '</strong></div>' +
+            '<div class="detay-guven__metrik"><span>Ort. cevap</span><strong>' + esc(guven.cevapSuresi) + '</strong></div>' +
             '</div>';
     }
 
@@ -287,7 +295,7 @@
         return marketQuotes;
     }
 
-    function piyasaTabSec(tab) {
+    function piyasaTabSec(tab, skipRender) {
         if (!window.MarketService || !MarketService.TAB_INSTRUMENTS[tab]) tab = 'kuyumcu';
         state.piyasaTab = tab;
         document.querySelectorAll('[data-piyasa-tab]').forEach(function (btn) {
@@ -296,8 +304,10 @@
             btn.classList.toggle('piyasa-page-tab--aktif', btn.classList.contains('piyasa-page-tab') && aktif);
             btn.setAttribute('aria-selected', aktif ? 'true' : 'false');
         });
-        renderPiyasaBandi();
-        renderHeroTerminal(marketQuotes);
+        if (!skipRender) {
+            renderPiyasaBandi();
+            renderHeroTerminal(marketQuotes);
+        }
     }
 
     function initPiyasaTabs() {
@@ -374,9 +384,9 @@
             renderPiyasaBandi();
             renderHeroTerminal(quotes);
         });
-        marketService.start();
         initPiyasaTabs();
-        piyasaTabSec(state.piyasaTab);
+        piyasaTabSec(state.piyasaTab, true);
+        marketService.start();
         window.addEventListener('beforeunload', function () {
             if (marketService) marketService.stop();
         });
@@ -401,18 +411,20 @@
         }
         grid.innerHTML = list.slice(0, 3).map(function (f) {
             var kat = kategoriBul(f.kategoriId);
-            var gorsel = f.gorsel
-                ? '<img src="' + f.gorsel + '" alt="' + f.ad + '" width="640" height="360" loading="lazy" decoding="async">'
+            var waHref = safeWaHref(f.tel);
+            var gorselSrc = safeUrl(f.gorsel, '');
+            var gorsel = gorselSrc
+                ? '<img class="aurix-img-fallback" src="' + esc(gorselSrc) + '" alt="' + esc(f.ad) + '" width="640" height="360" loading="lazy" decoding="async" data-remove-parent=".sponsor-alani-kart__gorsel">'
                 : '<div class="sponsor-alani-kart__placeholder">A</div>';
-            return '<article class="sponsor-alani-kart" data-detay="' + f.id + '">' +
+            return '<article class="sponsor-alani-kart" data-detay="' + esc(f.id) + '">' +
                 '<div class="sponsor-alani-kart__gorsel">' + gorsel + '</div>' +
                 '<div class="sponsor-alani-kart__govde">' +
                     '<span class="sponsor-alani-kart__rozet">SPONSOR</span>' +
-                    '<h3 class="sponsor-alani-kart__ad">' + f.ad + '</h3>' +
-                    '<p class="sponsor-alani-kart__kat">' + kat.ikon + ' ' + kat.ad + ' · ' + f.sehir + '</p>' +
+                    '<h3 class="sponsor-alani-kart__ad">' + esc(f.ad) + '</h3>' +
+                    '<p class="sponsor-alani-kart__kat">' + kat.ikon + ' ' + esc(kat.ad) + ' · ' + esc(f.sehir) + '</p>' +
                     '<div class="sponsor-alani-kart__aksiyon">' +
-                    '<button type="button" class="btn btn--ghost btn--sm" data-detay="' + f.id + '">Detay</button>' +
-                    '<a class="btn btn--primary btn--sm" href="https://wa.me/' + telTemizle(f.tel) + '" target="_blank" rel="noopener">WhatsApp</a>' +
+                    '<button type="button" class="btn btn--ghost btn--sm" data-detay="' + esc(f.id) + '">Detay</button>' +
+                    (waHref ? '<a class="btn btn--primary btn--sm" href="' + esc(waHref) + '" target="_blank" rel="noopener">WhatsApp</a>' : '') +
                     '</div>' +
                 '</div>' +
             '</article>';
@@ -554,26 +566,26 @@
         var guven = firmaGuvenVerisi(firma);
         var puanMetin = firma.puan ? firma.puan.toFixed(1) : '—';
 
-        return '<article class="firma-kart firma-kart--ana firma-kart--kompakt" data-id="' + firma.id + '">' +
+        return '<article class="firma-kart firma-kart--ana firma-kart--kompakt" data-id="' + esc(firma.id) + '">' +
             firmaAnaKapakHtml(firma, firma.ad) +
             '<div class="firma-kart__govde">' +
             '<div class="firma-kart__baslik-satir">' +
-            '<h3 class="firma-kart__ad">' + firma.ad + '</h3>' +
+            '<h3 class="firma-kart__ad">' + esc(firma.ad) + '</h3>' +
             '<span class="firma-kart__dogrulandi firma-kart__dogrulandi--inline">Doğrulandı</span>' +
             '</div>' +
-            '<p class="firma-kart__hizmet">' + kat.ad + '</p>' +
-            '<p class="firma-kart__sehir">' + firma.sehir + '</p>' +
+            '<p class="firma-kart__hizmet">' + esc(kat.ad) + '</p>' +
+            '<p class="firma-kart__sehir">' + esc(firma.sehir) + '</p>' +
             '<div class="firma-kart__puan-satir">' +
             '<span class="firma-kart__puan-deger">★ ' + puanMetin + '</span>' +
             '<span class="firma-kart__puan-etiket">Puan</span></div>' +
             '<div class="firma-kart__metrik-grid firma-kart__metrik-grid--kompakt">' +
             '<span class="firma-kart__metrik"><strong>' + guven.tamamlananIs + '</strong> Tamamlanan iş</span>' +
-            '<span class="firma-kart__metrik"><strong>' + guven.cevapSuresi + '</strong> Ort. cevap</span>' +
-            '<span class="firma-kart__metrik firma-kart__metrik--aktif"><strong>' + guven.sonAktif + '</strong> Son aktif</span>' +
+            '<span class="firma-kart__metrik"><strong>' + esc(guven.cevapSuresi) + '</strong> Ort. cevap</span>' +
+            '<span class="firma-kart__metrik firma-kart__metrik--aktif"><strong>' + esc(guven.sonAktif) + '</strong> Son aktif</span>' +
             '</div>' +
             '<div class="firma-kart__aksiyon firma-kart__aksiyon--kompakt">' +
-            '<button type="button" class="btn btn--primary btn--sm" data-teklif="' + firma.id + '">Teklif Al</button>' +
-            '<button type="button" class="btn btn--ghost btn--sm" data-detay="' + firma.id + '">Profili Gör</button>' +
+            '<button type="button" class="btn btn--primary btn--sm" data-teklif="' + esc(firma.id) + '">Teklif Al</button>' +
+            '<button type="button" class="btn btn--ghost btn--sm" data-detay="' + esc(firma.id) + '">Profili Gör</button>' +
             '</div></div></article>';
     }
 
@@ -592,7 +604,7 @@
             '</div>' +
             '<div class="firma-kart__guven-metrikler">' +
             '<span class="firma-kart__guven-metrik">' + guven.tamamlananIs + ' iş</span>' +
-            '<span class="firma-kart__guven-metrik">' + guven.cevapSuresi + '</span>' +
+            '<span class="firma-kart__guven-metrik">' + esc(guven.cevapSuresi) + '</span>' +
             '</div></div>';
     }
 
@@ -603,6 +615,7 @@
         }
         var kat = kategoriBul(firma.kategoriId);
         var tel = telTemizle(firma.tel);
+        var waHref = safeWaHref(tel);
         var anaSayfa = !!opts.anaSayfa;
         var premiumCls = (!anaSayfa && firma.premium) ? ' firma-kart--premium' : '';
         var partnerBadge = (!anaSayfa && firma.sponsor) ? '<span class="firma-kart__partner">PARTNER</span>' : '';
@@ -613,23 +626,23 @@
         var gorselIcerik = firmaKapakImgHtml(firma, firma.ad).replace('firma-kart__kapak-img', 'firma-kart__gorsel-img');
         var guvenHtml = firmaGuvenHtml(firma, anaSayfa);
         var birincilBtn = anaSayfa
-            ? '<button type="button" class="btn btn--primary btn--sm" data-teklif="' + firma.id + '">Teklif Al</button>'
-            : '<button type="button" class="btn btn--ghost btn--sm" data-detay="' + firma.id + '">Profili Gör</button>';
+            ? '<button type="button" class="btn btn--primary btn--sm" data-teklif="' + esc(firma.id) + '">Teklif Al</button>'
+            : '<button type="button" class="btn btn--ghost btn--sm" data-detay="' + esc(firma.id) + '">Profili Gör</button>';
         var ikincilBtn = anaSayfa
-            ? '<a class="btn btn--ghost btn--sm" href="https://wa.me/' + tel + '" target="_blank" rel="noopener">İletişim</a>'
-            : '<a class="btn btn--primary btn--sm" href="https://wa.me/' + tel + '" target="_blank" rel="noopener">WhatsApp</a>';
+            ? (waHref ? '<a class="btn btn--ghost btn--sm" href="' + esc(waHref) + '" target="_blank" rel="noopener">İletişim</a>' : '')
+            : (waHref ? '<a class="btn btn--primary btn--sm" href="' + esc(waHref) + '" target="_blank" rel="noopener">WhatsApp</a>' : '');
 
-        return '<article class="firma-kart' + premiumCls + (anaSayfa ? ' firma-kart--ana' : '') + '" data-id="' + firma.id + '">' +
+        return '<article class="firma-kart' + premiumCls + (anaSayfa ? ' firma-kart--ana' : '') + '" data-id="' + esc(firma.id) + '">' +
             premiumEtiket + partnerBadge + dogrulandi +
             '<div class="firma-kart__gorsel">' + gorselIcerik + '</div>' +
             '<div class="firma-kart__govde">' +
             '<div class="firma-kart__kat-rozet">' +
             '<span class="firma-kart__kat-ikon">' + kat.ikon + '</span>' +
-            '<span class="firma-kart__kat-ad">' + kat.ad + '</span>' +
+            '<span class="firma-kart__kat-ad">' + esc(kat.ad) + '</span>' +
             '</div>' +
             '<div class="firma-kart__ust">' +
-            '<h3 class="firma-kart__ad">' + firma.ad + '</h3>' +
-            '<span class="firma-kart__sehir">' + firma.sehir + '</span>' +
+            '<h3 class="firma-kart__ad">' + esc(firma.ad) + '</h3>' +
+            '<span class="firma-kart__sehir">' + esc(firma.sehir) + '</span>' +
             '</div>' +
             guvenHtml +
             '<div class="firma-kart__aksiyon">' + birincilBtn + ikincilBtn +
@@ -639,18 +652,20 @@
     function firmaKartVitrinHtml(firma) {
         var kat = kategoriBul(firma.kategoriId);
         var tel = telTemizle(firma.tel);
+        var waHref = safeWaHref(tel);
         var premiumCls = firma.premium ? ' firma-kart--premium' : '';
         var partnerBadge = firma.sponsor ? '<span class="firma-kart__partner">PARTNER</span>' : '';
         var gorselIcerik = firmaKapakImgHtml(firma, firma.ad).replace('firma-kart__kapak-img', 'firma-kart__gorsel-img');
-        var logoIcerik = firma.logo
-            ? '<img src="' + firma.logo + '" alt="" width="48" height="48" loading="lazy" decoding="async">'
-            : '<span class="firma-kart__logo-harf">' + firmaBasHarfleri(firma.ad) + '</span>';
+        var logoSrc = firma.logo ? safeUrl(firma.logo, '') : '';
+        var logoIcerik = logoSrc
+            ? '<img class="aurix-img-fallback" src="' + esc(logoSrc) + '" alt="" width="48" height="48" loading="lazy" decoding="async" data-remove-parent=".firma-kart__logo">'
+            : '<span class="firma-kart__logo-harf">' + esc(firmaBasHarfleri(firma.ad)) + '</span>';
         var aciklama = firma.aciklama || '';
         var puanHtml = firma.puan
             ? '<span class="firma-kart__puan">' + yildizGoster(firma.puan) + '</span>'
             : '<span class="firma-kart__puan firma-kart__puan--bos">Henüz puan yok</span>';
 
-        return '<article class="firma-kart firma-kart--vitrin' + premiumCls + '" data-id="' + firma.id + '">' +
+        return '<article class="firma-kart firma-kart--vitrin' + premiumCls + '" data-id="' + esc(firma.id) + '">' +
             (firma.premium ? '<span class="firma-kart__premium">PREMIUM</span>' : '') +
             partnerBadge +
             '<div class="firma-kart__gorsel">' + gorselIcerik + '</div>' +
@@ -658,18 +673,18 @@
             '<div class="firma-kart__kimlik">' +
             '<div class="firma-kart__logo">' + logoIcerik + '</div>' +
             '<div class="firma-kart__kimlik-metin">' +
-            '<h3 class="firma-kart__ad">' + firma.ad + '</h3>' +
+            '<h3 class="firma-kart__ad">' + esc(firma.ad) + '</h3>' +
             '<div class="firma-kart__meta">' +
-            '<span class="firma-kart__sehir">' + firma.sehir + '</span>' +
+            '<span class="firma-kart__sehir">' + esc(firma.sehir) + '</span>' +
             '<span class="firma-kart__kat-rozet">' +
             '<span class="firma-kart__kat-ikon">' + kat.ikon + '</span>' +
-            '<span class="firma-kart__kat-ad">' + kat.ad + '</span>' +
+            '<span class="firma-kart__kat-ad">' + esc(kat.ad) + '</span>' +
             '</span></div></div></div>' +
             '<div class="firma-kart__puan-alan">' + puanHtml + '</div>' +
-            (aciklama ? '<p class="firma-kart__aciklama">' + aciklama + '</p>' : '') +
+            (aciklama ? '<p class="firma-kart__aciklama">' + esc(aciklama) + '</p>' : '') +
             '<div class="firma-kart__aksiyon">' +
-            '<button type="button" class="btn btn--ghost btn--sm" data-detay="' + firma.id + '">Profili Gör</button>' +
-            '<a class="btn btn--primary btn--sm" href="https://wa.me/' + tel + '" target="_blank" rel="noopener">WhatsApp</a>' +
+            '<button type="button" class="btn btn--ghost btn--sm" data-detay="' + esc(firma.id) + '">Profili Gör</button>' +
+            (waHref ? '<a class="btn btn--primary btn--sm" href="' + esc(waHref) + '" target="_blank" rel="noopener">WhatsApp</a>' : '') +
             '</div></div></article>';
     }
 
@@ -773,7 +788,7 @@
         AURIX_DATA.SEHIRLER.forEach(function (s) {
             html += '<button type="button" class="filtre-chip filtre-chip--sehir' +
                 (state.filtre.sehir === s ? ' filtre-chip--aktif' : '') +
-                '" data-sehir="' + s + '">' + s + '</button>';
+                '" data-sehir="' + esc(s) + '">' + esc(s) + '</button>';
         });
         el.innerHTML = html;
 
@@ -908,20 +923,20 @@
         var el = $('isTalepleriGrid');
         if (!el || !AURIX_DATA.ACIK_IS_TALEPLERI) return;
         el.innerHTML = AURIX_DATA.ACIK_IS_TALEPLERI.map(function (talep) {
-            var durumCls = 'is-talep-kart__durum--' + (talep.durumTip || 'bekliyor');
+            var durumCls = 'is-talep-kart__durum--' + safeCss(talep.durumTip, 'bekliyor');
             return '<article class="is-talep-kart is-talep-kart--pro">' +
                 '<div class="is-talep-kart__ust">' +
                 '<div class="is-talep-kart__baslik-grup">' +
-                '<h3 class="is-talep-kart__baslik">' + talep.baslik + '</h3>' +
-                '<span class="is-talep-kart__sehir">' + talep.sehir + '</span></div>' +
-                '<span class="is-talep-kart__durum ' + durumCls + '">' + talep.durum + '</span></div>' +
+                '<h3 class="is-talep-kart__baslik">' + esc(talep.baslik) + '</h3>' +
+                '<span class="is-talep-kart__sehir">' + esc(talep.sehir) + '</span></div>' +
+                '<span class="is-talep-kart__durum ' + durumCls + '">' + esc(talep.durum) + '</span></div>' +
                 '<ul class="is-talep-kart__detaylar is-talep-kart__detaylar--odak">' +
-                '<li><span>Açılış</span><strong>' + (talep.acilisTarihi || '—') + '</strong></li>' +
+                '<li><span>Açılış</span><strong>' + esc(talep.acilisTarihi || '—') + '</strong></li>' +
                 '<li><span>Teklif</span><strong>' + (talep.teklifSayisi != null ? talep.teklifSayisi + ' teklif' : '—') + '</strong></li>' +
-                '<li><span>Yaklaşık bütçe</span><strong>' + (talep.butce || '—') + '</strong></li>' +
-                '<li><span>Teslim süresi</span><strong>' + (talep.termin || '—') + '</strong></li>' +
+                '<li><span>Yaklaşık bütçe</span><strong>' + esc(talep.butce || '—') + '</strong></li>' +
+                '<li><span>Teslim süresi</span><strong>' + esc(talep.termin || '—') + '</strong></li>' +
                 '</ul>' +
-                '<button type="button" class="btn btn--primary btn--sm is-talep-kart__btn" data-teklif-is="' + talep.id + '">Teklif Ver</button>' +
+                '<button type="button" class="btn btn--primary btn--sm is-talep-kart__btn" data-teklif-is="' + esc(talep.id) + '">Teklif Ver</button>' +
                 '</article>';
         }).join('');
         el.querySelectorAll('[data-teklif-is]').forEach(function (btn) {
@@ -935,11 +950,11 @@
         var el = $('canliAktiviteListe');
         if (!el || !AURIX_DATA.CANLI_AKTIVITE) return;
         el.innerHTML = AURIX_DATA.CANLI_AKTIVITE.map(function (a, i) {
-            return '<li class="canli-aktivite-oge canli-aktivite-oge--' + a.tip + '" style="--aktivite-delay:' + (i * 120) + 'ms">' +
+            return '<li class="canli-aktivite-oge canli-aktivite-oge--' + safeCss(a.tip, 'genel') + '" style="--aktivite-delay:' + (i * 120) + 'ms">' +
                 '<span class="canli-aktivite-oge__nokta" aria-hidden="true"></span>' +
                 '<div class="canli-aktivite-oge__icerik">' +
-                '<span class="canli-aktivite-oge__metin">' + a.metin + '</span>' +
-                '<time class="canli-aktivite-oge__zaman">' + (a.zaman || 'Az önce') + '</time>' +
+                '<span class="canli-aktivite-oge__metin">' + esc(a.metin) + '</span>' +
+                '<time class="canli-aktivite-oge__zaman">' + esc(a.zaman || 'Az önce') + '</time>' +
                 '</div></li>';
         }).join('');
     }
@@ -966,22 +981,22 @@
 
     function malzemeKartHtml(urun) {
         var kat = malzemeKategoriBul(urun.kategoriId);
-        var yedek = varsayilanFirmaGorseli();
-        var gorsel = urun.gorsel || yedek;
-        return '<article class="malzeme-kart" data-malzeme-id="' + urun.id + '">' +
+        var yedek = safeUrl(varsayilanFirmaGorseli(), '');
+        var gorsel = safeUrl(urun.gorsel, yedek) || yedek;
+        return '<article class="malzeme-kart" data-malzeme-id="' + esc(urun.id) + '">' +
             '<div class="malzeme-kart__gorsel">' +
-            '<img src="' + gorsel + '" alt="' + urun.baslik + '" width="320" height="200" loading="lazy" decoding="async" onerror="if(this.dataset.fallback!==\'1\'){this.dataset.fallback=\'1\';this.src=\'' + yedek + '\';}">' +
+            '<img class="aurix-img-fallback" src="' + esc(gorsel) + '" alt="' + esc(urun.baslik) + '" width="320" height="200" loading="lazy" decoding="async" data-fallback-src="' + esc(yedek) + '">' +
             (urun.dogrulandi ? '<span class="malzeme-kart__dogrulandi">Doğrulandı</span>' : '') +
             '</div>' +
             '<div class="malzeme-kart__govde">' +
-            '<span class="malzeme-kart__kat">' + kat.ikon + ' ' + kat.ad + '</span>' +
-            '<h3 class="malzeme-kart__baslik">' + urun.baslik + '</h3>' +
+            '<span class="malzeme-kart__kat">' + kat.ikon + ' ' + esc(kat.ad) + '</span>' +
+            '<h3 class="malzeme-kart__baslik">' + esc(urun.baslik) + '</h3>' +
             '<div class="malzeme-kart__meta">' +
-            '<span class="malzeme-kart__fiyat">' + urun.fiyat + '</span>' +
-            '<span class="malzeme-kart__durum">' + urun.durum + '</span>' +
+            '<span class="malzeme-kart__fiyat">' + esc(urun.fiyat) + '</span>' +
+            '<span class="malzeme-kart__durum">' + esc(urun.durum) + '</span>' +
             '</div>' +
-            '<p class="malzeme-kart__satici">' + urun.satici + ' · ' + urun.sehir + '</p>' +
-            '<button type="button" class="btn btn--primary btn--sm malzeme-kart__btn" data-malzeme-teklif="' + urun.id + '">Teklif Al</button>' +
+            '<p class="malzeme-kart__satici">' + esc(urun.satici) + ' · ' + esc(urun.sehir) + '</p>' +
+            '<button type="button" class="btn btn--primary btn--sm malzeme-kart__btn" data-malzeme-teklif="' + esc(urun.id) + '">Teklif Al</button>' +
             '</div></article>';
     }
 
@@ -1216,12 +1231,12 @@
         tbody.innerHTML = rows.length ? rows.map(function (f) {
             var kat = kategoriBul(f.kategoriId);
             var grupAd = kategoriGrupAdi(f.kategoriId);
-            var durumCls = 'durum durum--' + f.durum;
+            var durumCls = 'durum durum--' + safeCss(f.durum, 'beklemede');
             return '<tr class="admin-tablo__satir">' +
-                '<td><span class="admin-tablo__firma">' + f.ad + '</span></td>' +
-                '<td><span class="admin-tablo__meta">' + kat.ikon + ' ' + kat.ad + '</span></td>' +
-                '<td><span class="admin-tablo__meta">' + f.sehir + '</span></td>' +
-                '<td><span class="admin-tablo__kategori">' + grupAd + '</span></td>' +
+                '<td><span class="admin-tablo__firma">' + esc(f.ad) + '</span></td>' +
+                '<td><span class="admin-tablo__meta">' + kat.ikon + ' ' + esc(kat.ad) + '</span></td>' +
+                '<td><span class="admin-tablo__meta">' + esc(f.sehir) + '</span></td>' +
+                '<td><span class="admin-tablo__kategori">' + esc(grupAd) + '</span></td>' +
                 '<td><span class="admin-tablo__tel">+' + telTemizle(f.tel) + '</span></td>' +
                 '<td><span class="' + durumCls + '">' + adminDurumEtiket(f.durum) + '</span></td>' +
                 '<td><div class="admin-aksiyon">' + adminAksiyonHtml(f) + '</div></td></tr>';
@@ -1253,20 +1268,25 @@
         var link = $('navAdmin');
         var btn = $('adminGirisBtn');
         var headerSag = $('adminHeaderSag');
-        if (state.adminAktif) {
-            if (link) link.style.display = '';
-            if (btn) { btn.textContent = 'Çıkış'; btn.classList.add('btn--danger-outline'); }
-            if (headerSag) headerSag.hidden = false;
-        } else {
-            if (link) link.style.display = 'none';
-            if (btn) { btn.textContent = 'Admin Demo'; btn.classList.remove('btn--danger-outline'); }
+        var adminSayfa = document.querySelector('[data-sayfa="admin"]');
+        if (link) link.hidden = true;
+        if (btn) btn.hidden = true;
+        if (adminSayfa) adminSayfa.hidden = !ADMIN_PANEL_ENABLED || !state.adminAktif;
+        if (!ADMIN_PANEL_ENABLED || !state.adminAktif) {
             if (headerSag) headerSag.hidden = true;
+            return;
         }
+        if (link) link.style.display = '';
+        if (btn) { btn.textContent = 'Çıkış'; btn.classList.add('btn--danger-outline'); }
+        if (headerSag) headerSag.hidden = false;
     }
 
-    function tumunuRenderEt() {
-        renderPiyasaBandi();
-        renderHeroTerminal(marketQuotes);
+    function tumunuRenderEt(opts) {
+        opts = opts || {};
+        if (!opts.skipPiyasa) {
+            renderPiyasaBandi();
+            renderHeroTerminal(marketQuotes);
+        }
         renderSponsorAnaSayfa();
         renderIsTalepleri();
         renderHeroIstatistikler();
@@ -1276,7 +1296,9 @@
         renderCanliAktivite();
         renderMalzemePazari();
         renderVitrin();
-        renderAdminTablo();
+        if (ADMIN_PANEL_ENABLED && state.adminAktif) {
+            renderAdminTablo();
+        }
         renderAdminUI();
     }
 
@@ -1311,15 +1333,26 @@
         var detayImg = $('detayGorsel');
         if (detayImg) {
             detayImg.onerror = function () {
-                if (this.dataset.fallback !== '1') {
-                    this.dataset.fallback = '1';
-                    this.src = varsayilanFirmaGorseli();
+                if (this.dataset.fallbackApplied !== '1') {
+                    this.dataset.fallbackApplied = '1';
+                    this.src = safeUrl(varsayilanFirmaGorseli(), '');
                 }
             };
-            detayImg.src = firmaKapakGorsel(firma);
+            detayImg.src = safeUrl(firmaKapakGorsel(firma), safeUrl(varsayilanFirmaGorseli(), ''));
+            detayImg.alt = firma.ad;
             detayImg.style.display = '';
         }
-        $('detayWa').href = 'https://wa.me/' + tel;
+        var detayWa = $('detayWa');
+        if (detayWa) {
+            var waHref = safeWaHref(tel);
+            if (waHref) {
+                detayWa.href = waHref;
+                detayWa.hidden = false;
+            } else {
+                detayWa.removeAttribute('href');
+                detayWa.hidden = true;
+            }
+        }
         var rozetler = $('detayRozetler');
         if (rozetler) {
             rozetler.innerHTML = (firma.durum === 'onaylandi' ? '<span class="rozet rozet--dogrulandi">Doğrulandı</span>' : '') +
@@ -1373,9 +1406,8 @@
             modalAc('girisModal');
             return;
         }
-        if (id === 'admin' && !state.adminAktif) {
-            modalAc('adminLoginModal');
-            return;
+        if (id === 'admin') {
+            if (!ADMIN_PANEL_ENABLED || !state.adminAktif) return;
         }
         navMenuKapat();
         state.aktifSayfa = id;
@@ -1394,6 +1426,22 @@
         }
     }
 
+    function firmaBasvuruDogrula(ad, tel, aciklama) {
+        if (ad.length < 2) return 'Firma adı en az 2 karakter olmalı.';
+        if (!/^90[0-9]{10}$/.test(tel)) return 'Telefon: 905XXXXXXXXX formatında girin.';
+        if (aciklama.length < 10) return 'Açıklama en az 10 karakter olmalı.';
+        return null;
+    }
+
+    function firmaBasvuruOlustur(ad, tel, aciklama, kategoriId, sehir) {
+        return {
+            id: yeniId(), ad: ad, kategoriId: kategoriId, sehir: sehir, tel: tel,
+            aciklama: aciklama, premium: false, sponsor: false,
+            durum: 'beklemede', puan: 0, gorsel: null,
+            eklenmeTarihi: new Date().toISOString()
+        };
+    }
+
     function kayitGonder(e) {
         e.preventDefault();
         var ad = $('kayitAd').value.trim();
@@ -1402,20 +1450,14 @@
         var kategoriId = $('kayitKategori').value;
         var sehir = $('kayitSehir').value;
 
-        if (ad.length < 2) { toast('Firma adı en az 2 karakter olmalı.', 'error'); return; }
-        if (!/^90[0-9]{10}$/.test(tel)) { toast('Telefon: 905XXXXXXXXX formatında girin.', 'error'); return; }
-        if (aciklama.length < 10) { toast('Açıklama en az 10 karakter olmalı.', 'error'); return; }
+        var hata = firmaBasvuruDogrula(ad, tel, aciklama);
+        if (hata) { toast(hata, 'error'); return; }
 
-        var yeni = {
-            id: yeniId(), ad: ad, kategoriId: kategoriId, sehir: sehir, tel: tel,
-            aciklama: aciklama, premium: false, sponsor: false,
-            durum: 'beklemede', puan: 0, gorsel: null,
-            eklenmeTarihi: new Date().toISOString()
-        };
+        var yeni = firmaBasvuruOlustur(ad, tel, aciklama, kategoriId, sehir);
         state.firmalar.push(yeni);
         StorageAdapter.save(state.firmalar);
         $('kayitForm').reset();
-        toast('Başvurunuz alındı! Admin onayından sonra vitrinde görünecek.', 'success');
+        toast('Başvurunuz alındı! Onay sürecinden sonra vitrinde görünecek.', 'success');
         tumunuRenderEt();
         sayfaGoster('ana-sayfa');
     }
@@ -1459,16 +1501,10 @@
         var kategoriId = $('adminKayitKategori').value;
         var sehir = $('adminKayitSehir').value;
 
-        if (ad.length < 2) { toast('Firma adı en az 2 karakter olmalı.', 'error'); return; }
-        if (!/^90[0-9]{10}$/.test(tel)) { toast('Telefon: 905XXXXXXXXX formatında girin.', 'error'); return; }
-        if (aciklama.length < 10) { toast('Açıklama en az 10 karakter olmalı.', 'error'); return; }
+        var hata = firmaBasvuruDogrula(ad, tel, aciklama);
+        if (hata) { toast(hata, 'error'); return; }
 
-        var yeni = {
-            id: yeniId(), ad: ad, kategoriId: kategoriId, sehir: sehir, tel: tel,
-            aciklama: aciklama, premium: false, sponsor: false,
-            durum: 'beklemede', puan: 0, gorsel: null,
-            eklenmeTarihi: new Date().toISOString()
-        };
+        var yeni = firmaBasvuruOlustur(ad, tel, aciklama, kategoriId, sehir);
         state.firmalar.push(yeni);
         StorageAdapter.save(state.firmalar);
         $('adminKayitForm').reset();
@@ -1495,18 +1531,12 @@
     }
 
     function adminGiris() {
-        var email = $('adminEmail').value.trim();
-        var sifre = $('adminSifre').value;
-        if (email === DEMO_ADMIN.email && sifre === DEMO_ADMIN.sifre) {
-            state.adminAktif = true;
-            sessionStorage.setItem(ADMIN_KEY, '1');
-            modalKapat('adminLoginModal');
-            renderAdminUI();
-            toast('Admin demo oturumu açıldı.', 'success');
-            sayfaGoster('admin');
-        } else {
-            toast('Demo giriş: demo@aurix.com / aurix2026', 'error');
+        // v1.0: Supabase Auth signInWithPassword + profiles.role === 'admin' doğrulaması burada yapılacak.
+        if (!ADMIN_PANEL_ENABLED) {
+            toast('Yönetim paneli şu an devre dışı.', 'info');
+            return;
         }
+        toast('Geçersiz e-posta veya şifre.', 'error');
     }
 
     function adminCikis() {
@@ -1531,20 +1561,16 @@
 
     function init() {
         StorageAdapter.init();
-        state.adminAktif = sessionStorage.getItem(ADMIN_KEY) === '1';
+        sessionStorage.removeItem(ADMIN_KEY);
+        state.adminAktif = false;
 
+        AurixUtils.initImageFallbackHandler();
         renderKategoriSelectler();
         renderFiltreChips();
         renderSehirChips();
-        renderKategoriGruplari();
-        renderNedenAurix();
-        renderCanliAktivite();
         initCanliAktiviteCanli();
-        renderIsTalepleri();
-        renderHeroIstatistikler();
-        renderMalzemePazari();
         initMarketService();
-        tumunuRenderEt();
+        tumunuRenderEt({ skipPiyasa: true });
         setInterval(heroTerminalSaatGuncelle, 1000);
 
         // Navigasyon
@@ -1668,15 +1694,21 @@
 
         // Admin (navbar butonu kaldırıldı — gizli rota ile erişim)
         var adminGirisBtn = $('adminGirisBtn');
-        if (adminGirisBtn) {
+        if (adminGirisBtn && ADMIN_PANEL_ENABLED) {
             adminGirisBtn.addEventListener('click', function () {
                 state.adminAktif ? adminCikis() : modalAc('adminLoginModal');
             });
         }
-        $('adminLoginBtn').addEventListener('click', adminGiris);
-        $('adminSifre').addEventListener('keydown', function (e) {
-            if (e.key === 'Enter') adminGiris();
-        });
+        var adminLoginBtn = $('adminLoginBtn');
+        if (adminLoginBtn && ADMIN_PANEL_ENABLED) {
+            adminLoginBtn.addEventListener('click', adminGiris);
+        }
+        var adminSifre = $('adminSifre');
+        if (adminSifre && ADMIN_PANEL_ENABLED) {
+            adminSifre.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter') adminGiris();
+            });
+        }
         if ($('demoSifirlaBtn')) $('demoSifirlaBtn').addEventListener('click', demoVeriSifirla);
 
         var adminArama = $('adminAramaInput');
@@ -1689,7 +1721,7 @@
         var adminYeniFirma = $('adminYeniFirmaBtn');
         if (adminYeniFirma) {
             adminYeniFirma.addEventListener('click', function () {
-                if (!state.adminAktif) { modalAc('adminLoginModal'); return; }
+                if (!ADMIN_PANEL_ENABLED || !state.adminAktif) return;
                 modalAc('adminKayitModal');
             });
         }

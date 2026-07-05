@@ -13,6 +13,7 @@ Türkiye kuyumculuk sektörü için B2B platform demosu. Frontend ağırlıklı,
 ├── index.html          # Ana uygulama (SPA)
 ├── css/styles.css      # Aurix lüks teknoloji teması (mat siyah / gümüş)
 ├── js/
+│   ├── utils.js        # escapeHtml, safeUrl, güvenlik yardımcıları
 │   ├── data.js         # Kategoriler + örnek firmalar (→ Supabase ile değişecek)
 │   └── app.js          # Uygulama mantığı + StorageAdapter
 ├── assets/             # Logo, görseller (ileride)
@@ -29,17 +30,12 @@ Türkiye kuyumculuk sektörü için B2B platform demosu. Frontend ağırlıklı,
 - ✅ Firma kayıt formu
 - ✅ WhatsApp iletişim
 - ✅ Demo canlı piyasa bandı
-- ✅ Admin paneli (onay / red / sil)
+- ⏸ Admin paneli (v1.0'da Supabase Auth ile — şu an devre dışı)
 - ✅ Mobil uyumlu responsive tasarım
 
-## Admin Demo Girişi
+## Admin Paneli
 
-| Alan | Değer |
-|------|-------|
-| E-posta | `demo@aurix.com` |
-| Şifre | `aurix2026` |
-
-Admin panelinden firmaları onaylayabilir, reddedebilir veya silebilirsiniz.
+Beta v0.1'de yönetim paneli **devre dışıdır**. v1.0'da Supabase Auth ve `profiles.role = 'admin'` ile etkinleştirilecektir.
 
 ## Veri Saklama
 
@@ -50,7 +46,7 @@ Beta v0.1'de tüm veriler **localStorage** (`aurix_beta_v01_firms`) içinde tutu
 | Katman | Beta v0.1 | v1.0 |
 |--------|-----------|------|
 | Veri | `js/data.js` + localStorage | Supabase PostgreSQL |
-| Auth | Demo şifre | Supabase Auth + MFA |
+| Auth | Devre dışı (public) | Supabase Auth + MFA |
 | Storage | Harici görseller | Supabase Storage |
 | Adapter | `StorageAdapter` in app.js | `SupabaseAdapter` |
 

@@ -369,7 +369,7 @@
     </div>
 
     <!-- ===================== ADMIN DEMO ===================== -->
-    <div class="sayfa" data-sayfa="admin">
+    <div class="sayfa" data-sayfa="admin" hidden>
         <section class="bolum bolum--admin">
             <div class="kapsayici">
                 <header class="admin-header">
@@ -384,7 +384,7 @@
                 </header>
 
                 <div class="admin-demo-bar">
-                    <p class="admin-demo-bar__metin">Demo modu — veriler tarayıcıda (localStorage) saklanır. Giriş: <strong>demo@aurix.com</strong> / <strong>aurix2026</strong></p>
+                    <p class="admin-demo-bar__metin">Demo modu — veriler tarayıcıda (localStorage) saklanır.</p>
                     <div class="admin-demo-bar__aksiyon">
                         <button type="button" class="btn btn--danger-outline btn--xs" id="demoSifirlaBtn">Verileri Sıfırla</button>
                         <span class="admin-demo-bar__not">Demo verileri yeniden yüklenir.</span>
@@ -606,7 +606,7 @@
     </div>
 
     <!-- ADMIN LOGIN MODAL -->
-    <div class="modal" id="adminLoginModal">
+    <div class="modal" id="adminLoginModal" hidden>
         <div class="modal__kutu">
             <div class="modal__baslik">
                 <h3>Admin Demo Girişi</h3>
@@ -614,7 +614,7 @@
             </div>
             <div class="form-grup">
                 <label class="form-label" for="adminEmail">E-posta</label>
-                <input class="form-input" type="email" id="adminEmail" value="demo@aurix.com">
+                <input class="form-input" type="email" id="adminEmail" autocomplete="username">
             </div>
             <div class="form-grup">
                 <label class="form-label" for="adminSifre">Şifre</label>
@@ -675,6 +675,7 @@
 
     <div id="toastWrap"></div>
 
+    <script src="js/utils.js"></script>
     <script src="js/data.js"></script>
     <script src="js/market-service.js"></script>
     <script src="js/app.js"></script>
