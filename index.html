@@ -31,6 +31,7 @@
                 <a href="#" class="nav__link" data-nav="firmalar">Firmalar</a>
                 <a href="#" class="nav__link" data-nav="malzeme">Malzeme Pazarı</a>
                 <a href="#" class="nav__link" data-nav="piyasa">Piyasa</a>
+                <a href="#" class="nav__link" data-nav="panel">Panelim</a>
                 <a href="#" class="nav__link" data-nav="giris">Giriş Yap</a>
             </nav>
             <button type="button" class="nav__toggle" id="menuToggle" aria-label="Menüyü aç" aria-expanded="false" aria-controls="navMenu">
@@ -368,28 +369,77 @@
         </section>
     </div>
 
-    <!-- ===================== ADMIN DEMO ===================== -->
-    <div class="sayfa" data-sayfa="admin" hidden>
-        <section class="bolum bolum--admin">
+    <!-- ===================== KULLANICI PANELİ (Beta iskelet) ===================== -->
+    <div class="sayfa" data-sayfa="panel">
+        <section class="bolum bolum--panel">
             <div class="kapsayici">
-                <header class="admin-header">
-                    <div class="admin-header__sol">
-                        <h2 class="admin-header__baslik">Admin Dashboard</h2>
-                        <p class="admin-header__alt">Aurix Beta v0.1 • Demo Yönetim Paneli</p>
+                <header class="panel-header">
+                    <div class="panel-header__sol">
+                        <h2 class="panel-header__baslik">Firma Paneli</h2>
+                        <p class="panel-header__alt" id="panelUserGreeting">Firma paneli — demo görünüm</p>
                     </div>
-                    <div class="admin-header__sag" id="adminHeaderSag" hidden>
-                        <span class="admin-header__merhaba">Merhaba Admin</span>
+                    <div class="panel-header__sag">
+                        <button type="button" class="btn btn--ghost btn--sm" id="panelCikisBtn">Çıkış</button>
+                    </div>
+                </header>
+
+                <div class="panel-beta-bar" role="note">
+                    <p class="panel-beta-bar__metin">Beta panel: Gerçek üyelik sistemi daha sonra bağlanacaktır.</p>
+                </div>
+
+                <nav class="panel-tabs" id="panelTabs" role="tablist" aria-label="Panel sekmeleri">
+                    <button type="button" class="panel-tab panel-tab--aktif" data-panel-tab="profil" role="tab" aria-selected="true">Firma Profilim</button>
+                    <button type="button" class="panel-tab" data-panel-tab="is-talepleri" role="tab" aria-selected="false">İş Taleplerim</button>
+                    <button type="button" class="panel-tab" data-panel-tab="teklifler" role="tab" aria-selected="false">Gelen Teklifler</button>
+                    <button type="button" class="panel-tab" data-panel-tab="malzeme" role="tab" aria-selected="false">Malzeme İlanlarım</button>
+                    <button type="button" class="panel-tab" data-panel-tab="hesap" role="tab" aria-selected="false">Hesap Ayarları</button>
+                </nav>
+
+                <div class="panel-icerik">
+                    <div class="panel-sekme panel-sekme--aktif" data-panel-icerik="profil" id="panelSekmeProfil" role="tabpanel"></div>
+                    <div class="panel-sekme" data-panel-icerik="is-talepleri" id="panelSekmeIs" role="tabpanel" hidden></div>
+                    <div class="panel-sekme" data-panel-icerik="teklifler" id="panelSekmeTeklif" role="tabpanel" hidden></div>
+                    <div class="panel-sekme" data-panel-icerik="malzeme" id="panelSekmeMalzeme" role="tabpanel" hidden></div>
+                    <div class="panel-sekme" data-panel-icerik="hesap" id="panelSekmeHesap" role="tabpanel" hidden>
+                        <span id="panelHesapEmail" hidden aria-hidden="true"></span>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- ===================== ADMIN (pasif iskelet) ===================== -->
+    <div class="sayfa" data-sayfa="admin" hidden>
+        <section class="bolum bolum--admin bolum--panel">
+            <div class="kapsayici">
+                <header class="panel-header panel-header--admin">
+                    <div class="panel-header__sol">
+                        <h2 class="panel-header__baslik">Yönetim Paneli</h2>
+                        <p class="panel-header__alt">Aurix Beta v0.1 • Admin iskelet</p>
+                    </div>
+                    <div class="panel-header__sag" id="adminHeaderSag" hidden>
+                        <span class="panel-header__merhaba">Merhaba Admin</span>
                         <button type="button" class="btn btn--ghost btn--sm" id="adminPanelCikisBtn">Çıkış</button>
                     </div>
                 </header>
 
-                <div class="admin-demo-bar">
-                    <p class="admin-demo-bar__metin">Demo modu — veriler tarayıcıda (localStorage) saklanır.</p>
+                <div class="panel-beta-bar panel-beta-bar--admin" role="note">
+                    <p class="panel-beta-bar__metin">Yönetim paneli devre dışı — Supabase Auth + role=admin ile etkinleştirilecek.</p>
                     <div class="admin-demo-bar__aksiyon">
                         <button type="button" class="btn btn--danger-outline btn--xs" id="demoSifirlaBtn">Verileri Sıfırla</button>
-                        <span class="admin-demo-bar__not">Demo verileri yeniden yüklenir.</span>
                     </div>
                 </div>
+
+                <nav class="panel-tabs" id="adminPanelTabs" role="tablist" aria-label="Admin sekmeleri">
+                    <button type="button" class="panel-tab panel-tab--aktif" data-admin-tab="firmalar" role="tab" aria-selected="true">Bekleyen Firmalar</button>
+                    <button type="button" class="panel-tab" data-admin-tab="is-talepleri" role="tab" aria-selected="false">Bekleyen İş Talepleri</button>
+                    <button type="button" class="panel-tab" data-admin-tab="malzemeler" role="tab" aria-selected="false">Bekleyen Malzemeler</button>
+                    <button type="button" class="panel-tab" data-admin-tab="kullanicilar" role="tab" aria-selected="false">Kullanıcılar</button>
+                    <button type="button" class="panel-tab" data-admin-tab="raporlar" role="tab" aria-selected="false">Raporlar</button>
+                </nav>
+
+                <div class="panel-icerik">
+                    <div class="panel-sekme panel-sekme--aktif" data-admin-icerik="firmalar" role="tabpanel">
 
                 <div class="admin-ozet">
                     <div class="admin-kart">
@@ -486,6 +536,13 @@
                     <h3 class="admin-demo-info__baslik">Demo Bilgisi</h3>
                     <p class="admin-demo-info__metin">Bu panel yalnızca Beta v0.1 gösterimi içindir. Kimlik doğrulama ve veritabanı bağlantısı v1.0 sürümünde Supabase ile sağlanacaktır.</p>
                 </aside>
+
+                    </div>
+                    <div class="panel-sekme" data-admin-icerik="is-talepleri" id="adminSekmeIsTalepleri" role="tabpanel" hidden></div>
+                    <div class="panel-sekme" data-admin-icerik="malzemeler" id="adminSekmeMalzemeler" role="tabpanel" hidden></div>
+                    <div class="panel-sekme" data-admin-icerik="kullanicilar" id="adminSekmeKullanicilar" role="tabpanel" hidden></div>
+                    <div class="panel-sekme" data-admin-icerik="raporlar" id="adminSekmeRaporlar" role="tabpanel" hidden></div>
+                </div>
             </div>
         </section>
     </div>
@@ -605,25 +662,6 @@
         </div>
     </div>
 
-    <!-- ADMIN LOGIN MODAL -->
-    <div class="modal" id="adminLoginModal" hidden>
-        <div class="modal__kutu">
-            <div class="modal__baslik">
-                <h3>Admin Demo Girişi</h3>
-                <button class="modal__kapat" data-modal-kapat="adminLoginModal" aria-label="Kapat">×</button>
-            </div>
-            <div class="form-grup">
-                <label class="form-label" for="adminEmail">E-posta</label>
-                <input class="form-input" type="email" id="adminEmail" autocomplete="username">
-            </div>
-            <div class="form-grup">
-                <label class="form-label" for="adminSifre">Şifre</label>
-                <input class="form-input" type="password" id="adminSifre" placeholder="••••••••">
-            </div>
-            <button type="button" class="btn btn--primary" id="adminLoginBtn" style="width:100%">Giriş Yap</button>
-        </div>
-    </div>
-
     <!-- ADMIN KAYIT MODAL -->
     <div class="modal" id="adminKayitModal">
         <div class="modal__kutu modal__kutu--genis">
@@ -677,6 +715,8 @@
 
     <script src="js/utils.js"></script>
     <script src="js/data.js"></script>
+    <script src="js/authService.js"></script>
+    <script src="js/panels.js"></script>
     <script src="js/market-service.js"></script>
     <script src="js/app.js"></script>
 </body>

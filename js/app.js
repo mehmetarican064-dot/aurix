@@ -6,7 +6,6 @@
     'use strict';
 
     var STORAGE_KEY = 'aurix_beta_v01_firms';
-    var ADMIN_KEY = 'aurix_beta_admin_session';
     // Admin panel v1.0'da Supabase Auth + profiles.role='admin' ile etkinleştirilecek.
     var ADMIN_PANEL_ENABLED = false;
 
@@ -17,7 +16,6 @@
 
     var state = {
         firmalar: [],
-        adminAktif: false,
         aktifSayfa: 'ana-sayfa',
         piyasaTab: 'kuyumcu',
         adminArama: '',
@@ -26,6 +24,10 @@
         vitrin: { sayfa: 1, boyut: 9, siralama: 'onerilen' },
         malzeme: { arama: '', kategoriId: '' }
     };
+
+    function isAdminSession() {
+        return ADMIN_PANEL_ENABLED && AuthService.isAdmin();
+    }
 
     var marketService = null;
     var marketQuotes = [];
@@ -1271,8 +1273,8 @@
         var adminSayfa = document.querySelector('[data-sayfa="admin"]');
         if (link) link.hidden = true;
         if (btn) btn.hidden = true;
-        if (adminSayfa) adminSayfa.hidden = !ADMIN_PANEL_ENABLED || !state.adminAktif;
-        if (!ADMIN_PANEL_ENABLED || !state.adminAktif) {
+        if (adminSayfa) adminSayfa.hidden = !isAdminSession();
+        if (!isAdminSession()) {
             if (headerSag) headerSag.hidden = true;
             return;
         }
@@ -1296,7 +1298,7 @@
         renderCanliAktivite();
         renderMalzemePazari();
         renderVitrin();
-        if (ADMIN_PANEL_ENABLED && state.adminAktif) {
+        if (isAdminSession()) {
             renderAdminTablo();
         }
         renderAdminUI();
@@ -1407,7 +1409,11 @@
             return;
         }
         if (id === 'admin') {
-            if (!ADMIN_PANEL_ENABLED || !state.adminAktif) return;
+            if (!isAdminSession()) return;
+        }
+        if (id === 'panel') {
+            PanelUI.renderUserPanel();
+            PanelUI.panelTabSec('profil');
         }
         navMenuKapat();
         state.aktifSayfa = id;
@@ -1418,7 +1424,10 @@
             n.classList.toggle('nav__link--aktif', n.getAttribute('data-nav') === id);
         });
         window.scrollTo({ top: 0, behavior: 'smooth' });
-        if (id === 'admin') renderAdminTablo();
+        if (id === 'admin') {
+            PanelUI.renderAdminSkeleton();
+            renderAdminTablo();
+        }
         if (id === 'malzeme') renderMalzemePazari();
         if (id === 'piyasa') {
             renderPiyasaBandi();
@@ -1463,7 +1472,7 @@
     }
 
     function adminDurumGuncelle(id, durum) {
-        if (!state.adminAktif) return;
+        if (!isAdminSession()) return;
         var firma = state.firmalar.find(function (f) { return f.id === id; });
         if (!firma) return;
         firma.durum = durum;
@@ -1473,7 +1482,7 @@
     }
 
     function adminTogglePremium(id) {
-        if (!state.adminAktif) return;
+        if (!isAdminSession()) return;
         var firma = state.firmalar.find(function (f) { return f.id === id; });
         if (!firma) return;
         firma.premium = !firma.premium;
@@ -1483,7 +1492,7 @@
     }
 
     function adminTogglePartner(id) {
-        if (!state.adminAktif) return;
+        if (!isAdminSession()) return;
         var firma = state.firmalar.find(function (f) { return f.id === id; });
         if (!firma) return;
         firma.sponsor = !firma.sponsor;
@@ -1494,7 +1503,7 @@
 
     function adminKayitGonder(e) {
         e.preventDefault();
-        if (!state.adminAktif) return;
+        if (!isAdminSession()) return;
         var ad = $('adminKayitAd').value.trim();
         var tel = telTemizle($('adminKayitTel').value);
         var aciklama = $('adminKayitAciklama').value.trim();
@@ -1514,13 +1523,13 @@
     }
 
     function adminSil(id) {
-        if (!state.adminAktif) return;
+        if (!isAdminSession()) return;
         state.adminSilBekleyenId = id;
         modalAc('adminSilModal');
     }
 
     function adminSilOnayla() {
-        if (!state.adminAktif || !state.adminSilBekleyenId) return;
+        if (!isAdminSession() || !state.adminSilBekleyenId) return;
         var id = state.adminSilBekleyenId;
         state.firmalar = state.firmalar.filter(function (f) { return f.id !== id; });
         StorageAdapter.save(state.firmalar);
@@ -1540,8 +1549,7 @@
     }
 
     function adminCikis() {
-        state.adminAktif = false;
-        sessionStorage.removeItem(ADMIN_KEY);
+        AuthService.signOut();
         renderAdminUI();
         sayfaGoster('ana-sayfa');
         toast('Çıkış yapıldı.', 'info');
@@ -1561,8 +1569,6 @@
 
     function init() {
         StorageAdapter.init();
-        sessionStorage.removeItem(ADMIN_KEY);
-        state.adminAktif = false;
 
         AurixUtils.initImageFallbackHandler();
         renderKategoriSelectler();
@@ -1572,6 +1578,9 @@
         initMarketService();
         tumunuRenderEt({ skipPiyasa: true });
         setInterval(heroTerminalSaatGuncelle, 1000);
+
+        PanelUI.bindTabs();
+        PanelUI.renderAdminSkeleton();
 
         // Navigasyon
         document.querySelectorAll('[data-nav]').forEach(function (el) {
@@ -1647,8 +1656,17 @@
         var girisBtn = $('girisBtn');
         if (girisBtn) {
             girisBtn.addEventListener('click', function () {
+                var email = $('girisEmail') ? $('girisEmail').value : '';
+                var sifre = $('girisSifre') ? $('girisSifre').value : '';
+                var result = AuthService.signIn(email, sifre);
+                if (!result.ok) {
+                    toast(result.error, 'error');
+                    return;
+                }
                 modalKapat('girisModal');
-                toast('Giriş özelliği v1.0 sürümünde aktif olacaktır.', 'info');
+                PanelUI.renderUserPanel();
+                sayfaGoster('panel');
+                toast('Beta panel açıldı (demo oturum, sayfa yenilenince kapanır).', 'info');
             });
         }
 
@@ -1692,23 +1710,7 @@
         // Form
         $('kayitForm').addEventListener('submit', kayitGonder);
 
-        // Admin (navbar butonu kaldırıldı — gizli rota ile erişim)
-        var adminGirisBtn = $('adminGirisBtn');
-        if (adminGirisBtn && ADMIN_PANEL_ENABLED) {
-            adminGirisBtn.addEventListener('click', function () {
-                state.adminAktif ? adminCikis() : modalAc('adminLoginModal');
-            });
-        }
-        var adminLoginBtn = $('adminLoginBtn');
-        if (adminLoginBtn && ADMIN_PANEL_ENABLED) {
-            adminLoginBtn.addEventListener('click', adminGiris);
-        }
-        var adminSifre = $('adminSifre');
-        if (adminSifre && ADMIN_PANEL_ENABLED) {
-            adminSifre.addEventListener('keydown', function (e) {
-                if (e.key === 'Enter') adminGiris();
-            });
-        }
+        // Admin — yalnızca ADMIN_PANEL_ENABLED true iken bağlanır
         if ($('demoSifirlaBtn')) $('demoSifirlaBtn').addEventListener('click', demoVeriSifirla);
 
         var adminArama = $('adminAramaInput');
@@ -1721,7 +1723,7 @@
         var adminYeniFirma = $('adminYeniFirmaBtn');
         if (adminYeniFirma) {
             adminYeniFirma.addEventListener('click', function () {
-                if (!ADMIN_PANEL_ENABLED || !state.adminAktif) return;
+                if (!isAdminSession()) return;
                 modalAc('adminKayitModal');
             });
         }
@@ -1758,7 +1760,7 @@
     }
 
     // Global (HTML onclick yerine event delegation tercih edildi; geriye dönük)
-    window.Aurix = { sayfaGoster: sayfaGoster, scrollToBolum: scrollToBolum, modalKapat: modalKapat, demoSifirla: demoVeriSifirla };
+    window.Aurix = { sayfaGoster: sayfaGoster, scrollToBolum: scrollToBolum, modalKapat: modalKapat, demoSifirla: demoVeriSifirla, toast: toast };
 
     document.addEventListener('DOMContentLoaded', init);
 })();

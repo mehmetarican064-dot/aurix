@@ -410,6 +410,56 @@ window.AURIX_DATA = {
             eklenmeTarihi: '2026-03-19T12:00:00.000Z',
             gorsel: 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80'
         }
-    ]
+    ],
+
+    /* Kullanıcı paneli demo verisi (Beta iskelet) */
+    PANEL_DEMO: {
+        profil: {
+            firmaAd: 'Arıcan Vakumlu Döküm Merkezi',
+            kategori: 'Dökümcü',
+            sehir: 'İSTANBUL',
+            durum: 'Onay bekliyor',
+            tel: '905321112233',
+            aciklama: 'Sıfır gözenekli altın, gümüş ve platin döküm hatları. Günlük yüksek hacimli iş teslimi.'
+        },
+        isTalepleri: [
+            { id: 'pit1', baslik: '22 ayar bilezik seri üretimi', durum: 'Açık', teklifSayisi: 4, tarih: '28.06.2026' },
+            { id: 'pit2', baslik: 'Tektaş montür mıhlama', durum: 'Teklif toplanıyor', teklifSayisi: 2, tarih: '25.06.2026' }
+        ],
+        teklifler: [
+            { id: 'ptk1', isBaslik: 'Fantezi kolye döküm', firma: 'Kuzey CAD Atölyesi', tutar: '₺18.500', durum: 'Bekliyor' },
+            { id: 'ptk2', isBaslik: 'Lazer kesim plaka', firma: 'Zirve Lazer Kesim', tutar: '₺4.200', durum: 'Kabul edildi' }
+        ],
+        malzemeIlanlari: [
+            { id: 'pml1', baslik: 'Japon freze uç seti', fiyat: '₺6.750', durum: 'Yayında', goruntulenme: 124 },
+            { id: 'pml2', baslik: 'Mikro motor + el parçası', fiyat: '₺9.900', durum: 'Taslak', goruntulenme: 0 }
+        ],
+        hesap: {
+            bildirimler: 'E-posta ve uygulama bildirimleri',
+            guvenlik: 'İki adımlı doğrulama v1.0\'da'
+        }
+    },
+
+    /* Admin panel demo verisi (Beta iskelet — panel kapalıyken referans) */
+    ADMIN_PANEL_DEMO: {
+        isTalepleri: [
+            { id: 'ait1', baslik: '500 adet alyans üretimi', sehir: 'İZMİR', basvuru: '14.06.2026' },
+            { id: 'ait2', baslik: 'Pırlanta montür işi', sehir: 'İSTANBUL', basvuru: '13.06.2026' }
+        ],
+        malzemeler: [
+            { id: 'aml1', baslik: 'Terazi kalibrasyon seti', satici: 'Teknik Tedarik', durum: 'İncelemede' },
+            { id: 'aml2', baslik: 'Sarf kimyasal paketi', satici: 'Altın Kimya', durum: 'İncelemede' }
+        ],
+        kullanicilar: [
+            { id: 'u1', ad: 'Mehmet Y.', email: 'mehmet@ornek-atolye.com', rol: 'Firma', durum: 'Aktif' },
+            { id: 'u2', ad: 'Ayşe K.', email: 'ayse@ornek-ticaret.com', rol: 'Firma', durum: 'Beklemede' }
+        ],
+        raporlar: {
+            toplamFirma: 128,
+            bekleyenBasvuru: 7,
+            aylikIsTalebi: 34,
+            aktifMalzeme: 56
+        }
+    }
 };
 
