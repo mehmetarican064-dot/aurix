@@ -6017,6 +6017,618 @@ a { color: inherit; text-decoration: none; }
     }
 }
 
+/* —— Firma B2B dashboard —— */
+.fp-kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.fp-kpi {
+    background: var(--aurix-panel-solid);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 10px;
+    padding: 12px 14px;
+    min-width: 0;
+}
+
+.fp-kpi__etiket {
+    font-size: 11px;
+    color: var(--aurix-muted);
+    margin-bottom: 4px;
+    line-height: 1.3;
+}
+
+.fp-kpi__deger {
+    font-size: clamp(1rem, 3.5vw, 1.25rem);
+    font-weight: 700;
+    color: var(--aurix-gold-light);
+    word-break: break-word;
+}
+
+.fp-kpi__alt {
+    font-size: 10px;
+    color: var(--aurix-muted);
+    margin-top: 4px;
+}
+
+.fp-dash-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+}
+
+.fp-bolum {
+    background: var(--aurix-panel-solid);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 10px;
+    padding: 12px 14px;
+    min-width: 0;
+}
+
+.fp-bolum__baslik {
+    font-size: 13px;
+    font-weight: 600;
+    margin: 0 0 10px;
+    color: var(--aurix-text);
+}
+
+.fp-aktivite-list,
+.fp-mini-list,
+.fp-is-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.fp-aktivite {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    font-size: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.fp-aktivite:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.fp-aktivite__metin {
+    color: var(--aurix-text);
+    min-width: 0;
+}
+
+.fp-aktivite__zaman {
+    color: var(--aurix-muted);
+    font-size: 11px;
+    flex-shrink: 0;
+}
+
+.fp-mini-kart {
+    padding: 10px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.fp-mini-kart__ust {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 6px;
+}
+
+.fp-mini-kart__baslik {
+    font-size: 12px;
+    font-weight: 600;
+    min-width: 0;
+}
+
+.fp-mini-kart__alt {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 12px;
+    font-size: 11px;
+    color: var(--aurix-muted);
+}
+
+.fp-mini-kart__tutar {
+    color: var(--aurix-gold-light);
+    font-weight: 600;
+}
+
+.fp-perf-ozet {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.fp-perf-ozet__hucre {
+    text-align: center;
+    padding: 8px 4px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.fp-perf-ozet__hucre span {
+    display: block;
+    font-size: 10px;
+    color: var(--aurix-muted);
+    margin-bottom: 4px;
+}
+
+.fp-perf-ozet__hucre strong {
+    font-size: 13px;
+    color: var(--aurix-text);
+}
+
+.fp-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 10px;
+    font-weight: 600;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.fp-badge--yesil {
+    background: rgba(52, 199, 89, 0.15);
+    color: #34c759;
+}
+
+.fp-badge--turuncu {
+    background: rgba(255, 159, 10, 0.15);
+    color: #ff9f0a;
+}
+
+.fp-badge--notr {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--aurix-muted);
+}
+
+.fp-badge--kirmizi {
+    background: rgba(255, 69, 58, 0.12);
+    color: #ff6b6b;
+}
+
+.fp-table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin: 0 -2px;
+}
+
+.fp-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    min-width: 480px;
+}
+
+.fp-table th,
+.fp-table td {
+    padding: 8px 10px;
+    text-align: left;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.fp-table th {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--aurix-muted);
+    font-weight: 600;
+}
+
+.fp-table td {
+    color: var(--aurix-text);
+}
+
+.fp-bos-hucre,
+.fp-bos-metin {
+    color: var(--aurix-muted);
+    font-size: 12px;
+    text-align: center;
+    padding: 16px;
+}
+
+.fp-is-satir {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.fp-is-satir__sol strong {
+    display: block;
+    font-size: 13px;
+    margin-bottom: 2px;
+}
+
+.fp-is-satir__musteri {
+    font-size: 11px;
+    color: var(--aurix-muted);
+}
+
+.fp-is-satir__sag {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+}
+
+.fp-is-satir__tutar {
+    margin-left: auto;
+    color: var(--aurix-gold-light);
+    font-weight: 600;
+}
+
+.fp-teklif-kart {
+    background: var(--aurix-panel-solid);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 12px;
+    padding: 14px;
+    margin-bottom: 12px;
+}
+
+.fp-teklif-kart__ust {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.fp-teklif-kart__baslik {
+    font-size: 14px;
+    font-weight: 600;
+    margin: 0;
+    min-width: 0;
+}
+
+.fp-teklif-kart__meta {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+    margin: 0 0 14px;
+}
+
+.fp-teklif-kart__meta div {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    font-size: 12px;
+}
+
+.fp-teklif-kart__meta dt {
+    color: var(--aurix-muted);
+    margin: 0;
+}
+
+.fp-teklif-kart__meta dd {
+    margin: 0;
+    color: var(--aurix-text);
+    text-align: right;
+}
+
+.fp-teklif-kart__aksiyon {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.fp-profil-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+}
+
+.fp-profil-kart {
+    background: var(--aurix-panel-solid);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 12px;
+    padding: 16px;
+}
+
+.fp-profil-kart__ust {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 14px;
+}
+
+.fp-profil-kart__firma {
+    font-size: 1.125rem;
+    font-weight: 700;
+    margin: 0;
+    min-width: 0;
+}
+
+.fp-profil-kart__alt-baslik {
+    font-size: 13px;
+    margin: 0 0 8px;
+}
+
+.fp-profil-dl {
+    margin: 0 0 16px;
+}
+
+.fp-profil-dl div {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    font-size: 13px;
+}
+
+.fp-profil-dl dt {
+    color: var(--aurix-muted);
+    margin: 0;
+}
+
+.fp-profil-dl dd {
+    margin: 0;
+    text-align: right;
+    word-break: break-word;
+}
+
+.fp-profil-tamamlama__ust {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    margin-bottom: 8px;
+}
+
+.fp-profil-tamamlama__bar {
+    height: 8px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.08);
+    overflow: hidden;
+}
+
+.fp-profil-tamamlama__dolgu {
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, var(--aurix-gold), var(--aurix-gold-light));
+}
+
+.fp-profil-hesap {
+    font-size: 13px;
+    color: var(--aurix-text);
+    margin: 0 0 8px;
+    word-break: break-all;
+}
+
+.fp-chart {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 6px;
+    min-height: 160px;
+    padding: 8px 4px 0;
+}
+
+.fp-chart__hucre {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+}
+
+.fp-chart__deger {
+    font-size: 9px;
+    color: var(--aurix-muted);
+}
+
+.fp-chart__bar-wrap {
+    width: 100%;
+    max-width: 36px;
+    height: 100px;
+    display: flex;
+    align-items: flex-end;
+}
+
+.fp-chart__bar {
+    width: 100%;
+    height: var(--bar-h, 50%);
+    min-height: 4px;
+    border-radius: 4px 4px 0 0;
+    background: linear-gradient(180deg, var(--aurix-gold-light), rgba(201, 169, 98, 0.45));
+}
+
+.fp-chart__etiket {
+    font-size: 10px;
+    color: var(--aurix-muted);
+}
+
+.fp-ayarlar {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.fp-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 14px;
+    background: var(--aurix-panel-solid);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 10px;
+    cursor: pointer;
+    min-width: 0;
+}
+
+.fp-toggle__metin {
+    min-width: 0;
+}
+
+.fp-toggle__label {
+    display: block;
+    font-size: 13px;
+    color: var(--aurix-text);
+    margin-bottom: 2px;
+}
+
+.fp-toggle__aciklama {
+    display: block;
+    font-size: 11px;
+    color: var(--aurix-muted);
+}
+
+.fp-toggle__input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.fp-toggle__track {
+    position: relative;
+    flex-shrink: 0;
+    width: 44px;
+    height: 26px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.12);
+    transition: background 0.2s;
+}
+
+.fp-toggle__track::after {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #fff;
+    transition: transform 0.2s;
+}
+
+.fp-toggle__input:checked + .fp-toggle__track {
+    background: rgba(201, 169, 98, 0.55);
+}
+
+.fp-toggle__input:checked + .fp-toggle__track::after {
+    transform: translateX(18px);
+}
+
+@media (min-width: 640px) {
+    .fp-kpi-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .fp-dash-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .fp-teklif-kart__meta {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .fp-teklif-kart__meta div {
+        flex-direction: column;
+        gap: 2px;
+    }
+
+    .fp-teklif-kart__meta dd {
+        text-align: left;
+    }
+
+    .fp-is-satir {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+    }
+}
+
+@media (min-width: 900px) {
+    .fp-kpi-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .fp-profil-grid {
+        grid-template-columns: 2fr 1fr;
+    }
+}
+
+@media (max-width: 767px) {
+    .fp-kpi {
+        padding: 10px 12px;
+    }
+
+    .fp-kpi__deger {
+        font-size: 1rem;
+    }
+
+    .fp-perf-ozet {
+        grid-template-columns: 1fr;
+    }
+
+    .fp-table {
+        min-width: 0;
+    }
+
+    .fp-table thead {
+        display: none;
+    }
+
+    .fp-table tr {
+        display: block;
+        margin-bottom: 10px;
+        padding: 10px;
+        background: rgba(255, 255, 255, 0.03);
+        border-radius: 8px;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .fp-table td {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 4px 0;
+        border: none;
+    }
+
+    .fp-table td::before {
+        content: attr(data-label);
+        color: var(--aurix-muted);
+        font-size: 10px;
+        flex-shrink: 0;
+    }
+
+    .fp-teklif-kart__aksiyon .btn {
+        flex: 1;
+        min-width: 0;
+    }
+}
+
+@media (max-width: 360px) {
+    .fp-kpi-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .fp-chart__bar-wrap {
+        max-width: 28px;
+    }
+}
+
 @media (min-width: 768px) {
     .malzeme-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));

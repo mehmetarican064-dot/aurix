@@ -392,21 +392,23 @@
                 </div>
 
                 <nav class="panel-tabs" id="panelTabs" role="tablist" aria-label="Panel sekmeleri">
-                    <button type="button" class="panel-tab panel-tab--aktif" data-panel-tab="profil" role="tab" aria-selected="true">Firma Profilim</button>
-                    <button type="button" class="panel-tab" data-panel-tab="is-talepleri" role="tab" aria-selected="false">İş Taleplerim</button>
-                    <button type="button" class="panel-tab" data-panel-tab="teklifler" role="tab" aria-selected="false">Gelen Teklifler</button>
-                    <button type="button" class="panel-tab" data-panel-tab="malzeme" role="tab" aria-selected="false">Malzeme İlanlarım</button>
-                    <button type="button" class="panel-tab" data-panel-tab="hesap" role="tab" aria-selected="false">Hesap Ayarları</button>
+                    <button type="button" class="panel-tab panel-tab--aktif" data-panel-tab="dashboard" role="tab" aria-selected="true">Dashboard</button>
+                    <button type="button" class="panel-tab" data-panel-tab="isler" role="tab" aria-selected="false">İşlerim</button>
+                    <button type="button" class="panel-tab" data-panel-tab="gelirler" role="tab" aria-selected="false">Gelirlerim</button>
+                    <button type="button" class="panel-tab" data-panel-tab="teklifler" role="tab" aria-selected="false">Teklifler</button>
+                    <button type="button" class="panel-tab" data-panel-tab="profil" role="tab" aria-selected="false">Firma Profili</button>
+                    <button type="button" class="panel-tab" data-panel-tab="performans" role="tab" aria-selected="false">Performans</button>
+                    <button type="button" class="panel-tab" data-panel-tab="ayarlar" role="tab" aria-selected="false">Ayarlar</button>
                 </nav>
 
-                <div class="panel-icerik">
-                    <div class="panel-sekme panel-sekme--aktif" data-panel-icerik="profil" id="panelSekmeProfil" role="tabpanel"></div>
-                    <div class="panel-sekme" data-panel-icerik="is-talepleri" id="panelSekmeIs" role="tabpanel" hidden></div>
-                    <div class="panel-sekme" data-panel-icerik="teklifler" id="panelSekmeTeklif" role="tabpanel" hidden></div>
-                    <div class="panel-sekme" data-panel-icerik="malzeme" id="panelSekmeMalzeme" role="tabpanel" hidden></div>
-                    <div class="panel-sekme" data-panel-icerik="hesap" id="panelSekmeHesap" role="tabpanel" hidden>
-                        <span id="panelHesapEmail" hidden aria-hidden="true"></span>
-                    </div>
+                <div class="panel-icerik" id="panelIcerik">
+                    <div class="panel-sekme panel-sekme--aktif" data-panel-icerik="dashboard" id="panelSekmeDashboard" role="tabpanel"></div>
+                    <div class="panel-sekme" data-panel-icerik="isler" id="panelSekmeIsler" role="tabpanel" hidden></div>
+                    <div class="panel-sekme" data-panel-icerik="gelirler" id="panelSekmeGelirler" role="tabpanel" hidden></div>
+                    <div class="panel-sekme" data-panel-icerik="teklifler" id="panelSekmeTeklifler" role="tabpanel" hidden></div>
+                    <div class="panel-sekme" data-panel-icerik="profil" id="panelSekmeProfil" role="tabpanel" hidden></div>
+                    <div class="panel-sekme" data-panel-icerik="performans" id="panelSekmePerformans" role="tabpanel" hidden></div>
+                    <div class="panel-sekme" data-panel-icerik="ayarlar" id="panelSekmeAyarlar" role="tabpanel" hidden></div>
                 </div>
             </div>
         </section>

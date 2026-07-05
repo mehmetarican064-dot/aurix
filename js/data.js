@@ -412,31 +412,93 @@ window.AURIX_DATA = {
         }
     ],
 
-    /* Kullanıcı paneli demo verisi (Beta iskelet) */
+    /* Firma paneli demo verisi (B2B dashboard — Beta) */
     PANEL_DEMO: {
+        dashboard: {
+            ozet: {
+                buAyKazanc: '₺42.800',
+                odenecekBakiye: '₺12.450',
+                sonrakiOdeme: '15.07.2026',
+                profilPuani: '4.7'
+            },
+            aktiviteler: [
+                { metin: 'Fantezi kolye döküm teklifi alındı', zaman: '2 saat önce' },
+                { metin: '22 ayar bilezik işi teslim edildi', zaman: 'Dün 16:40' },
+                { metin: 'Profiliniz 12 kez görüntülendi', zaman: 'Dün' },
+                { metin: 'Mayıs hakediş ödemesi tamamlandı', zaman: '01.06.2026' }
+            ],
+            devamEdenIsler: [
+                { baslik: 'Tektaş montür mıhlama', musteri: 'Elmas Kuyumculuk', termin: '18.07.2026', durum: 'Devam ediyor' },
+                { baslik: 'Alyans prototip döküm', musteri: 'Altın Sarayı', termin: '22.07.2026', durum: 'Üretimde' }
+            ],
+            yeniTeklifler: [
+                { isAdi: 'Fantezi kolye döküm', musteri: 'Kuzey CAD Atölyesi', tutar: '₺18.500', durum: 'Bekliyor' },
+                { isAdi: 'Gram altın plaka işleme', musteri: 'Zirve Lazer', tutar: '₺6.800', durum: 'İnceleniyor' }
+            ],
+            performansOzet: {
+                ortTeslim: '4.2 gün',
+                ortPuan: '4.7 / 5',
+                teklifDonus: '%38'
+            }
+        },
+        gelirler: {
+            toplamKazanc: '₺186.400',
+            komisyon: '₺9.320',
+            cekilebilir: '₺12.450',
+            bekleyen: '₺8.200',
+            sonrakiOdemeTarihi: '15.07.2026',
+            ibanMaskeli: 'TR••••••••••1234',
+            gecmis: [
+                { tarih: '01.06.2026', tutar: '₺14.200', durum: 'Ödendi', aciklama: 'Mayıs hakediş ödemesi' },
+                { tarih: '15.05.2026', tutar: '₺11.850', durum: 'Ödendi', aciklama: 'Nisan hakediş ödemesi' },
+                { tarih: '28.04.2026', tutar: '₺9.600', durum: 'Hazırlanıyor', aciklama: 'Mart kapanış düzeltmesi' },
+                { tarih: '10.04.2026', tutar: '₺7.400', durum: 'Beklemede', aciklama: 'Ek iş onay bekliyor' }
+            ]
+        },
+        isler: {
+            sayac: { bekleyen: 2, devam: 3, teslim: 48, iptal: 1 },
+            liste: [
+                { baslik: '22 ayar bilezik seri üretimi', musteri: 'Altın Yolu', durum: 'Bekliyor', termin: '25.07.2026', tutar: '₺32.000' },
+                { baslik: 'Tektaş montür mıhlama', musteri: 'Elmas Kuyumculuk', durum: 'Devam ediyor', termin: '18.07.2026', tutar: '₺8.500' },
+                { baslik: 'Alyans prototip döküm', musteri: 'Altın Sarayı', durum: 'Üretimde', termin: '22.07.2026', tutar: '₺12.400' },
+                { baslik: 'Fantezi yüzük döküm', musteri: 'Nova Kuyumcu', durum: 'Teslim edildi', termin: '05.06.2026', tutar: '₺5.600' }
+            ]
+        },
+        teklifler: [
+            { id: 'ptk1', isAdi: 'Fantezi kolye döküm', musteri: 'Kuzey CAD Atölyesi', tutar: '₺18.500', termin: '14 gün', durum: 'Bekliyor' },
+            { id: 'ptk2', isAdi: 'Gram altın plaka işleme', musteri: 'Zirve Lazer Kesim', tutar: '₺6.800', termin: '7 gün', durum: 'İnceleniyor' },
+            { id: 'ptk3', isAdi: 'Platin mini döküm seti', musteri: 'Denizli Atölye', tutar: '₺24.000', termin: '21 gün', durum: 'Bekliyor' }
+        ],
         profil: {
             firmaAd: 'Arıcan Vakumlu Döküm Merkezi',
             kategori: 'Dökümcü',
             sehir: 'İSTANBUL',
-            durum: 'Onay bekliyor',
+            durum: 'Onaylı',
             tel: '905321112233',
-            aciklama: 'Sıfır gözenekli altın, gümüş ve platin döküm hatları. Günlük yüksek hacimli iş teslimi.'
+            aciklama: 'Sıfır gözenekli altın, gümüş ve platin döküm hatları. Günlük yüksek hacimli iş teslimi.',
+            tamamlamaOrani: 82
         },
-        isTalepleri: [
-            { id: 'pit1', baslik: '22 ayar bilezik seri üretimi', durum: 'Açık', teklifSayisi: 4, tarih: '28.06.2026' },
-            { id: 'pit2', baslik: 'Tektaş montür mıhlama', durum: 'Teklif toplanıyor', teklifSayisi: 2, tarih: '25.06.2026' }
-        ],
-        teklifler: [
-            { id: 'ptk1', isBaslik: 'Fantezi kolye döküm', firma: 'Kuzey CAD Atölyesi', tutar: '₺18.500', durum: 'Bekliyor' },
-            { id: 'ptk2', isBaslik: 'Lazer kesim plaka', firma: 'Zirve Lazer Kesim', tutar: '₺4.200', durum: 'Kabul edildi' }
-        ],
-        malzemeIlanlari: [
-            { id: 'pml1', baslik: 'Japon freze uç seti', fiyat: '₺6.750', durum: 'Yayında', goruntulenme: 124 },
-            { id: 'pml2', baslik: 'Mikro motor + el parçası', fiyat: '₺9.900', durum: 'Taslak', goruntulenme: 0 }
-        ],
-        hesap: {
-            bildirimler: 'E-posta ve uygulama bildirimleri',
-            guvenlik: 'İki adımlı doğrulama v1.0\'da'
+        performans: {
+            tamamlananIs: 48,
+            ortTeslim: '4.2 gün',
+            ortPuan: '4.7',
+            goruntulenme30: 312,
+            profilZiyaret: 89,
+            teklifDonus: '%38',
+            grafik: [
+                { ay: 'Oca', tutar: 22000 },
+                { ay: 'Şub', tutar: 28500 },
+                { ay: 'Mar', tutar: 31800 },
+                { ay: 'Nis', tutar: 35200 },
+                { ay: 'May', tutar: 40100 },
+                { ay: 'Haz', tutar: 42800 }
+            ]
+        },
+        ayarlar: {
+            firmaBildirim: true,
+            whatsappBildirim: true,
+            odemeBildirim: false,
+            profilGorunurluk: true
         }
     },
 

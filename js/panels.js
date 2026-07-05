@@ -1,5 +1,5 @@
 /**
- * AURIX Panel UI — kullanıcı ve admin iskelet (Beta v0.1)
+ * AURIX Panel UI — firma B2B dashboard & admin iskelet (Beta)
  * v1.0'da Supabase veri katmanı ile genişletilecek.
  */
 (function (global) {
@@ -9,8 +9,9 @@
 
     function $(id) { return document.getElementById(id); }
 
-    var userTab = 'profil';
+    var userTab = 'dashboard';
     var adminTab = 'firmalar';
+    var panelDemoBound = false;
 
     function panelTabSec(tab) {
         if (!tab) return;
@@ -40,6 +41,301 @@
             el.classList.toggle('panel-sekme--aktif', aktif);
             el.hidden = !aktif;
         });
+    }
+
+    function demoToast(mesaj) {
+        if (global.Aurix && Aurix.toast) {
+            Aurix.toast(mesaj, 'info');
+        }
+    }
+
+    function fpDurumSlug(durum) {
+        var d = String(durum || '').toLowerCase();
+        if (/ödendi|teslim|onay/.test(d)) return 'yesil';
+        if (/devam|üretim|hazırlan|incelen/.test(d)) return 'turuncu';
+        if (/iptal|red/.test(d)) return 'kirmizi';
+        return 'notr';
+    }
+
+    function fpDurumBadge(durum) {
+        var slug = fpDurumSlug(durum);
+        return '<span class="fp-badge fp-badge--' + slug + '">' + esc(durum) + '</span>';
+    }
+
+    function fpKpiGridHtml(kartlar) {
+        var html = kartlar.map(function (k) {
+            return '<article class="fp-kpi">' +
+                '<div class="fp-kpi__etiket">' + esc(k.etiket) + '</div>' +
+                '<div class="fp-kpi__deger">' + esc(k.deger) + '</div>' +
+                (k.alt ? '<div class="fp-kpi__alt">' + esc(k.alt) + '</div>' : '') +
+                '</article>';
+        }).join('');
+        return '<div class="fp-kpi-grid">' + html + '</div>';
+    }
+
+    function fpBolumHtml(baslik, icerik) {
+        return '<section class="fp-bolum">' +
+            '<h3 class="fp-bolum__baslik">' + esc(baslik) + '</h3>' +
+            icerik +
+            '</section>';
+    }
+
+    function fpAktiviteListHtml(ogeler) {
+        if (!ogeler.length) {
+            return '<p class="fp-bos-metin">Henüz aktivite yok.</p>';
+        }
+        var html = ogeler.map(function (a) {
+            return '<li class="fp-aktivite">' +
+                '<span class="fp-aktivite__metin">' + esc(a.metin) + '</span>' +
+                '<time class="fp-aktivite__zaman">' + esc(a.zaman) + '</time>' +
+                '</li>';
+        }).join('');
+        return '<ul class="fp-aktivite-list">' + html + '</ul>';
+    }
+
+    function fpMiniIsListHtml(ogeler) {
+        if (!ogeler.length) {
+            return '<p class="fp-bos-metin">Kayıt bulunamadı.</p>';
+        }
+        var html = ogeler.map(function (o) {
+            return '<li class="fp-mini-kart">' +
+                '<div class="fp-mini-kart__ust">' +
+                '<strong class="fp-mini-kart__baslik">' + esc(o.baslik || o.isAdi) + '</strong>' +
+                fpDurumBadge(o.durum) +
+                '</div>' +
+                '<div class="fp-mini-kart__alt">' +
+                '<span>' + esc(o.musteri) + '</span>' +
+                (o.termin ? '<span>Termin: ' + esc(o.termin) + '</span>' : '') +
+                (o.tutar ? '<span class="fp-mini-kart__tutar">' + esc(o.tutar) + '</span>' : '') +
+                '</div></li>';
+        }).join('');
+        return '<ul class="fp-mini-list">' + html + '</ul>';
+    }
+
+    function renderDashboard(demo) {
+        var d = demo.dashboard || {};
+        var ozet = d.ozet || {};
+        var perf = d.performansOzet || {};
+
+        var kpi = fpKpiGridHtml([
+            { etiket: 'Bu Ay Kazanç', deger: ozet.buAyKazanc || '—' },
+            { etiket: 'Ödenecek Bakiye', deger: ozet.odenecekBakiye || '—' },
+            { etiket: 'Sonraki Ödeme', deger: ozet.sonrakiOdeme || '—' },
+            { etiket: 'Profil Puanı', deger: ozet.profilPuani || '—', alt: '5 üzerinden' }
+        ]);
+
+        var perfOzet = '<div class="fp-perf-ozet">' +
+            '<div class="fp-perf-ozet__hucre"><span>Ort. teslim</span><strong>' + esc(perf.ortTeslim || '—') + '</strong></div>' +
+            '<div class="fp-perf-ozet__hucre"><span>Ort. puan</span><strong>' + esc(perf.ortPuan || '—') + '</strong></div>' +
+            '<div class="fp-perf-ozet__hucre"><span>Teklif dönüş</span><strong>' + esc(perf.teklifDonus || '—') + '</strong></div>' +
+            '</div>';
+
+        return kpi +
+            '<div class="fp-dash-grid">' +
+            fpBolumHtml('Son aktiviteler', fpAktiviteListHtml(d.aktiviteler || [])) +
+            fpBolumHtml('Devam eden işler', fpMiniIsListHtml(d.devamEdenIsler || [])) +
+            fpBolumHtml('Yeni gelen teklifler', fpMiniIsListHtml((d.yeniTeklifler || []).map(function (t) {
+                return { baslik: t.isAdi, musteri: t.musteri, tutar: t.tutar, durum: t.durum };
+            }))) +
+            fpBolumHtml('Performans özeti', perfOzet) +
+            '</div>';
+    }
+
+    function renderGelirler(demo) {
+        var g = demo.gelirler || {};
+        var kpi = fpKpiGridHtml([
+            { etiket: 'Toplam Kazanç', deger: g.toplamKazanc || '—' },
+            { etiket: 'Kesilen Komisyon', deger: g.komisyon || '—' },
+            { etiket: 'Çekilebilir Bakiye', deger: g.cekilebilir || '—' },
+            { etiket: 'Bekleyen Ödeme', deger: g.bekleyen || '—' },
+            { etiket: 'Sonraki Ödeme Tarihi', deger: g.sonrakiOdemeTarihi || '—' },
+            { etiket: 'IBAN', deger: g.ibanMaskeli || '—', alt: 'Demo — kayıt yapılmaz' }
+        ]);
+
+        var rows = (g.gecmis || []).map(function (r) {
+            return '<tr>' +
+                '<td data-label="Tarih">' + esc(r.tarih) + '</td>' +
+                '<td data-label="Tutar">' + esc(r.tutar) + '</td>' +
+                '<td data-label="Durum">' + fpDurumBadge(r.durum) + '</td>' +
+                '<td data-label="Açıklama">' + esc(r.aciklama) + '</td>' +
+                '</tr>';
+        }).join('');
+
+        var tablo = '<div class="fp-table-wrap">' +
+            '<table class="fp-table">' +
+            '<thead><tr><th>Tarih</th><th>Tutar</th><th>Durum</th><th>Açıklama</th></tr></thead>' +
+            '<tbody>' + (rows || '<tr><td colspan="4" class="fp-bos-hucre">Ödeme geçmişi yok.</td></tr>') + '</tbody>' +
+            '</table></div>';
+
+        return kpi + fpBolumHtml('Ödeme geçmişi', tablo) +
+            '<p class="panel-not">Ödeme ve IBAN işlemleri demo moddadır; gerçek para transferi yapılmaz.</p>';
+    }
+
+    function renderIsler(demo) {
+        var is = demo.isler || {};
+        var s = is.sayac || {};
+        var kpi = fpKpiGridHtml([
+            { etiket: 'Bekleyen İşler', deger: String(s.bekleyen != null ? s.bekleyen : 0) },
+            { etiket: 'Devam Eden İşler', deger: String(s.devam != null ? s.devam : 0) },
+            { etiket: 'Teslim Edilen İşler', deger: String(s.teslim != null ? s.teslim : 0) },
+            { etiket: 'İptal Edilenler', deger: String(s.iptal != null ? s.iptal : 0) }
+        ]);
+
+        var liste = (is.liste || []).map(function (o) {
+            return '<li class="fp-is-satir">' +
+                '<div class="fp-is-satir__sol">' +
+                '<strong>' + esc(o.baslik) + '</strong>' +
+                '<span class="fp-is-satir__musteri">' + esc(o.musteri) + '</span>' +
+                '</div>' +
+                '<div class="fp-is-satir__sag">' +
+                fpDurumBadge(o.durum) +
+                '<span class="fp-is-satir__termin">Termin: ' + esc(o.termin) + '</span>' +
+                '<span class="fp-is-satir__tutar">' + esc(o.tutar) + '</span>' +
+                '</div></li>';
+        }).join('');
+
+        return kpi + fpBolumHtml('İş listesi',
+            '<ul class="fp-is-list">' + (liste || '<li class="fp-bos-metin">İş bulunamadı.</li>') + '</ul>');
+    }
+
+    function renderTeklifler(demo) {
+        var teklifler = demo.teklifler || [];
+        if (!teklifler.length) {
+            return '<p class="fp-bos-metin">Henüz teklif yok.</p>';
+        }
+        return teklifler.map(function (t) {
+            return '<article class="fp-teklif-kart" data-teklif-id="' + esc(t.id || '') + '">' +
+                '<div class="fp-teklif-kart__ust">' +
+                '<h4 class="fp-teklif-kart__baslik">' + esc(t.isAdi) + '</h4>' +
+                fpDurumBadge(t.durum) +
+                '</div>' +
+                '<dl class="fp-teklif-kart__meta">' +
+                '<div><dt>Müşteri / Firma</dt><dd>' + esc(t.musteri) + '</dd></div>' +
+                '<div><dt>Teklif tutarı</dt><dd>' + esc(t.tutar) + '</dd></div>' +
+                '<div><dt>Teslim süresi</dt><dd>' + esc(t.termin) + '</dd></div>' +
+                '</dl>' +
+                '<div class="fp-teklif-kart__aksiyon">' +
+                '<button type="button" class="btn btn--ghost btn--sm" data-teklif-demo="detay">Detay</button>' +
+                '<button type="button" class="btn btn--ghost btn--sm" data-teklif-demo="mesaj">Mesaj</button>' +
+                '<button type="button" class="btn btn--gold btn--sm" data-teklif-demo="kabul">Kabul Et</button>' +
+                '</div></article>';
+        }).join('');
+    }
+
+    function renderProfil(demo, user) {
+        var p = demo.profil || {};
+        var oran = p.tamamlamaOrani != null ? p.tamamlamaOrani : 0;
+
+        return '<div class="fp-profil-grid">' +
+            '<article class="fp-profil-kart fp-profil-kart--ana">' +
+            '<div class="fp-profil-kart__ust">' +
+            '<h3 class="fp-profil-kart__firma">' + esc(p.firmaAd) + '</h3>' +
+            fpDurumBadge(p.durum) +
+            '</div>' +
+            '<dl class="fp-profil-dl">' +
+            '<div><dt>Branş</dt><dd>' + esc(p.kategori) + '</dd></div>' +
+            '<div><dt>Şehir</dt><dd>' + esc(p.sehir) + '</dd></div>' +
+            '<div><dt>WhatsApp</dt><dd>' + esc(p.tel ? '+' + p.tel : '—') + '</dd></div>' +
+            '<div><dt>Hizmet alanı</dt><dd>' + esc(p.aciklama) + '</dd></div>' +
+            '</dl>' +
+            '<div class="fp-profil-tamamlama">' +
+            '<div class="fp-profil-tamamlama__ust">' +
+            '<span>Profil tamamlama oranı</span>' +
+            '<strong>' + esc(String(oran)) + '%</strong>' +
+            '</div>' +
+            '<div class="fp-profil-tamamlama__bar" role="progressbar" aria-valuenow="' + esc(String(oran)) + '" aria-valuemin="0" aria-valuemax="100">' +
+            '<div class="fp-profil-tamamlama__dolgu" style="width:' + esc(String(oran)) + '%"></div>' +
+            '</div></div>' +
+            '</article>' +
+            '<article class="fp-profil-kart">' +
+            '<h4 class="fp-profil-kart__alt-baslik">Hesap</h4>' +
+            '<p class="fp-profil-hesap">' + esc(user ? user.email : 'Demo oturum — giriş yapılmadı') + '</p>' +
+            '<p class="panel-not">Profil düzenleme v1.0\'da aktif olacaktır.</p>' +
+            '</article></div>';
+    }
+
+    function renderPerformans(demo) {
+        var p = demo.performans || {};
+        var kpi = fpKpiGridHtml([
+            { etiket: 'Tamamlanan İş', deger: String(p.tamamlananIs != null ? p.tamamlananIs : 0) },
+            { etiket: 'Ortalama Teslim Süresi', deger: p.ortTeslim || '—' },
+            { etiket: 'Ortalama Puan', deger: p.ortPuan || '—' },
+            { etiket: 'Son 30 Gün Görüntülenme', deger: String(p.goruntulenme30 != null ? p.goruntulenme30 : 0) },
+            { etiket: 'Profil Ziyareti', deger: String(p.profilZiyaret != null ? p.profilZiyaret : 0) },
+            { etiket: 'Teklif Dönüş Oranı', deger: p.teklifDonus || '—' }
+        ]);
+
+        var grafik = p.grafik || [];
+        var maxVal = 1;
+        grafik.forEach(function (g) {
+            if (g.tutar > maxVal) maxVal = g.tutar;
+        });
+        var bars = grafik.map(function (g) {
+            var yuzde = Math.round((g.tutar / maxVal) * 100);
+            return '<div class="fp-chart__hucre">' +
+                '<div class="fp-chart__deger">' + esc('₺' + Math.round(g.tutar / 1000) + 'K') + '</div>' +
+                '<div class="fp-chart__bar-wrap" style="--bar-h:' + esc(String(yuzde)) + '%">' +
+                '<div class="fp-chart__bar"></div></div>' +
+                '<span class="fp-chart__etiket">' + esc(g.ay) + '</span></div>';
+        }).join('');
+
+        return kpi + fpBolumHtml('Son 6 ay kazanç (demo)',
+            '<div class="fp-chart" role="img" aria-label="Son 6 ay demo kazanç grafiği">' + bars + '</div>');
+    }
+
+    function renderAyarlar(demo) {
+        var a = demo.ayarlar || {};
+        var satirlar = [
+            { key: 'firmaBildirim', label: 'Firma bildirimleri', aciklama: 'Yeni iş ve teklif bildirimleri', varsayilan: a.firmaBildirim },
+            { key: 'whatsappBildirim', label: 'WhatsApp bildirimleri', aciklama: 'Kritik iş güncellemeleri', varsayilan: a.whatsappBildirim },
+            { key: 'odemeBildirim', label: 'Ödeme bildirimi', aciklama: 'Hakediş ve ödeme durumu', varsayilan: a.odemeBildirim },
+            { key: 'profilGorunurluk', label: 'Profil görünürlüğü', aciklama: 'Firma profiliniz arama sonuçlarında', varsayilan: a.profilGorunurluk }
+        ];
+
+        var html = satirlar.map(function (s) {
+            var checked = s.varsayilan ? ' checked' : '';
+            return '<label class="fp-toggle">' +
+                '<span class="fp-toggle__metin">' +
+                '<strong class="fp-toggle__label">' + esc(s.label) + '</strong>' +
+                '<span class="fp-toggle__aciklama">' + esc(s.aciklama) + '</span>' +
+                '</span>' +
+                '<input type="checkbox" class="fp-toggle__input" data-demo-ayar="' + esc(s.key) + '"' + checked + '>' +
+                '<span class="fp-toggle__track" aria-hidden="true"></span>' +
+                '</label>';
+        }).join('');
+
+        return '<div class="fp-ayarlar">' + html + '</div>' +
+            '<p class="panel-not">Ayarlar yalnızca demo arayüzüdür; tercihler kaydedilmez.</p>';
+    }
+
+    function bindPanelDemoActions() {
+        if (panelDemoBound) return;
+        panelDemoBound = true;
+
+        var icerik = $('panelIcerik');
+        if (icerik) {
+            icerik.addEventListener('click', function (e) {
+                var btn = e.target.closest('[data-teklif-demo]');
+                if (!btn) return;
+                var aksiyon = btn.getAttribute('data-teklif-demo');
+                var kart = btn.closest('[data-teklif-id]');
+                var id = kart ? kart.getAttribute('data-teklif-id') : '';
+                var mesajlar = {
+                    detay: 'Teklif detayı demo modda gösterilecek (#' + id + ').',
+                    mesaj: 'Mesajlaşma v1.0\'da açılacak (#' + id + ').',
+                    kabul: 'Teklif kabulü demo — gerçek işlem yapılmadı (#' + id + ').'
+                };
+                demoToast(mesajlar[aksiyon] || 'Demo işlem.');
+            });
+
+            icerik.addEventListener('change', function (e) {
+                var input = e.target.closest('[data-demo-ayar]');
+                if (!input) return;
+                var key = input.getAttribute('data-demo-ayar');
+                var durum = input.checked ? 'açık' : 'kapalı';
+                demoToast('Demo ayar: ' + key + ' ' + durum + ' (kaydedilmedi).');
+            });
+        }
     }
 
     function panelKartHtml(baslik, satirlar) {
@@ -72,7 +368,6 @@
     function renderUserPanel() {
         var demo = AURIX_DATA.PANEL_DEMO || {};
         var user = global.AuthService ? AuthService.getCurrentUser() : null;
-        var profil = demo.profil || {};
 
         var greeting = $('panelUserGreeting');
         if (greeting) {
@@ -81,75 +376,28 @@
                 : 'Firma paneli — demo görünüm';
         }
 
-        var emailEl = $('panelHesapEmail');
-        if (emailEl) emailEl.textContent = user ? user.email : '—';
+        var dashEl = $('panelSekmeDashboard');
+        if (dashEl) dashEl.innerHTML = renderDashboard(demo);
+
+        var islerEl = $('panelSekmeIsler');
+        if (islerEl) islerEl.innerHTML = renderIsler(demo);
+
+        var gelirEl = $('panelSekmeGelirler');
+        if (gelirEl) gelirEl.innerHTML = renderGelirler(demo);
+
+        var teklifEl = $('panelSekmeTeklifler');
+        if (teklifEl) teklifEl.innerHTML = renderTeklifler(demo);
 
         var profilEl = $('panelSekmeProfil');
-        if (profilEl) {
-            profilEl.innerHTML = panelKartHtml('Firma Profilim', [
-                { etiket: 'Firma adı', deger: profil.firmaAd },
-                { etiket: 'Branş', deger: profil.kategori },
-                { etiket: 'Şehir', deger: profil.sehir },
-                { etiket: 'Durum', deger: profil.durum },
-                { etiket: 'WhatsApp', deger: profil.tel ? '+' + profil.tel : '—' },
-                { etiket: 'Hizmet alanı', deger: profil.aciklama }
-            ]);
-        }
+        if (profilEl) profilEl.innerHTML = renderProfil(demo, user);
 
-        var isEl = $('panelSekmeIs');
-        if (isEl) {
-            isEl.innerHTML = panelListeHtml('İş Taleplerim', (demo.isTalepleri || []).map(function (t) {
-                return {
-                    baslik: t.baslik,
-                    durum: t.durum,
-                    teklifSayisi: t.teklifSayisi != null ? String(t.teklifSayisi) : '0',
-                    tarih: t.tarih
-                };
-            }), [
-                { key: 'baslik', label: 'Başlık' },
-                { key: 'durum', label: 'Durum' },
-                { key: 'teklifSayisi', label: 'Teklif' },
-                { key: 'tarih', label: 'Tarih' }
-            ]);
-        }
+        var perfEl = $('panelSekmePerformans');
+        if (perfEl) perfEl.innerHTML = renderPerformans(demo);
 
-        var teklifEl = $('panelSekmeTeklif');
-        if (teklifEl) {
-            teklifEl.innerHTML = panelListeHtml('Gelen Teklifler', demo.teklifler || [], [
-                { key: 'isBaslik', label: 'İş' },
-                { key: 'firma', label: 'Firma' },
-                { key: 'tutar', label: 'Tutar' },
-                { key: 'durum', label: 'Durum' }
-            ]);
-        }
+        var ayarEl = $('panelSekmeAyarlar');
+        if (ayarEl) ayarEl.innerHTML = renderAyarlar(demo);
 
-        var malzemeEl = $('panelSekmeMalzeme');
-        if (malzemeEl) {
-            isEl = demo.malzemeIlanlari || [];
-            malzemeEl.innerHTML = panelListeHtml('Malzeme İlanlarım', isEl.map(function (m) {
-                return {
-                    baslik: m.baslik,
-                    fiyat: m.fiyat,
-                    durum: m.durum,
-                    goruntulenme: m.goruntulenme != null ? String(m.goruntulenme) : '0'
-                };
-            }), [
-                { key: 'baslik', label: 'Ürün' },
-                { key: 'fiyat', label: 'Fiyat' },
-                { key: 'durum', label: 'Durum' },
-                { key: 'goruntulenme', label: 'Görüntülenme' }
-            ]);
-        }
-
-        var hesapEl = $('panelSekmeHesap');
-        if (hesapEl) {
-            var hesap = demo.hesap || {};
-            hesapEl.innerHTML = panelKartHtml('Hesap Ayarları', [
-                { etiket: 'E-posta', deger: user ? user.email : 'Giriş yapılmadı (demo)' },
-                { etiket: 'Bildirimler', deger: hesap.bildirimler || '—' },
-                { etiket: 'Güvenlik', deger: hesap.guvenlik || '—' }
-            ]) + '<p class="panel-not">Bu alan yalnızca arayüz iskeletidir. Ayarlar v1.0\'da kaydedilecektir.</p>';
-        }
+        bindPanelDemoActions();
     }
 
     function renderAdminSkeleton() {

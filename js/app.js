@@ -1442,7 +1442,7 @@
         }
         if (id === 'panel') {
             PanelUI.renderUserPanel();
-            PanelUI.panelTabSec('profil');
+            PanelUI.panelTabSec('dashboard');
         }
         navMenuKapat();
         state.aktifSayfa = id;
