@@ -1146,57 +1146,6 @@ a { color: inherit; text-decoration: none; }
     border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-/* Görsel fallback — yerel assets, boş kutu önleme */
-.aurix-img-fallback--hidden {
-    display: none !important;
-}
-
-.gorsel-alan--placeholder,
-.firma-kart__gorsel.gorsel-alan--placeholder,
-.malzeme-kart__gorsel.gorsel-alan--placeholder,
-.sponsor-alani-kart__gorsel.gorsel-alan--placeholder {
-    background: linear-gradient(145deg, #1a1a1c 0%, #141416 100%);
-}
-
-.aurix-gorsel-placeholder {
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(145deg, #1e1e22 0%, #121214 100%);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-}
-
-.aurix-gorsel-placeholder::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(circle at 50% 45%, rgba(201, 169, 98, 0.12) 0%, transparent 55%);
-    pointer-events: none;
-}
-
-.firma-kart__logo .aurix-gorsel-placeholder {
-    position: relative;
-    inset: auto;
-    width: 100%;
-    height: 100%;
-    border-radius: inherit;
-    border: none;
-}
-
-.firma-kart__logo-img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-}
-
-.malzeme-kart__img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: center;
-    display: block;
-}
-
 .firma-kart__gorsel {
     flex-shrink: 0;
     height: 168px;
