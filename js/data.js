@@ -35,7 +35,7 @@ window.AURIX_DATA = {
         { id: 'tamir', ad: 'Tamir', ikon: '⚙️' }
     ],
 
-    SEHIRLER: ['İSTANBUL', 'İZMİR', 'DENİZLİ', 'KAHRAMANMARAŞ', 'ANKARA', 'BURSA', 'GAZİANTEP'],
+    SEHIRLER: ['İSTANBUL', 'İZMİR', 'ANKARA', 'BURSA', 'DENİZLİ', 'KAHRAMANMARAŞ', 'TRABZON', 'GAZİANTEP', 'ADANA', 'KONYA'],
 
     PIYASA_DEMO: {
         dolar: { etiket: 'DOLAR ($)', deger: '34,18', birim: 'TL', degisim: '+0,12' },
@@ -152,46 +152,74 @@ window.AURIX_DATA = {
     /* Açık iş talepleri — ana sayfa */
     ACIK_IS_TALEPLERI: [
         {
-            id: 'it001',
-            kategoriId: 'dokumcu',
-            baslik: '925 Gümüş Kolye Dökümü',
-            sehir: 'İstanbul',
-            adet: '300 adet',
-            termin: '10 gün',
-            butce: '₺45.000 – ₺60.000',
-            teklifSayisi: 4,
-            acilisTarihi: '12 Haz 2026',
-            durum: 'Teklif bekliyor',
-            durumTip: 'bekliyor',
-            sonGuncelleme: '2 saat önce'
+            id: 'it001', kategoriId: 'dokumcu',
+            baslik: '925 Gümüş Erkek Yüzük Dökümü',
+            sehir: 'İstanbul', adet: '450 adet', termin: '12 gün',
+            butce: '₺52.000 – ₺68.000', teklifSayisi: 6,
+            acilisTarihi: '08 Tem 2026', durum: 'Teklif bekliyor', durumTip: 'bekliyor', sonGuncelleme: '1 saat önce'
         },
         {
-            id: 'it002',
-            kategoriId: 'cizimci',
-            baslik: 'CAD Model Çizimi',
-            sehir: 'İzmir',
-            adet: '1 model',
-            termin: '3 gün',
-            butce: '₺2.500 – ₺4.000',
-            teklifSayisi: 7,
-            acilisTarihi: '14 Haz 2026',
-            durum: 'Acil',
-            durumTip: 'acil',
-            sonGuncelleme: '45 dk önce'
+            id: 'it002', kategoriId: 'polisaj',
+            baslik: '22 Ayar Alyans Rodajı',
+            sehir: 'İzmir', adet: '80 çift', termin: '5 gün',
+            butce: '₺18.000 – ₺24.000', teklifSayisi: 4,
+            acilisTarihi: '07 Tem 2026', durum: 'Teklif bekliyor', durumTip: 'bekliyor', sonGuncelleme: '3 saat önce'
         },
         {
-            id: 'it003',
-            kategoriId: 'mumcu',
-            baslik: 'Mum Basımı',
-            sehir: 'Kahramanmaraş',
-            adet: '120 adet',
-            termin: '2 gün',
-            butce: '₺8.000 – ₺12.000',
-            teklifSayisi: 3,
-            acilisTarihi: '10 Haz 2026',
-            durum: 'Teklif bekliyor',
-            durumTip: 'bekliyor',
-            sonGuncelleme: '5 saat önce'
+            id: 'it003', kategoriId: 'mihlamaci',
+            baslik: 'Pırlanta Mıhlama',
+            sehir: 'Ankara', adet: '36 adet', termin: '7 gün',
+            butce: '₺9.500 – ₺14.000', teklifSayisi: 8,
+            acilisTarihi: '06 Tem 2026', durum: 'Acil', durumTip: 'acil', sonGuncelleme: '35 dk önce'
+        },
+        {
+            id: 'it004', kategoriId: 'cizimci',
+            baslik: 'CAD Çizim Hizmeti — Fantezi Kolye',
+            sehir: 'Denizli', adet: '1 model + STL', termin: '4 gün',
+            butce: '₺3.200 – ₺5.500', teklifSayisi: 5,
+            acilisTarihi: '05 Tem 2026', durum: 'Teklif bekliyor', durumTip: 'bekliyor', sonGuncelleme: '6 saat önce'
+        },
+        {
+            id: 'it005', kategoriId: 'lazer',
+            baslik: 'Lazer Kesim — 14 Ayar Plaka',
+            sehir: 'Kahramanmaraş', adet: '120 parça', termin: '3 gün',
+            butce: '₺6.800 – ₺9.200', teklifSayisi: 3,
+            acilisTarihi: '04 Tem 2026', durum: 'Teklif bekliyor', durumTip: 'bekliyor', sonGuncelleme: 'Dün'
+        },
+        {
+            id: 'it006', kategoriId: 'polisaj',
+            baslik: 'Mine İşleme ve Finish',
+            sehir: 'Bursa', adet: '200 adet', termin: '10 gün',
+            butce: '₺22.000 – ₺30.000', teklifSayisi: 2,
+            acilisTarihi: '03 Tem 2026', durum: 'Teklif bekliyor', durumTip: 'bekliyor', sonGuncelleme: 'Dün'
+        },
+        {
+            id: 'it007', kategoriId: 'kalipci',
+            baslik: 'Kalıp Hazırlama — Tektaş Montür',
+            sehir: 'İstanbul', adet: '12 kalıp', termin: '6 gün',
+            butce: '₺11.000 – ₺15.500', teklifSayisi: 4,
+            acilisTarihi: '02 Tem 2026', durum: 'Teklif bekliyor', durumTip: 'bekliyor', sonGuncelleme: '2 gün önce'
+        },
+        {
+            id: 'it008', kategoriId: 'dokumcu',
+            baslik: '18 Ayar Fantezi Küpe Dökümü',
+            sehir: 'Gaziantep', adet: '280 adet', termin: '14 gün',
+            butce: '₺38.000 – ₺48.000', teklifSayisi: 5,
+            acilisTarihi: '01 Tem 2026', durum: 'Teklif bekliyor', durumTip: 'bekliyor', sonGuncelleme: '2 gün önce'
+        },
+        {
+            id: 'it009', kategoriId: 'mumcu',
+            baslik: 'Alyans Mum Basımı',
+            sehir: 'Konya', adet: '60 çift', termin: '2 gün',
+            butce: '₺4.500 – ₺6.800', teklifSayisi: 7,
+            acilisTarihi: '30 Haz 2026', durum: 'Acil', durumTip: 'acil', sonGuncelleme: '3 gün önce'
+        },
+        {
+            id: 'it010', kategoriId: 'matrix',
+            baslik: 'Matrix Model — Nişan Yüzüğü Serisi',
+            sehir: 'Trabzon', adet: '8 model', termin: '5 gün',
+            butce: '₺7.500 – ₺11.000', teklifSayisi: 3,
+            acilisTarihi: '29 Haz 2026', durum: 'Teklif bekliyor', durumTip: 'bekliyor', sonGuncelleme: '3 gün önce'
         }
     ],
 
@@ -217,10 +245,12 @@ window.AURIX_DATA = {
     ],
 
     CANLI_AKTIVITE: [
-        { tip: 'is', metin: "İstanbul'da yeni CAD işi oluşturuldu.", zaman: '2 dakika önce' },
-        { tip: 'firma', metin: "Ankara'da yeni firma doğrulandı.", zaman: '5 dakika önce' },
-        { tip: 'teklif', metin: "İzmir'de teklif kabul edildi.", zaman: '5 dakika önce' },
-        { tip: 'is', metin: "Kahramanmaraş'ta döküm işi yayınlandı.", zaman: '20 dakika önce' }
+        { tip: 'is', metin: 'İstanbul — 925 gümüş erkek yüzük dökümü talebi açıldı.', zaman: '2 dakika önce' },
+        { tip: 'teklif', metin: 'Denizli — Anadolu CAD Tasarım teklifi kabul edildi.', zaman: '4 dakika önce' },
+        { tip: 'firma', metin: 'Trabzon — Marina Stone profili doğrulandı.', zaman: '8 dakika önce' },
+        { tip: 'is', metin: 'Kahramanmaraş — 22 ayar alyans rodaj işi yayınlandı.', zaman: '12 dakika önce' },
+        { tip: 'teklif', metin: 'Bursa — Atlas Kalıp kalıp hazırlama teklifi gönderdi.', zaman: '18 dakika önce' },
+        { tip: 'is', metin: 'İzmir — pırlanta mıhlama işi 5 teklif aldı.', zaman: '25 dakika önce' }
     ],
 
     /* Firma profili güven alanları — v1.0 backend ile doldurulacak */
@@ -249,28 +279,42 @@ window.AURIX_DATA = {
         { id: 'cimoz', ad: 'Cımbızlar', ikon: '⊥' },
         { id: 'kimyasal', ad: 'Kimyasallar', ikon: '🧪' },
         { id: 'sarf', ad: 'Sarf Malzemeleri', ikon: '📋' },
-        { id: 'yedek-parca', ad: 'Yedek Parçalar', ikon: '⚙' }
+        { id: 'yedek-parca', ad: 'Yedek Parçalar', ikon: '⚙' },
+        { id: 'kalip-malzeme', ad: 'Kalıp Malzemeleri', ikon: '🔲' },
+        { id: 'hammadde', ad: 'Hammadde & Tel', ikon: '〰' },
+        { id: 'aksesuar', ad: 'Aksesuar & Parça', ikon: '⛓' },
+        { id: 'parlatma', ad: 'Parlatma Malzemeleri', ikon: '✦' }
     ],
 
     MALZEME_URUNLER: [
-        { id: 'mu001', kategoriId: 'lazer-makine', baslik: 'Fiber Lazer Kesim 30W', fiyat: '₺185.000', satici: 'Tekno Lazer Ltd.', sehir: 'İstanbul', durum: 'Stokta', dogrulandi: true, gorsel: 'https://images.unsplash.com/photo-1611591437281-460bf24535ce?auto=format&fit=crop&w=600&q=80' },
-        { id: 'mu002', kategoriId: 'dokum-makine', baslik: 'Vakum Döküm Makinesi 1kg', fiyat: '₺420.000', satici: 'Altın Makina', sehir: 'Kahramanmaraş', durum: 'Stokta', dogrulandi: true, gorsel: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=600&q=80' },
-        { id: 'mu003', kategoriId: 'mikromotor', baslik: 'Saeshin Strong 210 Mikromotor', fiyat: '₺12.500', satici: 'Nova Kuyumculuk Malzeme', sehir: 'İstanbul', durum: 'Stokta', dogrulandi: true, gorsel: 'https://images.unsplash.com/photo-1586075010923-2dd4570fb338?auto=format&fit=crop&w=600&q=80' },
-        { id: 'mu004', kategoriId: 'terazi', baslik: 'Hassas Dijital Terazi 0,001g', fiyat: '₺8.900', satici: 'Precision Tools TR', sehir: 'Ankara', durum: 'Stokta', dogrulandi: true, gorsel: 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=600&q=80' },
-        { id: 'mu005', kategoriId: 'mihlama-alet', baslik: 'Mikro Mıhlama Pens Seti', fiyat: '₺2.400', satici: 'Elmas Mikro Mıhlama', sehir: 'İzmir', durum: 'Stokta', dogrulandi: true, gorsel: 'https://images.unsplash.com/photo-1515562141203-7a88fb7ce338?auto=format&fit=crop&w=600&q=80' },
-        { id: 'mu006', kategoriId: 'polisaj', baslik: 'Profesyonel Polisaj Fırça Seti', fiyat: '₺1.850', satici: 'Rodaj Pro', sehir: 'Bursa', durum: 'Stokta', dogrulandi: false, gorsel: 'https://images.unsplash.com/photo-1617032210775-8a046a4a4899?auto=format&fit=crop&w=600&q=80' },
-        { id: 'mu007', kategoriId: 'rodaj', baslik: 'Rodaj Diski Seti 120–3000 grit', fiyat: '₺950', satici: 'Rodaj Pro', sehir: 'Bursa', durum: 'Stokta', dogrulandi: true, gorsel: 'https://images.unsplash.com/photo-1617032210775-8a046a4a4899?auto=format&fit=crop&w=600&q=80' },
-        { id: 'mu008', kategoriId: 'el-alet', baslik: 'Kuyumcu El Aleti Seti 12 Parça', fiyat: '₺3.200', satici: 'Nova Kuyumculuk Malzeme', sehir: 'İstanbul', durum: 'Stokta', dogrulandi: true, gorsel: 'https://images.unsplash.com/photo-1586075010923-2dd4570fb338?auto=format&fit=crop&w=600&q=80' },
-        { id: 'mu009', kategoriId: 'matkap-uc', baslik: 'HSS Matkap Ucu Seti 0,5–3mm', fiyat: '₺680', satici: 'Precision Tools TR', sehir: 'Ankara', durum: 'Stokta', dogrulandi: true, gorsel: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=600&q=80' },
-        { id: 'mu010', kategoriId: 'freze', baslik: 'Carbide Freze Seti 20 Parça', fiyat: '₺1.450', satici: 'Precision Tools TR', sehir: 'Ankara', durum: 'Stokta', dogrulandi: true, gorsel: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=600&q=80' },
-        { id: 'mu011', kategoriId: 'motor', baslik: 'Hanging Motor 1/4 HP', fiyat: '₺6.800', satici: 'Altın Makina', sehir: 'Kahramanmaraş', durum: 'Stokta', dogrulandi: true, gorsel: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=600&q=80' },
-        { id: 'mu012', kategoriId: 'kalem', baslik: 'Graver Kalemi Seti', fiyat: '₺520', satici: 'Nova Kuyumculuk Malzeme', sehir: 'İstanbul', durum: 'Stokta', dogrulandi: true, gorsel: 'https://images.unsplash.com/photo-1586075010923-2dd4570fb338?auto=format&fit=crop&w=600&q=80' },
-        { id: 'mu013', kategoriId: 'pense', baslik: 'Flat Nose Pense Seti', fiyat: '₺780', satici: 'Nova Kuyumculuk Malzeme', sehir: 'İstanbul', durum: 'Stokta', dogrulandi: true, gorsel: 'https://images.unsplash.com/photo-1586075010923-2dd4570fb338?auto=format&fit=crop&w=600&q=80' },
-        { id: 'mu014', kategoriId: 'cimoz', baslik: 'Anti-Manyetik Cımbız Seti', fiyat: '₺640', satici: 'Precision Tools TR', sehir: 'Ankara', durum: 'Stokta', dogrulandi: true, gorsel: 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=600&q=80' },
-        { id: 'mu015', kategoriId: 'kimyasal', baslik: 'Ultrasonik Temizlik Solüsyonu 5L', fiyat: '₺420', satici: 'Kimya Gold', sehir: 'İzmir', durum: 'Stokta', dogrulandi: true, gorsel: 'https://images.unsplash.com/photo-1617032210775-8a046a4a4899?auto=format&fit=crop&w=600&q=80' },
-        { id: 'mu016', kategoriId: 'sarf', baslik: 'Lehim Teli 0,5mm 50g', fiyat: '₺380', satici: 'Kimya Gold', sehir: 'İzmir', durum: 'Stokta', dogrulandi: true, gorsel: 'https://images.unsplash.com/photo-1617032210775-8a046a4a4899?auto=format&fit=crop&w=600&q=80' },
-        { id: 'mu017', kategoriId: 'yedek-parca', baslik: 'Mikromotor Kollet Seti', fiyat: '₺290', satici: 'Nova Kuyumculuk Malzeme', sehir: 'İstanbul', durum: 'Stokta', dogrulandi: true, gorsel: 'https://images.unsplash.com/photo-1586075010923-2dd4570fb338?auto=format&fit=crop&w=600&q=80' },
-        { id: 'mu018', kategoriId: 'lazer-makine', baslik: 'CO2 Lazer Kazıma 40W', fiyat: '₺95.000', satici: 'Tekno Lazer Ltd.', sehir: 'İstanbul', durum: 'Sipariş', dogrulandi: true, gorsel: 'https://images.unsplash.com/photo-1611591437281-460bf24535ce?auto=format&fit=crop&w=600&q=80' }
+        { id: 'mu001', kategoriId: 'dokum-makine', baslik: 'Vakum Döküm Makinesi 3kg', fiyat: '₺485.000', satici: 'İstanbul Kuyum Teknoloji', sehir: 'İstanbul', durum: 'Stokta', dogrulandi: true, gorsel: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=600&q=80' },
+        { id: 'mu002', kategoriId: 'kimyasal', baslik: 'Ultrasonik Temizleyici 6L', fiyat: '₺14.800', satici: 'Vizyon Döküm Tedarik', sehir: 'Bursa', durum: 'Stokta', dogrulandi: true, gorsel: 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=600&q=80' },
+        { id: 'mu003', kategoriId: 'motor', baslik: 'Rodaj Motoru 1/4 HP', fiyat: '₺7.200', satici: 'Ege Rodaj Tedarik', sehir: 'İzmir', durum: 'Stokta', dogrulandi: true, gorsel: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=600&q=80' },
+        { id: 'mu004', kategoriId: 'kalem', baslik: 'Gravür Kalemi Seti 12 Parça', fiyat: '₺680', satici: 'Kale Kalıp Malzeme', sehir: 'Denizli', durum: 'Stokta', dogrulandi: true, gorsel: 'https://images.unsplash.com/photo-1586075010923-2dd4570fb338?auto=format&fit=crop&w=600&q=80' },
+        { id: 'mu005', kategoriId: 'motor', baslik: 'El Motoru Hanging 1/4 HP', fiyat: '₺6.400', satici: 'İstanbul Kuyum Teknoloji', sehir: 'İstanbul', durum: 'Stokta', dogrulandi: true, gorsel: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=600&q=80' },
+        { id: 'mu006', kategoriId: 'mikromotor', baslik: 'Saeshin Strong 210 Mikromotor', fiyat: '₺12.500', satici: 'Ahenk Kuyum Malzeme', sehir: 'Konya', durum: 'Stokta', dogrulandi: true, gorsel: 'https://images.unsplash.com/photo-1586075010923-2dd4570fb338?auto=format&fit=crop&w=600&q=80' },
+        { id: 'mu007', kategoriId: 'matkap-uc', baslik: 'Matkap Ucu Seti 0,5–3mm HSS', fiyat: '₺720', satici: 'Lider Lazer Tedarik', sehir: 'Kahramanmaraş', durum: 'Stokta', dogrulandi: true, gorsel: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=600&q=80' },
+        { id: 'mu008', kategoriId: 'mihlama-alet', baslik: 'Mıhlama Kalemi Profesyonel', fiyat: '₺1.950', satici: 'Nova Mıhlama Tedarik', sehir: 'İzmir', durum: 'Stokta', dogrulandi: true, gorsel: 'https://images.unsplash.com/photo-1515562141203-7a88fb7ce338?auto=format&fit=crop&w=600&q=80' },
+        { id: 'mu009', kategoriId: 'pense', baslik: 'Kuyumcu Pense Seti 6 Parça', fiyat: '₺890', satici: 'Ahenk Kuyum Malzeme', sehir: 'Konya', durum: 'Stokta', dogrulandi: true, gorsel: 'https://images.unsplash.com/photo-1586075010923-2dd4570fb338?auto=format&fit=crop&w=600&q=80' },
+        { id: 'mu010', kategoriId: 'kalip-malzeme', baslik: 'Kalıp Lastiği 2mm Rulo', fiyat: '₺340', satici: 'Atlas Kalıp Malzeme', sehir: 'Bursa', durum: 'Stokta', dogrulandi: true, gorsel: 'https://images.unsplash.com/photo-1617032210775-8a046a4a4899?auto=format&fit=crop&w=600&q=80' },
+        { id: 'mu011', kategoriId: 'kalip-malzeme', baslik: 'Döküm Alçısı 25kg', fiyat: '₺580', satici: 'Kale Kalıp Malzeme', sehir: 'Denizli', durum: 'Stokta', dogrulandi: true, gorsel: 'https://images.unsplash.com/photo-1617032210775-8a046a4a4899?auto=format&fit=crop&w=600&q=80' },
+        { id: 'mu012', kategoriId: 'kalip-malzeme', baslik: 'Grafit Pota Seti 3 Boy', fiyat: '₺2.100', satici: 'Altıneller Döküm Tedarik', sehir: 'Kahramanmaraş', durum: 'Stokta', dogrulandi: true, gorsel: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=600&q=80' },
+        { id: 'mu013', kategoriId: 'sarf', baslik: 'Refrakter Malzeme Karışımı 5kg', fiyat: '₺760', satici: 'Mira Döküm Kimya', sehir: 'Denizli', durum: 'Stokta', dogrulandi: true, gorsel: 'https://images.unsplash.com/photo-1617032210775-8a046a4a4899?auto=format&fit=crop&w=600&q=80' },
+        { id: 'mu014', kategoriId: 'hammadde', baslik: '925 Gümüş Tel 1mm 50g', fiyat: '₺420', satici: 'Doruk Gold Hammadde', sehir: 'Ankara', durum: 'Stokta', dogrulandi: true, gorsel: 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=600&q=80' },
+        { id: 'mu015', kategoriId: 'hammadde', baslik: '14 Ayar Altın Tel 0,8mm', fiyat: '₺1.850', satici: 'Doruk Gold Hammadde', sehir: 'Ankara', durum: 'Stokta', dogrulandi: true, gorsel: 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=600&q=80' },
+        { id: 'mu016', kategoriId: 'aksesuar', baslik: 'İtalyan Zincir 45cm 14K', fiyat: '₺3.400', satici: 'Marina Stone Aksesuar', sehir: 'Trabzon', durum: 'Stokta', dogrulandi: true, gorsel: 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=600&q=80' },
+        { id: 'mu017', kategoriId: 'aksesuar', baslik: 'Kuyumcu Kilit Seti 8mm', fiyat: '₺290', satici: 'Ahenk Kuyum Malzeme', sehir: 'Konya', durum: 'Stokta', dogrulandi: true, gorsel: 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=600&q=80' },
+        { id: 'mu018', kategoriId: 'aksesuar', baslik: 'Taş Yuvası Seti 3–6mm', fiyat: '₺540', satici: 'Elmas Stone Tedarik', sehir: 'İstanbul', durum: 'Stokta', dogrulandi: true, gorsel: 'https://images.unsplash.com/photo-1603561596112-0a132757a803?auto=format&fit=crop&w=600&q=80' },
+        { id: 'mu019', kategoriId: 'parlatma', baslik: 'Zımpara Disk Seti 120–3000 grit', fiyat: '₺980', satici: 'Ege Rodaj Tedarik', sehir: 'İzmir', durum: 'Stokta', dogrulandi: true, gorsel: 'https://images.unsplash.com/photo-1617032210775-8a046a4a4899?auto=format&fit=crop&w=600&q=80' },
+        { id: 'mu020', kategoriId: 'parlatma', baslik: 'Parlatma Keçesi Seti 6 Parça', fiyat: '₺650', satici: 'Ege Rodaj Tedarik', sehir: 'İzmir', durum: 'Stokta', dogrulandi: true, gorsel: 'https://images.unsplash.com/photo-1617032210775-8a046a4a4899?auto=format&fit=crop&w=600&q=80' },
+        { id: 'mu021', kategoriId: 'lazer-makine', baslik: 'Fiber Lazer Kesim 30W', fiyat: '₺185.000', satici: 'Lider Lazer Makine', sehir: 'Kahramanmaraş', durum: 'Stokta', dogrulandi: true, gorsel: 'https://images.unsplash.com/photo-1611591437281-460bf24535ce?auto=format&fit=crop&w=600&q=80' },
+        { id: 'mu022', kategoriId: 'terazi', baslik: 'Hassas Dijital Terazi 0,001g', fiyat: '₺8.900', satici: 'Prestij Ayar Ekipman', sehir: 'İstanbul', durum: 'Stokta', dogrulandi: true, gorsel: 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=600&q=80' },
+        { id: 'mu023', kategoriId: 'freze', baslik: 'Carbide Freze Seti 20 Parça', fiyat: '₺1.450', satici: 'Zenith Jewelry Works', sehir: 'Ankara', durum: 'Stokta', dogrulandi: true, gorsel: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=600&q=80' },
+        { id: 'mu024', kategoriId: 'mihlama-alet', baslik: 'Mikro Mıhlama Pens Seti', fiyat: '₺2.400', satici: 'Safir Jewelry Tools', sehir: 'Gaziantep', durum: 'Stokta', dogrulandi: true, gorsel: 'https://images.unsplash.com/photo-1515562141203-7a88fb7ce338?auto=format&fit=crop&w=600&q=80' },
+        { id: 'mu025', kategoriId: 'el-alet', baslik: 'Kuyumcu El Aleti Seti 12 Parça', fiyat: '₺3.200', satici: 'İnci Gold Design Tedarik', sehir: 'Adana', durum: 'Stokta', dogrulandi: true, gorsel: 'https://images.unsplash.com/photo-1586075010923-2dd4570fb338?auto=format&fit=crop&w=600&q=80' },
+        { id: 'mu026', kategoriId: 'sarf', baslik: 'Lehim Teli 0,5mm 50g', fiyat: '₺380', satici: 'Arıcan Kuyumculuk Tedarik', sehir: 'İstanbul', durum: 'Stokta', dogrulandi: true, gorsel: 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=600&q=80' },
+        { id: 'mu027', kategoriId: 'polisaj', baslik: 'Profesyonel Polisaj Fırça Seti', fiyat: '₺1.850', satici: 'Ege Rodaj Tedarik', sehir: 'İzmir', durum: 'Stokta', dogrulandi: true, gorsel: 'https://images.unsplash.com/photo-1617032210775-8a046a4a4899?auto=format&fit=crop&w=600&q=80' },
+        { id: 'mu028', kategoriId: 'lazer-makine', baslik: 'CO2 Lazer Kazıma 40W', fiyat: '₺95.000', satici: 'Lider Lazer Makine', sehir: 'Kahramanmaraş', durum: 'Sipariş', dogrulandi: true, gorsel: 'https://images.unsplash.com/photo-1611591437281-460bf24535ce?auto=format&fit=crop&w=600&q=80' }
     ],
 
     NEDEN_AURIX: [
@@ -298,117 +342,256 @@ window.AURIX_DATA = {
 
     ORNEK_FIRMALAR: [
         {
-            id: 'f001', ad: 'Altın İş Merkezi Döküm', kategoriId: 'dokumcu',
+            id: 'f001', ad: 'Arıcan Kuyumculuk', kategoriId: 'dokumcu',
             sehir: 'İSTANBUL', tel: '905321112233',
-            aciklama: 'Vakumlu döküm, yüksek hacimli altın ve gümüş üretim. Günlük 500+ parça kapasite.',
+            aciklama: 'Vakumlu altın ve gümüş döküm. Günlük 600+ parça kapasite, sıfır gözenek garantisi.',
             premium: true, sponsor: true, durum: 'onaylandi', puan: 4.8,
-            tamamlananIs: 186, cevapSuresi: '< 2 saat',
+            tamamlananIs: 214, cevapSuresi: '< 2 saat', sonAktif: 'Bugün',
             eklenmeTarihi: '2026-01-10T10:00:00.000Z',
             gorsel: 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=600&q=80'
         },
         {
-            id: 'f002', ad: 'Elmas Mikro Mıhlama Atölyesi', kategoriId: 'mihlamaci',
-            sehir: 'İZMİR', tel: '905423334455',
-            aciklama: 'Mikroskop altında pırlanta ve fantezi taş kitleme. Tektaş ve yüzük uzmanlığı.',
+            id: 'f002', ad: 'Altıneller Döküm', kategoriId: 'dokumcu',
+            sehir: 'KAHRAMANMARAŞ', tel: '905423334455',
+            aciklama: '22 ayar ve 18 ayar seri döküm. Platin ve gümüş hatları mevcuttur.',
             premium: true, sponsor: true, durum: 'onaylandi', puan: 4.9,
+            tamamlananIs: 178, cevapSuresi: '< 1 saat', sonAktif: 'Bugün',
             eklenmeTarihi: '2026-02-14T09:30:00.000Z',
-            gorsel: 'https://images.unsplash.com/photo-1515562141203-7a88fb7ce338?auto=format&fit=crop&w=600&q=80'
+            gorsel: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=600&q=80'
         },
         {
-            id: 'f003', ad: 'Aurum Matrix Tasarım Stüdyosu', kategoriId: 'matrix',
+            id: 'f003', ad: 'Anadolu CAD Tasarım', kategoriId: 'cizimci',
             sehir: 'DENİZLİ', tel: '905556667788',
-            aciklama: 'Matrix 9 & 10, STL ve 3DM arşivi. Alyans, tektaş ve fantezi model kütüphanesi.',
+            aciklama: 'Matrix, Rhino ve STL teslimi. Fantezi, alyans ve tektaş model kütüphanesi.',
             premium: true, sponsor: false, durum: 'onaylandi', puan: 4.7,
+            tamamlananIs: 142, cevapSuresi: '2 saat', sonAktif: 'Dün',
             eklenmeTarihi: '2026-02-20T14:00:00.000Z',
             gorsel: 'https://images.unsplash.com/photo-1573408301185-9146fe634ad0?auto=format&fit=crop&w=600&q=80'
         },
         {
-            id: 'f004', ad: 'Zirve Hassas Lazer Kesim', kategoriId: 'lazer',
-            sehir: 'KAHRAMANMARAŞ', tel: '905339998877',
-            aciklama: '0,1 mm altın plaka kesim, isim kazıma ve fantezi plaka üretimi.',
-            premium: false, sponsor: true, durum: 'onaylandi', puan: 4.6,
-            eklenmeTarihi: '2026-03-01T11:00:00.000Z',
-            gorsel: 'https://images.unsplash.com/photo-1611591437281-460bf24535ce?auto=format&fit=crop&w=600&q=80'
-        },
-        {
-            id: 'f005', ad: 'Anadolu Taş Tedarik', kategoriId: 'tas',
-            sehir: 'İSTANBUL', tel: '905067788990',
-            aciklama: 'GIA sertifikalı pırlanta, safir, zümrüt ve fantezi taş toptan tedarik.',
+            id: 'f004', ad: 'Nova Mıhlama', kategoriId: 'mihlamaci',
+            sehir: 'İZMİR', tel: '905339998877',
+            aciklama: 'Mikroskop altında pırlanta ve fantezi taş kitleme. Tektaş ve yüzük uzmanlığı.',
             premium: true, sponsor: true, durum: 'onaylandi', puan: 4.9,
-            eklenmeTarihi: '2026-03-08T08:00:00.000Z',
-            gorsel: 'https://images.unsplash.com/photo-1603561596112-0a132757a803?auto=format&fit=crop&w=600&q=80'
+            tamamlananIs: 196, cevapSuresi: '< 2 saat', sonAktif: 'Bugün',
+            eklenmeTarihi: '2026-03-01T11:00:00.000Z',
+            gorsel: 'https://images.unsplash.com/photo-1515562141203-7a88fb7ce338?auto=format&fit=crop&w=600&q=80'
         },
         {
-            id: 'f006', ad: 'Kapalıçarşı Ayar Evi', kategoriId: 'ayar',
-            sehir: 'İSTANBUL', tel: '905124455667',
-            aciklama: '916, 750, 585 ayar analizi. Hızlı rapor, sertifikalı laboratuvar.',
-            premium: false, sponsor: false, durum: 'onaylandi', puan: 4.5,
-            eklenmeTarihi: '2026-03-12T16:00:00.000Z',
+            id: 'f005', ad: 'Prestij Ayar Evi', kategoriId: 'ayar',
+            sehir: 'İSTANBUL', tel: '905067788990',
+            aciklama: '916, 750, 585 ayar analizi. Sertifikalı laboratuvar, aynı gün rapor.',
+            premium: false, sponsor: false, durum: 'onaylandi', puan: 4.6,
+            tamamlananIs: 312, cevapSuresi: '4 saat', sonAktif: 'Bugün',
+            eklenmeTarihi: '2026-03-08T08:00:00.000Z',
             gorsel: 'https://images.unsplash.com/photo-1586075010923-2dd4570fb338?auto=format&fit=crop&w=600&q=80'
         },
         {
-            id: 'f007', ad: 'Rhino Pro Model Ofisi', kategoriId: 'rhino',
-            sehir: 'ANKARA', tel: '905334455667',
-            aciklama: 'Rhino 7/8 ile organik ve geometrik kuyumcu modelleme. Render ve STL teslim.',
+            id: 'f006', ad: 'Atlas Kalıp', kategoriId: 'kalipci',
+            sehir: 'BURSA', tel: '905124455667',
+            aciklama: 'Silikon, metal ve mum kalıp üretimi. Yüksek detaylı fantezi kalıplar.',
             premium: true, sponsor: false, durum: 'onaylandi', puan: 4.7,
-            eklenmeTarihi: '2026-03-18T10:30:00.000Z',
+            tamamlananIs: 89, cevapSuresi: '6 saat', sonAktif: 'Dün',
+            eklenmeTarihi: '2026-03-12T16:00:00.000Z',
             gorsel: 'https://images.unsplash.com/photo-1617032210775-8a046a4a4899?auto=format&fit=crop&w=600&q=80'
         },
         {
-            id: 'f008', ad: 'Marmara Zincir Sanayi', kategoriId: 'zincir',
-            sehir: 'BURSA', tel: '905228899001',
-            aciklama: 'İtalyan ve fantezi zincir üretimi. 14K, 18K, 22K gramaj seçenekleri.',
-            premium: false, sponsor: true, durum: 'onaylandi', puan: 4.4,
+            id: 'f007', ad: 'Lider Lazer', kategoriId: 'lazer',
+            sehir: 'KAHRAMANMARAŞ', tel: '905334455667',
+            aciklama: '0,1 mm altın plaka kesim, isim kazıma ve fantezi plaka üretimi.',
+            premium: false, sponsor: true, durum: 'onaylandi', puan: 4.6,
+            tamamlananIs: 124, cevapSuresi: 'Aynı gün', sonAktif: 'Bugün',
+            eklenmeTarihi: '2026-03-18T10:30:00.000Z',
+            gorsel: 'https://images.unsplash.com/photo-1611591437281-460bf24535ce?auto=format&fit=crop&w=600&q=80'
+        },
+        {
+            id: 'f008', ad: 'Elmas Stone', kategoriId: 'tas',
+            sehir: 'İSTANBUL', tel: '905228899001',
+            aciklama: 'GIA sertifikalı pırlanta, safir, zümrüt ve fantezi taş toptan tedarik.',
+            premium: true, sponsor: true, durum: 'onaylandi', puan: 4.9,
+            tamamlananIs: 267, cevapSuresi: '< 1 saat', sonAktif: 'Bugün',
             eklenmeTarihi: '2026-03-22T13:00:00.000Z',
+            gorsel: 'https://images.unsplash.com/photo-1603561596112-0a132757a803?auto=format&fit=crop&w=600&q=80'
+        },
+        {
+            id: 'f009', ad: 'Ege Rodaj', kategoriId: 'polisaj',
+            sehir: 'İZMİR', tel: '905009887766',
+            aciklama: 'Rodaj, parlatma ve mine finish. Seri üretim ve özel sipariş kabul edilir.',
+            premium: false, sponsor: false, durum: 'beklemede', puan: 0,
+            tamamlananIs: 0, cevapSuresi: '—', sonAktif: '—',
+            eklenmeTarihi: '2026-07-01T09:00:00.000Z',
+            gorsel: 'https://images.unsplash.com/photo-1617032210775-8a046a4a4899?auto=format&fit=crop&w=600&q=80'
+        },
+        {
+            id: 'f010', ad: 'Doruk Gold', kategoriId: 'dokumcu',
+            sehir: 'ANKARA', tel: '905331122334',
+            aciklama: '18 ayar fantezi döküm ve prototip üretim. Hızlı numune teslimi.',
+            premium: false, sponsor: false, durum: 'onaylandi', puan: 4.5,
+            tamamlananIs: 98, cevapSuresi: '4 saat', sonAktif: '2 gün önce',
+            eklenmeTarihi: '2026-03-20T10:00:00.000Z',
+            gorsel: 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=600&q=80'
+        },
+        {
+            id: 'f011', ad: 'Safir Jewelry', kategoriId: 'mihlamaci',
+            sehir: 'GAZİANTEP', tel: '905442233445',
+            aciklama: 'Baget, yuvarlak ve özel kesim taş mıhlama. Mikro ayar işleri.',
+            premium: true, sponsor: true, durum: 'onaylandi', puan: 4.8,
+            tamamlananIs: 156, cevapSuresi: '2 saat', sonAktif: 'Dün',
+            eklenmeTarihi: '2026-03-21T11:00:00.000Z',
+            gorsel: 'https://images.unsplash.com/photo-1515562141203-7a88fb7ce338?auto=format&fit=crop&w=600&q=80'
+        },
+        {
+            id: 'f012', ad: 'Mira Döküm', kategoriId: 'dokumcu',
+            sehir: 'DENİZLİ', tel: '905553344556',
+            aciklama: 'Gümüş ve altın vakum döküm. Günlük yüksek hacim, kalite kontrol dahil.',
+            premium: false, sponsor: true, durum: 'onaylandi', puan: 4.4,
+            tamamlananIs: 134, cevapSuresi: '6 saat', sonAktif: 'Bugün',
+            eklenmeTarihi: '2026-03-23T14:00:00.000Z',
+            gorsel: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=600&q=80'
+        },
+        {
+            id: 'f013', ad: 'Kuzey Tasarım', kategoriId: 'matrix',
+            sehir: 'İSTANBUL', tel: '905127788990',
+            aciklama: 'Matrix 9 & 10, STL ve 3DM arşivi. Nişan, alyans ve fantezi koleksiyonlar.',
+            premium: true, sponsor: false, durum: 'onaylandi', puan: 4.7,
+            tamamlananIs: 118, cevapSuresi: '2 saat', sonAktif: 'Bugün',
+            eklenmeTarihi: '2026-03-24T09:00:00.000Z',
+            gorsel: 'https://images.unsplash.com/photo-1573408301185-9146fe634ad0?auto=format&fit=crop&w=600&q=80'
+        },
+        {
+            id: 'f014', ad: 'İstanbul Kuyum Teknoloji', kategoriId: 'makine',
+            sehir: 'İSTANBUL', tel: '905338877665',
+            aciklama: 'Döküm, lazer ve rodaj makineleri satışı. Kurulum ve servis desteği.',
+            premium: true, sponsor: true, durum: 'onaylandi', puan: 4.6,
+            tamamlananIs: 76, cevapSuresi: 'Aynı gün', sonAktif: 'Dün',
+            eklenmeTarihi: '2026-03-19T12:00:00.000Z',
+            gorsel: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=600&q=80'
+        },
+        {
+            id: 'f015', ad: 'Zenith Jewelry Works', kategoriId: 'rhino',
+            sehir: 'ANKARA', tel: '905441122334',
+            aciklama: 'Rhino 7/8 ile organik ve geometrik kuyumcu modelleme. Render ve STL teslim.',
+            premium: true, sponsor: false, durum: 'onaylandi', puan: 4.8,
+            tamamlananIs: 102, cevapSuresi: '4 saat', sonAktif: 'Bugün',
+            eklenmeTarihi: '2026-04-02T10:00:00.000Z',
+            gorsel: 'https://images.unsplash.com/photo-1617032210775-8a046a4a4899?auto=format&fit=crop&w=600&q=80'
+        },
+        {
+            id: 'f016', ad: 'Marina Stone', kategoriId: 'tas',
+            sehir: 'TRABZON', tel: '905462233445',
+            aciklama: 'Doğu Karadeniz bölgesi taş tedarik ağı. Pırlanta ve renkli taş stokları.',
+            premium: false, sponsor: false, durum: 'onaylandi', puan: 4.5,
+            tamamlananIs: 87, cevapSuresi: '6 saat', sonAktif: '3 gün önce',
+            eklenmeTarihi: '2026-04-05T11:00:00.000Z',
+            gorsel: 'https://images.unsplash.com/photo-1603561596112-0a132757a803?auto=format&fit=crop&w=600&q=80'
+        },
+        {
+            id: 'f017', ad: 'Ahenk Kuyum', kategoriId: 'bilezik',
+            sehir: 'KONYA', tel: '905332244556',
+            aciklama: '22 ayar bilezik üretimi. İtalyan ve fantezi modeller, toptan sevkiyat.',
+            premium: false, sponsor: true, durum: 'onaylandi', puan: 4.4,
+            tamamlananIs: 163, cevapSuresi: 'Aynı gün', sonAktif: 'Bugün',
+            eklenmeTarihi: '2026-04-08T09:00:00.000Z',
             gorsel: 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=600&q=80'
         },
         {
-            id: 'f009', ad: 'Beta Demo Başvuru Atölyesi', kategoriId: 'polisaj',
-            sehir: 'İZMİR', tel: '905009887766',
-            aciklama: 'Admin onayı bekleyen örnek başvuru kaydı.',
-            premium: false, sponsor: false, durum: 'beklemede', puan: 0,
-            eklenmeTarihi: '2026-03-25T09:00:00.000Z',
-            gorsel: null
+            id: 'f018', ad: 'İnci Gold Design', kategoriId: 'cizimci',
+            sehir: 'ADANA', tel: '905322334455',
+            aciklama: 'CAD çizim ve teknik resim. Müşteri briefinden STL teslimine kadar uçtan uca.',
+            premium: false, sponsor: false, durum: 'onaylandi', puan: 4.6,
+            tamamlananIs: 74, cevapSuresi: '4 saat', sonAktif: 'Dün',
+            eklenmeTarihi: '2026-04-10T14:00:00.000Z',
+            gorsel: 'https://images.unsplash.com/photo-1573408301185-9146fe634ad0?auto=format&fit=crop&w=600&q=80'
         },
         {
-            id: 'f010', ad: 'Nova Kuyumculuk Malzeme', kategoriId: 'malzeme',
-            sehir: 'İSTANBUL', tel: '905331122334',
-            aciklama: 'Genel kuyumculuk malzeme ve aparat toptan tedarik. Hızlı sevkiyat.',
+            id: 'f019', ad: 'Vizyon Döküm', kategoriId: 'dokumcu',
+            sehir: 'BURSA', tel: '905224455667',
+            aciklama: 'Platin ve palladium döküm hatları. Medikal ve kuyumculuk segmenti.',
+            premium: true, sponsor: false, durum: 'onaylandi', puan: 4.7,
+            tamamlananIs: 112, cevapSuresi: '2 saat', sonAktif: 'Bugün',
+            eklenmeTarihi: '2026-04-12T08:00:00.000Z',
+            gorsel: 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=600&q=80'
+        },
+        {
+            id: 'f020', ad: 'Kale Kalıp', kategoriId: 'kalipci',
+            sehir: 'DENİZLİ', tel: '905258899001',
+            aciklama: 'Tektaş, alyans ve fantezi kalıp üretimi. Hızlı revizyon ve numune.',
+            premium: false, sponsor: false, durum: 'onaylandi', puan: 4.5,
+            tamamlananIs: 68, cevapSuresi: '6 saat', sonAktif: '2 gün önce',
+            eklenmeTarihi: '2026-04-15T10:00:00.000Z',
+            gorsel: 'https://images.unsplash.com/photo-1617032210775-8a046a4a4899?auto=format&fit=crop&w=600&q=80'
+        },
+        {
+            id: 'f021', ad: 'Anadolu Mum Sanayi', kategoriId: 'mumcu',
+            sehir: 'KONYA', tel: '905332211009',
+            aciklama: 'Kuyumcu mum basım ve model hazırlığı. Seri ve özel sipariş.',
             premium: false, sponsor: false, durum: 'onaylandi', puan: 4.3,
-            eklenmeTarihi: '2026-03-20T10:00:00.000Z',
-            gorsel: 'https://images.unsplash.com/photo-1586075010923-2dd4570fb338?auto=format&fit=crop&w=600&q=80'
+            tamamlananIs: 95, cevapSuresi: 'Aynı gün', sonAktif: 'Bugün',
+            eklenmeTarihi: '2026-04-18T11:00:00.000Z',
+            gorsel: 'https://images.unsplash.com/photo-1617032210775-8a046a4a4899?auto=format&fit=crop&w=600&q=80'
         },
         {
-            id: 'f011', ad: 'Prestij Vitrin Sistemleri', kategoriId: 'vitrin',
+            id: 'f022', ad: 'Kapalıçarşı Ramat Evi', kategoriId: 'ramat',
+            sehir: 'İSTANBUL', tel: '905212345678',
+            aciklama: 'Hurda altın, gümüş ve değerli metal ramat. Şeffaf tartım ve anında ödeme.',
+            premium: false, sponsor: false, durum: 'onaylandi', puan: 4.5,
+            tamamlananIs: 421, cevapSuresi: '< 1 saat', sonAktif: 'Bugün',
+            eklenmeTarihi: '2026-04-20T09:00:00.000Z',
+            gorsel: 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=600&q=80'
+        },
+        {
+            id: 'f023', ad: 'Prestij Vitrin Sistemleri', kategoriId: 'vitrin',
             sehir: 'İSTANBUL', tel: '905442233445',
-            aciklama: 'Kuyumcu vitrin, manken ve LED aydınlatma çözümleri. Montaj dahil.',
+            aciklama: 'Kuyumcu vitrin, manken ve LED aydınlatma. Montaj ve bakım dahil.',
             premium: true, sponsor: true, durum: 'onaylandi', puan: 4.6,
-            eklenmeTarihi: '2026-03-21T11:00:00.000Z',
+            tamamlananIs: 54, cevapSuresi: 'Aynı gün', sonAktif: 'Dün',
+            eklenmeTarihi: '2026-04-22T11:00:00.000Z',
             gorsel: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=600&q=80'
         },
         {
-            id: 'f012', ad: 'Elegance Kutu & Ambalaj', kategoriId: 'kutu',
+            id: 'f024', ad: 'Elegance Kutu & Ambalaj', kategoriId: 'kutu',
             sehir: 'BURSA', tel: '905553344556',
             aciklama: 'Özel tasarım kuyumcu kutuları, süet çantalar ve marka baskılı ambalaj.',
             premium: false, sponsor: false, durum: 'onaylandi', puan: 4.4,
-            eklenmeTarihi: '2026-03-23T14:00:00.000Z',
+            tamamlananIs: 82, cevapSuresi: '6 saat', sonAktif: '3 gün önce',
+            eklenmeTarihi: '2026-04-24T14:00:00.000Z',
             gorsel: 'https://images.unsplash.com/photo-1549465220-1a8b9238cd48?auto=format&fit=crop&w=600&q=80'
         },
         {
-            id: 'f013', ad: 'Kapalıçarşı Ramat Evi', kategoriId: 'ramat',
-            sehir: 'İSTANBUL', tel: '905127788990',
-            aciklama: 'Hurda altın, gümüş ve değerli metal ramat işlemleri. Şeffaf tartım ve ödeme.',
-            premium: false, sponsor: false, durum: 'onaylandi', puan: 4.5,
-            eklenmeTarihi: '2026-03-24T09:00:00.000Z',
-            gorsel: 'https://images.unsplash.com/photo-1617032210775-8a046a4a4899?auto=format&fit=crop&w=800&q=80'
+            id: 'f025', ad: 'Marmara Zincir Sanayi', kategoriId: 'zincir',
+            sehir: 'BURSA', tel: '905228899001',
+            aciklama: 'İtalyan ve fantezi zincir üretimi. 14K, 18K, 22K gramaj seçenekleri.',
+            premium: false, sponsor: true, durum: 'onaylandi', puan: 4.4,
+            tamamlananIs: 148, cevapSuresi: '4 saat', sonAktif: 'Bugün',
+            eklenmeTarihi: '2026-04-26T13:00:00.000Z',
+            gorsel: 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=600&q=80'
         },
         {
-            id: 'f014', ad: 'Altın Tel & Lehim Merkezi', kategoriId: 'lehim',
+            id: 'f026', ad: 'Kale Kilit Kuyum', kategoriId: 'kilit',
+            sehir: 'İSTANBUL', tel: '905337766554',
+            aciklama: 'Kuyumcu kilit, klips ve bağlantı parçaları. Toptan ve perakende.',
+            premium: false, sponsor: false, durum: 'onaylandi', puan: 4.3,
+            tamamlananIs: 91, cevapSuresi: 'Aynı gün', sonAktif: 'Dün',
+            eklenmeTarihi: '2026-04-28T10:00:00.000Z',
+            gorsel: 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=600&q=80'
+        },
+        {
+            id: 'f027', ad: 'Ahenk Malzeme Tedarik', kategoriId: 'malzeme',
+            sehir: 'KONYA', tel: '905331122334',
+            aciklama: 'Kuyumculuk malzeme, aparat ve sarf malzemeleri. Türkiye geneli sevkiyat.',
+            premium: false, sponsor: false, durum: 'onaylandi', puan: 4.3,
+            tamamlananIs: 203, cevapSuresi: '2 saat', sonAktif: 'Bugün',
+            eklenmeTarihi: '2026-05-01T10:00:00.000Z',
+            gorsel: 'https://images.unsplash.com/photo-1586075010923-2dd4570fb338?auto=format&fit=crop&w=600&q=80'
+        },
+        {
+            id: 'f028', ad: 'Altın Tel & Lehim Merkezi', kategoriId: 'lehim',
             sehir: 'İSTANBUL', tel: '905338877665',
-            aciklama: 'Altın lehim, kaynak teli ve flux kimyasalları. Toptan ve perakende.',
+            aciklama: 'Altın lehim, kaynak teli ve flux kimyasalları. Toptan stok.',
             premium: false, sponsor: false, durum: 'onaylandi', puan: 4.2,
-            eklenmeTarihi: '2026-03-19T12:00:00.000Z',
-            gorsel: 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80'
+            tamamlananIs: 176, cevapSuresi: '4 saat', sonAktif: 'Bugün',
+            eklenmeTarihi: '2026-05-03T12:00:00.000Z',
+            gorsel: 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=600&q=80'
         }
     ],
 
@@ -416,82 +599,91 @@ window.AURIX_DATA = {
     PANEL_DEMO: {
         dashboard: {
             ozet: {
-                buAyKazanc: '₺42.800',
-                odenecekBakiye: '₺12.450',
+                buAyKazanc: '₺48.600',
+                odenecekBakiye: '₺14.200',
                 sonrakiOdeme: '15.07.2026',
-                profilPuani: '4.7'
+                profilPuani: '4.8'
             },
             aktiviteler: [
-                { metin: 'Fantezi kolye döküm teklifi alındı', zaman: '2 saat önce' },
-                { metin: '22 ayar bilezik işi teslim edildi', zaman: 'Dün 16:40' },
-                { metin: 'Profiliniz 12 kez görüntülendi', zaman: 'Dün' },
-                { metin: 'Mayıs hakediş ödemesi tamamlandı', zaman: '01.06.2026' }
+                { metin: '925 gümüş erkek yüzük dökümü için teklif alındı', zaman: '45 dk önce' },
+                { metin: '22 ayar alyans serisi teslim edildi — ₺32.000', zaman: 'Dün 17:20' },
+                { metin: 'Profiliniz 18 kez görüntülendi', zaman: 'Dün' },
+                { metin: 'Haziran hakediş ödemesi hesabınıza aktarıldı', zaman: '01.07.2026' },
+                { metin: 'Pırlanta mıhlama işi tamamlandı — 4.9 puan', zaman: '28.06.2026' }
             ],
             devamEdenIsler: [
-                { baslik: 'Tektaş montür mıhlama', musteri: 'Elmas Kuyumculuk', termin: '18.07.2026', durum: 'Devam ediyor' },
-                { baslik: 'Alyans prototip döküm', musteri: 'Altın Sarayı', termin: '22.07.2026', durum: 'Üretimde' }
+                { baslik: 'Tektaş montür mıhlama', musteri: 'Elmas Stone', termin: '18.07.2026', durum: 'Devam ediyor' },
+                { baslik: 'Alyans prototip döküm', musteri: 'Safir Jewelry', termin: '22.07.2026', durum: 'Üretimde' },
+                { baslik: '18 ayar küpe seri döküm', musteri: 'Nova Mıhlama', termin: '25.07.2026', durum: 'Bekliyor' }
             ],
             yeniTeklifler: [
-                { isAdi: 'Fantezi kolye döküm', musteri: 'Kuzey CAD Atölyesi', tutar: '₺18.500', durum: 'Bekliyor' },
-                { isAdi: 'Gram altın plaka işleme', musteri: 'Zirve Lazer', tutar: '₺6.800', durum: 'İnceleniyor' }
+                { isAdi: '925 gümüş erkek yüzük dökümü', musteri: 'Kuzey Tasarım', tutar: '₺21.500', durum: 'Bekliyor' },
+                { isAdi: 'Gram altın plaka lazer kesim', musteri: 'Lider Lazer', tutar: '₺7.200', durum: 'İnceleniyor' },
+                { isAdi: 'Fantezi kolye döküm', musteri: 'Anadolu CAD Tasarım', tutar: '₺19.800', durum: 'Bekliyor' }
             ],
             performansOzet: {
-                ortTeslim: '4.2 gün',
-                ortPuan: '4.7 / 5',
-                teklifDonus: '%38'
+                ortTeslim: '3.8 gün',
+                ortPuan: '4.8 / 5',
+                teklifDonus: '%42'
             }
         },
         gelirler: {
-            toplamKazanc: '₺186.400',
-            komisyon: '₺9.320',
-            cekilebilir: '₺12.450',
-            bekleyen: '₺8.200',
+            toplamKazanc: '₺214.800',
+            komisyon: '₺10.740',
+            cekilebilir: '₺14.200',
+            bekleyen: '₺9.400',
             sonrakiOdemeTarihi: '15.07.2026',
             ibanMaskeli: 'TR••••••••••1234',
             gecmis: [
-                { tarih: '01.06.2026', tutar: '₺14.200', durum: 'Ödendi', aciklama: 'Mayıs hakediş ödemesi' },
-                { tarih: '15.05.2026', tutar: '₺11.850', durum: 'Ödendi', aciklama: 'Nisan hakediş ödemesi' },
-                { tarih: '28.04.2026', tutar: '₺9.600', durum: 'Hazırlanıyor', aciklama: 'Mart kapanış düzeltmesi' },
-                { tarih: '10.04.2026', tutar: '₺7.400', durum: 'Beklemede', aciklama: 'Ek iş onay bekliyor' }
+                { tarih: '01.07.2026', tutar: '₺16.400', durum: 'Ödendi', aciklama: 'Haziran hakediş ödemesi' },
+                { tarih: '15.06.2026', tutar: '₺14.200', durum: 'Ödendi', aciklama: 'Mayıs hakediş ödemesi' },
+                { tarih: '28.05.2026', tutar: '₺11.600', durum: 'Ödendi', aciklama: 'Nisan hakediş ödemesi' },
+                { tarih: '10.05.2026', tutar: '₺8.900', durum: 'Hazırlanıyor', aciklama: 'Mart kapanış düzeltmesi' },
+                { tarih: '02.05.2026', tutar: '₺7.800', durum: 'Beklemede', aciklama: 'Ek iş onay sürecinde' }
             ]
         },
         isler: {
-            sayac: { bekleyen: 2, devam: 3, teslim: 48, iptal: 1 },
+            sayac: { bekleyen: 3, devam: 4, teslim: 214, iptal: 2 },
             liste: [
-                { baslik: '22 ayar bilezik seri üretimi', musteri: 'Altın Yolu', durum: 'Bekliyor', termin: '25.07.2026', tutar: '₺32.000' },
-                { baslik: 'Tektaş montür mıhlama', musteri: 'Elmas Kuyumculuk', durum: 'Devam ediyor', termin: '18.07.2026', tutar: '₺8.500' },
-                { baslik: 'Alyans prototip döküm', musteri: 'Altın Sarayı', durum: 'Üretimde', termin: '22.07.2026', tutar: '₺12.400' },
-                { baslik: 'Fantezi yüzük döküm', musteri: 'Nova Kuyumcu', durum: 'Teslim edildi', termin: '05.06.2026', tutar: '₺5.600' }
+                { baslik: '925 gümüş erkek yüzük dökümü', musteri: 'Kuzey Tasarım', durum: 'Bekliyor', termin: '28.07.2026', tutar: '₺21.500' },
+                { baslik: '22 ayar bilezik seri üretimi', musteri: 'Ahenk Kuyum', durum: 'Bekliyor', termin: '25.07.2026', tutar: '₺32.000' },
+                { baslik: 'Tektaş montür mıhlama', musteri: 'Elmas Stone', durum: 'Devam ediyor', termin: '18.07.2026', tutar: '₺8.500' },
+                { baslik: 'Alyans prototip döküm', musteri: 'Safir Jewelry', durum: 'Üretimde', termin: '22.07.2026', tutar: '₺12.400' },
+                { baslik: '18 ayar fantezi küpe dökümü', musteri: 'İnci Gold Design', durum: 'Teslim edildi', termin: '05.07.2026', tutar: '₺6.200' },
+                { baslik: 'Platin mini döküm seti', musteri: 'Vizyon Döküm', durum: 'Teslim edildi', termin: '28.06.2026', tutar: '₺24.000' }
             ]
         },
         teklifler: [
-            { id: 'ptk1', isAdi: 'Fantezi kolye döküm', musteri: 'Kuzey CAD Atölyesi', tutar: '₺18.500', termin: '14 gün', durum: 'Bekliyor' },
-            { id: 'ptk2', isAdi: 'Gram altın plaka işleme', musteri: 'Zirve Lazer Kesim', tutar: '₺6.800', termin: '7 gün', durum: 'İnceleniyor' },
-            { id: 'ptk3', isAdi: 'Platin mini döküm seti', musteri: 'Denizli Atölye', tutar: '₺24.000', termin: '21 gün', durum: 'Bekliyor' }
+            { id: 'ptk1', isAdi: '925 gümüş erkek yüzük dökümü', musteri: 'Kuzey Tasarım', tutar: '₺21.500', termin: '12 gün', durum: 'Bekliyor' },
+            { id: 'ptk2', isAdi: 'Gram altın plaka lazer kesim', musteri: 'Lider Lazer', tutar: '₺7.200', termin: '5 gün', durum: 'İnceleniyor' },
+            { id: 'ptk3', isAdi: 'Fantezi kolye döküm', musteri: 'Anadolu CAD Tasarım', tutar: '₺19.800', termin: '14 gün', durum: 'Bekliyor' },
+            { id: 'ptk4', isAdi: 'Pırlanta mıhlama — 36 adet', musteri: 'Nova Mıhlama', tutar: '₺11.400', termin: '7 gün', durum: 'Bekliyor' }
         ],
         profil: {
-            firmaAd: 'Arıcan Vakumlu Döküm Merkezi',
+            firmaAd: 'Arıcan Kuyumculuk',
             kategori: 'Dökümcü',
             sehir: 'İSTANBUL',
             durum: 'Onaylı',
             tel: '905321112233',
-            aciklama: 'Sıfır gözenekli altın, gümüş ve platin döküm hatları. Günlük yüksek hacimli iş teslimi.',
-            tamamlamaOrani: 82
+            aciklama: 'Vakumlu altın ve gümüş döküm. Günlük 600+ parça kapasite, sıfır gözenek garantisi.',
+            tamamlamaOrani: 94
         },
         performans: {
-            tamamlananIs: 48,
-            ortTeslim: '4.2 gün',
-            ortPuan: '4.7',
-            goruntulenme30: 312,
-            profilZiyaret: 89,
-            teklifDonus: '%38',
+            tamamlananIs: 214,
+            ortTeslim: '3.8 gün',
+            ortPuan: '4.8',
+            goruntulenme30: 428,
+            profilZiyaret: 112,
+            teklifDonus: '%42',
+            teslimOrani: '%96',
+            musteriMemnuniyeti: '4.8 / 5',
             grafik: [
-                { ay: 'Oca', tutar: 22000 },
-                { ay: 'Şub', tutar: 28500 },
-                { ay: 'Mar', tutar: 31800 },
-                { ay: 'Nis', tutar: 35200 },
-                { ay: 'May', tutar: 40100 },
-                { ay: 'Haz', tutar: 42800 }
+                { ay: 'Oca', tutar: 24800 },
+                { ay: 'Şub', tutar: 31200 },
+                { ay: 'Mar', tutar: 35600 },
+                { ay: 'Nis', tutar: 38400 },
+                { ay: 'May', tutar: 44200 },
+                { ay: 'Haz', tutar: 48600 }
             ]
         },
         ayarlar: {
@@ -505,16 +697,18 @@ window.AURIX_DATA = {
     /* Admin panel demo verisi (Beta iskelet — panel kapalıyken referans) */
     ADMIN_PANEL_DEMO: {
         isTalepleri: [
-            { id: 'ait1', baslik: '500 adet alyans üretimi', sehir: 'İZMİR', basvuru: '14.06.2026' },
-            { id: 'ait2', baslik: 'Pırlanta montür işi', sehir: 'İSTANBUL', basvuru: '13.06.2026' }
+            { id: 'ait1', baslik: '500 adet alyans üretimi', sehir: 'İZMİR', basvuru: '06.07.2026' },
+            { id: 'ait2', baslik: 'Pırlanta montür işi', sehir: 'İSTANBUL', basvuru: '05.07.2026' },
+            { id: 'ait3', baslik: 'Ege Rodaj — firma başvurusu', sehir: 'İZMİR', basvuru: '01.07.2026' }
         ],
         malzemeler: [
-            { id: 'aml1', baslik: 'Terazi kalibrasyon seti', satici: 'Teknik Tedarik', durum: 'İncelemede' },
-            { id: 'aml2', baslik: 'Sarf kimyasal paketi', satici: 'Altın Kimya', durum: 'İncelemede' }
+            { id: 'aml1', baslik: 'Ultrasonik Temizleyici 6L', satici: 'Vizyon Döküm Tedarik', durum: 'İncelemede' },
+            { id: 'aml2', baslik: 'Grafit Pota Seti 3 Boy', satici: 'Altıneller Döküm Tedarik', durum: 'İncelemede' }
         ],
         kullanicilar: [
-            { id: 'u1', ad: 'Mehmet Y.', email: 'mehmet@ornek-atolye.com', rol: 'Firma', durum: 'Aktif' },
-            { id: 'u2', ad: 'Ayşe K.', email: 'ayse@ornek-ticaret.com', rol: 'Firma', durum: 'Beklemede' }
+            { id: 'u1', ad: 'Mehmet A.', email: 'mehmet@arican-kuyum.com', rol: 'Firma', durum: 'Aktif' },
+            { id: 'u2', ad: 'Ayşe K.', email: 'ayse@novamihlama.com', rol: 'Firma', durum: 'Aktif' },
+            { id: 'u3', ad: 'Can Y.', email: 'can@egerodaj.com', rol: 'Firma', durum: 'Beklemede' }
         ],
         raporlar: {
             toplamFirma: 128,

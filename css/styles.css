@@ -3373,6 +3373,57 @@ a { color: inherit; text-decoration: none; }
     text-overflow: ellipsis;
 }
 
+[data-sayfa="firmalar"] .firma-kart--vitrin .firma-kart__baslik-satir {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 7px;
+}
+
+[data-sayfa="firmalar"] .firma-kart--vitrin .firma-kart__baslik-satir .firma-kart__ad {
+    margin-bottom: 0;
+    flex: 1;
+    min-width: 0;
+}
+
+[data-sayfa="firmalar"] .firma-kart__dogrulandi--vitrin {
+    flex-shrink: 0;
+    font-size: 9px;
+    padding: 2px 7px;
+}
+
+[data-sayfa="firmalar"] .firma-kart__vitrin-metrikler {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 14px;
+    padding: 8px 0 4px;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    margin: 4px 0 6px;
+}
+
+[data-sayfa="firmalar"] .firma-kart__vitrin-metrik {
+    font-size: 11px;
+    color: var(--aurix-muted);
+    min-width: 0;
+}
+
+[data-sayfa="firmalar"] .firma-kart__vitrin-metrik strong {
+    color: var(--aurix-text);
+    font-weight: 600;
+}
+
+[data-sayfa="firmalar"] .firma-kart__vitrin-metrik .firma-kart__puan-deger {
+    color: var(--aurix-gold-light);
+    font-weight: 600;
+    font-size: 12px;
+}
+
+[data-sayfa="firmalar"] .firma-kart__vitrin-metrik--aktif strong {
+    color: #34c759;
+}
+
 [data-sayfa="firmalar"] .firma-kart--vitrin .firma-kart__puan-alan {
     min-height: auto;
 }
@@ -3786,6 +3837,21 @@ a { color: inherit; text-decoration: none; }
 
     [data-sayfa="firmalar"] .firma-kart--vitrin .firma-kart__aciklama {
         display: none;
+    }
+
+    [data-sayfa="firmalar"] .firma-kart__vitrin-metrikler {
+        gap: 4px 10px;
+        padding: 6px 0 2px;
+        margin: 2px 0 4px;
+    }
+
+    [data-sayfa="firmalar"] .firma-kart__vitrin-metrik {
+        font-size: 9px;
+    }
+
+    [data-sayfa="firmalar"] .firma-kart__dogrulandi--vitrin {
+        font-size: 7px;
+        padding: 1px 5px;
     }
 
     [data-sayfa="firmalar"] .firma-kart--vitrin .firma-kart__premium,

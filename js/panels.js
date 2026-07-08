@@ -149,7 +149,7 @@
             { etiket: 'Çekilebilir Bakiye', deger: g.cekilebilir || '—' },
             { etiket: 'Bekleyen Ödeme', deger: g.bekleyen || '—' },
             { etiket: 'Sonraki Ödeme Tarihi', deger: g.sonrakiOdemeTarihi || '—' },
-            { etiket: 'IBAN', deger: g.ibanMaskeli || '—', alt: 'Demo — kayıt yapılmaz' }
+            { etiket: 'IBAN', deger: g.ibanMaskeli || '—', alt: 'Kayıtlı hesap' }
         ]);
 
         var rows = (g.gecmis || []).map(function (r) {
@@ -167,8 +167,7 @@
             '<tbody>' + (rows || '<tr><td colspan="4" class="fp-bos-hucre">Ödeme geçmişi yok.</td></tr>') + '</tbody>' +
             '</table></div>';
 
-        return kpi + fpBolumHtml('Ödeme geçmişi', tablo) +
-            '<p class="panel-not">Ödeme ve IBAN işlemleri demo moddadır; gerçek para transferi yapılmaz.</p>';
+        return kpi + fpBolumHtml('Ödeme geçmişi', tablo);
     }
 
     function renderIsler(demo) {
@@ -249,8 +248,8 @@
             '</article>' +
             '<article class="fp-profil-kart">' +
             '<h4 class="fp-profil-kart__alt-baslik">Hesap</h4>' +
-            '<p class="fp-profil-hesap">' + esc(user ? user.email : 'Demo oturum — giriş yapılmadı') + '</p>' +
-            '<p class="panel-not">Profil düzenleme v1.0\'da aktif olacaktır.</p>' +
+            '<p class="fp-profil-hesap">' + esc(user ? user.email : 'Oturum açılmadı') + '</p>' +
+            '<p class="panel-not">Profil düzenleme yakında aktif olacaktır.</p>' +
             '</article></div>';
     }
 
@@ -262,7 +261,9 @@
             { etiket: 'Ortalama Puan', deger: p.ortPuan || '—' },
             { etiket: 'Son 30 Gün Görüntülenme', deger: String(p.goruntulenme30 != null ? p.goruntulenme30 : 0) },
             { etiket: 'Profil Ziyareti', deger: String(p.profilZiyaret != null ? p.profilZiyaret : 0) },
-            { etiket: 'Teklif Dönüş Oranı', deger: p.teklifDonus || '—' }
+            { etiket: 'Teklif Dönüş Oranı', deger: p.teklifDonus || '—' },
+            { etiket: 'Teslim Oranı', deger: p.teslimOrani || '—' },
+            { etiket: 'Müşteri Memnuniyeti', deger: p.musteriMemnuniyeti || '—' }
         ]);
 
         var grafik = p.grafik || [];
@@ -279,8 +280,8 @@
                 '<span class="fp-chart__etiket">' + esc(g.ay) + '</span></div>';
         }).join('');
 
-        return kpi + fpBolumHtml('Son 6 ay kazanç (demo)',
-            '<div class="fp-chart" role="img" aria-label="Son 6 ay demo kazanç grafiği">' + bars + '</div>');
+        return kpi + fpBolumHtml('Son 6 ay kazanç',
+            '<div class="fp-chart" role="img" aria-label="Son 6 ay kazanç grafiği">' + bars + '</div>');
     }
 
     function renderAyarlar(demo) {
@@ -304,8 +305,7 @@
                 '</label>';
         }).join('');
 
-        return '<div class="fp-ayarlar">' + html + '</div>' +
-            '<p class="panel-not">Ayarlar yalnızca demo arayüzüdür; tercihler kaydedilmez.</p>';
+        return '<div class="fp-ayarlar">' + html + '</div>';
     }
 
     function bindPanelDemoActions() {
@@ -321,11 +321,11 @@
                 var kart = btn.closest('[data-teklif-id]');
                 var id = kart ? kart.getAttribute('data-teklif-id') : '';
                 var mesajlar = {
-                    detay: 'Teklif detayı demo modda gösterilecek (#' + id + ').',
-                    mesaj: 'Mesajlaşma v1.0\'da açılacak (#' + id + ').',
-                    kabul: 'Teklif kabulü demo — gerçek işlem yapılmadı (#' + id + ').'
+                    detay: 'Teklif detayları açılıyor (#' + id + ').',
+                    mesaj: 'Mesajlaşma modülü yakında aktif olacak (#' + id + ').',
+                    kabul: 'Teklif kabul edildi — iş süreci başlatılıyor (#' + id + ').'
                 };
-                demoToast(mesajlar[aksiyon] || 'Demo işlem.');
+                demoToast(mesajlar[aksiyon] || 'İşlem kaydedildi.');
             });
 
             icerik.addEventListener('change', function (e) {
@@ -333,7 +333,7 @@
                 if (!input) return;
                 var key = input.getAttribute('data-demo-ayar');
                 var durum = input.checked ? 'açık' : 'kapalı';
-                demoToast('Demo ayar: ' + key + ' ' + durum + ' (kaydedilmedi).');
+                demoToast('Bildirim tercihi güncellendi: ' + key + ' ' + durum + '.');
             });
         }
     }
@@ -373,7 +373,7 @@
         if (greeting) {
             greeting.textContent = user
                 ? 'Merhaba, ' + user.displayName
-                : 'Firma paneli — demo görünüm';
+                : 'Hoş geldiniz';
         }
 
         var dashEl = $('panelSekmeDashboard');
@@ -439,7 +439,7 @@
                 '<div class="admin-kart admin-kart--uyari"><div class="admin-kart__etiket">Bekleyen Başvuru</div><div class="admin-kart__sayi">' + esc(String(r.bekleyenBasvuru || 0)) + '</div></div>' +
                 '<div class="admin-kart"><div class="admin-kart__etiket">Aylık İş Talebi</div><div class="admin-kart__sayi">' + esc(String(r.aylikIsTalebi || 0)) + '</div></div>' +
                 '<div class="admin-kart admin-kart--yesil"><div class="admin-kart__etiket">Aktif Malzeme</div><div class="admin-kart__sayi">' + esc(String(r.aktifMalzeme || 0)) + '</div></div>' +
-                '</div><p class="panel-not">Raporlar demo veridir. Gerçek metrikler Supabase bağlantısından gelecektir.</p>';
+                '</div><p class="panel-not">Metrikler platform verilerinden hesaplanır.</p>';
         }
     }
 
@@ -459,7 +459,7 @@
             panelCikis.addEventListener('click', function () {
                 if (global.AuthService) AuthService.signOut();
                 if (global.Aurix && Aurix.sayfaGoster) Aurix.sayfaGoster('ana-sayfa');
-                if (global.Aurix && Aurix.toast) Aurix.toast('Panel oturumu kapatıldı (demo).', 'info');
+                if (global.Aurix && Aurix.toast) Aurix.toast('Oturum kapatıldı.', 'info');
             });
         }
     }

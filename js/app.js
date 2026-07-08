@@ -679,8 +679,7 @@
 
     function firmaKartVitrinHtml(firma) {
         var kat = kategoriBul(firma.kategoriId);
-        var tel = telTemizle(firma.tel);
-        var waHref = safeWaHref(tel);
+        var guven = firmaGuvenVerisi(firma);
         var premiumCls = firma.premium ? ' firma-kart--premium' : '';
         var partnerBadge = firma.sponsor ? '<span class="firma-kart__partner">PARTNER</span>' : '';
         var gorselIcerik = firmaKapakImgHtml(firma, firma.ad).replace('firma-kart__kapak-img', 'firma-kart__gorsel-img');
@@ -689,9 +688,13 @@
             ? '<img class="aurix-img-fallback" src="' + esc(logoSrc) + '" alt="" width="48" height="48" loading="lazy" decoding="async" data-remove-parent=".firma-kart__logo">'
             : '<span class="firma-kart__logo-harf">' + esc(firmaBasHarfleri(firma.ad)) + '</span>';
         var aciklama = firma.aciklama || '';
+        var puanMetin = firma.puan ? firma.puan.toFixed(1) : '—';
         var puanHtml = firma.puan
-            ? '<span class="firma-kart__puan">' + yildizGoster(firma.puan) + '</span>'
+            ? '<span class="firma-kart__puan-deger">★ ' + puanMetin + '</span>'
             : '<span class="firma-kart__puan firma-kart__puan--bos">Henüz puan yok</span>';
+        var dogrulandiBadge = firma.durum === 'onaylandi'
+            ? '<span class="firma-kart__dogrulandi firma-kart__dogrulandi--vitrin">Doğrulandı</span>'
+            : '';
 
         return '<article class="firma-kart firma-kart--vitrin' + premiumCls + '" data-id="' + esc(firma.id) + '">' +
             (firma.premium ? '<span class="firma-kart__premium">PREMIUM</span>' : '') +
@@ -701,18 +704,25 @@
             '<div class="firma-kart__kimlik">' +
             '<div class="firma-kart__logo">' + logoIcerik + '</div>' +
             '<div class="firma-kart__kimlik-metin">' +
+            '<div class="firma-kart__baslik-satir">' +
             '<h3 class="firma-kart__ad">' + esc(firma.ad) + '</h3>' +
+            dogrulandiBadge +
+            '</div>' +
             '<div class="firma-kart__meta">' +
             '<span class="firma-kart__sehir">' + esc(firma.sehir) + '</span>' +
             '<span class="firma-kart__kat-rozet">' +
             '<span class="firma-kart__kat-ikon">' + kat.ikon + '</span>' +
             '<span class="firma-kart__kat-ad">' + esc(kat.ad) + '</span>' +
             '</span></div></div></div>' +
-            '<div class="firma-kart__puan-alan">' + puanHtml + '</div>' +
+            '<div class="firma-kart__vitrin-metrikler">' +
+            '<span class="firma-kart__vitrin-metrik">' + puanHtml + '</span>' +
+            '<span class="firma-kart__vitrin-metrik"><strong>' + guven.tamamlananIs + '</strong> tamamlanan iş</span>' +
+            '<span class="firma-kart__vitrin-metrik firma-kart__vitrin-metrik--aktif"><strong>' + esc(guven.sonAktif) + '</strong> aktif</span>' +
+            '</div>' +
             (aciklama ? '<p class="firma-kart__aciklama">' + esc(aciklama) + '</p>' : '') +
             '<div class="firma-kart__aksiyon">' +
             '<button type="button" class="btn btn--ghost btn--sm" data-detay="' + esc(firma.id) + '">Profili Gör</button>' +
-            (waHref ? '<a class="btn btn--primary btn--sm" href="' + esc(waHref) + '" target="_blank" rel="noopener">WhatsApp</a>' : '') +
+            '<button type="button" class="btn btn--primary btn--sm" data-teklif="' + esc(firma.id) + '">Teklif Gönder</button>' +
             '</div></div></article>';
     }
 
@@ -1700,7 +1710,7 @@
                 modalKapat('girisModal');
                 PanelUI.renderUserPanel();
                 sayfaGoster('panel');
-                toast('Beta panel açıldı (demo oturum, sayfa yenilenince kapanır).', 'info');
+                toast('Firma paneli açıldı.', 'info');
             });
         }
 
