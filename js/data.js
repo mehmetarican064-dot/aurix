@@ -287,34 +287,34 @@ window.AURIX_DATA = {
     ],
 
     MALZEME_URUNLER: [
-        { id: 'mu001', kategoriId: 'dokum-makine', baslik: 'Vakum Döküm Makinesi 3kg', fiyat: '₺485.000', satici: 'İstanbul Kuyum Teknoloji', sehir: 'İstanbul', durum: 'Stokta', dogrulandi: true, gorsel: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=600&q=80' },
-        { id: 'mu002', kategoriId: 'kimyasal', baslik: 'Ultrasonik Temizleyici 6L', fiyat: '₺14.800', satici: 'Vizyon Döküm Tedarik', sehir: 'Bursa', durum: 'Stokta', dogrulandi: true, gorsel: 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=600&q=80' },
-        { id: 'mu003', kategoriId: 'motor', baslik: 'Rodaj Motoru 1/4 HP', fiyat: '₺7.200', satici: 'Ege Rodaj Tedarik', sehir: 'İzmir', durum: 'Stokta', dogrulandi: true, gorsel: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=600&q=80' },
-        { id: 'mu004', kategoriId: 'kalem', baslik: 'Gravür Kalemi Seti 12 Parça', fiyat: '₺680', satici: 'Kale Kalıp Malzeme', sehir: 'Denizli', durum: 'Stokta', dogrulandi: true, gorsel: 'https://images.unsplash.com/photo-1586075010923-2dd4570fb338?auto=format&fit=crop&w=600&q=80' },
-        { id: 'mu005', kategoriId: 'motor', baslik: 'El Motoru Hanging 1/4 HP', fiyat: '₺6.400', satici: 'İstanbul Kuyum Teknoloji', sehir: 'İstanbul', durum: 'Stokta', dogrulandi: true, gorsel: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=600&q=80' },
-        { id: 'mu006', kategoriId: 'mikromotor', baslik: 'Saeshin Strong 210 Mikromotor', fiyat: '₺12.500', satici: 'Ahenk Kuyum Malzeme', sehir: 'Konya', durum: 'Stokta', dogrulandi: true, gorsel: 'https://images.unsplash.com/photo-1586075010923-2dd4570fb338?auto=format&fit=crop&w=600&q=80' },
-        { id: 'mu007', kategoriId: 'matkap-uc', baslik: 'Matkap Ucu Seti 0,5–3mm HSS', fiyat: '₺720', satici: 'Lider Lazer Tedarik', sehir: 'Kahramanmaraş', durum: 'Stokta', dogrulandi: true, gorsel: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=600&q=80' },
-        { id: 'mu008', kategoriId: 'mihlama-alet', baslik: 'Mıhlama Kalemi Profesyonel', fiyat: '₺1.950', satici: 'Nova Mıhlama Tedarik', sehir: 'İzmir', durum: 'Stokta', dogrulandi: true, gorsel: 'https://images.unsplash.com/photo-1515562141203-7a88fb7ce338?auto=format&fit=crop&w=600&q=80' },
-        { id: 'mu009', kategoriId: 'pense', baslik: 'Kuyumcu Pense Seti 6 Parça', fiyat: '₺890', satici: 'Ahenk Kuyum Malzeme', sehir: 'Konya', durum: 'Stokta', dogrulandi: true, gorsel: 'https://images.unsplash.com/photo-1586075010923-2dd4570fb338?auto=format&fit=crop&w=600&q=80' },
-        { id: 'mu010', kategoriId: 'kalip-malzeme', baslik: 'Kalıp Lastiği 2mm Rulo', fiyat: '₺340', satici: 'Atlas Kalıp Malzeme', sehir: 'Bursa', durum: 'Stokta', dogrulandi: true, gorsel: 'https://images.unsplash.com/photo-1617032210775-8a046a4a4899?auto=format&fit=crop&w=600&q=80' },
-        { id: 'mu011', kategoriId: 'kalip-malzeme', baslik: 'Döküm Alçısı 25kg', fiyat: '₺580', satici: 'Kale Kalıp Malzeme', sehir: 'Denizli', durum: 'Stokta', dogrulandi: true, gorsel: 'https://images.unsplash.com/photo-1617032210775-8a046a4a4899?auto=format&fit=crop&w=600&q=80' },
-        { id: 'mu012', kategoriId: 'kalip-malzeme', baslik: 'Grafit Pota Seti 3 Boy', fiyat: '₺2.100', satici: 'Altıneller Döküm Tedarik', sehir: 'Kahramanmaraş', durum: 'Stokta', dogrulandi: true, gorsel: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=600&q=80' },
-        { id: 'mu013', kategoriId: 'sarf', baslik: 'Refrakter Malzeme Karışımı 5kg', fiyat: '₺760', satici: 'Mira Döküm Kimya', sehir: 'Denizli', durum: 'Stokta', dogrulandi: true, gorsel: 'https://images.unsplash.com/photo-1617032210775-8a046a4a4899?auto=format&fit=crop&w=600&q=80' },
-        { id: 'mu014', kategoriId: 'hammadde', baslik: '925 Gümüş Tel 1mm 50g', fiyat: '₺420', satici: 'Doruk Gold Hammadde', sehir: 'Ankara', durum: 'Stokta', dogrulandi: true, gorsel: 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=600&q=80' },
-        { id: 'mu015', kategoriId: 'hammadde', baslik: '14 Ayar Altın Tel 0,8mm', fiyat: '₺1.850', satici: 'Doruk Gold Hammadde', sehir: 'Ankara', durum: 'Stokta', dogrulandi: true, gorsel: 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=600&q=80' },
-        { id: 'mu016', kategoriId: 'aksesuar', baslik: 'İtalyan Zincir 45cm 14K', fiyat: '₺3.400', satici: 'Marina Stone Aksesuar', sehir: 'Trabzon', durum: 'Stokta', dogrulandi: true, gorsel: 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=600&q=80' },
-        { id: 'mu017', kategoriId: 'aksesuar', baslik: 'Kuyumcu Kilit Seti 8mm', fiyat: '₺290', satici: 'Ahenk Kuyum Malzeme', sehir: 'Konya', durum: 'Stokta', dogrulandi: true, gorsel: 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=600&q=80' },
-        { id: 'mu018', kategoriId: 'aksesuar', baslik: 'Taş Yuvası Seti 3–6mm', fiyat: '₺540', satici: 'Elmas Stone Tedarik', sehir: 'İstanbul', durum: 'Stokta', dogrulandi: true, gorsel: 'https://images.unsplash.com/photo-1603561596112-0a132757a803?auto=format&fit=crop&w=600&q=80' },
-        { id: 'mu019', kategoriId: 'parlatma', baslik: 'Zımpara Disk Seti 120–3000 grit', fiyat: '₺980', satici: 'Ege Rodaj Tedarik', sehir: 'İzmir', durum: 'Stokta', dogrulandi: true, gorsel: 'https://images.unsplash.com/photo-1617032210775-8a046a4a4899?auto=format&fit=crop&w=600&q=80' },
-        { id: 'mu020', kategoriId: 'parlatma', baslik: 'Parlatma Keçesi Seti 6 Parça', fiyat: '₺650', satici: 'Ege Rodaj Tedarik', sehir: 'İzmir', durum: 'Stokta', dogrulandi: true, gorsel: 'https://images.unsplash.com/photo-1617032210775-8a046a4a4899?auto=format&fit=crop&w=600&q=80' },
-        { id: 'mu021', kategoriId: 'lazer-makine', baslik: 'Fiber Lazer Kesim 30W', fiyat: '₺185.000', satici: 'Lider Lazer Makine', sehir: 'Kahramanmaraş', durum: 'Stokta', dogrulandi: true, gorsel: 'https://images.unsplash.com/photo-1611591437281-460bf24535ce?auto=format&fit=crop&w=600&q=80' },
-        { id: 'mu022', kategoriId: 'terazi', baslik: 'Hassas Dijital Terazi 0,001g', fiyat: '₺8.900', satici: 'Prestij Ayar Ekipman', sehir: 'İstanbul', durum: 'Stokta', dogrulandi: true, gorsel: 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=600&q=80' },
-        { id: 'mu023', kategoriId: 'freze', baslik: 'Carbide Freze Seti 20 Parça', fiyat: '₺1.450', satici: 'Zenith Jewelry Works', sehir: 'Ankara', durum: 'Stokta', dogrulandi: true, gorsel: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=600&q=80' },
-        { id: 'mu024', kategoriId: 'mihlama-alet', baslik: 'Mikro Mıhlama Pens Seti', fiyat: '₺2.400', satici: 'Safir Jewelry Tools', sehir: 'Gaziantep', durum: 'Stokta', dogrulandi: true, gorsel: 'https://images.unsplash.com/photo-1515562141203-7a88fb7ce338?auto=format&fit=crop&w=600&q=80' },
-        { id: 'mu025', kategoriId: 'el-alet', baslik: 'Kuyumcu El Aleti Seti 12 Parça', fiyat: '₺3.200', satici: 'İnci Gold Design Tedarik', sehir: 'Adana', durum: 'Stokta', dogrulandi: true, gorsel: 'https://images.unsplash.com/photo-1586075010923-2dd4570fb338?auto=format&fit=crop&w=600&q=80' },
-        { id: 'mu026', kategoriId: 'sarf', baslik: 'Lehim Teli 0,5mm 50g', fiyat: '₺380', satici: 'Arıcan Kuyumculuk Tedarik', sehir: 'İstanbul', durum: 'Stokta', dogrulandi: true, gorsel: 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=600&q=80' },
-        { id: 'mu027', kategoriId: 'polisaj', baslik: 'Profesyonel Polisaj Fırça Seti', fiyat: '₺1.850', satici: 'Ege Rodaj Tedarik', sehir: 'İzmir', durum: 'Stokta', dogrulandi: true, gorsel: 'https://images.unsplash.com/photo-1617032210775-8a046a4a4899?auto=format&fit=crop&w=600&q=80' },
-        { id: 'mu028', kategoriId: 'lazer-makine', baslik: 'CO2 Lazer Kazıma 40W', fiyat: '₺95.000', satici: 'Lider Lazer Makine', sehir: 'Kahramanmaraş', durum: 'Sipariş', dogrulandi: true, gorsel: 'https://images.unsplash.com/photo-1611591437281-460bf24535ce?auto=format&fit=crop&w=600&q=80' }
+        { id: 'mu001', kategoriId: 'dokum-makine', baslik: 'Vakum Döküm Makinesi 3kg', fiyat: '₺485.000', satici: 'İstanbul Kuyum Teknoloji', sehir: 'İstanbul', durum: 'Stokta', dogrulandi: true },
+        { id: 'mu002', kategoriId: 'kimyasal', baslik: 'Ultrasonik Temizleyici 6L', fiyat: '₺14.800', satici: 'Vizyon Döküm Tedarik', sehir: 'Bursa', durum: 'Stokta', dogrulandi: true },
+        { id: 'mu003', kategoriId: 'motor', baslik: 'Rodaj Motoru 1/4 HP', fiyat: '₺7.200', satici: 'Ege Rodaj Tedarik', sehir: 'İzmir', durum: 'Stokta', dogrulandi: true },
+        { id: 'mu004', kategoriId: 'kalem', baslik: 'Gravür Kalemi Seti 12 Parça', fiyat: '₺680', satici: 'Kale Kalıp Malzeme', sehir: 'Denizli', durum: 'Stokta', dogrulandi: true },
+        { id: 'mu005', kategoriId: 'motor', baslik: 'El Motoru Hanging 1/4 HP', fiyat: '₺6.400', satici: 'İstanbul Kuyum Teknoloji', sehir: 'İstanbul', durum: 'Stokta', dogrulandi: true },
+        { id: 'mu006', kategoriId: 'mikromotor', baslik: 'Saeshin Strong 210 Mikromotor', fiyat: '₺12.500', satici: 'Ahenk Kuyum Malzeme', sehir: 'Konya', durum: 'Stokta', dogrulandi: true },
+        { id: 'mu007', kategoriId: 'matkap-uc', baslik: 'Matkap Ucu Seti 0,5–3mm HSS', fiyat: '₺720', satici: 'Lider Lazer Tedarik', sehir: 'Kahramanmaraş', durum: 'Stokta', dogrulandi: true },
+        { id: 'mu008', kategoriId: 'mihlama-alet', baslik: 'Mıhlama Kalemi Profesyonel', fiyat: '₺1.950', satici: 'Nova Mıhlama Tedarik', sehir: 'İzmir', durum: 'Stokta', dogrulandi: true },
+        { id: 'mu009', kategoriId: 'pense', baslik: 'Kuyumcu Pense Seti 6 Parça', fiyat: '₺890', satici: 'Ahenk Kuyum Malzeme', sehir: 'Konya', durum: 'Stokta', dogrulandi: true },
+        { id: 'mu010', kategoriId: 'kalip-malzeme', baslik: 'Kalıp Lastiği 2mm Rulo', fiyat: '₺340', satici: 'Atlas Kalıp Malzeme', sehir: 'Bursa', durum: 'Stokta', dogrulandi: true },
+        { id: 'mu011', kategoriId: 'kalip-malzeme', baslik: 'Döküm Alçısı 25kg', fiyat: '₺580', satici: 'Kale Kalıp Malzeme', sehir: 'Denizli', durum: 'Stokta', dogrulandi: true },
+        { id: 'mu012', kategoriId: 'kalip-malzeme', baslik: 'Grafit Pota Seti 3 Boy', fiyat: '₺2.100', satici: 'Altıneller Döküm Tedarik', sehir: 'Kahramanmaraş', durum: 'Stokta', dogrulandi: true },
+        { id: 'mu013', kategoriId: 'sarf', baslik: 'Refrakter Malzeme Karışımı 5kg', fiyat: '₺760', satici: 'Mira Döküm Kimya', sehir: 'Denizli', durum: 'Stokta', dogrulandi: true },
+        { id: 'mu014', kategoriId: 'hammadde', baslik: '925 Gümüş Tel 1mm 50g', fiyat: '₺420', satici: 'Doruk Gold Hammadde', sehir: 'Ankara', durum: 'Stokta', dogrulandi: true },
+        { id: 'mu015', kategoriId: 'hammadde', baslik: '14 Ayar Altın Tel 0,8mm', fiyat: '₺1.850', satici: 'Doruk Gold Hammadde', sehir: 'Ankara', durum: 'Stokta', dogrulandi: true },
+        { id: 'mu016', kategoriId: 'aksesuar', baslik: 'İtalyan Zincir 45cm 14K', fiyat: '₺3.400', satici: 'Marina Stone Aksesuar', sehir: 'Trabzon', durum: 'Stokta', dogrulandi: true },
+        { id: 'mu017', kategoriId: 'aksesuar', baslik: 'Kuyumcu Kilit Seti 8mm', fiyat: '₺290', satici: 'Ahenk Kuyum Malzeme', sehir: 'Konya', durum: 'Stokta', dogrulandi: true },
+        { id: 'mu018', kategoriId: 'aksesuar', baslik: 'Taş Yuvası Seti 3–6mm', fiyat: '₺540', satici: 'Elmas Stone Tedarik', sehir: 'İstanbul', durum: 'Stokta', dogrulandi: true },
+        { id: 'mu019', kategoriId: 'parlatma', baslik: 'Zımpara Disk Seti 120–3000 grit', fiyat: '₺980', satici: 'Ege Rodaj Tedarik', sehir: 'İzmir', durum: 'Stokta', dogrulandi: true },
+        { id: 'mu020', kategoriId: 'parlatma', baslik: 'Parlatma Keçesi Seti 6 Parça', fiyat: '₺650', satici: 'Ege Rodaj Tedarik', sehir: 'İzmir', durum: 'Stokta', dogrulandi: true },
+        { id: 'mu021', kategoriId: 'lazer-makine', baslik: 'Fiber Lazer Kesim 30W', fiyat: '₺185.000', satici: 'Lider Lazer Makine', sehir: 'Kahramanmaraş', durum: 'Stokta', dogrulandi: true },
+        { id: 'mu022', kategoriId: 'terazi', baslik: 'Hassas Dijital Terazi 0,001g', fiyat: '₺8.900', satici: 'Prestij Ayar Ekipman', sehir: 'İstanbul', durum: 'Stokta', dogrulandi: true },
+        { id: 'mu023', kategoriId: 'freze', baslik: 'Carbide Freze Seti 20 Parça', fiyat: '₺1.450', satici: 'Zenith Jewelry Works', sehir: 'Ankara', durum: 'Stokta', dogrulandi: true },
+        { id: 'mu024', kategoriId: 'mihlama-alet', baslik: 'Mikro Mıhlama Pens Seti', fiyat: '₺2.400', satici: 'Safir Jewelry Tools', sehir: 'Gaziantep', durum: 'Stokta', dogrulandi: true },
+        { id: 'mu025', kategoriId: 'el-alet', baslik: 'Kuyumcu El Aleti Seti 12 Parça', fiyat: '₺3.200', satici: 'İnci Gold Design Tedarik', sehir: 'Adana', durum: 'Stokta', dogrulandi: true },
+        { id: 'mu026', kategoriId: 'sarf', baslik: 'Lehim Teli 0,5mm 50g', fiyat: '₺380', satici: 'Arıcan Kuyumculuk Tedarik', sehir: 'İstanbul', durum: 'Stokta', dogrulandi: true },
+        { id: 'mu027', kategoriId: 'polisaj', baslik: 'Profesyonel Polisaj Fırça Seti', fiyat: '₺1.850', satici: 'Ege Rodaj Tedarik', sehir: 'İzmir', durum: 'Stokta', dogrulandi: true },
+        { id: 'mu028', kategoriId: 'lazer-makine', baslik: 'CO2 Lazer Kazıma 40W', fiyat: '₺95.000', satici: 'Lider Lazer Makine', sehir: 'Kahramanmaraş', durum: 'Sipariş', dogrulandi: true }
     ],
 
     NEDEN_AURIX: [
@@ -324,20 +324,37 @@ window.AURIX_DATA = {
         { ikon: 'ag', baslik: 'Profesyonel Ağ', metin: 'Tüm kuyumculuk ekosistemi tek çatıda.' }
     ],
 
-    VARSAYILAN_GORSEL: 'https://images.unsplash.com/photo-1617032210775-8a046a4a4899?auto=format&fit=crop&w=800&q=80',
+    VARSAYILAN_GORSEL: 'assets/images/firma.png',
 
-    /* Kategori bazlı yerel kapak görselleri (yedek) */
+    /* Kategori bazlı yerel kapak görselleri — assets/images/ */
     KATEGORI_KAPAK_GORSELLERI: {
-        cizimci: 'assets/cizim.png',
-        matrix: 'assets/cizim.png',
-        rhino: 'assets/cizim.png',
-        dokumcu: 'assets/dokum.png',
-        mumcu: 'assets/mum.png',
-        tas: 'assets/tas.png',
-        mihlamaci: 'assets/tas.png',
-        polisaj: 'assets/toptan.jpg',
-        lazer: 'assets/dokum.png',
-        toptanci: 'assets/toptan.jpg'
+        cizimci: 'assets/images/cad.png',
+        matrix: 'assets/images/cad.png',
+        rhino: 'assets/images/cad.png',
+        dokumcu: 'assets/images/dokum.png',
+        mumcu: 'assets/images/mum.png',
+        kalipci: 'assets/images/kalip.png',
+        mihlamaci: 'assets/images/mihlama.png',
+        tas: 'assets/images/tas.png',
+        ayar: 'assets/images/malzeme.jpg',
+        ramat: 'assets/images/dokum.png',
+        polisaj: 'assets/images/malzeme.jpg',
+        lazer: 'assets/images/lazer.png',
+        makine: 'assets/images/makine.png',
+        zincir: 'assets/images/malzeme.jpg',
+        kilit: 'assets/images/malzeme.jpg',
+        bilezik: 'assets/images/malzeme.jpg',
+        toptanci: 'assets/images/malzeme.jpg',
+        vitrin: 'assets/images/malzeme.jpg',
+        kutu: 'assets/images/malzeme.jpg',
+        malzeme: 'assets/images/malzeme.jpg',
+        sarf: 'assets/images/malzeme.jpg',
+        kimyasal: 'assets/images/malzeme.jpg',
+        tel: 'assets/images/malzeme.jpg',
+        lehim: 'assets/images/malzeme.jpg',
+        aparat: 'assets/images/malzeme.jpg',
+        kaplama: 'assets/images/malzeme.jpg',
+        tamir: 'assets/images/malzeme.jpg'
     },
 
     ORNEK_FIRMALAR: [
@@ -347,8 +364,7 @@ window.AURIX_DATA = {
             aciklama: 'Vakumlu altın ve gümüş döküm. Günlük 600+ parça kapasite, sıfır gözenek garantisi.',
             premium: true, sponsor: true, durum: 'onaylandi', puan: 4.8,
             tamamlananIs: 214, cevapSuresi: '< 2 saat', sonAktif: 'Bugün',
-            eklenmeTarihi: '2026-01-10T10:00:00.000Z',
-            gorsel: 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=600&q=80'
+            eklenmeTarihi: '2026-01-10T10:00:00.000Z'
         },
         {
             id: 'f002', ad: 'Altıneller Döküm', kategoriId: 'dokumcu',
@@ -356,8 +372,7 @@ window.AURIX_DATA = {
             aciklama: '22 ayar ve 18 ayar seri döküm. Platin ve gümüş hatları mevcuttur.',
             premium: true, sponsor: true, durum: 'onaylandi', puan: 4.9,
             tamamlananIs: 178, cevapSuresi: '< 1 saat', sonAktif: 'Bugün',
-            eklenmeTarihi: '2026-02-14T09:30:00.000Z',
-            gorsel: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=600&q=80'
+            eklenmeTarihi: '2026-02-14T09:30:00.000Z'
         },
         {
             id: 'f003', ad: 'Anadolu CAD Tasarım', kategoriId: 'cizimci',
@@ -365,8 +380,7 @@ window.AURIX_DATA = {
             aciklama: 'Matrix, Rhino ve STL teslimi. Fantezi, alyans ve tektaş model kütüphanesi.',
             premium: true, sponsor: false, durum: 'onaylandi', puan: 4.7,
             tamamlananIs: 142, cevapSuresi: '2 saat', sonAktif: 'Dün',
-            eklenmeTarihi: '2026-02-20T14:00:00.000Z',
-            gorsel: 'https://images.unsplash.com/photo-1573408301185-9146fe634ad0?auto=format&fit=crop&w=600&q=80'
+            eklenmeTarihi: '2026-02-20T14:00:00.000Z'
         },
         {
             id: 'f004', ad: 'Nova Mıhlama', kategoriId: 'mihlamaci',
@@ -374,8 +388,7 @@ window.AURIX_DATA = {
             aciklama: 'Mikroskop altında pırlanta ve fantezi taş kitleme. Tektaş ve yüzük uzmanlığı.',
             premium: true, sponsor: true, durum: 'onaylandi', puan: 4.9,
             tamamlananIs: 196, cevapSuresi: '< 2 saat', sonAktif: 'Bugün',
-            eklenmeTarihi: '2026-03-01T11:00:00.000Z',
-            gorsel: 'https://images.unsplash.com/photo-1515562141203-7a88fb7ce338?auto=format&fit=crop&w=600&q=80'
+            eklenmeTarihi: '2026-03-01T11:00:00.000Z'
         },
         {
             id: 'f005', ad: 'Prestij Ayar Evi', kategoriId: 'ayar',
@@ -383,8 +396,7 @@ window.AURIX_DATA = {
             aciklama: '916, 750, 585 ayar analizi. Sertifikalı laboratuvar, aynı gün rapor.',
             premium: false, sponsor: false, durum: 'onaylandi', puan: 4.6,
             tamamlananIs: 312, cevapSuresi: '4 saat', sonAktif: 'Bugün',
-            eklenmeTarihi: '2026-03-08T08:00:00.000Z',
-            gorsel: 'https://images.unsplash.com/photo-1586075010923-2dd4570fb338?auto=format&fit=crop&w=600&q=80'
+            eklenmeTarihi: '2026-03-08T08:00:00.000Z'
         },
         {
             id: 'f006', ad: 'Atlas Kalıp', kategoriId: 'kalipci',
@@ -392,8 +404,7 @@ window.AURIX_DATA = {
             aciklama: 'Silikon, metal ve mum kalıp üretimi. Yüksek detaylı fantezi kalıplar.',
             premium: true, sponsor: false, durum: 'onaylandi', puan: 4.7,
             tamamlananIs: 89, cevapSuresi: '6 saat', sonAktif: 'Dün',
-            eklenmeTarihi: '2026-03-12T16:00:00.000Z',
-            gorsel: 'https://images.unsplash.com/photo-1617032210775-8a046a4a4899?auto=format&fit=crop&w=600&q=80'
+            eklenmeTarihi: '2026-03-12T16:00:00.000Z'
         },
         {
             id: 'f007', ad: 'Lider Lazer', kategoriId: 'lazer',
@@ -401,8 +412,7 @@ window.AURIX_DATA = {
             aciklama: '0,1 mm altın plaka kesim, isim kazıma ve fantezi plaka üretimi.',
             premium: false, sponsor: true, durum: 'onaylandi', puan: 4.6,
             tamamlananIs: 124, cevapSuresi: 'Aynı gün', sonAktif: 'Bugün',
-            eklenmeTarihi: '2026-03-18T10:30:00.000Z',
-            gorsel: 'https://images.unsplash.com/photo-1611591437281-460bf24535ce?auto=format&fit=crop&w=600&q=80'
+            eklenmeTarihi: '2026-03-18T10:30:00.000Z'
         },
         {
             id: 'f008', ad: 'Elmas Stone', kategoriId: 'tas',
@@ -410,8 +420,7 @@ window.AURIX_DATA = {
             aciklama: 'GIA sertifikalı pırlanta, safir, zümrüt ve fantezi taş toptan tedarik.',
             premium: true, sponsor: true, durum: 'onaylandi', puan: 4.9,
             tamamlananIs: 267, cevapSuresi: '< 1 saat', sonAktif: 'Bugün',
-            eklenmeTarihi: '2026-03-22T13:00:00.000Z',
-            gorsel: 'https://images.unsplash.com/photo-1603561596112-0a132757a803?auto=format&fit=crop&w=600&q=80'
+            eklenmeTarihi: '2026-03-22T13:00:00.000Z'
         },
         {
             id: 'f009', ad: 'Ege Rodaj', kategoriId: 'polisaj',
@@ -419,8 +428,7 @@ window.AURIX_DATA = {
             aciklama: 'Rodaj, parlatma ve mine finish. Seri üretim ve özel sipariş kabul edilir.',
             premium: false, sponsor: false, durum: 'beklemede', puan: 0,
             tamamlananIs: 0, cevapSuresi: '—', sonAktif: '—',
-            eklenmeTarihi: '2026-07-01T09:00:00.000Z',
-            gorsel: 'https://images.unsplash.com/photo-1617032210775-8a046a4a4899?auto=format&fit=crop&w=600&q=80'
+            eklenmeTarihi: '2026-07-01T09:00:00.000Z'
         },
         {
             id: 'f010', ad: 'Doruk Gold', kategoriId: 'dokumcu',
@@ -428,8 +436,7 @@ window.AURIX_DATA = {
             aciklama: '18 ayar fantezi döküm ve prototip üretim. Hızlı numune teslimi.',
             premium: false, sponsor: false, durum: 'onaylandi', puan: 4.5,
             tamamlananIs: 98, cevapSuresi: '4 saat', sonAktif: '2 gün önce',
-            eklenmeTarihi: '2026-03-20T10:00:00.000Z',
-            gorsel: 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=600&q=80'
+            eklenmeTarihi: '2026-03-20T10:00:00.000Z'
         },
         {
             id: 'f011', ad: 'Safir Jewelry', kategoriId: 'mihlamaci',
@@ -437,8 +444,7 @@ window.AURIX_DATA = {
             aciklama: 'Baget, yuvarlak ve özel kesim taş mıhlama. Mikro ayar işleri.',
             premium: true, sponsor: true, durum: 'onaylandi', puan: 4.8,
             tamamlananIs: 156, cevapSuresi: '2 saat', sonAktif: 'Dün',
-            eklenmeTarihi: '2026-03-21T11:00:00.000Z',
-            gorsel: 'https://images.unsplash.com/photo-1515562141203-7a88fb7ce338?auto=format&fit=crop&w=600&q=80'
+            eklenmeTarihi: '2026-03-21T11:00:00.000Z'
         },
         {
             id: 'f012', ad: 'Mira Döküm', kategoriId: 'dokumcu',
@@ -446,8 +452,7 @@ window.AURIX_DATA = {
             aciklama: 'Gümüş ve altın vakum döküm. Günlük yüksek hacim, kalite kontrol dahil.',
             premium: false, sponsor: true, durum: 'onaylandi', puan: 4.4,
             tamamlananIs: 134, cevapSuresi: '6 saat', sonAktif: 'Bugün',
-            eklenmeTarihi: '2026-03-23T14:00:00.000Z',
-            gorsel: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=600&q=80'
+            eklenmeTarihi: '2026-03-23T14:00:00.000Z'
         },
         {
             id: 'f013', ad: 'Kuzey Tasarım', kategoriId: 'matrix',
@@ -455,8 +460,7 @@ window.AURIX_DATA = {
             aciklama: 'Matrix 9 & 10, STL ve 3DM arşivi. Nişan, alyans ve fantezi koleksiyonlar.',
             premium: true, sponsor: false, durum: 'onaylandi', puan: 4.7,
             tamamlananIs: 118, cevapSuresi: '2 saat', sonAktif: 'Bugün',
-            eklenmeTarihi: '2026-03-24T09:00:00.000Z',
-            gorsel: 'https://images.unsplash.com/photo-1573408301185-9146fe634ad0?auto=format&fit=crop&w=600&q=80'
+            eklenmeTarihi: '2026-03-24T09:00:00.000Z'
         },
         {
             id: 'f014', ad: 'İstanbul Kuyum Teknoloji', kategoriId: 'makine',
@@ -464,8 +468,7 @@ window.AURIX_DATA = {
             aciklama: 'Döküm, lazer ve rodaj makineleri satışı. Kurulum ve servis desteği.',
             premium: true, sponsor: true, durum: 'onaylandi', puan: 4.6,
             tamamlananIs: 76, cevapSuresi: 'Aynı gün', sonAktif: 'Dün',
-            eklenmeTarihi: '2026-03-19T12:00:00.000Z',
-            gorsel: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=600&q=80'
+            eklenmeTarihi: '2026-03-19T12:00:00.000Z'
         },
         {
             id: 'f015', ad: 'Zenith Jewelry Works', kategoriId: 'rhino',
@@ -473,8 +476,7 @@ window.AURIX_DATA = {
             aciklama: 'Rhino 7/8 ile organik ve geometrik kuyumcu modelleme. Render ve STL teslim.',
             premium: true, sponsor: false, durum: 'onaylandi', puan: 4.8,
             tamamlananIs: 102, cevapSuresi: '4 saat', sonAktif: 'Bugün',
-            eklenmeTarihi: '2026-04-02T10:00:00.000Z',
-            gorsel: 'https://images.unsplash.com/photo-1617032210775-8a046a4a4899?auto=format&fit=crop&w=600&q=80'
+            eklenmeTarihi: '2026-04-02T10:00:00.000Z'
         },
         {
             id: 'f016', ad: 'Marina Stone', kategoriId: 'tas',
@@ -482,8 +484,7 @@ window.AURIX_DATA = {
             aciklama: 'Doğu Karadeniz bölgesi taş tedarik ağı. Pırlanta ve renkli taş stokları.',
             premium: false, sponsor: false, durum: 'onaylandi', puan: 4.5,
             tamamlananIs: 87, cevapSuresi: '6 saat', sonAktif: '3 gün önce',
-            eklenmeTarihi: '2026-04-05T11:00:00.000Z',
-            gorsel: 'https://images.unsplash.com/photo-1603561596112-0a132757a803?auto=format&fit=crop&w=600&q=80'
+            eklenmeTarihi: '2026-04-05T11:00:00.000Z'
         },
         {
             id: 'f017', ad: 'Ahenk Kuyum', kategoriId: 'bilezik',
@@ -491,8 +492,7 @@ window.AURIX_DATA = {
             aciklama: '22 ayar bilezik üretimi. İtalyan ve fantezi modeller, toptan sevkiyat.',
             premium: false, sponsor: true, durum: 'onaylandi', puan: 4.4,
             tamamlananIs: 163, cevapSuresi: 'Aynı gün', sonAktif: 'Bugün',
-            eklenmeTarihi: '2026-04-08T09:00:00.000Z',
-            gorsel: 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=600&q=80'
+            eklenmeTarihi: '2026-04-08T09:00:00.000Z'
         },
         {
             id: 'f018', ad: 'İnci Gold Design', kategoriId: 'cizimci',
@@ -500,8 +500,7 @@ window.AURIX_DATA = {
             aciklama: 'CAD çizim ve teknik resim. Müşteri briefinden STL teslimine kadar uçtan uca.',
             premium: false, sponsor: false, durum: 'onaylandi', puan: 4.6,
             tamamlananIs: 74, cevapSuresi: '4 saat', sonAktif: 'Dün',
-            eklenmeTarihi: '2026-04-10T14:00:00.000Z',
-            gorsel: 'https://images.unsplash.com/photo-1573408301185-9146fe634ad0?auto=format&fit=crop&w=600&q=80'
+            eklenmeTarihi: '2026-04-10T14:00:00.000Z'
         },
         {
             id: 'f019', ad: 'Vizyon Döküm', kategoriId: 'dokumcu',
@@ -509,8 +508,7 @@ window.AURIX_DATA = {
             aciklama: 'Platin ve palladium döküm hatları. Medikal ve kuyumculuk segmenti.',
             premium: true, sponsor: false, durum: 'onaylandi', puan: 4.7,
             tamamlananIs: 112, cevapSuresi: '2 saat', sonAktif: 'Bugün',
-            eklenmeTarihi: '2026-04-12T08:00:00.000Z',
-            gorsel: 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=600&q=80'
+            eklenmeTarihi: '2026-04-12T08:00:00.000Z'
         },
         {
             id: 'f020', ad: 'Kale Kalıp', kategoriId: 'kalipci',
@@ -518,8 +516,7 @@ window.AURIX_DATA = {
             aciklama: 'Tektaş, alyans ve fantezi kalıp üretimi. Hızlı revizyon ve numune.',
             premium: false, sponsor: false, durum: 'onaylandi', puan: 4.5,
             tamamlananIs: 68, cevapSuresi: '6 saat', sonAktif: '2 gün önce',
-            eklenmeTarihi: '2026-04-15T10:00:00.000Z',
-            gorsel: 'https://images.unsplash.com/photo-1617032210775-8a046a4a4899?auto=format&fit=crop&w=600&q=80'
+            eklenmeTarihi: '2026-04-15T10:00:00.000Z'
         },
         {
             id: 'f021', ad: 'Anadolu Mum Sanayi', kategoriId: 'mumcu',
@@ -527,8 +524,7 @@ window.AURIX_DATA = {
             aciklama: 'Kuyumcu mum basım ve model hazırlığı. Seri ve özel sipariş.',
             premium: false, sponsor: false, durum: 'onaylandi', puan: 4.3,
             tamamlananIs: 95, cevapSuresi: 'Aynı gün', sonAktif: 'Bugün',
-            eklenmeTarihi: '2026-04-18T11:00:00.000Z',
-            gorsel: 'https://images.unsplash.com/photo-1617032210775-8a046a4a4899?auto=format&fit=crop&w=600&q=80'
+            eklenmeTarihi: '2026-04-18T11:00:00.000Z'
         },
         {
             id: 'f022', ad: 'Kapalıçarşı Ramat Evi', kategoriId: 'ramat',
@@ -536,8 +532,7 @@ window.AURIX_DATA = {
             aciklama: 'Hurda altın, gümüş ve değerli metal ramat. Şeffaf tartım ve anında ödeme.',
             premium: false, sponsor: false, durum: 'onaylandi', puan: 4.5,
             tamamlananIs: 421, cevapSuresi: '< 1 saat', sonAktif: 'Bugün',
-            eklenmeTarihi: '2026-04-20T09:00:00.000Z',
-            gorsel: 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=600&q=80'
+            eklenmeTarihi: '2026-04-20T09:00:00.000Z'
         },
         {
             id: 'f023', ad: 'Prestij Vitrin Sistemleri', kategoriId: 'vitrin',
@@ -545,8 +540,7 @@ window.AURIX_DATA = {
             aciklama: 'Kuyumcu vitrin, manken ve LED aydınlatma. Montaj ve bakım dahil.',
             premium: true, sponsor: true, durum: 'onaylandi', puan: 4.6,
             tamamlananIs: 54, cevapSuresi: 'Aynı gün', sonAktif: 'Dün',
-            eklenmeTarihi: '2026-04-22T11:00:00.000Z',
-            gorsel: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=600&q=80'
+            eklenmeTarihi: '2026-04-22T11:00:00.000Z'
         },
         {
             id: 'f024', ad: 'Elegance Kutu & Ambalaj', kategoriId: 'kutu',
@@ -554,8 +548,7 @@ window.AURIX_DATA = {
             aciklama: 'Özel tasarım kuyumcu kutuları, süet çantalar ve marka baskılı ambalaj.',
             premium: false, sponsor: false, durum: 'onaylandi', puan: 4.4,
             tamamlananIs: 82, cevapSuresi: '6 saat', sonAktif: '3 gün önce',
-            eklenmeTarihi: '2026-04-24T14:00:00.000Z',
-            gorsel: 'https://images.unsplash.com/photo-1549465220-1a8b9238cd48?auto=format&fit=crop&w=600&q=80'
+            eklenmeTarihi: '2026-04-24T14:00:00.000Z'
         },
         {
             id: 'f025', ad: 'Marmara Zincir Sanayi', kategoriId: 'zincir',
@@ -563,8 +556,7 @@ window.AURIX_DATA = {
             aciklama: 'İtalyan ve fantezi zincir üretimi. 14K, 18K, 22K gramaj seçenekleri.',
             premium: false, sponsor: true, durum: 'onaylandi', puan: 4.4,
             tamamlananIs: 148, cevapSuresi: '4 saat', sonAktif: 'Bugün',
-            eklenmeTarihi: '2026-04-26T13:00:00.000Z',
-            gorsel: 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=600&q=80'
+            eklenmeTarihi: '2026-04-26T13:00:00.000Z'
         },
         {
             id: 'f026', ad: 'Kale Kilit Kuyum', kategoriId: 'kilit',
@@ -572,8 +564,7 @@ window.AURIX_DATA = {
             aciklama: 'Kuyumcu kilit, klips ve bağlantı parçaları. Toptan ve perakende.',
             premium: false, sponsor: false, durum: 'onaylandi', puan: 4.3,
             tamamlananIs: 91, cevapSuresi: 'Aynı gün', sonAktif: 'Dün',
-            eklenmeTarihi: '2026-04-28T10:00:00.000Z',
-            gorsel: 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=600&q=80'
+            eklenmeTarihi: '2026-04-28T10:00:00.000Z'
         },
         {
             id: 'f027', ad: 'Ahenk Malzeme Tedarik', kategoriId: 'malzeme',
@@ -581,8 +572,7 @@ window.AURIX_DATA = {
             aciklama: 'Kuyumculuk malzeme, aparat ve sarf malzemeleri. Türkiye geneli sevkiyat.',
             premium: false, sponsor: false, durum: 'onaylandi', puan: 4.3,
             tamamlananIs: 203, cevapSuresi: '2 saat', sonAktif: 'Bugün',
-            eklenmeTarihi: '2026-05-01T10:00:00.000Z',
-            gorsel: 'https://images.unsplash.com/photo-1586075010923-2dd4570fb338?auto=format&fit=crop&w=600&q=80'
+            eklenmeTarihi: '2026-05-01T10:00:00.000Z'
         },
         {
             id: 'f028', ad: 'Altın Tel & Lehim Merkezi', kategoriId: 'lehim',
@@ -590,8 +580,7 @@ window.AURIX_DATA = {
             aciklama: 'Altın lehim, kaynak teli ve flux kimyasalları. Toptan stok.',
             premium: false, sponsor: false, durum: 'onaylandi', puan: 4.2,
             tamamlananIs: 176, cevapSuresi: '4 saat', sonAktif: 'Bugün',
-            eklenmeTarihi: '2026-05-03T12:00:00.000Z',
-            gorsel: 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=600&q=80'
+            eklenmeTarihi: '2026-05-03T12:00:00.000Z'
         }
     ],
 

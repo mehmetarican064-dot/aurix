@@ -1151,7 +1151,7 @@ a { color: inherit; text-decoration: none; }
     height: 168px;
     aspect-ratio: 16 / 9;
     overflow: hidden;
-    background: var(--aurix-surface);
+    background: #0a0a0c;
     position: relative;
 }
 
@@ -1362,9 +1362,10 @@ a { color: inherit; text-decoration: none; }
     aspect-ratio: 16 / 10;
     min-height: 220px;
     overflow: hidden;
-    background: rgba(255, 255, 255, 0.04);
+    background: #0a0a0c;
 }
 
+.sponsor-alani-kart__gorsel .firma-gorsel-alan,
 .sponsor-alani-kart__gorsel img {
     width: 100%;
     height: 100%;
@@ -1372,7 +1373,9 @@ a { color: inherit; text-decoration: none; }
     transition: transform 0.5s var(--aurix-ease);
 }
 
-.sponsor-alani-kart:hover .sponsor-alani-kart__gorsel img { transform: scale(1.05); }
+.sponsor-alani-kart:hover .sponsor-alani-kart__gorsel .firma-gorsel-alan--ok img {
+    transform: scale(1.05);
+}
 
 .sponsor-alani-kart__placeholder {
     width: 100%;
@@ -2421,13 +2424,20 @@ a { color: inherit; text-decoration: none; }
     background: rgba(255, 255, 255, 0.1);
 }
 
-.detay-gorsel {
+.detay-gorsel-wrap {
     width: 100%;
     height: 220px;
-    object-fit: cover;
     border-radius: var(--aurix-radius);
     margin-bottom: 16px;
     border: 1px solid var(--aurix-border);
+    overflow: hidden;
+}
+
+.detay-gorsel {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    background: transparent;
 }
 
 .detay-meta {
@@ -5201,7 +5211,7 @@ a { color: inherit; text-decoration: none; }
     height: 100%;
     object-fit: cover;
     display: block;
-    background: linear-gradient(145deg, #1a1a1c 0%, #121214 100%);
+    background: transparent;
 }
 
 .firma-kart--pro .firma-kart__kapak {
@@ -8108,5 +8118,165 @@ a { color: inherit; text-decoration: none; }
     .footer--wireframe .footer__alt-orta a {
         font-size: 9px;
     }
+}
+
+/* ================================================================
+   Firma görsel alanı — sektör placeholder sistemi
+   ================================================================ */
+.firma-gorsel-alan {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    min-height: inherit;
+    background: #0a0a0c;
+}
+
+.firma-gorsel-alan > img:not(.firma-sektor-ph__logo) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    z-index: 2;
+    opacity: 0;
+    transition: opacity 0.35s ease, transform 0.5s var(--aurix-ease);
+    background: transparent;
+}
+
+.firma-gorsel-alan.firma-gorsel-alan--ok > img:not(.firma-sektor-ph__logo) {
+    opacity: 1;
+}
+
+.firma-gorsel-alan.firma-gorsel-alan--ph > img:not(.firma-sektor-ph__logo) {
+    opacity: 0;
+    visibility: hidden;
+}
+
+.firma-sektor-ph {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    pointer-events: none;
+}
+
+.firma-sektor-ph__bg {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+}
+
+.firma-sektor-ph__logo {
+    position: relative;
+    z-index: 2;
+    width: 52px;
+    height: 52px;
+    object-fit: contain;
+    opacity: 0.9;
+    filter: drop-shadow(0 2px 14px rgba(201, 169, 98, 0.3));
+}
+
+.firma-sektor-ph__ikon {
+    position: relative;
+    z-index: 2;
+    font-size: 22px;
+    line-height: 1;
+    filter: drop-shadow(0 1px 6px rgba(0, 0, 0, 0.6));
+}
+
+.firma-gorsel-alan.firma-gorsel-alan--ok .firma-sektor-ph {
+    opacity: 0;
+    transition: opacity 0.35s ease;
+}
+
+.firma-gorsel-alan--thumb .firma-sektor-ph__logo {
+    width: 24px;
+    height: 24px;
+}
+
+.firma-gorsel-alan--thumb .firma-sektor-ph__ikon {
+    font-size: 12px;
+}
+
+.firma-kart__gorsel .firma-gorsel-alan,
+.firma-kart__thumb .firma-gorsel-alan,
+.sponsor-alani-kart__gorsel .firma-gorsel-alan,
+.detay-gorsel-wrap.firma-gorsel-alan {
+    min-height: 100%;
+    height: 100%;
+}
+
+.firma-kart:hover .firma-gorsel-alan.firma-gorsel-alan--ok > img:not(.firma-sektor-ph__logo) {
+    transform: scale(1.06);
+}
+
+/* Sektör temaları — premium degrade arka planlar */
+.firma-gorsel-alan--dokum .firma-sektor-ph__bg {
+    background:
+        radial-gradient(ellipse 90% 70% at 50% 75%, rgba(212, 140, 42, 0.38) 0%, transparent 68%),
+        linear-gradient(155deg, #1f1408 0%, #0a0a0c 45%, #2a1a0a 100%);
+}
+
+.firma-gorsel-alan--cad .firma-sektor-ph__bg {
+    background:
+        radial-gradient(ellipse 75% 55% at 58% 38%, rgba(72, 130, 210, 0.28) 0%, transparent 65%),
+        linear-gradient(155deg, #0a1420 0%, #0a0a0c 50%, #121a2e 100%);
+}
+
+.firma-gorsel-alan--mihlama .firma-sektor-ph__bg {
+    background:
+        radial-gradient(ellipse 70% 60% at 50% 45%, rgba(220, 220, 255, 0.22) 0%, transparent 62%),
+        linear-gradient(155deg, #12121a 0%, #0a0a0c 48%, #1a1828 100%);
+}
+
+.firma-gorsel-alan--tas .firma-sektor-ph__bg {
+    background:
+        radial-gradient(ellipse 80% 65% at 45% 50%, rgba(140, 90, 220, 0.3) 0%, transparent 66%),
+        linear-gradient(155deg, #140f22 0%, #0a0a0c 50%, #1e1230 100%);
+}
+
+.firma-gorsel-alan--lazer .firma-sektor-ph__bg {
+    background:
+        radial-gradient(ellipse 65% 50% at 55% 55%, rgba(255, 90, 40, 0.32) 0%, transparent 60%),
+        linear-gradient(155deg, #1a0c08 0%, #0a0a0c 48%, #2a1008 100%);
+}
+
+.firma-gorsel-alan--kalip .firma-sektor-ph__bg {
+    background:
+        radial-gradient(ellipse 75% 58% at 48% 62%, rgba(180, 130, 60, 0.3) 0%, transparent 64%),
+        linear-gradient(155deg, #181208 0%, #0a0a0c 50%, #221a0c 100%);
+}
+
+.firma-gorsel-alan--makine .firma-sektor-ph__bg {
+    background:
+        radial-gradient(ellipse 80% 60% at 50% 40%, rgba(160, 170, 190, 0.22) 0%, transparent 65%),
+        linear-gradient(155deg, #101418 0%, #0a0a0c 50%, #181c22 100%);
+}
+
+.firma-gorsel-alan--malzeme .firma-sektor-ph__bg {
+    background:
+        radial-gradient(ellipse 78% 62% at 50% 55%, rgba(201, 169, 98, 0.28) 0%, transparent 66%),
+        linear-gradient(155deg, #141210 0%, #0a0a0c 48%, #1c1810 100%);
+}
+
+.firma-gorsel-alan--genel .firma-sektor-ph__bg {
+    background:
+        radial-gradient(ellipse 85% 70% at 50% 50%, rgba(201, 169, 98, 0.25) 0%, transparent 68%),
+        linear-gradient(155deg, #12100c 0%, #0a0a0c 42%, #1a1408 100%);
+}
+
+.detay-gorsel-wrap .firma-sektor-ph__logo {
+    width: 64px;
+    height: 64px;
+}
+
+.detay-gorsel-wrap .firma-sektor-ph__ikon {
+    font-size: 26px;
 }
 
