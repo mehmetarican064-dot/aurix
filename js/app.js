@@ -13,6 +13,8 @@
 
     var esc = AurixUtils.escapeHtml;
     var safeUrl = AurixUtils.safeUrl;
+    var safeImageUrl = AurixUtils.safeImageUrl;
+    var defaultImg = AurixUtils.defaultImage;
     var safeWaHref = AurixUtils.safeWhatsAppHref;
     var safeCss = AurixUtils.safeCssClass;
 
@@ -129,29 +131,70 @@
     }
 
     function varsayilanFirmaGorseli() {
-        return AURIX_DATA.VARSAYILAN_GORSEL || '';
+        return safeImageUrl(AURIX_DATA.VARSAYILAN_GORSEL, defaultImg());
+    }
+
+    function varsayilanMalzemeGorseli() {
+        return safeImageUrl(AURIX_DATA.VARSAYILAN_MALZEME_GORSEL, 'assets/images/malzeme.svg');
     }
 
     function firmaKapakGorsel(firma) {
-        if (firma && firma.gorsel) return firma.gorsel;
+        if (firma && firma.gorsel && AurixUtils.isLocalAssetPath(firma.gorsel)) {
+            return safeImageUrl(firma.gorsel, varsayilanFirmaGorseli());
+        }
         var map = AURIX_DATA.KATEGORI_KAPAK_GORSELLERI || {};
-        if (firma && map[firma.kategoriId]) return map[firma.kategoriId];
+        if (firma && map[firma.kategoriId]) {
+            return safeImageUrl(map[firma.kategoriId], varsayilanFirmaGorseli());
+        }
         return varsayilanFirmaGorseli();
     }
 
+    function malzemeKapakGorsel(urun) {
+        var yedek = varsayilanMalzemeGorseli();
+        if (urun && urun.gorsel && AurixUtils.isLocalAssetPath(urun.gorsel)) {
+            return safeImageUrl(urun.gorsel, yedek);
+        }
+        var map = AURIX_DATA.MALZEME_KATEGORI_GORSELLERI || {};
+        if (urun && map[urun.kategoriId]) {
+            return safeImageUrl(map[urun.kategoriId], yedek);
+        }
+        return yedek;
+    }
+
+    function gorselImgHtml(src, opts) {
+        opts = opts || {};
+        var yedek = safeImageUrl(opts.fallback || defaultImg(), defaultImg());
+        var imgSrc = safeImageUrl(src, yedek);
+        var cls = 'aurix-img-fallback' + (opts.extraClass ? ' ' + opts.extraClass : '');
+        return '<img class="' + cls + '" src="' + esc(imgSrc) + '"' +
+            ' alt="' + esc(opts.alt != null ? opts.alt : '') + '"' +
+            ' width="' + (opts.width || 400) + '" height="' + (opts.height || 200) + '"' +
+            ' loading="lazy" decoding="async"' +
+            ' data-fallback-src="' + esc(yedek) + '"' +
+            (opts.removeOnFail ? ' data-remove-on-fail="' + esc(opts.removeOnFail) + '"' : '') +
+            '>';
+    }
+
     function firmaAnaKapakHtml(firma, alt) {
-        if (!firma || !firma.gorsel) return '';
-        var src = safeUrl(firma.gorsel, '');
-        if (!src) return '';
-        return '<div class="firma-kart__thumb">' +
-            '<img class="firma-kart__thumb-img aurix-img-fallback" src="' + esc(src) + '" alt="' + esc(alt || '') + '" width="320" height="64" loading="lazy" decoding="async" data-remove-parent=".firma-kart__thumb">' +
+        return '<div class="firma-kart__kapak">' +
+            gorselImgHtml(firmaKapakGorsel(firma), {
+                alt: alt,
+                extraClass: 'firma-kart__kapak-img',
+                width: 400,
+                height: 200,
+                fallback: varsayilanFirmaGorseli()
+            }) +
             '</div>';
     }
 
     function firmaKapakImgHtml(firma, alt) {
-        var yedek = safeUrl(varsayilanFirmaGorseli(), '');
-        var src = safeUrl(firmaKapakGorsel(firma), yedek);
-        return '<img class="firma-kart__kapak-img aurix-img-fallback" src="' + esc(src) + '" alt="' + esc(alt || '') + '" width="400" height="200" loading="lazy" decoding="async" data-fallback-src="' + esc(yedek) + '">';
+        return gorselImgHtml(firmaKapakGorsel(firma), {
+            alt: alt,
+            extraClass: 'firma-kart__kapak-img',
+            width: 400,
+            height: 200,
+            fallback: varsayilanFirmaGorseli()
+        });
     }
 
     function heroKategoriFiltre(kategoriId, aramaMetni) {
@@ -440,10 +483,12 @@
         grid.innerHTML = list.slice(0, 3).map(function (f) {
             var kat = kategoriBul(f.kategoriId);
             var waHref = safeWaHref(f.tel);
-            var gorselSrc = safeUrl(f.gorsel, '');
-            var gorsel = gorselSrc
-                ? '<img class="aurix-img-fallback" src="' + esc(gorselSrc) + '" alt="' + esc(f.ad) + '" width="640" height="360" loading="lazy" decoding="async" data-remove-parent=".sponsor-alani-kart__gorsel">'
-                : '<div class="sponsor-alani-kart__placeholder">A</div>';
+            var gorsel = gorselImgHtml(firmaKapakGorsel(f), {
+                alt: f.ad,
+                width: 640,
+                height: 360,
+                fallback: varsayilanFirmaGorseli()
+            });
             return '<article class="sponsor-alani-kart" data-detay="' + esc(f.id) + '">' +
                 '<div class="sponsor-alani-kart__gorsel">' + gorsel + '</div>' +
                 '<div class="sponsor-alani-kart__govde">' +
@@ -683,9 +728,9 @@
         var premiumCls = firma.premium ? ' firma-kart--premium' : '';
         var partnerBadge = firma.sponsor ? '<span class="firma-kart__partner">PARTNER</span>' : '';
         var gorselIcerik = firmaKapakImgHtml(firma, firma.ad).replace('firma-kart__kapak-img', 'firma-kart__gorsel-img');
-        var logoSrc = firma.logo ? safeUrl(firma.logo, '') : '';
+        var logoSrc = firma.logo && AurixUtils.isLocalAssetPath(firma.logo) ? safeImageUrl(firma.logo, '') : '';
         var logoIcerik = logoSrc
-            ? '<img class="aurix-img-fallback" src="' + esc(logoSrc) + '" alt="" width="48" height="48" loading="lazy" decoding="async" data-remove-parent=".firma-kart__logo">'
+            ? gorselImgHtml(logoSrc, { alt: '', width: 48, height: 48, extraClass: 'firma-kart__logo-img', fallback: varsayilanFirmaGorseli() })
             : '<span class="firma-kart__logo-harf">' + esc(firmaBasHarfleri(firma.ad)) + '</span>';
         var aciklama = firma.aciklama || '';
         var puanMetin = firma.puan ? firma.puan.toFixed(1) : '—';
@@ -1019,11 +1064,11 @@
 
     function malzemeKartHtml(urun) {
         var kat = malzemeKategoriBul(urun.kategoriId);
-        var yedek = safeUrl(varsayilanFirmaGorseli(), '');
-        var gorsel = safeUrl(urun.gorsel, yedek) || yedek;
+        var yedek = varsayilanMalzemeGorseli();
+        var gorsel = malzemeKapakGorsel(urun);
         return '<article class="malzeme-kart" data-malzeme-id="' + esc(urun.id) + '">' +
             '<div class="malzeme-kart__gorsel">' +
-            '<img class="aurix-img-fallback" src="' + esc(gorsel) + '" alt="' + esc(urun.baslik) + '" width="320" height="200" loading="lazy" decoding="async" data-fallback-src="' + esc(yedek) + '">' +
+            gorselImgHtml(gorsel, { alt: urun.baslik, width: 320, height: 200, extraClass: 'malzeme-kart__img', fallback: yedek }) +
             (urun.dogrulandi ? '<span class="malzeme-kart__dogrulandi">Doğrulandı</span>' : '') +
             '</div>' +
             '<div class="malzeme-kart__govde">' +
@@ -1373,15 +1418,17 @@
         $('detayPuan').textContent = firma.puan ? yildizGoster(firma.puan) : 'Henüz puan yok';
         var detayImg = $('detayGorsel');
         if (detayImg) {
-            detayImg.onerror = function () {
-                if (this.dataset.fallbackApplied !== '1') {
-                    this.dataset.fallbackApplied = '1';
-                    this.src = safeUrl(varsayilanFirmaGorseli(), '');
-                }
-            };
-            detayImg.src = safeUrl(firmaKapakGorsel(firma), safeUrl(varsayilanFirmaGorseli(), ''));
-            detayImg.alt = firma.ad;
+            detayImg.classList.add('aurix-img-fallback');
+            detayImg.dataset.fallbackApplied = '';
+            var detayYedek = varsayilanFirmaGorseli();
+            detayImg.setAttribute('data-fallback-src', detayYedek);
+            detayImg.onerror = null;
+            detayImg.classList.remove('aurix-img-fallback--hidden');
             detayImg.style.display = '';
+            var detayWrap = detayImg.parentElement;
+            if (detayWrap) detayWrap.classList.remove('gorsel-alan--placeholder');
+            detayImg.src = safeImageUrl(firmaKapakGorsel(firma), detayYedek);
+            detayImg.alt = firma.ad;
         }
         var detayWa = $('detayWa');
         if (detayWa) {

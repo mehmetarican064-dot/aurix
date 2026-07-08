@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="450" viewBox="0 0 800 450" role="img" aria-label="CAD">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e1e22"/>
+      <stop offset="100%" stop-color="#121214"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="450" fill="url(#bg)"/>
+  <rect x="290" y="170" width="220" height="140" rx="6" fill="none" stroke="#c9a962" stroke-width="2" opacity="0.35"/>
+  <path d="M310 290 L370 210 L430 250 L490 190" fill="none" stroke="#c9a962" stroke-width="2" opacity="0.45"/>
+  <circle cx="370" cy="210" r="6" fill="#c9a962" opacity="0.5"/>
+  <circle cx="430" cy="250" r="6" fill="#c9a962" opacity="0.5"/>
+  <text x="400" y="340" text-anchor="middle" font-family="system-ui,sans-serif" font-size="16" fill="#8a8a8e" letter-spacing="3">CAD</text>
+</svg>

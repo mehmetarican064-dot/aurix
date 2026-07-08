@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="450" viewBox="0 0 800 450" role="img" aria-label="M1hlama">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e1e22"/>
+      <stop offset="100%" stop-color="#121214"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="450" fill="url(#bg)"/>
+  <circle cx="400" cy="220" r="48" fill="none" stroke="#c9a962" stroke-width="2" opacity="0.35"/>
+  <path d="M400 172 L412 228 L468 228 L424 260 L440 316 L400 284 L360 316 L376 260 L332 228 L388 228 Z" fill="#c9a962" opacity="0.25"/>
+  <text x="400" y="340" text-anchor="middle" font-family="system-ui,sans-serif" font-size="16" fill="#8a8a8e" letter-spacing="3">MIHLAMA</text>
+</svg>
