@@ -71,6 +71,10 @@
         var scope = root || document;
         scope.querySelectorAll('.firma-gorsel-alan > img.aurix-img-fallback').forEach(function (img) {
             if (!isFirmaKapakImg(img)) return;
+            if (img.getAttribute('data-force-ph') === '1') {
+                firmaGorselAlanDurum(img, true);
+                return;
+            }
             if (img.complete && img.naturalWidth > 0) {
                 firmaGorselAlanDurum(img, false);
             } else if (img.complete && !img.naturalWidth) {
@@ -83,6 +87,10 @@
         var scope = root || document;
         scope.querySelectorAll('.firma-gorsel-alan > img.aurix-img-fallback').forEach(function (img) {
             if (!isFirmaKapakImg(img)) return;
+            if (img.getAttribute('data-force-ph') === '1') {
+                firmaGorselAlanDurum(img, true);
+                return;
+            }
             img.loading = 'eager';
             if (img.complete && img.naturalWidth > 0) {
                 firmaGorselAlanDurum(img, false);
@@ -114,6 +122,10 @@
         document.addEventListener('load', function (e) {
             var img = e.target;
             if (!isFirmaKapakImg(img)) return;
+            if (img.getAttribute('data-force-ph') === '1') {
+                firmaGorselAlanDurum(img, true);
+                return;
+            }
             firmaGorselAlanDurum(img, false);
         }, true);
 

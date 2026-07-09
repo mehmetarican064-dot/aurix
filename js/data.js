@@ -31,7 +31,6 @@ window.AURIX_DATA = {
         { id: 'tel', ad: 'Tel', ikon: '〰️' },
         { id: 'lehim', ad: 'Lehim', ikon: '🔥' },
         { id: 'aparat', ad: 'Aparat', ikon: '🔧' },
-        { id: 'kaplama', ad: 'Kaplama', ikon: '◈' },
         { id: 'tamir', ad: 'Tamir', ikon: '⚙️' }
     ],
 
@@ -160,7 +159,7 @@ window.AURIX_DATA = {
         },
         {
             id: 'it002', kategoriId: 'polisaj',
-            baslik: '22 Ayar Alyans Rodajı',
+            baslik: '22 Ayar Alyans Polisajı',
             sehir: 'İzmir', adet: '80 çift', termin: '5 gün',
             butce: '₺18.000 – ₺24.000', teklifSayisi: 4,
             acilisTarihi: '07 Tem 2026', durum: 'Teklif bekliyor', durumTip: 'bekliyor', sonGuncelleme: '3 saat önce'
@@ -229,10 +228,7 @@ window.AURIX_DATA = {
         { id: 'mumcu', ad: 'Mum Basım', sembol: '◆', isSayisi: 9, firmaTaban: 190, aciklama: 'Kuyumcu mum basım ve model hazırlığı.' },
         { id: 'dokumcu', ad: 'Döküm', sembol: '⚙', isSayisi: 22, firmaTaban: 420, aciklama: 'Altın, gümüş ve fantezi döküm üretimi.' },
         { id: 'mihlamaci', ad: 'Mıhlama', sembol: '◈', isSayisi: 11, firmaTaban: 310, aciklama: 'Taş kitleme ve mikro mıhlama işleri.' },
-        { id: 'polisaj', ad: 'Rodaj', sembol: '◎', isSayisi: 8, firmaTaban: 240, aciklama: 'Parlatma, rodaj ve yüzey işleme.' },
-        { id: 'lazer', ad: 'Lazer', sembol: '⚡', isSayisi: 6, firmaTaban: 165, aciklama: 'Lazer kesim, kazıma ve markalama.' },
         { id: 'tas', ad: 'Taş', sembol: '✦', isSayisi: 10, firmaTaban: 350, aciklama: 'Pırlanta ve değerli taş tedariki.' },
-        { id: 'kaplama', ad: 'Kaplama', sembol: '◉', isSayisi: 5, firmaTaban: 120, aciklama: 'Rodaj sonrası kaplama ve finish.' },
         { id: 'tamir', ad: 'Tamir', sembol: '⊕', isSayisi: 7, firmaTaban: 200, aciklama: 'Bakım, ölçü ve tamir hizmetleri.' },
         { id: 'malzeme-tedarik', ad: 'Malzeme Tedarik', sembol: '▣', isSayisi: 18, firmaTaban: 320, aciklama: 'Takı ekipmanları, makineler, sarf malzemeleri, el aletleri ve yedek parçalar.', ozelSayfa: 'malzeme' }
     ],
@@ -248,7 +244,7 @@ window.AURIX_DATA = {
         { tip: 'is', metin: 'İstanbul — 925 gümüş erkek yüzük dökümü talebi açıldı.', zaman: '2 dakika önce' },
         { tip: 'teklif', metin: 'Denizli — Anadolu CAD Tasarım teklifi kabul edildi.', zaman: '4 dakika önce' },
         { tip: 'firma', metin: 'Trabzon — Marina Stone profili doğrulandı.', zaman: '8 dakika önce' },
-        { tip: 'is', metin: 'Kahramanmaraş — 22 ayar alyans rodaj işi yayınlandı.', zaman: '12 dakika önce' },
+        { tip: 'is', metin: 'Kahramanmaraş — 22 ayar alyans polisaj işi yayınlandı.', zaman: '12 dakika önce' },
         { tip: 'teklif', metin: 'Bursa — Atlas Kalıp kalıp hazırlama teklifi gönderdi.', zaman: '18 dakika önce' },
         { tip: 'is', metin: 'İzmir — pırlanta mıhlama işi 5 teklif aldı.', zaman: '25 dakika önce' }
     ],
@@ -266,7 +262,6 @@ window.AURIX_DATA = {
         { id: 'lazer-makine', ad: 'Lazer Makineleri', ikon: '⚡' },
         { id: 'dokum-makine', ad: 'Döküm Makineleri', ikon: '⚙' },
         { id: 'polisaj', ad: 'Polisaj', ikon: '✨' },
-        { id: 'rodaj', ad: 'Rodaj', ikon: '◎' },
         { id: 'mihlama-alet', ad: 'Mıhlama Aletleri', ikon: '◈' },
         { id: 'el-alet', ad: 'El Aletleri', ikon: '🔧' },
         { id: 'matkap-uc', ad: 'Matkap Uçları', ikon: '⬡' },
@@ -289,7 +284,7 @@ window.AURIX_DATA = {
     MALZEME_URUNLER: [
         { id: 'mu001', kategoriId: 'dokum-makine', baslik: 'Vakum Döküm Makinesi 3kg', fiyat: '₺485.000', satici: 'İstanbul Kuyum Teknoloji', sehir: 'İstanbul', durum: 'Stokta', dogrulandi: true },
         { id: 'mu002', kategoriId: 'kimyasal', baslik: 'Ultrasonik Temizleyici 6L', fiyat: '₺14.800', satici: 'Vizyon Döküm Tedarik', sehir: 'Bursa', durum: 'Stokta', dogrulandi: true },
-        { id: 'mu003', kategoriId: 'motor', baslik: 'Rodaj Motoru 1/4 HP', fiyat: '₺7.200', satici: 'Ege Rodaj Tedarik', sehir: 'İzmir', durum: 'Stokta', dogrulandi: true },
+        { id: 'mu003', kategoriId: 'motor', baslik: 'Polisaj Motoru 1/4 HP', fiyat: '₺7.200', satici: 'Ege Polisaj Tedarik', sehir: 'İzmir', durum: 'Stokta', dogrulandi: true },
         { id: 'mu004', kategoriId: 'kalem', baslik: 'Gravür Kalemi Seti 12 Parça', fiyat: '₺680', satici: 'Kale Kalıp Malzeme', sehir: 'Denizli', durum: 'Stokta', dogrulandi: true },
         { id: 'mu005', kategoriId: 'motor', baslik: 'El Motoru Hanging 1/4 HP', fiyat: '₺6.400', satici: 'İstanbul Kuyum Teknoloji', sehir: 'İstanbul', durum: 'Stokta', dogrulandi: true },
         { id: 'mu006', kategoriId: 'mikromotor', baslik: 'Saeshin Strong 210 Mikromotor', fiyat: '₺12.500', satici: 'Ahenk Kuyum Malzeme', sehir: 'Konya', durum: 'Stokta', dogrulandi: true },
@@ -305,15 +300,15 @@ window.AURIX_DATA = {
         { id: 'mu016', kategoriId: 'aksesuar', baslik: 'İtalyan Zincir 45cm 14K', fiyat: '₺3.400', satici: 'Marina Stone Aksesuar', sehir: 'Trabzon', durum: 'Stokta', dogrulandi: true },
         { id: 'mu017', kategoriId: 'aksesuar', baslik: 'Kuyumcu Kilit Seti 8mm', fiyat: '₺290', satici: 'Ahenk Kuyum Malzeme', sehir: 'Konya', durum: 'Stokta', dogrulandi: true },
         { id: 'mu018', kategoriId: 'aksesuar', baslik: 'Taş Yuvası Seti 3–6mm', fiyat: '₺540', satici: 'Elmas Stone Tedarik', sehir: 'İstanbul', durum: 'Stokta', dogrulandi: true },
-        { id: 'mu019', kategoriId: 'parlatma', baslik: 'Zımpara Disk Seti 120–3000 grit', fiyat: '₺980', satici: 'Ege Rodaj Tedarik', sehir: 'İzmir', durum: 'Stokta', dogrulandi: true },
-        { id: 'mu020', kategoriId: 'parlatma', baslik: 'Parlatma Keçesi Seti 6 Parça', fiyat: '₺650', satici: 'Ege Rodaj Tedarik', sehir: 'İzmir', durum: 'Stokta', dogrulandi: true },
+        { id: 'mu019', kategoriId: 'parlatma', baslik: 'Zımpara Disk Seti 120–3000 grit', fiyat: '₺980', satici: 'Ege Polisaj Tedarik', sehir: 'İzmir', durum: 'Stokta', dogrulandi: true },
+        { id: 'mu020', kategoriId: 'parlatma', baslik: 'Parlatma Keçesi Seti 6 Parça', fiyat: '₺650', satici: 'Ege Polisaj Tedarik', sehir: 'İzmir', durum: 'Stokta', dogrulandi: true },
         { id: 'mu021', kategoriId: 'lazer-makine', baslik: 'Fiber Lazer Kesim 30W', fiyat: '₺185.000', satici: 'Lider Lazer Makine', sehir: 'Kahramanmaraş', durum: 'Stokta', dogrulandi: true },
         { id: 'mu022', kategoriId: 'terazi', baslik: 'Hassas Dijital Terazi 0,001g', fiyat: '₺8.900', satici: 'Prestij Ayar Ekipman', sehir: 'İstanbul', durum: 'Stokta', dogrulandi: true },
         { id: 'mu023', kategoriId: 'freze', baslik: 'Carbide Freze Seti 20 Parça', fiyat: '₺1.450', satici: 'Zenith Jewelry Works', sehir: 'Ankara', durum: 'Stokta', dogrulandi: true },
         { id: 'mu024', kategoriId: 'mihlama-alet', baslik: 'Mikro Mıhlama Pens Seti', fiyat: '₺2.400', satici: 'Safir Jewelry Tools', sehir: 'Gaziantep', durum: 'Stokta', dogrulandi: true },
         { id: 'mu025', kategoriId: 'el-alet', baslik: 'Kuyumcu El Aleti Seti 12 Parça', fiyat: '₺3.200', satici: 'İnci Gold Design Tedarik', sehir: 'Adana', durum: 'Stokta', dogrulandi: true },
         { id: 'mu026', kategoriId: 'sarf', baslik: 'Lehim Teli 0,5mm 50g', fiyat: '₺380', satici: 'Arıcan Kuyumculuk Tedarik', sehir: 'İstanbul', durum: 'Stokta', dogrulandi: true },
-        { id: 'mu027', kategoriId: 'polisaj', baslik: 'Profesyonel Polisaj Fırça Seti', fiyat: '₺1.850', satici: 'Ege Rodaj Tedarik', sehir: 'İzmir', durum: 'Stokta', dogrulandi: true },
+        { id: 'mu027', kategoriId: 'polisaj', baslik: 'Profesyonel Polisaj Fırça Seti', fiyat: '₺1.850', satici: 'Ege Polisaj Tedarik', sehir: 'İzmir', durum: 'Stokta', dogrulandi: true },
         { id: 'mu028', kategoriId: 'lazer-makine', baslik: 'CO2 Lazer Kazıma 40W', fiyat: '₺95.000', satici: 'Lider Lazer Makine', sehir: 'Kahramanmaraş', durum: 'Sipariş', dogrulandi: true }
     ],
 
@@ -344,16 +339,15 @@ window.AURIX_DATA = {
         zincir: 'assets/images/malzeme.jpg',
         kilit: 'assets/images/malzeme.jpg',
         bilezik: 'assets/images/malzeme.jpg',
-        toptanci: 'assets/images/malzeme.jpg',
-        vitrin: 'assets/images/malzeme.jpg',
-        kutu: 'assets/images/malzeme.jpg',
+        toptanci: 'assets/images/firma.png',
+        vitrin: 'assets/images/firma.png',
+        kutu: 'assets/images/firma.png',
         malzeme: 'assets/images/malzeme.jpg',
         sarf: 'assets/images/malzeme.jpg',
         kimyasal: 'assets/images/malzeme.jpg',
         tel: 'assets/images/malzeme.jpg',
         lehim: 'assets/images/malzeme.jpg',
         aparat: 'assets/images/malzeme.jpg',
-        kaplama: 'assets/images/malzeme.jpg',
         tamir: 'assets/images/malzeme.jpg'
     },
 
@@ -423,12 +417,12 @@ window.AURIX_DATA = {
             eklenmeTarihi: '2026-03-22T13:00:00.000Z'
         },
         {
-            id: 'f009', ad: 'Ege Rodaj', kategoriId: 'polisaj',
+            id: 'f009', ad: 'Ege Polisaj', kategoriId: 'polisaj',
             sehir: 'İZMİR', tel: '905009887766',
-            aciklama: 'Rodaj, parlatma ve mine finish. Seri üretim ve özel sipariş kabul edilir.',
-            premium: false, sponsor: false, durum: 'beklemede', puan: 0,
-            tamamlananIs: 0, cevapSuresi: '—', sonAktif: '—',
-            eklenmeTarihi: '2026-07-01T09:00:00.000Z'
+            aciklama: 'Profesyonel polisaj, parlatma ve mine finish. Seri üretim ve özel sipariş kabul edilir.',
+            premium: false, sponsor: false, durum: 'onaylandi', puan: 4.5,
+            tamamlananIs: 132, cevapSuresi: '2 saat', sonAktif: 'Bugün',
+            eklenmeTarihi: '2026-03-25T09:00:00.000Z'
         },
         {
             id: 'f010', ad: 'Doruk Gold', kategoriId: 'dokumcu',
@@ -465,7 +459,7 @@ window.AURIX_DATA = {
         {
             id: 'f014', ad: 'İstanbul Kuyum Teknoloji', kategoriId: 'makine',
             sehir: 'İSTANBUL', tel: '905338877665',
-            aciklama: 'Döküm, lazer ve rodaj makineleri satışı. Kurulum ve servis desteği.',
+            aciklama: 'Döküm, lazer ve polisaj makineleri satışı. Kurulum ve servis desteği.',
             premium: true, sponsor: true, durum: 'onaylandi', puan: 4.6,
             tamamlananIs: 76, cevapSuresi: 'Aynı gün', sonAktif: 'Dün',
             eklenmeTarihi: '2026-03-19T12:00:00.000Z'
@@ -688,7 +682,7 @@ window.AURIX_DATA = {
         isTalepleri: [
             { id: 'ait1', baslik: '500 adet alyans üretimi', sehir: 'İZMİR', basvuru: '06.07.2026' },
             { id: 'ait2', baslik: 'Pırlanta montür işi', sehir: 'İSTANBUL', basvuru: '05.07.2026' },
-            { id: 'ait3', baslik: 'Ege Rodaj — firma başvurusu', sehir: 'İZMİR', basvuru: '01.07.2026' }
+            { id: 'ait3', baslik: 'Ege Polisaj — firma başvurusu', sehir: 'İZMİR', basvuru: '01.07.2026' }
         ],
         malzemeler: [
             { id: 'aml1', baslik: 'Ultrasonik Temizleyici 6L', satici: 'Vizyon Döküm Tedarik', durum: 'İncelemede' },
@@ -697,7 +691,7 @@ window.AURIX_DATA = {
         kullanicilar: [
             { id: 'u1', ad: 'Mehmet A.', email: 'mehmet@arican-kuyum.com', rol: 'Firma', durum: 'Aktif' },
             { id: 'u2', ad: 'Ayşe K.', email: 'ayse@novamihlama.com', rol: 'Firma', durum: 'Aktif' },
-            { id: 'u3', ad: 'Can Y.', email: 'can@egerodaj.com', rol: 'Firma', durum: 'Beklemede' }
+            { id: 'u3', ad: 'Can Y.', email: 'can@egepolisaj.com', rol: 'Firma', durum: 'Beklemede' }
         ],
         raporlar: {
             toplamFirma: 128,
