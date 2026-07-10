@@ -64,13 +64,29 @@
 
     function fpKpiGridHtml(kartlar) {
         var html = kartlar.map(function (k) {
-            return '<article class="fp-kpi">' +
+            return '<article class="fp-kpi' + (k.vurgu ? ' fp-kpi--vurgu' : '') + '">' +
                 '<div class="fp-kpi__etiket">' + esc(k.etiket) + '</div>' +
                 '<div class="fp-kpi__deger">' + esc(k.deger) + '</div>' +
                 (k.alt ? '<div class="fp-kpi__alt">' + esc(k.alt) + '</div>' : '') +
                 '</article>';
         }).join('');
-        return '<div class="fp-kpi-grid">' + html + '</div>';
+        return '<div class="fp-kpi-grid' + (kartlar.length >= 6 ? ' fp-kpi-grid--6' : '') + '">' + html + '</div>';
+    }
+
+    function fpOdemeKartHtml(odeme) {
+        odeme = odeme || {};
+        return '<article class="fp-odeme-kart">' +
+            '<div class="fp-odeme-kart__baslik">Ödeme Özeti</div>' +
+            '<div class="fp-odeme-kart__grid">' +
+            '<div class="fp-odeme-kart__oge"><span>Mevcut Bakiye</span><strong>' + esc(odeme.mevcutBakiye || '—') + '</strong></div>' +
+            '<div class="fp-odeme-kart__oge"><span>Bekleyen Bakiye</span><strong>' + esc(odeme.bekleyenBakiye || '—') + '</strong></div>' +
+            '<div class="fp-odeme-kart__oge"><span>Komisyon Kesintisi</span><strong>' + esc(odeme.komisyon || '—') + '</strong></div>' +
+            '<div class="fp-odeme-kart__oge"><span>Tahmini Ödeme Tarihi</span><strong>' + esc(odeme.tahminiOdeme || '—') + '</strong></div>' +
+            '<div class="fp-odeme-kart__oge fp-odeme-kart__oge--iban"><span>IBAN Durumu</span><strong>' +
+            esc(odeme.ibanDurumu || '—') +
+            (odeme.ibanMaskeli ? '<em>' + esc(odeme.ibanMaskeli) + '</em>' : '') +
+            '</strong></div>' +
+            '</div></article>';
     }
 
     function fpBolumHtml(baslik, icerik) {
@@ -116,28 +132,35 @@
         var d = demo.dashboard || {};
         var ozet = d.ozet || {};
         var perf = d.performansOzet || {};
+        var odeme = d.odemeKarti || {};
 
         var kpi = fpKpiGridHtml([
-            { etiket: 'Bu Ay Kazanç', deger: ozet.buAyKazanc || '—' },
-            { etiket: 'Ödenecek Bakiye', deger: ozet.odenecekBakiye || '—' },
-            { etiket: 'Sonraki Ödeme', deger: ozet.sonrakiOdeme || '—' },
-            { etiket: 'Profil Puanı', deger: ozet.profilPuani || '—', alt: '5 üzerinden' }
+            { etiket: 'Günlük Kazanç', deger: ozet.gunlukKazanc || '—', vurgu: true },
+            { etiket: 'Aylık Kazanç', deger: ozet.aylikKazanc || '—', vurgu: true },
+            { etiket: 'Bekleyen Ödemeler', deger: ozet.bekleyenOdemeler || '—' },
+            { etiket: 'Hesaba Geçecek Tutar', deger: ozet.hesabaGececek || '—' },
+            { etiket: 'Tamamlanan İşler', deger: ozet.tamamlananIs || '—' },
+            { etiket: 'Aktif İşler', deger: ozet.aktifIs || '—' }
         ]);
 
-        var perfOzet = '<div class="fp-perf-ozet">' +
-            '<div class="fp-perf-ozet__hucre"><span>Ort. teslim</span><strong>' + esc(perf.ortTeslim || '—') + '</strong></div>' +
-            '<div class="fp-perf-ozet__hucre"><span>Ort. puan</span><strong>' + esc(perf.ortPuan || '—') + '</strong></div>' +
-            '<div class="fp-perf-ozet__hucre"><span>Teklif dönüş</span><strong>' + esc(perf.teklifDonus || '—') + '</strong></div>' +
+        var perfOzet = '<div class="fp-perf-ozet fp-perf-ozet--4">' +
+            '<div class="fp-perf-ozet__hucre"><span>Profil Görüntülenmesi</span><strong>' + esc(perf.profilGoruntulenme || '—') + '</strong></div>' +
+            '<div class="fp-perf-ozet__hucre"><span>Teklif Dönüş Oranı</span><strong>' + esc(perf.teklifDonus || '—') + '</strong></div>' +
+            '<div class="fp-perf-ozet__hucre"><span>Müşteri Memnuniyeti</span><strong>' + esc(perf.musteriMemnuniyeti || '—') + '</strong></div>' +
+            '<div class="fp-perf-ozet__hucre"><span>Tamamlama Oranı</span><strong>' + esc(perf.tamamlamaOrani || '—') + '</strong></div>' +
             '</div>';
 
         return kpi +
-            '<div class="fp-dash-grid">' +
-            fpBolumHtml('Son aktiviteler', fpAktiviteListHtml(d.aktiviteler || [])) +
-            fpBolumHtml('Devam eden işler', fpMiniIsListHtml(d.devamEdenIsler || [])) +
-            fpBolumHtml('Yeni gelen teklifler', fpMiniIsListHtml((d.yeniTeklifler || []).map(function (t) {
+            fpOdemeKartHtml(odeme) +
+            fpBolumHtml('Performans', perfOzet) +
+            '<div class="fp-dash-grid fp-dash-grid--panel">' +
+            fpBolumHtml('Son Gelen Teklifler', fpMiniIsListHtml((d.yeniTeklifler || []).map(function (t) {
                 return { baslik: t.isAdi, musteri: t.musteri, tutar: t.tutar, durum: t.durum };
             }))) +
-            fpBolumHtml('Performans özeti', perfOzet) +
+            fpBolumHtml('Devam Eden İşler', fpMiniIsListHtml(d.devamEdenIsler || [])) +
+            fpBolumHtml('Tamamlanan İşler', fpMiniIsListHtml(d.tamamlananIsler || [])) +
+            fpBolumHtml('Yaklaşan Ödemeler', fpMiniIsListHtml(d.yaklasanOdemeler || [])) +
+            fpBolumHtml('Son Hareketler', fpAktiviteListHtml(d.aktiviteler || [])) +
             '</div>';
     }
 
@@ -256,14 +279,14 @@
     function renderPerformans(demo) {
         var p = demo.performans || {};
         var kpi = fpKpiGridHtml([
+            { etiket: 'Profil Görüntülenmesi', deger: String(p.goruntulenme30 != null ? p.goruntulenme30 : 0), vurgu: true },
+            { etiket: 'Teklif Dönüş Oranı', deger: p.teklifDonus || '—', vurgu: true },
+            { etiket: 'Müşteri Memnuniyeti', deger: p.musteriMemnuniyeti || '—', vurgu: true },
+            { etiket: 'Tamamlama Oranı', deger: p.teslimOrani || '—', vurgu: true },
             { etiket: 'Tamamlanan İş', deger: String(p.tamamlananIs != null ? p.tamamlananIs : 0) },
             { etiket: 'Ortalama Teslim Süresi', deger: p.ortTeslim || '—' },
             { etiket: 'Ortalama Puan', deger: p.ortPuan || '—' },
-            { etiket: 'Son 30 Gün Görüntülenme', deger: String(p.goruntulenme30 != null ? p.goruntulenme30 : 0) },
-            { etiket: 'Profil Ziyareti', deger: String(p.profilZiyaret != null ? p.profilZiyaret : 0) },
-            { etiket: 'Teklif Dönüş Oranı', deger: p.teklifDonus || '—' },
-            { etiket: 'Teslim Oranı', deger: p.teslimOrani || '—' },
-            { etiket: 'Müşteri Memnuniyeti', deger: p.musteriMemnuniyeti || '—' }
+            { etiket: 'Profil Ziyareti', deger: String(p.profilZiyaret != null ? p.profilZiyaret : 0) }
         ]);
 
         var grafik = p.grafik || [];

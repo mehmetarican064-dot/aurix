@@ -2387,6 +2387,291 @@ a { color: inherit; text-decoration: none; }
 
 .modal__kutu--genis { max-width: 620px; }
 
+.modal__kutu--profil {
+    max-width: 680px;
+    padding: 0 0 24px;
+    overflow-x: hidden;
+}
+
+.modal__kutu--profil .detay-profil__ust {
+    padding: 20px 24px 12px;
+    margin-bottom: 0;
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    background: linear-gradient(180deg, rgba(18, 16, 12, 0.96) 0%, rgba(18, 16, 12, 0.88) 100%);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+.modal__kutu--profil .detay-profil__ust h3 {
+    font-size: 18px;
+    letter-spacing: 0.01em;
+}
+
+.detay-kapak-alan {
+    position: relative;
+    margin: 0 0 8px;
+}
+
+.detay-gorsel-wrap {
+    width: 100%;
+    height: 220px;
+    border-radius: var(--aurix-radius);
+    margin-bottom: 16px;
+    border: 1px solid var(--aurix-border);
+    overflow: hidden;
+}
+
+.modal__kutu--profil .detay-gorsel-wrap {
+    height: 260px;
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+    margin-bottom: 0;
+    border-color: rgba(201, 169, 98, 0.16);
+}
+
+.detay-gorsel {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    background: transparent;
+}
+
+.detay-logo {
+    position: absolute;
+    left: 24px;
+    bottom: -28px;
+    width: 72px;
+    height: 72px;
+    border-radius: 16px;
+    background: linear-gradient(160deg, #1a160f 0%, #0c0c0e 100%);
+    border: 2px solid rgba(201, 169, 98, 0.45);
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(201, 169, 98, 0.12);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    z-index: 4;
+}
+
+.detay-logo__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.detay-logo__harf {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: var(--aurix-gold-light);
+}
+
+.detay-kimlik {
+    padding: 36px 24px 0;
+}
+
+.detay-kimlik__rozetler {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 10px;
+    min-height: 22px;
+}
+
+.detay-meta {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 4px;
+    font-size: 13px;
+    color: var(--aurix-muted);
+}
+
+.detay-meta__oge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(201, 169, 98, 0.12);
+}
+
+.detay-meta__oge--puan {
+    color: var(--aurix-gold-light);
+    border-color: rgba(201, 169, 98, 0.28);
+}
+
+.detay-meta__oge--sehir {
+    color: var(--aurix-text);
+}
+
+.modal__kutu--profil .detay-guven {
+    margin: 16px 24px 0;
+}
+
+.detay-bolum {
+    padding: 16px 24px 0;
+}
+
+.detay-bolum__baslik {
+    margin: 0 0 10px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--aurix-gold-light);
+}
+
+.detay-hizmetler {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.detay-hizmet-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--aurix-text);
+    background: rgba(201, 169, 98, 0.08);
+    border: 1px solid rgba(201, 169, 98, 0.2);
+}
+
+.detay-aciklama {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--aurix-border);
+    border-radius: var(--aurix-radius);
+    padding: 16px;
+    font-size: 15px;
+    line-height: 1.65;
+    margin: 0;
+    color: var(--aurix-text);
+}
+
+.detay-galeri {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.detay-galeri__oge {
+    position: relative;
+    aspect-ratio: 4 / 3;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid rgba(201, 169, 98, 0.14);
+    background: #0a0a0c;
+    min-height: 72px;
+}
+
+.detay-galeri__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.detay-galeri__oge.firma-gorsel-alan > img:not(.firma-sektor-ph__logo) {
+    position: absolute;
+    inset: 0;
+}
+
+.detay-isler {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.detay-is {
+    padding: 12px 14px;
+    border-radius: var(--aurix-radius);
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(201, 169, 98, 0.12);
+}
+
+.detay-is__ust {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    align-items: flex-start;
+    margin-bottom: 6px;
+}
+
+.detay-is__baslik {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--aurix-white);
+    line-height: 1.35;
+}
+
+.detay-is__tutar {
+    flex-shrink: 0;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--aurix-gold-light);
+}
+
+.detay-is__alt {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    font-size: 11px;
+    color: var(--aurix-muted);
+}
+
+.detay-aksiyon {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 20px 24px 0;
+}
+
+@media (max-width: 560px) {
+    .modal__kutu--profil .detay-gorsel-wrap {
+        height: 200px;
+    }
+
+    .detay-logo {
+        left: 16px;
+        width: 60px;
+        height: 60px;
+        bottom: -24px;
+        border-radius: 14px;
+    }
+
+    .detay-kimlik,
+    .detay-bolum,
+    .detay-aksiyon,
+    .modal__kutu--profil .detay-guven {
+        padding-left: 16px;
+        padding-right: 16px;
+    }
+
+    .modal__kutu--profil .detay-guven {
+        margin-left: 16px;
+        margin-right: 16px;
+        padding-left: 14px;
+        padding-right: 14px;
+    }
+
+    .detay-galeri {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .detay-kimlik {
+        padding-top: 32px;
+    }
+}
+
 @keyframes modalIn {
     from { opacity: 0; transform: scale(0.97) translateY(12px); }
     to { opacity: 1; transform: scale(1) translateY(0); }
@@ -2422,42 +2707,6 @@ a { color: inherit; text-decoration: none; }
 .modal__kapat:hover {
     color: var(--aurix-white);
     background: rgba(255, 255, 255, 0.1);
-}
-
-.detay-gorsel-wrap {
-    width: 100%;
-    height: 220px;
-    border-radius: var(--aurix-radius);
-    margin-bottom: 16px;
-    border: 1px solid var(--aurix-border);
-    overflow: hidden;
-}
-
-.detay-gorsel {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    background: transparent;
-}
-
-.detay-meta {
-    display: flex;
-    gap: 12px;
-    flex-wrap: wrap;
-    margin-bottom: 12px;
-    font-size: 13px;
-    color: var(--aurix-muted);
-}
-
-.detay-aciklama {
-    background: rgba(0, 0, 0, 0.3);
-    border: 1px solid var(--aurix-border);
-    border-radius: var(--aurix-radius);
-    padding: 16px;
-    font-size: 15px;
-    line-height: 1.65;
-    margin: 16px 0;
-    color: var(--aurix-text);
 }
 
 .rozet {
@@ -3111,6 +3360,136 @@ a { color: inherit; text-decoration: none; }
     border-top: 1px solid rgba(201, 169, 98, 0.08);
     padding-top: 14px;
     padding-bottom: 14px;
+}
+
+/* —— İçerik sayfaları (footer linkleri) —— */
+.bolum--icerik {
+    padding-top: 48px;
+    padding-bottom: 64px;
+    min-height: 55vh;
+}
+
+.icerik-sayfa {
+    max-width: 760px;
+}
+
+.icerik-sayfa__rozet {
+    display: inline-block;
+    margin: 0 0 12px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--aurix-gold-light);
+    background: rgba(201, 169, 98, 0.1);
+    border: 1px solid rgba(201, 169, 98, 0.22);
+}
+
+.icerik-sayfa__baslik {
+    margin: 0 0 10px;
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    font-weight: 700;
+    color: var(--aurix-white);
+    letter-spacing: -0.02em;
+}
+
+.icerik-sayfa__ozet {
+    margin: 0 0 24px;
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--aurix-muted);
+}
+
+.icerik-sayfa__govde {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.icerik-sayfa__govde h2 {
+    margin: 8px 0 0;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--aurix-gold-light);
+}
+
+.icerik-sayfa__govde p {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--aurix-text);
+}
+
+.icerik-sayfa__govde a {
+    color: var(--aurix-gold-light);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.icerik-sss {
+    gap: 10px;
+}
+
+.icerik-sss__madde {
+    border: 1px solid rgba(201, 169, 98, 0.14);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.03);
+    padding: 0 14px;
+}
+
+.icerik-sss__madde summary {
+    cursor: pointer;
+    list-style: none;
+    padding: 14px 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--aurix-white);
+}
+
+.icerik-sss__madde summary::-webkit-details-marker {
+    display: none;
+}
+
+.icerik-sss__madde p {
+    padding: 0 0 14px;
+    color: var(--aurix-muted);
+}
+
+.icerik-yakinda {
+    padding: 12px 14px;
+    border-radius: 10px;
+    border: 1px dashed rgba(201, 169, 98, 0.35);
+    background: rgba(201, 169, 98, 0.06);
+    font-size: 13px;
+    line-height: 1.55;
+    color: var(--aurix-text);
+}
+
+.icerik-form {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 8px;
+}
+
+.icerik-form__not {
+    margin: 8px 0 0;
+    font-size: 12px;
+    color: var(--aurix-muted);
+}
+
+@media (max-width: 640px) {
+    .bolum--icerik {
+        padding-top: 28px;
+        padding-bottom: 40px;
+    }
+
+    .icerik-sayfa__ozet {
+        font-size: 14px;
+        margin-bottom: 18px;
+    }
 }
 
 [data-sayfa="ana-sayfa"] .bolum--ana-vitrin .firma-kart__partner {
@@ -6117,11 +6496,17 @@ a { color: inherit; text-decoration: none; }
 }
 
 .fp-kpi {
-    background: var(--aurix-panel-solid);
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    background: linear-gradient(165deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
+    border: 1px solid rgba(201, 169, 98, 0.14);
     border-radius: 10px;
     padding: 12px 14px;
     min-width: 0;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.18);
+}
+
+.fp-kpi--vurgu {
+    border-color: rgba(201, 169, 98, 0.32);
+    background: linear-gradient(165deg, rgba(201, 169, 98, 0.12) 0%, rgba(255, 255, 255, 0.02) 100%);
 }
 
 .fp-kpi__etiket {
@@ -6144,6 +6529,68 @@ a { color: inherit; text-decoration: none; }
     margin-top: 4px;
 }
 
+.fp-odeme-kart {
+    margin-bottom: 16px;
+    padding: 14px 16px;
+    border-radius: 12px;
+    background: linear-gradient(155deg, rgba(201, 169, 98, 0.1) 0%, rgba(18, 16, 12, 0.92) 45%, rgba(10, 10, 12, 0.96) 100%);
+    border: 1px solid rgba(201, 169, 98, 0.28);
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.28), inset 0 1px 0 rgba(201, 169, 98, 0.12);
+}
+
+.fp-odeme-kart__baslik {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--aurix-gold-light);
+    margin-bottom: 12px;
+}
+
+.fp-odeme-kart__grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.fp-odeme-kart__oge {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    background: rgba(0, 0, 0, 0.22);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    min-width: 0;
+}
+
+.fp-odeme-kart__oge span {
+    font-size: 10px;
+    color: var(--aurix-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.fp-odeme-kart__oge strong {
+    font-size: 14px;
+    color: var(--aurix-white);
+    font-weight: 700;
+}
+
+.fp-odeme-kart__oge--iban {
+    grid-column: 1 / -1;
+}
+
+.fp-odeme-kart__oge--iban em {
+    display: block;
+    margin-top: 2px;
+    font-style: normal;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--aurix-muted);
+    letter-spacing: 0.06em;
+}
+
 .fp-dash-grid {
     display: grid;
     grid-template-columns: 1fr;
@@ -6151,8 +6598,8 @@ a { color: inherit; text-decoration: none; }
 }
 
 .fp-bolum {
-    background: var(--aurix-panel-solid);
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.015) 100%);
+    border: 1px solid rgba(201, 169, 98, 0.12);
     border-radius: 10px;
     padding: 12px 14px;
     min-width: 0;
@@ -6241,11 +6688,16 @@ a { color: inherit; text-decoration: none; }
     gap: 8px;
 }
 
+.fp-perf-ozet--4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
 .fp-perf-ozet__hucre {
     text-align: center;
-    padding: 8px 4px;
+    padding: 10px 6px;
     border-radius: 8px;
     background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(201, 169, 98, 0.1);
 }
 
 .fp-perf-ozet__hucre span {
@@ -6257,7 +6709,7 @@ a { color: inherit; text-decoration: none; }
 
 .fp-perf-ozet__hucre strong {
     font-size: 13px;
-    color: var(--aurix-text);
+    color: var(--aurix-gold-light);
 }
 
 .fp-badge {
@@ -6625,8 +7077,28 @@ a { color: inherit; text-decoration: none; }
         grid-template-columns: repeat(3, minmax(0, 1fr));
     }
 
+    .fp-kpi-grid--6 {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .fp-odeme-kart__grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .fp-odeme-kart__oge--iban {
+        grid-column: span 1;
+    }
+
+    .fp-perf-ozet--4 {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
     .fp-dash-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .fp-dash-grid--panel > .fp-bolum:last-child {
+        grid-column: 1 / -1;
     }
 
     .fp-teklif-kart__meta {
@@ -6654,6 +7126,18 @@ a { color: inherit; text-decoration: none; }
         grid-template-columns: repeat(4, minmax(0, 1fr));
     }
 
+    .fp-kpi-grid--6 {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .fp-odeme-kart__grid {
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+    }
+
+    .fp-odeme-kart__oge--iban {
+        grid-column: span 1;
+    }
+
     .fp-profil-grid {
         grid-template-columns: 2fr 1fr;
     }
@@ -6670,6 +7154,10 @@ a { color: inherit; text-decoration: none; }
 
     .fp-perf-ozet {
         grid-template-columns: 1fr;
+    }
+
+    .fp-perf-ozet--4 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
     .fp-table {
@@ -8174,10 +8662,9 @@ a { color: inherit; text-decoration: none; }
     inset: 0;
     z-index: 1;
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 10px;
+    overflow: hidden;
     pointer-events: none;
 }
 
@@ -8187,36 +8674,60 @@ a { color: inherit; text-decoration: none; }
     z-index: 0;
 }
 
+/* Arka planda büyük logo — tam net görünmez */
 .firma-sektor-ph__logo {
-    position: relative;
-    z-index: 2;
-    width: 52px;
-    height: 52px;
+    position: absolute;
+    z-index: 1;
+    width: 58%;
+    max-width: 180px;
+    height: auto;
+    aspect-ratio: 1;
     object-fit: contain;
-    opacity: 0.9;
-    filter: drop-shadow(0 2px 14px rgba(201, 169, 98, 0.3));
+    opacity: 0.42;
+    filter: blur(5px) brightness(1.05) drop-shadow(0 0 28px rgba(201, 169, 98, 0.35));
+    transform: scale(1.12);
+    user-select: none;
 }
 
-.firma-sektor-ph__ikon {
-    position: relative;
+/* Frosted glass katmanı — logonun üstü */
+.firma-sektor-ph__frost {
+    position: absolute;
+    inset: 0;
     z-index: 2;
-    font-size: 22px;
-    line-height: 1;
-    filter: drop-shadow(0 1px 6px rgba(0, 0, 0, 0.6));
+    background:
+        linear-gradient(160deg, rgba(255, 255, 255, 0.06) 0%, transparent 42%, rgba(0, 0, 0, 0.28) 100%),
+        rgba(8, 8, 10, 0.38);
+    backdrop-filter: blur(10px) saturate(120%);
+    -webkit-backdrop-filter: blur(10px) saturate(120%);
+    box-shadow: inset 0 1px 0 rgba(201, 169, 98, 0.12);
+}
+
+/* Hafif gold parlama */
+.firma-sektor-ph__glow {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    background:
+        radial-gradient(ellipse 55% 45% at 50% 42%, rgba(201, 169, 98, 0.22) 0%, transparent 70%),
+        radial-gradient(ellipse 80% 60% at 50% 100%, rgba(201, 169, 98, 0.08) 0%, transparent 55%);
+    pointer-events: none;
 }
 
 .firma-gorsel-alan.firma-gorsel-alan--ok .firma-sektor-ph {
     opacity: 0;
-    transition: opacity 0.35s ease;
+    visibility: hidden;
+    transition: opacity 0.35s ease, visibility 0.35s ease;
 }
 
 .firma-gorsel-alan--thumb .firma-sektor-ph__logo {
-    width: 24px;
-    height: 24px;
+    width: 44%;
+    max-width: 72px;
+    filter: blur(3.5px) brightness(1.05) drop-shadow(0 0 12px rgba(201, 169, 98, 0.28));
 }
 
-.firma-gorsel-alan--thumb .firma-sektor-ph__ikon {
-    font-size: 12px;
+.firma-gorsel-alan--thumb .firma-sektor-ph__frost {
+    backdrop-filter: blur(7px) saturate(115%);
+    -webkit-backdrop-filter: blur(7px) saturate(115%);
 }
 
 .firma-kart__gorsel .firma-gorsel-alan,
@@ -8231,67 +8742,64 @@ a { color: inherit; text-decoration: none; }
     transform: scale(1.06);
 }
 
-/* Sektör temaları — premium degrade arka planlar */
+/* Sektör temaları — siyah + gold ağırlıklı degrade arka planlar */
 .firma-gorsel-alan--dokum .firma-sektor-ph__bg {
     background:
-        radial-gradient(ellipse 90% 70% at 50% 75%, rgba(212, 140, 42, 0.38) 0%, transparent 68%),
-        linear-gradient(155deg, #1f1408 0%, #0a0a0c 45%, #2a1a0a 100%);
+        radial-gradient(ellipse 90% 70% at 50% 75%, rgba(201, 169, 98, 0.28) 0%, transparent 68%),
+        linear-gradient(155deg, #1a1408 0%, #0a0a0c 45%, #1f160a 100%);
 }
 
 .firma-gorsel-alan--cad .firma-sektor-ph__bg {
     background:
-        radial-gradient(ellipse 75% 55% at 58% 38%, rgba(72, 130, 210, 0.28) 0%, transparent 65%),
-        linear-gradient(155deg, #0a1420 0%, #0a0a0c 50%, #121a2e 100%);
+        radial-gradient(ellipse 75% 55% at 58% 38%, rgba(201, 169, 98, 0.2) 0%, transparent 65%),
+        linear-gradient(155deg, #12100c 0%, #0a0a0c 50%, #18140e 100%);
 }
 
 .firma-gorsel-alan--mihlama .firma-sektor-ph__bg {
     background:
-        radial-gradient(ellipse 70% 60% at 50% 45%, rgba(220, 220, 255, 0.22) 0%, transparent 62%),
-        linear-gradient(155deg, #12121a 0%, #0a0a0c 48%, #1a1828 100%);
+        radial-gradient(ellipse 70% 60% at 50% 45%, rgba(201, 169, 98, 0.22) 0%, transparent 62%),
+        linear-gradient(155deg, #14120e 0%, #0a0a0c 48%, #1a160f 100%);
 }
 
 .firma-gorsel-alan--tas .firma-sektor-ph__bg {
     background:
-        radial-gradient(ellipse 80% 65% at 45% 50%, rgba(140, 90, 220, 0.3) 0%, transparent 66%),
-        linear-gradient(155deg, #140f22 0%, #0a0a0c 50%, #1e1230 100%);
+        radial-gradient(ellipse 80% 65% at 45% 50%, rgba(201, 169, 98, 0.24) 0%, transparent 66%),
+        linear-gradient(155deg, #16120a 0%, #0a0a0c 50%, #1c160c 100%);
 }
 
 .firma-gorsel-alan--lazer .firma-sektor-ph__bg {
     background:
-        radial-gradient(ellipse 65% 50% at 55% 55%, rgba(255, 90, 40, 0.32) 0%, transparent 60%),
-        linear-gradient(155deg, #1a0c08 0%, #0a0a0c 48%, #2a1008 100%);
+        radial-gradient(ellipse 65% 50% at 55% 55%, rgba(201, 169, 98, 0.26) 0%, transparent 60%),
+        linear-gradient(155deg, #181008 0%, #0a0a0c 48%, #1e1408 100%);
 }
 
 .firma-gorsel-alan--kalip .firma-sektor-ph__bg {
     background:
-        radial-gradient(ellipse 75% 58% at 48% 62%, rgba(180, 130, 60, 0.3) 0%, transparent 64%),
-        linear-gradient(155deg, #181208 0%, #0a0a0c 50%, #221a0c 100%);
+        radial-gradient(ellipse 75% 58% at 48% 62%, rgba(201, 169, 98, 0.25) 0%, transparent 64%),
+        linear-gradient(155deg, #161208 0%, #0a0a0c 50%, #1c160a 100%);
 }
 
 .firma-gorsel-alan--makine .firma-sektor-ph__bg {
     background:
-        radial-gradient(ellipse 80% 60% at 50% 40%, rgba(160, 170, 190, 0.22) 0%, transparent 65%),
-        linear-gradient(155deg, #101418 0%, #0a0a0c 50%, #181c22 100%);
+        radial-gradient(ellipse 80% 60% at 50% 40%, rgba(201, 169, 98, 0.18) 0%, transparent 65%),
+        linear-gradient(155deg, #12100e 0%, #0a0a0c 50%, #161410 100%);
 }
 
 .firma-gorsel-alan--malzeme .firma-sektor-ph__bg {
     background:
-        radial-gradient(ellipse 78% 62% at 50% 55%, rgba(201, 169, 98, 0.28) 0%, transparent 66%),
+        radial-gradient(ellipse 78% 62% at 50% 55%, rgba(201, 169, 98, 0.26) 0%, transparent 66%),
         linear-gradient(155deg, #141210 0%, #0a0a0c 48%, #1c1810 100%);
 }
 
 .firma-gorsel-alan--genel .firma-sektor-ph__bg {
     background:
-        radial-gradient(ellipse 85% 70% at 50% 50%, rgba(201, 169, 98, 0.25) 0%, transparent 68%),
+        radial-gradient(ellipse 85% 70% at 50% 50%, rgba(201, 169, 98, 0.22) 0%, transparent 68%),
         linear-gradient(155deg, #12100c 0%, #0a0a0c 42%, #1a1408 100%);
 }
 
 .detay-gorsel-wrap .firma-sektor-ph__logo {
-    width: 64px;
-    height: 64px;
-}
-
-.detay-gorsel-wrap .firma-sektor-ph__ikon {
-    font-size: 26px;
+    width: 48%;
+    max-width: 220px;
+    filter: blur(6px) brightness(1.05) drop-shadow(0 0 36px rgba(201, 169, 98, 0.38));
 }
 

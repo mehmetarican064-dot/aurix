@@ -582,33 +582,55 @@ window.AURIX_DATA = {
     PANEL_DEMO: {
         dashboard: {
             ozet: {
-                buAyKazanc: '₺48.600',
-                odenecekBakiye: '₺14.200',
-                sonrakiOdeme: '15.07.2026',
-                profilPuani: '4.8'
+                gunlukKazanc: '₺6.850',
+                aylikKazanc: '₺48.600',
+                bekleyenOdemeler: '₺9.400',
+                hesabaGececek: '₺14.200',
+                tamamlananIs: '214',
+                aktifIs: '4'
             },
+            odemeKarti: {
+                mevcutBakiye: '₺14.200',
+                bekleyenBakiye: '₺9.400',
+                komisyon: '₺10.740',
+                tahminiOdeme: '15.07.2026',
+                ibanDurumu: 'Doğrulandı',
+                ibanMaskeli: 'TR••••••••••1234'
+            },
+            performansOzet: {
+                profilGoruntulenme: '428',
+                teklifDonus: '%42',
+                musteriMemnuniyeti: '4.8 / 5',
+                tamamlamaOrani: '%96'
+            },
+            yeniTeklifler: [
+                { isAdi: '925 gümüş erkek yüzük dökümü', musteri: 'Kuzey Tasarım', tutar: '₺21.500', durum: 'Bekliyor' },
+                { isAdi: 'Gram altın plaka lazer kesim', musteri: 'Lider Lazer', tutar: '₺7.200', durum: 'İnceleniyor' },
+                { isAdi: 'Fantezi kolye döküm', musteri: 'Anadolu CAD Tasarım', tutar: '₺19.800', durum: 'Bekliyor' },
+                { isAdi: 'Pırlanta mıhlama — 36 adet', musteri: 'Nova Mıhlama', tutar: '₺11.400', durum: 'Bekliyor' }
+            ],
+            devamEdenIsler: [
+                { baslik: 'Tektaş montür mıhlama', musteri: 'Elmas Stone', termin: '18.07.2026', durum: 'Devam ediyor', tutar: '₺8.500' },
+                { baslik: 'Alyans prototip döküm', musteri: 'Safir Jewelry', termin: '22.07.2026', durum: 'Üretimde', tutar: '₺12.400' },
+                { baslik: '18 ayar küpe seri döküm', musteri: 'Nova Mıhlama', termin: '25.07.2026', durum: 'Bekliyor', tutar: '₺18.600' }
+            ],
+            tamamlananIsler: [
+                { baslik: '22 ayar alyans serisi', musteri: 'Ahenk Kuyum', termin: '05.07.2026', durum: 'Teslim edildi', tutar: '₺32.000' },
+                { baslik: 'Platin mini döküm seti', musteri: 'Vizyon Döküm', termin: '28.06.2026', durum: 'Teslim edildi', tutar: '₺24.000' },
+                { baslik: '18 ayar fantezi küpe', musteri: 'İnci Gold Design', termin: '05.07.2026', durum: 'Teslim edildi', tutar: '₺6.200' }
+            ],
+            yaklasanOdemeler: [
+                { baslik: 'Temmuz hakediş ödemesi', musteri: 'AURIX Ödeme', termin: '15.07.2026', durum: 'Planlandı', tutar: '₺14.200' },
+                { baslik: 'Mıhlama işi tahsilatı', musteri: 'Elmas Stone', termin: '18.07.2026', durum: 'Bekliyor', tutar: '₺8.500' },
+                { baslik: 'Alyans döküm bakiyesi', musteri: 'Safir Jewelry', termin: '22.07.2026', durum: 'Bekliyor', tutar: '₺4.800' }
+            ],
             aktiviteler: [
                 { metin: '925 gümüş erkek yüzük dökümü için teklif alındı', zaman: '45 dk önce' },
                 { metin: '22 ayar alyans serisi teslim edildi — ₺32.000', zaman: 'Dün 17:20' },
                 { metin: 'Profiliniz 18 kez görüntülendi', zaman: 'Dün' },
                 { metin: 'Haziran hakediş ödemesi hesabınıza aktarıldı', zaman: '01.07.2026' },
                 { metin: 'Pırlanta mıhlama işi tamamlandı — 4.9 puan', zaman: '28.06.2026' }
-            ],
-            devamEdenIsler: [
-                { baslik: 'Tektaş montür mıhlama', musteri: 'Elmas Stone', termin: '18.07.2026', durum: 'Devam ediyor' },
-                { baslik: 'Alyans prototip döküm', musteri: 'Safir Jewelry', termin: '22.07.2026', durum: 'Üretimde' },
-                { baslik: '18 ayar küpe seri döküm', musteri: 'Nova Mıhlama', termin: '25.07.2026', durum: 'Bekliyor' }
-            ],
-            yeniTeklifler: [
-                { isAdi: '925 gümüş erkek yüzük dökümü', musteri: 'Kuzey Tasarım', tutar: '₺21.500', durum: 'Bekliyor' },
-                { isAdi: 'Gram altın plaka lazer kesim', musteri: 'Lider Lazer', tutar: '₺7.200', durum: 'İnceleniyor' },
-                { isAdi: 'Fantezi kolye döküm', musteri: 'Anadolu CAD Tasarım', tutar: '₺19.800', durum: 'Bekliyor' }
-            ],
-            performansOzet: {
-                ortTeslim: '3.8 gün',
-                ortPuan: '4.8 / 5',
-                teklifDonus: '%42'
-            }
+            ]
         },
         gelirler: {
             toplamKazanc: '₺214.800',

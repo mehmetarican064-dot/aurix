@@ -265,12 +265,12 @@
         return { src: src, katGorsel: katGorsel, forcePh: false };
     }
 
-    function firmaSektorPlaceholderHtml(firma) {
-        var kat = kategoriBul(firma.kategoriId);
+    function firmaSektorPlaceholderHtml() {
         return '<div class="firma-sektor-ph" aria-hidden="true">' +
             '<div class="firma-sektor-ph__bg"></div>' +
-            '<img class="firma-sektor-ph__logo" src="assets/logo.png" alt="" width="56" height="56" loading="lazy" decoding="async">' +
-            '<span class="firma-sektor-ph__ikon">' + kat.ikon + '</span>' +
+            '<img class="firma-sektor-ph__logo" src="assets/logo.png" alt="" width="160" height="160" loading="lazy" decoding="async">' +
+            '<div class="firma-sektor-ph__frost"></div>' +
+            '<div class="firma-sektor-ph__glow"></div>' +
             '</div>';
     }
 
@@ -289,7 +289,7 @@
             ' width="' + (opts.width || 400) + '" height="' + (opts.height || 200) + '" loading="eager" decoding="async"' +
             ' data-fallback-src="' + esc(fbSrc) + '" data-fallback-final="' + esc(AurixUtils.PH_MARKER) + '"' +
             (g.forcePh ? ' data-force-ph="1" data-fallback-applied="2"' : '') + '>' +
-            firmaSektorPlaceholderHtml(firma) +
+            firmaSektorPlaceholderHtml() +
             '</div>';
     }
 
@@ -320,7 +320,6 @@
         if (!wrap || !img) return;
         var g = firmaKapakImgAttrs(firma);
         var tema = firmaSektorTema(firma.kategoriId);
-        var kat = kategoriBul(firma.kategoriId);
         var fbSrc = g.katGorsel && g.katGorsel !== g.src ? g.katGorsel : '';
         wrap.className = 'detay-gorsel-wrap firma-gorsel-alan firma-gorsel-alan--' + safeCss(tema, 'genel');
         wrap.setAttribute('data-sektor', firma.kategoriId || '');
@@ -332,8 +331,9 @@
             wrap.appendChild(ph);
         }
         ph.innerHTML = '<div class="firma-sektor-ph__bg"></div>' +
-            '<img class="firma-sektor-ph__logo" src="assets/logo.png" alt="" width="64" height="64" loading="lazy" decoding="async">' +
-            '<span class="firma-sektor-ph__ikon">' + kat.ikon + '</span>';
+            '<img class="firma-sektor-ph__logo" src="assets/logo.png" alt="" width="160" height="160" loading="lazy" decoding="async">' +
+            '<div class="firma-sektor-ph__frost"></div>' +
+            '<div class="firma-sektor-ph__glow"></div>';
         wrap.classList.remove('firma-gorsel-alan--ok', 'firma-gorsel-alan--ph');
         img.classList.add('aurix-img-fallback');
         img.dataset.fallbackApplied = '';
@@ -394,6 +394,181 @@
             '<div class="detay-guven__metrik"><span>Son aktif</span><strong>' + esc(guven.sonAktif) + '</strong></div>' +
             '<div class="detay-guven__metrik"><span>Ort. cevap</span><strong>' + esc(guven.cevapSuresi) + '</strong></div>' +
             '</div>';
+    }
+
+    /* Firma profil modalı — kategoriye göre demo içerik (yalnızca detay modal) */
+    var FIRMA_PROFIL_HIZMETLER = {
+        dokumcu: ['Vakum döküm', '18–22 ayar altın', '925 gümüş', 'Prototip üretim'],
+        mihlamaci: ['Mikro mıhlama', 'Tektaş montür', 'Pırlanta kitleme', 'Fantezi taş'],
+        mumcu: ['Mum basım', 'Model hazırlık', 'Seri mum', 'Özel sipariş'],
+        cizimci: ['CAD çizim', 'STL teslim', 'Teknik resim', 'Koleksiyon model'],
+        matrix: ['Matrix modelleme', '3DM arşiv', 'Nişan / alyans', 'Render'],
+        rhino: ['Rhino modelleme', 'Organik form', 'STL / 3DM', 'Render'],
+        tas: ['Pırlanta tedarik', 'Renkli taş', 'GIA sertifika', 'Toptan satış'],
+        ayar: ['Ayar analizi', 'Sertifikalı rapor', '916 / 750 / 585', 'Aynı gün sonuç'],
+        ramat: ['Hurda ramat', 'Altın / gümüş', 'Şeffaf tartım', 'Anında ödeme'],
+        kalipci: ['Silikon kalıp', 'Metal kalıp', 'Mum kalıp', 'Numune'],
+        polisaj: ['Polisaj', 'Parlatma', 'Mine finish', 'Seri yüzey'],
+        lazer: ['Lazer kesim', 'Kazıma', 'Plaka üretim', 'İsim yazımı'],
+        makine: ['Döküm makinesi', 'Lazer ekipman', 'Kurulum', 'Servis'],
+        vitrin: ['Vitrin sistemi', 'LED aydınlatma', 'Montaj', 'Bakım'],
+        kutu: ['Kuyumcu kutu', 'Marka baskı', 'Süet çanta', 'Özel tasarım'],
+        zincir: ['İtalyan zincir', 'Fantezi zincir', '14K–22K', 'Toptan'],
+        kilit: ['Kilit / klips', 'Bağlantı parçası', 'Toptan', 'Perakende'],
+        bilezik: ['22 ayar bilezik', 'İtalyan model', 'Fantezi', 'Toptan sevkiyat'],
+        malzeme: ['Sarf malzeme', 'Aparat', 'Kimyasal', 'Türkiye geneli sevkiyat'],
+        lehim: ['Altın lehim', 'Kaynak teli', 'Flux', 'Toptan stok']
+    };
+
+    var FIRMA_PROFIL_ISLER = {
+        dokumcu: [
+            { baslik: '925 gümüş erkek yüzük dökümü', musteri: 'Kuzey Tasarım', tarih: '05.07.2026', tutar: '₺21.500' },
+            { baslik: '18 ayar fantezi küpe serisi', musteri: 'İnci Gold Design', tarih: '28.06.2026', tutar: '₺38.000' },
+            { baslik: '22 ayar alyans döküm', musteri: 'Safir Jewelry', tarih: '18.06.2026', tutar: '₺16.400' }
+        ],
+        mihlamaci: [
+            { baslik: 'Pırlanta mıhlama — 36 adet', musteri: 'Elmas Stone', tarih: '06.07.2026', tutar: '₺11.400' },
+            { baslik: 'Tektaş montür kitleme', musteri: 'Nova Mıhlama', tarih: '01.07.2026', tutar: '₺8.500' },
+            { baslik: 'Baget taş mikro ayar', musteri: 'Marina Stone', tarih: '22.06.2026', tutar: '₺6.200' }
+        ],
+        cizimci: [
+            { baslik: 'Fantezi kolye CAD + STL', musteri: 'Anadolu CAD', tarih: '04.07.2026', tutar: '₺4.800' },
+            { baslik: 'Nişan yüzüğü teknik çizim', musteri: 'Kuzey Tasarım', tarih: '26.06.2026', tutar: '₺3.200' },
+            { baslik: 'Alyans koleksiyon modeli', musteri: 'Zenith Jewelry', tarih: '15.06.2026', tutar: '₺7.500' }
+        ],
+        matrix: [
+            { baslik: 'Matrix nişan yüzüğü serisi', musteri: 'Prestij Ayar', tarih: '03.07.2026', tutar: '₺9.200' },
+            { baslik: '3DM alyans arşivi', musteri: 'Ahenk Kuyum', tarih: '24.06.2026', tutar: '₺5.600' },
+            { baslik: 'Fantezi kolye render', musteri: 'İnci Gold', tarih: '12.06.2026', tutar: '₺4.100' }
+        ],
+        rhino: [
+            { baslik: 'Organik yüzük modeli', musteri: 'Vizyon Döküm', tarih: '02.07.2026', tutar: '₺6.800' },
+            { baslik: 'Geometrik küpe STL', musteri: 'Atlas Kalıp', tarih: '20.06.2026', tutar: '₺5.200' },
+            { baslik: 'Rhino koleksiyon paketi', musteri: 'Doruk Gold', tarih: '08.06.2026', tutar: '₺11.000' }
+        ],
+        tas: [
+            { baslik: 'GIA pırlanta tedarik — 12 taş', musteri: 'Safir Jewelry', tarih: '07.07.2026', tutar: '₺186.000' },
+            { baslik: 'Safir / zümrüt set', musteri: 'Nova Mıhlama', tarih: '29.06.2026', tutar: '₺42.000' },
+            { baslik: 'Fantezi taş toptan', musteri: 'Ahenk Kuyum', tarih: '14.06.2026', tutar: '₺28.500' }
+        ],
+        mumcu: [
+            { baslik: 'Alyans mum basımı — 60 çift', musteri: 'Mira Döküm', tarih: '05.07.2026', tutar: '₺5.800' },
+            { baslik: 'Tektaş mum model', musteri: 'Atlas Kalıp', tarih: '27.06.2026', tutar: '₺3.400' },
+            { baslik: 'Seri mum hazırlık', musteri: 'Arıcan Kuyumculuk', tarih: '16.06.2026', tutar: '₺7.200' }
+        ],
+        lazer: [
+            { baslik: '14 ayar plaka lazer kesim', musteri: 'Lider Lazer', tarih: '06.07.2026', tutar: '₺8.400' },
+            { baslik: 'İsim kazıma — 80 parça', musteri: 'Doruk Gold', tarih: '25.06.2026', tutar: '₺4.600' },
+            { baslik: 'Fantezi plaka üretim', musteri: 'Altıneller Döküm', tarih: '11.06.2026', tutar: '₺12.800' }
+        ],
+        makine: [
+            { baslik: 'Vakum döküm makinesi kurulumu', musteri: 'Vizyon Döküm', tarih: '30.06.2026', tutar: '₺485.000' },
+            { baslik: 'Fiber lazer servis', musteri: 'Lider Lazer', tarih: '18.06.2026', tutar: '₺14.200' },
+            { baslik: 'Mikromotor tedarik', musteri: 'Ege Polisaj', tarih: '05.06.2026', tutar: '₺12.500' }
+        ],
+        polisaj: [
+            { baslik: '22 ayar alyans polisajı', musteri: 'Ahenk Kuyum', tarih: '07.07.2026', tutar: '₺9.800' },
+            { baslik: 'Mine finish — 200 adet', musteri: 'Marmara Zincir', tarih: '28.06.2026', tutar: '₺22.000' },
+            { baslik: 'Seri parlatma', musteri: 'Kale Kilit', tarih: '10.06.2026', tutar: '₺7.600' }
+        ],
+        kalipci: [
+            { baslik: 'Tektaş montür kalıbı', musteri: 'Nova Mıhlama', tarih: '04.07.2026', tutar: '₺12.400' },
+            { baslik: 'Alyans kalıp seti', musteri: 'Safir Jewelry', tarih: '22.06.2026', tutar: '₺8.900' },
+            { baslik: 'Fantezi silikon kalıp', musteri: 'Anadolu Mum', tarih: '09.06.2026', tutar: '₺6.500' }
+        ]
+    };
+
+    function firmaProfilHizmetler(firma) {
+        var list = FIRMA_PROFIL_HIZMETLER[firma.kategoriId];
+        if (list && list.length) return list.slice();
+        var kat = kategoriBul(firma.kategoriId);
+        return [kat.ad, firma.sehir + ' hizmet', 'B2B üretim', 'Teklif & teslim'];
+    }
+
+    function firmaProfilIsler(firma) {
+        var list = FIRMA_PROFIL_ISLER[firma.kategoriId];
+        if (list && list.length) return list.slice(0, 3);
+        var guven = firmaGuvenVerisi(firma);
+        return [
+            { baslik: kategoriBul(firma.kategoriId).ad + ' işi tamamlandı', musteri: 'B2B müşteri', tarih: '01.07.2026', tutar: '—' },
+            { baslik: 'Seri üretim teslimi', musteri: firma.sehir + ' atölye', tarih: '20.06.2026', tutar: '—' },
+            { baslik: 'Özel sipariş kapanışı', musteri: 'Platform müşterisi', tarih: '08.06.2026', tutar: guven.tamamlananIs + '+ iş' }
+        ];
+    }
+
+    function firmaProfilGaleri(firma) {
+        var map = AURIX_DATA.KATEGORI_KAPAK_GORSELLERI || {};
+        var birincil = firmaKapakGorsel(firma);
+        var adaylar = [birincil];
+        var yedekler = [
+            map[firma.kategoriId],
+            'assets/images/dokum.png',
+            'assets/images/cad.png',
+            'assets/images/mihlama.png',
+            'assets/images/tas.png',
+            'assets/images/mum.png',
+            'assets/images/makine.png',
+            'assets/images/malzeme.jpg',
+            'assets/images/lazer.png',
+            'assets/images/kalip.png',
+            'assets/images/firma.png'
+        ];
+        yedekler.forEach(function (yol) {
+            var g = safeImageUrl(yol, '');
+            if (g && adaylar.indexOf(g) === -1) adaylar.push(g);
+        });
+        return adaylar.slice(0, 4);
+    }
+
+    function detayLogoGuncelle(firma) {
+        var el = $('detayLogo');
+        if (!el) return;
+        var logoSrc = firma.logo ? safeImageUrl(firma.logo, '') : '';
+        if (logoSrc && logoSrc.indexOf('assets/') === 0) {
+            el.innerHTML = '<img class="detay-logo__img aurix-img-fallback" src="' + esc(logoSrc) + '" alt="" width="72" height="72" loading="lazy" decoding="async" data-fallback-final="' + esc(AurixUtils.PH_MARKER) + '">';
+        } else {
+            el.innerHTML = '<span class="detay-logo__harf">' + esc(firmaBasHarfleri(firma.ad)) + '</span>';
+        }
+    }
+
+    function detayHizmetlerGuncelle(firma) {
+        var el = $('detayHizmetler');
+        if (!el) return;
+        el.innerHTML = firmaProfilHizmetler(firma).map(function (h) {
+            return '<span class="detay-hizmet-chip">' + esc(h) + '</span>';
+        }).join('');
+    }
+
+    function detayGaleriGuncelle(firma) {
+        var el = $('detayGaleri');
+        if (!el) return;
+        var gorseller = firmaProfilGaleri(firma);
+        var tema = firmaSektorTema(firma.kategoriId);
+        el.innerHTML = gorseller.map(function (src, i) {
+            return '<div class="detay-galeri__oge firma-gorsel-alan firma-gorsel-alan--' + safeCss(tema, 'genel') + '">' +
+                '<img class="detay-galeri__img aurix-img-fallback" src="' + esc(src) + '" alt="" width="160" height="120" loading="lazy" decoding="async"' +
+                ' data-fallback-final="' + esc(AurixUtils.PH_MARKER) + '">' +
+                firmaSektorPlaceholderHtml() +
+                '</div>';
+        }).join('');
+        AurixUtils.refreshFirmaGorselleri(el);
+    }
+
+    function detayIslerGuncelle(firma) {
+        var el = $('detayIsler');
+        if (!el) return;
+        var isler = firmaProfilIsler(firma);
+        el.innerHTML = isler.map(function (is) {
+            return '<li class="detay-is">' +
+                '<div class="detay-is__ust">' +
+                '<strong class="detay-is__baslik">' + esc(is.baslik) + '</strong>' +
+                '<span class="detay-is__tutar">' + esc(is.tutar) + '</span>' +
+                '</div>' +
+                '<div class="detay-is__alt">' +
+                '<span>' + esc(is.musteri) + '</span>' +
+                '<time>' + esc(is.tarih) + '</time>' +
+                '</div></li>';
+        }).join('');
     }
 
     function malzemeKategoriBul(id) {
@@ -1585,9 +1760,14 @@
         $('detayAd').textContent = firma.ad;
         $('detayKat').textContent = kat.ikon + ' ' + kat.ad;
         $('detaySehir').textContent = firma.sehir;
-        $('detayAciklama').textContent = firma.aciklama;
+        $('detayAciklama').textContent = firma.aciklama || 'Firma açıklaması henüz eklenmedi.';
         $('detayPuan').textContent = firma.puan ? yildizGoster(firma.puan) : 'Henüz puan yok';
         detayGorselGuncelle(firma);
+        detayLogoGuncelle(firma);
+        detayHizmetlerGuncelle(firma);
+        detayGaleriGuncelle(firma);
+        detayIslerGuncelle(firma);
+
         var detayWa = $('detayWa');
         if (detayWa) {
             var waHref = safeWaHref(tel);
@@ -1599,15 +1779,27 @@
                 detayWa.hidden = true;
             }
         }
+
         var rozetler = $('detayRozetler');
         if (rozetler) {
-            rozetler.innerHTML = (firma.durum === 'onaylandi' ? '<span class="rozet rozet--dogrulandi">Doğrulandı</span>' : '') +
+            rozetler.innerHTML =
+                (firma.durum === 'onaylandi' ? '<span class="rozet rozet--dogrulandi">Doğrulandı</span>' : '') +
                 (firma.premium ? '<span class="rozet rozet--premium">PREMIUM</span>' : '') +
                 (firma.sponsor ? '<span class="rozet rozet--partner">PARTNER</span>' : '');
         }
+
         var detayGuven = $('detayGuven');
         if (detayGuven) detayGuven.innerHTML = detayGuvenPanelHtml(firma);
+
+        var teklifBtn = $('detayTeklifBtn');
+        if (teklifBtn) {
+            teklifBtn.onclick = function () {
+                toast(firma.ad + ' firmasına teklif talebiniz alındı. En kısa sürede dönüş yapılacak.', 'success');
+            };
+        }
+
         modalAc('detayModal');
+        AurixUtils.refreshFirmaGorselleri($('detayModal'));
     }
 
     function modalAc(id) {
@@ -1840,6 +2032,49 @@
                 sayfaGoster(el.getAttribute('data-nav'));
             });
         });
+
+        document.querySelectorAll('[data-yakinda]').forEach(function (el) {
+            el.addEventListener('click', function (e) {
+                e.preventDefault();
+                var tip = el.getAttribute('data-yakinda');
+                if (tip === 'mobil') {
+                    toast('Mobil uygulama yakında. Şimdilik web sürümünü kullanabilirsiniz.', 'info');
+                } else if (tip === 'sosyal') {
+                    toast('Sosyal medya hesapları yakında paylaşılacak.', 'info');
+                } else {
+                    toast('Bu özellik yakında aktif olacak.', 'info');
+                }
+            });
+        });
+
+        var iletisimForm = $('iletisimForm');
+        if (iletisimForm) {
+            iletisimForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+                var ad = ($('iletisimAd') && $('iletisimAd').value || '').trim();
+                var email = ($('iletisimEmail') && $('iletisimEmail').value || '').trim();
+                var konu = ($('iletisimKonu') && $('iletisimKonu').value || '').trim();
+                var mesaj = ($('iletisimMesaj') && $('iletisimMesaj').value || '').trim();
+                if (ad.length < 2) {
+                    toast('Lütfen ad / firma bilgisini girin.', 'error');
+                    return;
+                }
+                if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                    toast('Geçerli bir e-posta girin.', 'error');
+                    return;
+                }
+                if (!konu) {
+                    toast('Lütfen konu seçin.', 'error');
+                    return;
+                }
+                if (mesaj.length < 10) {
+                    toast('Mesaj en az 10 karakter olmalı.', 'error');
+                    return;
+                }
+                iletisimForm.reset();
+                toast('Mesajınız alındı. Beta döneminde yanıt süresi değişken olabilir.', 'success');
+            });
+        }
 
         document.querySelectorAll('[data-scroll]').forEach(function (el) {
             el.addEventListener('click', function (e) {
