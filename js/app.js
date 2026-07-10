@@ -962,7 +962,7 @@
 
     function kategoriIsSayisi(item) {
         var taban = item.isSayisi || 0;
-        var acik = (AURIX_DATA.ACIK_IS_TALEPLERI || []).filter(function (t) {
+        var acik = onayliIsTalepleri().filter(function (t) {
             return t.kategoriId === item.id;
         }).length;
         return taban + acik;
@@ -2110,6 +2110,9 @@
             modalAc('girisModal');
             return;
         }
+        document.querySelectorAll('.modal--acik').forEach(function (m) {
+            modalKapat(m.id);
+        });
         if (id === 'admin') {
             if (!isAdminSession()) return;
         }
@@ -2242,15 +2245,6 @@
         modalKapat('adminSilModal');
         toast('Kayıt silindi.', 'info');
         tumunuRenderEt();
-    }
-
-    function adminGiris() {
-        // v1.0: Supabase Auth signInWithPassword + profiles.role === 'admin' doğrulaması burada yapılacak.
-        if (!ADMIN_PANEL_ENABLED) {
-            toast('Yönetim paneli şu an devre dışı.', 'info');
-            return;
-        }
-        toast('Geçersiz e-posta veya şifre.', 'error');
     }
 
     function adminCikis() {
@@ -2416,9 +2410,10 @@
             });
         }
 
-        var girisBtn = $('girisBtn');
-        if (girisBtn) {
-            girisBtn.addEventListener('click', function () {
+        var girisForm = $('girisForm');
+        if (girisForm) {
+            girisForm.addEventListener('submit', function (e) {
+                e.preventDefault();
                 var email = $('girisEmail') ? $('girisEmail').value : '';
                 var sifre = $('girisSifre') ? $('girisSifre').value : '';
                 var result = AuthService.signIn(email, sifre);
@@ -2432,14 +2427,6 @@
                 toast('Firma paneli açıldı.', 'info');
             });
         }
-
-        document.querySelectorAll('.giris-modal__kayit-link').forEach(function (btn) {
-            btn.addEventListener('click', function (e) {
-                e.preventDefault();
-                modalKapat('girisModal');
-                sayfaGoster('kayit');
-            });
-        });
 
         // Arama
         var aramaInput = $('aramaInput');
@@ -2515,7 +2502,8 @@
         });
 
         // Mobil menü
-        $('menuToggle').addEventListener('click', navMenuToggle);
+        var menuToggle = $('menuToggle');
+        if (menuToggle) menuToggle.addEventListener('click', navMenuToggle);
         var navBackdrop = $('navBackdrop');
         if (navBackdrop) navBackdrop.addEventListener('click', navMenuKapat);
 

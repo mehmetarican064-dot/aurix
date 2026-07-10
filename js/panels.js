@@ -361,33 +361,6 @@
         }
     }
 
-    function panelKartHtml(baslik, satirlar) {
-        var rows = satirlar.map(function (s) {
-            return '<div class="panel-kart__satir"><span class="panel-kart__etiket">' + esc(s.etiket) +
-                '</span><span class="panel-kart__deger">' + esc(s.deger) + '</span></div>';
-        }).join('');
-        return '<article class="panel-kart"><h3 class="panel-kart__baslik">' + esc(baslik) + '</h3><div class="panel-kart__govde">' + rows + '</div></article>';
-    }
-
-    function panelListeHtml(baslik, ogeler, alanlar) {
-        if (!ogeler.length) {
-            return '<div class="panel-bos"><p>Henüz kayıt yok.</p></div>';
-        }
-        var html = ogeler.map(function (o) {
-            var satirlar = alanlar.map(function (a) {
-                return '<span class="panel-liste__hucre panel-liste__hucre--' + esc(a.key) + '">' + esc(o[a.key] || '—') + '</span>';
-            }).join('');
-            return '<li class="panel-liste__oge">' + satirlar + '</li>';
-        }).join('');
-        var basliklar = alanlar.map(function (a) {
-            return '<span class="panel-liste__baslik-hucre">' + esc(a.label) + '</span>';
-        }).join('');
-        return '<div class="panel-liste-wrap"><h3 class="panel-liste__baslik">' + esc(baslik) + '</h3>' +
-            '<ul class="panel-liste panel-liste--baslikli" aria-label="' + esc(baslik) + '">' +
-            '<li class="panel-liste__oge panel-liste__oge--baslik" aria-hidden="true">' + basliklar + '</li>' +
-            html + '</ul></div>';
-    }
-
     function renderUserPanel() {
         var demo = AURIX_DATA.PANEL_DEMO || {};
         var user = global.AuthService ? AuthService.getCurrentUser() : null;

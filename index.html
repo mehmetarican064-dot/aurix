@@ -863,15 +863,17 @@
                 <button class="modal__kapat" data-modal-kapat="girisModal" aria-label="Kapat">×</button>
             </div>
             <p class="giris-modal__metin">Firma hesabınıza giriş yapın. Tam entegrasyon v1.0 sürümünde aktif olacaktır.</p>
+            <form id="girisForm">
             <div class="form-grup">
                 <label class="form-label" for="girisEmail">E-posta</label>
-                <input class="form-input" type="email" id="girisEmail" placeholder="ornek@firma.com" autocomplete="email">
+                <input class="form-input" type="email" id="girisEmail" placeholder="ornek@firma.com" autocomplete="email" required>
             </div>
             <div class="form-grup">
                 <label class="form-label" for="girisSifre">Şifre</label>
-                <input class="form-input" type="password" id="girisSifre" placeholder="••••••••" autocomplete="current-password">
+                <input class="form-input" type="password" id="girisSifre" placeholder="••••••••" autocomplete="current-password" required minlength="4">
             </div>
-            <button type="button" class="btn btn--primary" id="girisBtn" style="width:100%">Giriş Yap</button>
+            <button type="submit" class="btn btn--primary" id="girisBtn" style="width:100%">Giriş Yap</button>
+            </form>
             <p class="giris-modal__alt"><button type="button" class="giris-modal__kayit-link" data-nav="kayit">Firma kaydı oluştur</button></p>
         </div>
     </div>
