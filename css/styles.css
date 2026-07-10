@@ -2354,6 +2354,125 @@ a { color: inherit; text-decoration: none; }
     -webkit-backdrop-filter: blur(8px);
 }
 
+/* Admin moderasyon listeleri */
+.admin-mod {
+    min-width: 0;
+    max-width: 100%;
+}
+
+.admin-mod__baslik {
+    font-size: 15px;
+    font-weight: 600;
+    margin: 0 0 14px;
+    color: var(--aurix-text);
+}
+
+.admin-mod__liste {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.admin-mod__oge {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 14px 16px;
+    background: var(--aurix-panel-solid);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 10px;
+    min-width: 0;
+}
+
+.admin-mod__bilgi {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+    flex: 1;
+}
+
+.admin-mod__ad {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--aurix-text);
+    word-break: break-word;
+}
+
+.admin-mod__meta {
+    font-size: 12px;
+    color: var(--aurix-muted);
+    word-break: break-word;
+}
+
+.admin-mod__tablo-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    max-width: 100%;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.admin-tablo--mod {
+    min-width: 640px;
+}
+
+.admin-mod-bos {
+    padding: 28px 16px;
+    text-align: center;
+    color: var(--aurix-muted);
+    font-size: 14px;
+    border: 1px dashed rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+}
+
+.admin-mod-bos p { margin: 0; }
+
+.admin-mod-durum {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    padding: 4px 8px;
+    border-radius: 6px;
+    white-space: nowrap;
+}
+
+.admin-mod-durum--aktif {
+    color: var(--aurix-success);
+    background: rgba(52, 199, 89, 0.12);
+}
+
+.admin-mod-durum--beklemede {
+    color: var(--aurix-warning);
+    background: rgba(255, 159, 10, 0.12);
+}
+
+.admin-mod-durum--askida {
+    color: var(--aurix-muted);
+    background: rgba(255, 255, 255, 0.06);
+}
+
+[data-sayfa="admin"] {
+    overflow-x: hidden;
+    max-width: 100%;
+}
+
+[data-sayfa="admin"] .kapsayici,
+[data-sayfa="admin"] .panel-sekme {
+    min-width: 0;
+    max-width: 100%;
+}
+
+[data-sayfa="admin"] .panel-tabs {
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
 /* ---- MODAL ---- */
 .modal {
     position: fixed;
@@ -3089,6 +3208,13 @@ a { color: inherit; text-decoration: none; }
     .admin-toolbar { flex-direction: column; align-items: stretch; }
     .admin-arama { max-width: none; }
     .admin-demo-bar { flex-direction: column; align-items: flex-start; }
+    .admin-mod__oge {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .admin-mod__oge .admin-aksiyon {
+        justify-content: flex-end;
+    }
     .neden-grid { grid-template-columns: 1fr; }
     #toastWrap { left: 16px; right: 16px; }
     .toast { max-width: 100%; }

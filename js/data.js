@@ -699,28 +699,62 @@ window.AURIX_DATA = {
         }
     },
 
-    /* Admin panel demo verisi (Beta iskelet — panel kapalıyken referans) */
+    /* Admin panel — bekleyen iş/malzeme kuyruğu + kullanıcı demo (oturum içi moderasyon) */
     ADMIN_PANEL_DEMO: {
-        isTalepleri: [
-            { id: 'ait1', baslik: '500 adet alyans üretimi', sehir: 'İZMİR', basvuru: '06.07.2026' },
-            { id: 'ait2', baslik: 'Pırlanta montür işi', sehir: 'İSTANBUL', basvuru: '05.07.2026' },
-            { id: 'ait3', baslik: 'Ege Polisaj — firma başvurusu', sehir: 'İZMİR', basvuru: '01.07.2026' }
+        bekleyenIsTalepleri: [
+            {
+                id: 'ait1', kategoriId: 'dokumcu',
+                baslik: '500 adet 14 ayar alyans dökümü',
+                sehir: 'İzmir', adet: '500 adet', termin: '18 gün',
+                butce: '₺95.000 – ₺120.000', teklifSayisi: 0,
+                acilisTarihi: '10 Tem 2026', durum: 'Teklif bekliyor', durumTip: 'bekliyor',
+                basvuru: '10.07.2026', sonGuncelleme: 'Az önce'
+            },
+            {
+                id: 'ait2', kategoriId: 'mihlamaci',
+                baslik: 'Pırlanta montür mıhlama — 48 adet',
+                sehir: 'İstanbul', adet: '48 adet', termin: '9 gün',
+                butce: '₺16.000 – ₺22.000', teklifSayisi: 0,
+                acilisTarihi: '09 Tem 2026', durum: 'Teklif bekliyor', durumTip: 'bekliyor',
+                basvuru: '09.07.2026', sonGuncelleme: '2 saat önce'
+            },
+            {
+                id: 'ait3', kategoriId: 'polisaj',
+                baslik: '22 ayar bilezik seri polisaj',
+                sehir: 'Denizli', adet: '160 adet', termin: '7 gün',
+                butce: '₺28.000 – ₺36.000', teklifSayisi: 0,
+                acilisTarihi: '08 Tem 2026', durum: 'Acil', durumTip: 'acil',
+                basvuru: '08.07.2026', sonGuncelleme: '5 saat önce'
+            }
         ],
-        malzemeler: [
-            { id: 'aml1', baslik: 'Ultrasonik Temizleyici 6L', satici: 'Vizyon Döküm Tedarik', durum: 'İncelemede' },
-            { id: 'aml2', baslik: 'Grafit Pota Seti 3 Boy', satici: 'Altıneller Döküm Tedarik', durum: 'İncelemede' }
+        bekleyenMalzemeler: [
+            {
+                id: 'aml1', kategoriId: 'kimyasal',
+                baslik: 'Ultrasonik Temizleyici 10L Endüstriyel',
+                fiyat: '₺22.400', satici: 'Vizyon Döküm Tedarik', sehir: 'Bursa',
+                durum: 'Stokta', dogrulandi: false, basvuru: '09.07.2026'
+            },
+            {
+                id: 'aml2', kategoriId: 'kalip-malzeme',
+                baslik: 'Grafit Pota Seti 5 Boy',
+                fiyat: '₺3.450', satici: 'Altıneller Döküm Tedarik', sehir: 'Kahramanmaraş',
+                durum: 'Stokta', dogrulandi: false, basvuru: '08.07.2026'
+            },
+            {
+                id: 'aml3', kategoriId: 'mikromotor',
+                baslik: 'Saeshin Strong 204 Mikromotor Set',
+                fiyat: '₺9.800', satici: 'Ahenk Kuyum Malzeme', sehir: 'Konya',
+                durum: 'Sipariş', dogrulandi: false, basvuru: '07.07.2026'
+            }
         ],
         kullanicilar: [
-            { id: 'u1', ad: 'Mehmet A.', email: 'mehmet@arican-kuyum.com', rol: 'Firma', durum: 'Aktif' },
-            { id: 'u2', ad: 'Ayşe K.', email: 'ayse@novamihlama.com', rol: 'Firma', durum: 'Aktif' },
-            { id: 'u3', ad: 'Can Y.', email: 'can@egepolisaj.com', rol: 'Firma', durum: 'Beklemede' }
-        ],
-        raporlar: {
-            toplamFirma: 128,
-            bekleyenBasvuru: 7,
-            aylikIsTalebi: 34,
-            aktifMalzeme: 56
-        }
+            { id: 'u1', ad: 'Mehmet Arıcan', email: 'mehmet@arican-kuyum.com', rol: 'Firma', durum: 'Aktif', durumTip: 'aktif', sehir: 'İstanbul', kayit: '12.03.2026' },
+            { id: 'u2', ad: 'Ayşe Korkmaz', email: 'ayse@novamihlama.com', rol: 'Firma', durum: 'Aktif', durumTip: 'aktif', sehir: 'İzmir', kayit: '28.04.2026' },
+            { id: 'u3', ad: 'Can Yılmaz', email: 'can@egepolisaj.com', rol: 'Firma', durum: 'Beklemede', durumTip: 'beklemede', sehir: 'İzmir', kayit: '06.07.2026' },
+            { id: 'u4', ad: 'Elif Demir', email: 'elif@dorukgold.com', rol: 'Alıcı', durum: 'Aktif', durumTip: 'aktif', sehir: 'Ankara', kayit: '15.05.2026' },
+            { id: 'u5', ad: 'Burak Şahin', email: 'burak@liderlazer.com', rol: 'Firma', durum: 'Askıda', durumTip: 'askida', sehir: 'Kahramanmaraş', kayit: '02.02.2026' },
+            { id: 'u6', ad: 'Zeynep Aksoy', email: 'zeynep@safirjewelry.com', rol: 'Firma', durum: 'Aktif', durumTip: 'aktif', sehir: 'Gaziantep', kayit: '19.06.2026' }
+        ]
     }
 };
 

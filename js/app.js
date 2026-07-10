@@ -19,6 +19,9 @@
 
     var state = {
         firmalar: [],
+        isTalepleri: [],
+        malzemeler: [],
+        kullanicilar: [],
         aktifSayfa: 'ana-sayfa',
         piyasaTab: 'kuyumcu',
         adminArama: '',
@@ -27,6 +30,48 @@
         vitrin: { sayfa: 1, boyut: 9, siralama: 'onerilen' },
         malzeme: { arama: '', kategoriId: '' }
     };
+
+    function cloneJson(obj) {
+        return JSON.parse(JSON.stringify(obj));
+    }
+
+    /** İş/malzeme moderasyonu oturum içi; admin yetkisi localStorage'a yazılmaz. */
+    function initModerationQueues() {
+        var demo = AURIX_DATA.ADMIN_PANEL_DEMO || {};
+        state.isTalepleri = (AURIX_DATA.ACIK_IS_TALEPLERI || []).map(function (t) {
+            var c = cloneJson(t);
+            c.moderasyon = c.moderasyon || 'onaylandi';
+            return c;
+        });
+        (demo.bekleyenIsTalepleri || []).forEach(function (t) {
+            if (state.isTalepleri.some(function (x) { return x.id === t.id; })) return;
+            var c = cloneJson(t);
+            c.moderasyon = 'beklemede';
+            state.isTalepleri.push(c);
+        });
+
+        state.malzemeler = (AURIX_DATA.MALZEME_URUNLER || []).map(function (u) {
+            var c = cloneJson(u);
+            c.moderasyon = c.moderasyon || 'onaylandi';
+            return c;
+        });
+        (demo.bekleyenMalzemeler || []).forEach(function (u) {
+            if (state.malzemeler.some(function (x) { return x.id === u.id; })) return;
+            var c = cloneJson(u);
+            c.moderasyon = 'beklemede';
+            state.malzemeler.push(c);
+        });
+
+        state.kullanicilar = cloneJson(demo.kullanicilar || []);
+    }
+
+    function onayliIsTalepleri() {
+        return state.isTalepleri.filter(function (t) { return t.moderasyon === 'onaylandi'; });
+    }
+
+    function onayliMalzemeler() {
+        return state.malzemeler.filter(function (u) { return u.moderasyon === 'onaylandi'; });
+    }
 
     function initDevAdminMode() {
         var params = new URLSearchParams(window.location.search);
@@ -1348,15 +1393,20 @@
 
     function renderIsTalepleri() {
         var el = $('isTalepleriGrid');
-        if (!el || !AURIX_DATA.ACIK_IS_TALEPLERI) return;
-        el.innerHTML = AURIX_DATA.ACIK_IS_TALEPLERI.map(function (talep) {
+        if (!el) return;
+        var liste = onayliIsTalepleri();
+        if (!liste.length) {
+            el.innerHTML = '<p class="bolum-bos">Şu an yayınlanmış iş talebi yok.</p>';
+            return;
+        }
+        el.innerHTML = liste.map(function (talep) {
             var durumCls = 'is-talep-kart__durum--' + safeCss(talep.durumTip, 'bekliyor');
             return '<article class="is-talep-kart is-talep-kart--pro">' +
                 '<div class="is-talep-kart__ust">' +
                 '<div class="is-talep-kart__baslik-grup">' +
-                '<h3 class="is-talep-kart__baslik">' + esc(talep.baslik) + '</h3>' +
-                '<span class="is-talep-kart__sehir">' + esc(talep.sehir) + '</span></div>' +
-                '<span class="is-talep-kart__durum ' + durumCls + '">' + esc(talep.durum) + '</span></div>' +
+                '<h3 class="is-talep-kart__baslik">' + esc(talep.baslik || '—') + '</h3>' +
+                '<span class="is-talep-kart__sehir">' + esc(talep.sehir || '—') + '</span></div>' +
+                '<span class="is-talep-kart__durum ' + durumCls + '">' + esc(talep.durum || '—') + '</span></div>' +
                 '<ul class="is-talep-kart__detaylar is-talep-kart__detaylar--odak">' +
                 '<li><span>Açılış</span><strong>' + esc(talep.acilisTarihi || '—') + '</strong></li>' +
                 '<li><span>Teklif</span><strong>' + (talep.teklifSayisi != null ? talep.teklifSayisi + ' teklif' : '—') + '</strong></li>' +
@@ -1428,14 +1478,14 @@
     }
 
     function filtreliMalzemeUrunleri() {
-        var list = AURIX_DATA.MALZEME_URUNLER || [];
+        var list = onayliMalzemeler();
         var arama = (state.malzeme.arama || '').toLocaleLowerCase('tr-TR');
         var katId = state.malzeme.kategoriId;
         return list.filter(function (u) {
             if (katId && u.kategoriId !== katId) return false;
             if (!arama) return true;
             var kat = malzemeKategoriBul(u.kategoriId);
-            var metin = (u.baslik + ' ' + u.satici + ' ' + u.sehir + ' ' + kat.ad).toLocaleLowerCase('tr-TR');
+            var metin = ((u.baslik || '') + ' ' + (u.satici || '') + ' ' + (u.sehir || '') + ' ' + kat.ad).toLocaleLowerCase('tr-TR');
             return metin.indexOf(arama) !== -1;
         });
     }
@@ -1691,6 +1741,157 @@
         renderAdminOzet();
     }
 
+    function adminModDurumEtiket(durum) {
+        var map = { beklemede: 'Beklemede', onaylandi: 'Onaylandı', reddedildi: 'Reddedildi' };
+        return map[durum] || durum || '—';
+    }
+
+    function adminKullaniciDurumHtml(u) {
+        var tip = safeCss(u.durumTip || u.durum, 'aktif');
+        return '<span class="admin-mod-durum admin-mod-durum--' + tip + '">' + esc(u.durum || '—') + '</span>';
+    }
+
+    function adminModListeBos(metin) {
+        return '<div class="admin-mod-bos"><p>' + esc(metin) + '</p></div>';
+    }
+
+    function renderAdminIsTalepleriSekme() {
+        var el = $('adminSekmeIsTalepleri');
+        if (!el) return;
+        var bekleyen = state.isTalepleri.filter(function (t) { return t.moderasyon === 'beklemede'; });
+        if (!bekleyen.length) {
+            el.innerHTML = adminModListeBos('Bekleyen iş talebi yok.');
+            return;
+        }
+        el.innerHTML = '<div class="admin-mod">' +
+            '<h3 class="admin-mod__baslik">Bekleyen İş Talepleri</h3>' +
+            '<ul class="admin-mod__liste" aria-label="Bekleyen iş talepleri">' +
+            bekleyen.map(function (t) {
+                return '<li class="admin-mod__oge">' +
+                    '<div class="admin-mod__bilgi">' +
+                    '<strong class="admin-mod__ad">' + esc(t.baslik || '—') + '</strong>' +
+                    '<span class="admin-mod__meta">' + esc(t.sehir || '—') + ' · ' + esc(t.basvuru || t.acilisTarihi || '—') + '</span>' +
+                    '<span class="admin-mod__meta">' + esc(t.butce || '—') + ' · ' + esc(t.termin || '—') + '</span>' +
+                    '</div>' +
+                    '<div class="admin-aksiyon">' +
+                    '<button type="button" class="admin-btn admin-btn--onay" data-is-onay="' + esc(t.id) + '" title="Onayla">✓</button>' +
+                    '<button type="button" class="admin-btn admin-btn--red" data-is-red="' + esc(t.id) + '" title="Reddet">✕</button>' +
+                    '</div></li>';
+            }).join('') +
+            '</ul></div>';
+
+        el.querySelectorAll('[data-is-onay]').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                adminModerasyonGuncelle('is', btn.getAttribute('data-is-onay'), 'onaylandi');
+            });
+        });
+        el.querySelectorAll('[data-is-red]').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                adminModerasyonGuncelle('is', btn.getAttribute('data-is-red'), 'reddedildi');
+            });
+        });
+    }
+
+    function renderAdminMalzemelerSekme() {
+        var el = $('adminSekmeMalzemeler');
+        if (!el) return;
+        var bekleyen = state.malzemeler.filter(function (u) { return u.moderasyon === 'beklemede'; });
+        if (!bekleyen.length) {
+            el.innerHTML = adminModListeBos('Bekleyen malzeme ilanı yok.');
+            return;
+        }
+        el.innerHTML = '<div class="admin-mod">' +
+            '<h3 class="admin-mod__baslik">Bekleyen Malzeme İlanları</h3>' +
+            '<ul class="admin-mod__liste" aria-label="Bekleyen malzeme ilanları">' +
+            bekleyen.map(function (u) {
+                return '<li class="admin-mod__oge">' +
+                    '<div class="admin-mod__bilgi">' +
+                    '<strong class="admin-mod__ad">' + esc(u.baslik || '—') + '</strong>' +
+                    '<span class="admin-mod__meta">' + esc(u.satici || '—') + ' · ' + esc(u.sehir || '—') + '</span>' +
+                    '<span class="admin-mod__meta">' + esc(u.fiyat || '—') + ' · Başvuru: ' + esc(u.basvuru || '—') + '</span>' +
+                    '</div>' +
+                    '<div class="admin-aksiyon">' +
+                    '<button type="button" class="admin-btn admin-btn--onay" data-mal-onay="' + esc(u.id) + '" title="Onayla">✓</button>' +
+                    '<button type="button" class="admin-btn admin-btn--red" data-mal-red="' + esc(u.id) + '" title="Reddet">✕</button>' +
+                    '</div></li>';
+            }).join('') +
+            '</ul></div>';
+
+        el.querySelectorAll('[data-mal-onay]').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                adminModerasyonGuncelle('malzeme', btn.getAttribute('data-mal-onay'), 'onaylandi');
+            });
+        });
+        el.querySelectorAll('[data-mal-red]').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                adminModerasyonGuncelle('malzeme', btn.getAttribute('data-mal-red'), 'reddedildi');
+            });
+        });
+    }
+
+    function renderAdminKullanicilarSekme() {
+        var el = $('adminSekmeKullanicilar');
+        if (!el) return;
+        var liste = state.kullanicilar || [];
+        if (!liste.length) {
+            el.innerHTML = adminModListeBos('Kullanıcı kaydı yok.');
+            return;
+        }
+        el.innerHTML = '<div class="admin-mod">' +
+            '<h3 class="admin-mod__baslik">Kullanıcılar</h3>' +
+            '<div class="admin-mod__tablo-wrap">' +
+            '<table class="admin-tablo admin-tablo--mod">' +
+            '<thead><tr><th>Ad</th><th>E-posta</th><th>Rol</th><th>Şehir</th><th>Kayıt</th><th>Durum</th></tr></thead>' +
+            '<tbody>' +
+            liste.map(function (u) {
+                return '<tr class="admin-tablo__satir">' +
+                    '<td><span class="admin-tablo__firma">' + esc(u.ad || '—') + '</span></td>' +
+                    '<td><span class="admin-tablo__meta">' + esc(u.email || '—') + '</span></td>' +
+                    '<td><span class="admin-tablo__meta">' + esc(u.rol || '—') + '</span></td>' +
+                    '<td><span class="admin-tablo__meta">' + esc(u.sehir || '—') + '</span></td>' +
+                    '<td><span class="admin-tablo__meta">' + esc(u.kayit || '—') + '</span></td>' +
+                    '<td>' + adminKullaniciDurumHtml(u) + '</td></tr>';
+            }).join('') +
+            '</tbody></table></div></div>';
+    }
+
+    function renderAdminRaporlarSekme() {
+        var el = $('adminSekmeRaporlar');
+        if (!el) return;
+        var toplamFirma = state.firmalar.length;
+        var bekleyenFirma = state.firmalar.filter(function (f) { return f.durum === 'beklemede'; }).length;
+        var bekleyenIs = state.isTalepleri.filter(function (t) { return t.moderasyon === 'beklemede'; }).length;
+        var aktifMalzeme = onayliMalzemeler().length;
+        el.innerHTML = '<div class="admin-ozet admin-ozet--rapor">' +
+            '<div class="admin-kart"><div class="admin-kart__etiket">Toplam Firma</div><div class="admin-kart__sayi">' + toplamFirma + '</div></div>' +
+            '<div class="admin-kart admin-kart--uyari"><div class="admin-kart__etiket">Bekleyen Başvuru</div><div class="admin-kart__sayi">' + bekleyenFirma + '</div></div>' +
+            '<div class="admin-kart"><div class="admin-kart__etiket">Bekleyen İş Talebi</div><div class="admin-kart__sayi">' + bekleyenIs + '</div></div>' +
+            '<div class="admin-kart admin-kart--yesil"><div class="admin-kart__etiket">Yayındaki Malzeme</div><div class="admin-kart__sayi">' + aktifMalzeme + '</div></div>' +
+            '</div><p class="panel-not">Metrikler oturumdaki platform verilerinden hesaplanır.</p>';
+    }
+
+    function renderAdminModeration() {
+        if (!isAdminSession()) return;
+        renderAdminIsTalepleriSekme();
+        renderAdminMalzemelerSekme();
+        renderAdminKullanicilarSekme();
+        renderAdminRaporlarSekme();
+    }
+
+    function adminModerasyonGuncelle(tip, id, durum) {
+        if (!isAdminSession()) return;
+        var liste = tip === 'is' ? state.isTalepleri : state.malzemeler;
+        var item = liste.find(function (x) { return x.id === id; });
+        if (!item) return;
+        item.moderasyon = durum;
+        if (tip === 'malzeme' && durum === 'onaylandi') item.dogrulandi = true;
+        var ad = item.baslik || id;
+        toast(ad + ' → ' + adminModDurumEtiket(durum), 'success');
+        renderAdminModeration();
+        renderIsTalepleri();
+        renderMalzemePazari();
+    }
+
     function renderAdminUI() {
         var link = $('navAdmin');
         var btn = $('adminGirisBtn');
@@ -1728,6 +1929,7 @@
         renderVitrin();
         if (isAdminSession()) {
             renderAdminTablo();
+            renderAdminModeration();
         }
         renderAdminUI();
         AurixUtils.refreshFirmaGorselleri();
@@ -1863,6 +2065,7 @@
         if (id === 'admin') {
             PanelUI.renderAdminSkeleton();
             renderAdminTablo();
+            renderAdminModeration();
         }
         if (id === 'malzeme') renderMalzemePazari();
         if (id === 'piyasa') {
@@ -2001,6 +2204,7 @@
         if (!confirm('Tüm demo verileri sıfırlansın mı?')) return;
         StorageAdapter.reset();
         StorageAdapter.init();
+        initModerationQueues();
         tumunuRenderEt();
         toast('Demo verileri sıfırlandı.', 'info');
     }
@@ -2012,6 +2216,7 @@
     function init() {
         initDevAdminMode();
         StorageAdapter.init();
+        initModerationQueues();
 
         AurixUtils.initImageFallbackHandler();
         renderKategoriSelectler();
@@ -2023,7 +2228,10 @@
         setInterval(heroTerminalSaatGuncelle, 1000);
 
         PanelUI.bindTabs();
-        PanelUI.renderAdminSkeleton();
+        if (isAdminSession()) {
+            PanelUI.renderAdminSkeleton();
+            renderAdminModeration();
+        }
 
         // Navigasyon
         document.querySelectorAll('[data-nav]').forEach(function (el) {
@@ -2250,7 +2458,14 @@
     }
 
     // Global (HTML onclick yerine event delegation tercih edildi; geriye dönük)
-    window.Aurix = { sayfaGoster: sayfaGoster, scrollToBolum: scrollToBolum, modalKapat: modalKapat, demoSifirla: demoVeriSifirla, toast: toast };
+    window.Aurix = {
+        sayfaGoster: sayfaGoster,
+        scrollToBolum: scrollToBolum,
+        modalKapat: modalKapat,
+        demoSifirla: demoVeriSifirla,
+        toast: toast,
+        renderAdminModeration: renderAdminModeration
+    };
 
     document.addEventListener('DOMContentLoaded', init);
 })();

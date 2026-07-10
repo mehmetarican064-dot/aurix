@@ -424,46 +424,19 @@
     }
 
     function renderAdminSkeleton() {
-        var demo = AURIX_DATA.ADMIN_PANEL_DEMO || {};
-
-        var isEl = $('adminSekmeIsTalepleri');
-        if (isEl) {
-            isEl.innerHTML = panelListeHtml('Bekleyen İş Talepleri', demo.isTalepleri || [], [
-                { key: 'baslik', label: 'Başlık' },
-                { key: 'sehir', label: 'Şehir' },
-                { key: 'basvuru', label: 'Başvuru' }
-            ]);
+        if (global.Aurix && typeof Aurix.renderAdminModeration === 'function') {
+            Aurix.renderAdminModeration();
+            return;
         }
-
-        var malEl = $('adminSekmeMalzemeler');
-        if (malEl) {
-            malEl.innerHTML = panelListeHtml('Bekleyen Malzemeler', demo.malzemeler || [], [
-                { key: 'baslik', label: 'Ürün' },
-                { key: 'satici', label: 'Satıcı' },
-                { key: 'durum', label: 'Durum' }
-            ]);
-        }
-
-        var kulEl = $('adminSekmeKullanicilar');
-        if (kulEl) {
-            kulEl.innerHTML = panelListeHtml('Kullanıcılar', demo.kullanicilar || [], [
-                { key: 'ad', label: 'Ad' },
-                { key: 'email', label: 'E-posta' },
-                { key: 'rol', label: 'Rol' },
-                { key: 'durum', label: 'Durum' }
-            ]);
-        }
-
-        var rapEl = $('adminSekmeRaporlar');
-        if (rapEl) {
-            var r = demo.raporlar || {};
-            rapEl.innerHTML = '<div class="admin-ozet admin-ozet--rapor">' +
-                '<div class="admin-kart"><div class="admin-kart__etiket">Toplam Firma</div><div class="admin-kart__sayi">' + esc(String(r.toplamFirma || 0)) + '</div></div>' +
-                '<div class="admin-kart admin-kart--uyari"><div class="admin-kart__etiket">Bekleyen Başvuru</div><div class="admin-kart__sayi">' + esc(String(r.bekleyenBasvuru || 0)) + '</div></div>' +
-                '<div class="admin-kart"><div class="admin-kart__etiket">Aylık İş Talebi</div><div class="admin-kart__sayi">' + esc(String(r.aylikIsTalebi || 0)) + '</div></div>' +
-                '<div class="admin-kart admin-kart--yesil"><div class="admin-kart__etiket">Aktif Malzeme</div><div class="admin-kart__sayi">' + esc(String(r.aktifMalzeme || 0)) + '</div></div>' +
-                '</div><p class="panel-not">Metrikler platform verilerinden hesaplanır.</p>';
-        }
+        var el;
+        el = $('adminSekmeIsTalepleri');
+        if (el) el.innerHTML = '<div class="admin-mod-bos"><p>Yükleniyor…</p></div>';
+        el = $('adminSekmeMalzemeler');
+        if (el) el.innerHTML = '<div class="admin-mod-bos"><p>Yükleniyor…</p></div>';
+        el = $('adminSekmeKullanicilar');
+        if (el) el.innerHTML = '<div class="admin-mod-bos"><p>Yükleniyor…</p></div>';
+        el = $('adminSekmeRaporlar');
+        if (el) el.innerHTML = '<div class="admin-mod-bos"><p>Yükleniyor…</p></div>';
     }
 
     function bindTabs() {
