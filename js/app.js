@@ -10,6 +10,8 @@
     var ADMIN_PANEL_ENABLED = false;
     // TODO: Supabase Auth sonrası devAdmin parametresi tamamen kaldırılacak.
     var devAdminMode = false;
+    /** Tanıtım videosu sunum modu — yalnızca ?demoVideo=1 */
+    var demoVideoMode = false;
 
     var esc = AurixUtils.escapeHtml;
     var safeUrl = AurixUtils.safeUrl;
@@ -76,6 +78,55 @@
     function initDevAdminMode() {
         var params = new URLSearchParams(window.location.search);
         devAdminMode = params.get('devAdmin') === '1';
+    }
+
+    function initDemoVideoMode() {
+        var params = new URLSearchParams(window.location.search);
+        demoVideoMode = params.get('demoVideo') === '1';
+        if (!demoVideoMode) return;
+
+        document.documentElement.classList.add('demo-video');
+        if (document.body) document.body.classList.add('demo-video');
+
+        // Görsel sunum için firma paneli oturumu — admin yetkisi yok, kalıcı saklanmaz.
+        if (window.AuthService && !AuthService.getCurrentUser()) {
+            AuthService.signIn('mehmet@arican-kuyum.com', 'video-mode', {
+                displayName: 'Mehmet Arıcan',
+                role: 'user'
+            });
+        }
+
+        var footerNot = document.querySelector('.footer__not');
+        if (footerNot) footerNot.textContent = '© 2026 AURIX · Kuyumculuk İş Ağı';
+
+        var vitrinAlt = document.querySelector('.vitrin-hero__alt');
+        if (vitrinAlt && /WhatsApp/i.test(vitrinAlt.textContent)) {
+            vitrinAlt.textContent = 'Onaylı atölye ve tedarikçileri keşfedin; profil inceleyin veya AURIX Mesaj ile iletişime geçin.';
+        }
+    }
+
+    function applyDemoVideoUi() {
+        if (!demoVideoMode) return;
+        document.documentElement.classList.add('demo-video');
+        if (document.body) document.body.classList.add('demo-video');
+
+        var banner = $('devAdminBanner');
+        if (banner) banner.hidden = true;
+
+        document.querySelectorAll('.panel-beta-bar, .admin-demo-info, .admin-demo-bar, .admin-demo-not').forEach(function (el) {
+            el.hidden = true;
+        });
+
+        var detayWa = $('detayWa');
+        if (detayWa) detayWa.textContent = 'AURIX Mesaj';
+    }
+
+    function isDemoVideoMode() {
+        return demoVideoMode;
+    }
+
+    function iletisimBtnEtiket() {
+        return demoVideoMode ? 'AURIX Mesaj' : 'WhatsApp';
     }
 
     function isAdminSession() {
@@ -281,9 +332,10 @@
         return adaylar[n % adaylar.length];
     }
 
-    /* Sıralamayı değiştirmez; yalnızca ardışık aynı kapak yolunu engeller. */
+    /* Sıralamayı değiştirmez; yalnızca ardışık aynı kapak / placeholder'ı engeller. */
     function createKapakSirasi() {
         var oncekiSrc = '';
+        var oncekiPh = false;
         return {
             attrs: function (firma) {
                 var katGorsel = firmaKategoriGorseli(firma);
@@ -298,6 +350,14 @@
                         src = '';
                     }
                 }
+                if (forcePh && oncekiPh) {
+                    var alt2 = firmaKapakAlternatif(firma, oncekiSrc || katGorsel);
+                    if (alt2) {
+                        forcePh = false;
+                        src = alt2;
+                    }
+                }
+                oncekiPh = forcePh;
                 oncekiSrc = forcePh ? '__aurix_logo_ph__' : src;
                 return { src: src, katGorsel: katGorsel, forcePh: forcePh };
             }
@@ -533,11 +593,10 @@
     function firmaProfilIsler(firma) {
         var list = FIRMA_PROFIL_ISLER[firma.kategoriId];
         if (list && list.length) return list.slice(0, 3);
-        var guven = firmaGuvenVerisi(firma);
         return [
-            { baslik: kategoriBul(firma.kategoriId).ad + ' işi tamamlandı', musteri: 'B2B müşteri', tarih: '01.07.2026', tutar: '—' },
-            { baslik: 'Seri üretim teslimi', musteri: firma.sehir + ' atölye', tarih: '20.06.2026', tutar: '—' },
-            { baslik: 'Özel sipariş kapanışı', musteri: 'Platform müşterisi', tarih: '08.06.2026', tutar: guven.tamamlananIs + '+ iş' }
+            { baslik: kategoriBul(firma.kategoriId).ad + ' işi tamamlandı', musteri: 'B2B müşteri', tarih: '01.07.2026', tutar: '₺8.400' },
+            { baslik: 'Seri üretim teslimi', musteri: firma.sehir + ' atölye', tarih: '20.06.2026', tutar: '₺12.600' },
+            { baslik: 'Özel sipariş kapanışı', musteri: 'Platform müşterisi', tarih: '08.06.2026', tutar: '₺6.900' }
         ];
     }
 
@@ -868,7 +927,7 @@
                     '<p class="sponsor-alani-kart__kat">' + kat.ikon + ' ' + esc(kat.ad) + ' · ' + esc(f.sehir) + '</p>' +
                     '<div class="sponsor-alani-kart__aksiyon">' +
                     '<button type="button" class="btn btn--ghost btn--sm" data-detay="' + esc(f.id) + '">Detay</button>' +
-                    (waHref ? '<a class="btn btn--primary btn--sm" href="' + esc(waHref) + '" target="_blank" rel="noopener">WhatsApp</a>' : '') +
+                    (waHref ? '<a class="btn btn--primary btn--sm" href="' + esc(waHref) + '" target="_blank" rel="noopener">' + iletisimBtnEtiket() + '</a>' : '') +
                     '</div>' +
                 '</div>' +
             '</article>';
@@ -1037,7 +1096,7 @@
         if (!anaSayfa || firma.durum !== 'onaylandi') {
             return firma.puan
                 ? '<div class="firma-kart__puan-alan"><span class="firma-kart__puan">' + yildizGoster(firma.puan) + '</span></div>'
-                : '<div class="firma-kart__puan-alan"><span class="firma-kart__puan firma-kart__puan--bos">Henüz yorum yok</span></div>';
+                : '<div class="firma-kart__puan-alan"><span class="firma-kart__puan firma-kart__puan--bos">Değerlendirme bekleniyor</span></div>';
         }
         var guven = firmaGuvenVerisi(firma);
         var puanMetin = firma.puan ? firma.puan.toFixed(1) : '—';
@@ -1080,7 +1139,7 @@
             : '<button type="button" class="btn btn--ghost btn--sm" data-detay="' + esc(firma.id) + '">Profili Gör</button>';
         var ikincilBtn = anaSayfa
             ? (waHref ? '<a class="btn btn--ghost btn--sm" href="' + esc(waHref) + '" target="_blank" rel="noopener">İletişim</a>' : '')
-            : (waHref ? '<a class="btn btn--primary btn--sm" href="' + esc(waHref) + '" target="_blank" rel="noopener">WhatsApp</a>' : '');
+            : (waHref ? '<a class="btn btn--primary btn--sm" href="' + esc(waHref) + '" target="_blank" rel="noopener">' + iletisimBtnEtiket() + '</a>' : '');
 
         return '<article class="firma-kart' + premiumCls + (anaSayfa ? ' firma-kart--ana' : '') + '" data-id="' + esc(firma.id) + '">' +
             premiumEtiket + partnerBadge + dogrulandi +
@@ -1418,7 +1477,9 @@
         }).join('');
         el.querySelectorAll('[data-teklif-is]').forEach(function (btn) {
             btn.addEventListener('click', function () {
-                toast('Teklif gönderme özelliği çok yakında aktif olacak.', 'info');
+                toast(demoVideoMode
+                    ? 'Teklif talebiniz alındı. Firmalar en kısa sürede dönüş yapacak.'
+                    : 'Teklif gönderme özelliği çok yakında aktif olacak.', 'info');
             });
         });
     }
@@ -1519,7 +1580,9 @@
 
         grid.querySelectorAll('[data-malzeme-teklif]').forEach(function (btn) {
             btn.addEventListener('click', function () {
-                toast('Malzeme teklif özelliği çok yakında aktif olacak.', 'info');
+                toast(demoVideoMode
+                    ? 'Malzeme teklif talebiniz satıcıya iletildi.'
+                    : 'Malzeme teklif özelliği çok yakında aktif olacak.', 'info');
             });
         });
     }
@@ -1962,8 +2025,8 @@
         $('detayAd').textContent = firma.ad;
         $('detayKat').textContent = kat.ikon + ' ' + kat.ad;
         $('detaySehir').textContent = firma.sehir;
-        $('detayAciklama').textContent = firma.aciklama || 'Firma açıklaması henüz eklenmedi.';
-        $('detayPuan').textContent = firma.puan ? yildizGoster(firma.puan) : 'Henüz puan yok';
+        $('detayAciklama').textContent = firma.aciklama || 'Profesyonel B2B üretim ve tedarik hizmeti sunar.';
+        $('detayPuan').textContent = firma.puan ? yildizGoster(firma.puan) : 'Yeni üye';
         detayGorselGuncelle(firma);
         detayLogoGuncelle(firma);
         detayHizmetlerGuncelle(firma);
@@ -1973,6 +2036,7 @@
         var detayWa = $('detayWa');
         if (detayWa) {
             var waHref = safeWaHref(tel);
+            detayWa.textContent = demoVideoMode ? 'AURIX Mesaj' : 'WhatsApp ile İletişim';
             if (waHref) {
                 detayWa.href = waHref;
                 detayWa.hidden = false;
@@ -2215,6 +2279,7 @@
 
     function init() {
         initDevAdminMode();
+        initDemoVideoMode();
         StorageAdapter.init();
         initModerationQueues();
 
@@ -2228,6 +2293,10 @@
         setInterval(heroTerminalSaatGuncelle, 1000);
 
         PanelUI.bindTabs();
+        applyDemoVideoUi();
+        if (demoVideoMode) {
+            PanelUI.renderUserPanel();
+        }
         if (isAdminSession()) {
             PanelUI.renderAdminSkeleton();
             renderAdminModeration();
@@ -2464,7 +2533,8 @@
         modalKapat: modalKapat,
         demoSifirla: demoVeriSifirla,
         toast: toast,
-        renderAdminModeration: renderAdminModeration
+        renderAdminModeration: renderAdminModeration,
+        isDemoVideoMode: isDemoVideoMode
     };
 
     document.addEventListener('DOMContentLoaded', init);

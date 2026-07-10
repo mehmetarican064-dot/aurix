@@ -7530,6 +7530,21 @@ a { color: inherit; text-decoration: none; }
     padding: 6px 8px;
 }
 
+.firma-grid--kompakt,
+.firma-grid--ana-vitrin.firma-grid--kompakt,
+.firma-grid--vitrin,
+.is-talepleri-grid,
+.malzeme-grid {
+    align-items: stretch;
+}
+
+.firma-kart--kompakt,
+.firma-kart--vitrin,
+.is-talep-kart--pro,
+.malzeme-kart {
+    height: 100%;
+}
+
 /* Eski büyük vitrin override — kompakt grid */
 [data-sayfa="ana-sayfa"] .firma-grid--ana-vitrin.firma-grid--kompakt {
     display: grid;
@@ -9156,5 +9171,28 @@ a { color: inherit; text-decoration: none; }
         padding: 12px;
     }
 }
+
+/* ================================================================
+   Tanıtım videosu modu — ?demoVideo=1
+   Normal görünümü etkilemez; yalnızca sunum uyarılarını gizler.
+   ================================================================ */
+
+html.demo-video .dev-admin-banner,
+html.demo-video .panel-beta-bar,
+html.demo-video .panel-beta-bar--admin,
+html.demo-video .admin-demo-info,
+html.demo-video .admin-demo-bar,
+html.demo-video .admin-demo-not,
+body.demo-video .dev-admin-banner,
+body.demo-video .panel-beta-bar,
+body.demo-video .admin-demo-info,
+body.demo-video .admin-demo-bar {
+    display: none !important;
+}
+
+html.demo-video [data-sayfa="admin"] .panel-header__alt {
+    visibility: hidden;
+}
+
 
 

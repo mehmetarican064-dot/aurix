@@ -13,9 +13,10 @@
      * @param {string} password
      * @returns {{ ok: boolean, user?: object, error?: string }}
      */
-    function signIn(email, password) {
+    function signIn(email, password, opts) {
         email = String(email || '').trim();
         password = String(password || '');
+        opts = opts || {};
 
         if (!email) return { ok: false, error: 'E-posta adresi gerekli.' };
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
@@ -29,8 +30,8 @@
         currentUser = {
             id: 'mock-' + Date.now().toString(36),
             email: email,
-            role: 'user',
-            displayName: email.split('@')[0].replace(/[._-]/g, ' ')
+            role: opts.role === 'admin' ? 'user' : (opts.role || 'user'),
+            displayName: opts.displayName || email.split('@')[0].replace(/[._-]/g, ' ')
         };
 
         return { ok: true, user: currentUser };

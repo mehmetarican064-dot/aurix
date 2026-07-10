@@ -166,7 +166,7 @@ window.AURIX_DATA = {
         },
         {
             id: 'it003', kategoriId: 'mihlamaci',
-            baslik: 'Pırlanta Mıhlama',
+            baslik: 'Pırlanta Tektaş Mıhlama — 36 Adet',
             sehir: 'Ankara', adet: '36 adet', termin: '7 gün',
             butce: '₺9.500 – ₺14.000', teklifSayisi: 8,
             acilisTarihi: '06 Tem 2026', durum: 'Acil', durumTip: 'acil', sonGuncelleme: '35 dk önce'
@@ -254,7 +254,7 @@ window.AURIX_DATA = {
         { id: 'vergi', etiket: 'Vergi doğrulandı' },
         { id: 'telefon', etiket: 'Telefon doğrulandı' },
         { id: 'adres', etiket: 'Adres doğrulandı' },
-        { id: 'whatsapp', etiket: 'WhatsApp doğrulandı' }
+        { id: 'whatsapp', etiket: 'AURIX Mesaj doğrulandı' }
     ],
 
     /* Malzeme Pazarı kategorileri */
@@ -309,7 +309,9 @@ window.AURIX_DATA = {
         { id: 'mu025', kategoriId: 'el-alet', baslik: 'Kuyumcu El Aleti Seti 12 Parça', fiyat: '₺3.200', satici: 'İnci Gold Design Tedarik', sehir: 'Adana', durum: 'Stokta', dogrulandi: true },
         { id: 'mu026', kategoriId: 'sarf', baslik: 'Lehim Teli 0,5mm 50g', fiyat: '₺380', satici: 'Arıcan Kuyumculuk Tedarik', sehir: 'İstanbul', durum: 'Stokta', dogrulandi: true },
         { id: 'mu027', kategoriId: 'polisaj', baslik: 'Profesyonel Polisaj Fırça Seti', fiyat: '₺1.850', satici: 'Ege Polisaj Tedarik', sehir: 'İzmir', durum: 'Stokta', dogrulandi: true },
-        { id: 'mu028', kategoriId: 'lazer-makine', baslik: 'CO2 Lazer Kazıma 40W', fiyat: '₺95.000', satici: 'Lider Lazer Makine', sehir: 'Kahramanmaraş', durum: 'Sipariş', dogrulandi: true }
+        { id: 'mu028', kategoriId: 'lazer-makine', baslik: 'CO2 Lazer Kazıma 40W', fiyat: '₺95.000', satici: 'Lider Lazer Makine', sehir: 'Kahramanmaraş', durum: 'Sipariş', dogrulandi: true },
+        { id: 'mu029', kategoriId: 'yedek-parca', baslik: 'Vakum Döküm Pompa Membranı', fiyat: '₺2.850', satici: 'İstanbul Kuyum Teknoloji', sehir: 'İstanbul', durum: 'Stokta', dogrulandi: true },
+        { id: 'mu030', kategoriId: 'yedek-parca', baslik: 'Lazer Lens Seti 20mm Fiber', fiyat: '₺4.200', satici: 'Lider Lazer Makine', sehir: 'Kahramanmaraş', durum: 'Stokta', dogrulandi: true }
     ],
 
     NEDEN_AURIX: [

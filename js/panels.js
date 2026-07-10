@@ -257,7 +257,7 @@
             '<dl class="fp-profil-dl">' +
             '<div><dt>Branş</dt><dd>' + esc(p.kategori) + '</dd></div>' +
             '<div><dt>Şehir</dt><dd>' + esc(p.sehir) + '</dd></div>' +
-            '<div><dt>WhatsApp</dt><dd>' + esc(p.tel ? '+' + p.tel : '—') + '</dd></div>' +
+            '<div><dt>AURIX Mesaj</dt><dd>' + esc(p.tel ? '+' + p.tel : '—') + '</dd></div>' +
             '<div><dt>Hizmet alanı</dt><dd>' + esc(p.aciklama) + '</dd></div>' +
             '</dl>' +
             '<div class="fp-profil-tamamlama">' +
@@ -272,7 +272,7 @@
             '<article class="fp-profil-kart">' +
             '<h4 class="fp-profil-kart__alt-baslik">Hesap</h4>' +
             '<p class="fp-profil-hesap">' + esc(user ? user.email : 'Oturum açılmadı') + '</p>' +
-            '<p class="panel-not">Profil düzenleme yakında aktif olacaktır.</p>' +
+            '<p class="panel-not">Profil bilgilerinizi buradan yönetebilirsiniz.</p>' +
             '</article></div>';
     }
 
@@ -311,7 +311,7 @@
         var a = demo.ayarlar || {};
         var satirlar = [
             { key: 'firmaBildirim', label: 'Firma bildirimleri', aciklama: 'Yeni iş ve teklif bildirimleri', varsayilan: a.firmaBildirim },
-            { key: 'whatsappBildirim', label: 'WhatsApp bildirimleri', aciklama: 'Kritik iş güncellemeleri', varsayilan: a.whatsappBildirim },
+            { key: 'whatsappBildirim', label: 'Panel Bildirimleri', aciklama: 'Kritik iş güncellemeleri', varsayilan: a.whatsappBildirim },
             { key: 'odemeBildirim', label: 'Ödeme bildirimi', aciklama: 'Hakediş ve ödeme durumu', varsayilan: a.odemeBildirim },
             { key: 'profilGorunurluk', label: 'Profil görünürlüğü', aciklama: 'Firma profiliniz arama sonuçlarında', varsayilan: a.profilGorunurluk }
         ];
@@ -341,12 +341,10 @@
                 var btn = e.target.closest('[data-teklif-demo]');
                 if (!btn) return;
                 var aksiyon = btn.getAttribute('data-teklif-demo');
-                var kart = btn.closest('[data-teklif-id]');
-                var id = kart ? kart.getAttribute('data-teklif-id') : '';
                 var mesajlar = {
-                    detay: 'Teklif detayları açılıyor (#' + id + ').',
-                    mesaj: 'Mesajlaşma modülü yakında aktif olacak (#' + id + ').',
-                    kabul: 'Teklif kabul edildi — iş süreci başlatılıyor (#' + id + ').'
+                    detay: 'Teklif detayları açıldı.',
+                    mesaj: 'AURIX Mesaj iletildi.',
+                    kabul: 'Teklif kabul edildi — iş süreci başlatılıyor.'
                 };
                 demoToast(mesajlar[aksiyon] || 'İşlem kaydedildi.');
             });
@@ -354,9 +352,11 @@
             icerik.addEventListener('change', function (e) {
                 var input = e.target.closest('[data-demo-ayar]');
                 if (!input) return;
-                var key = input.getAttribute('data-demo-ayar');
                 var durum = input.checked ? 'açık' : 'kapalı';
-                demoToast('Bildirim tercihi güncellendi: ' + key + ' ' + durum + '.');
+                var labelEl = input.closest('.fp-toggle');
+                var label = labelEl && labelEl.querySelector('.fp-toggle__label');
+                var ad = label ? label.textContent : 'Tercih';
+                demoToast(ad + ' ' + durum + '.');
             });
         }
     }
