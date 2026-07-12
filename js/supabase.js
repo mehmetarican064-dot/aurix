@@ -11,7 +11,7 @@
     var SUPABASE_URL = 'https://svsouqnhtlpcpdvqahmd.supabase.co';
 
     // ↓↓↓ Publishable Key’inizi tırnakların arasına yapıştırın ↓↓↓
-    var SUPABASE_ANON_KEY = 'sb_publishable_c2mZqJ7T3rcM0Jlcm_405Q_UqRv7peK...';
+    var SUPABASE_ANON_KEY = sb_publishable_c2mZqJ7T3rcM0Jlcm_405Q_UqRv7peK'
     // ↑↑↑ örn. eyJ... veya sb_publishable_... ↑↑↑
 
     var client = null;
