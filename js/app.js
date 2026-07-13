@@ -2198,8 +2198,8 @@
         var hata = firmaBasvuruDogrula(ad, tel, aciklama);
         if (hata) { toast(hata, 'error'); return; }
 
-        if (!window.AurixSupabase || !AurixSupabase.keyHazirMi()) {
-            toast('Publishable Key eksik. js/supabase.js dosyasına yapıştırın.', 'error');
+        if (!window.AurixSupabase || typeof AurixSupabase.baglantiHazirMi !== 'function' || !AurixSupabase.baglantiHazirMi()) {
+            toast('Supabase bağlantısı hazır değil. Sayfayı yenileyip tekrar deneyin.', 'error');
             return;
         }
 
@@ -2208,8 +2208,17 @@
             : null;
         if (submitBtn) submitBtn.disabled = true;
 
+        var kategoriAd = '';
+        if (window.AURIX_DATA && AURIX_DATA.KATEGORILER) {
+            var katBul = AURIX_DATA.KATEGORILER.find(function (k) { return k.id === kategoriId; });
+            kategoriAd = katBul ? katBul.ad : kategoriId;
+        } else {
+            kategoriAd = kategoriId;
+        }
+
         AurixSupabase.kaydetFirma({
             ad: ad,
+            kategori: kategoriAd,
             kategoriId: kategoriId,
             sehir: sehir,
             tel: tel,
@@ -2254,20 +2263,27 @@
             : null;
         if (submitBtn) submitBtn.disabled = true;
 
-        if (!window.AurixSupabase || !AurixSupabase.keyHazirMi()) {
+        if (!window.AurixSupabase || typeof AurixSupabase.baglantiHazirMi !== 'function' || !AurixSupabase.baglantiHazirMi()) {
             if (submitBtn) submitBtn.disabled = false;
-            toast('Publishable Key eksik. js/supabase.js dosyasına yapıştırın.', 'error');
+            toast('Supabase bağlantısı hazır değil. Sayfayı yenileyip tekrar deneyin.', 'error');
             return;
+        }
+
+        var kategoriAd = kategoriId;
+        if (window.AURIX_DATA && AURIX_DATA.KATEGORILER) {
+            var katBul = AURIX_DATA.KATEGORILER.find(function (k) { return k.id === kategoriId; });
+            if (katBul) kategoriAd = katBul.ad;
         }
 
         AurixSupabase.kaydetIsTalebi({
             baslik: baslik,
-            kategoriId: kategoriId,
+            kategori: kategoriAd,
             sehir: sehir,
             adet: adet,
             termin: termin,
             butce: butce,
-            aciklama: aciklama
+            aciklama: aciklama,
+            durum: 'beklemede'
         }).then(function (res) {
             if (submitBtn) submitBtn.disabled = false;
             if (!res.ok) {
