@@ -1,13 +1,14 @@
 /**
  * AURIX — Supabase istemcisi (vanilla JS + CDN, GitHub Pages uyumlu)
  * Publishable (anon) key istemci tarafında kullanılabilir; service_role ASLA eklenmez.
+ *
+ * firmalar sütunları: firma_adi, sehir, kategori, aciklama, telefon, email, dogrulanmis, created_at
+ * is_talepleri sütunları: baslik, aciklama, kategori, sehir, durum, created_at
  */
 (function (global) {
     'use strict';
 
     var SUPABASE_URL = 'https://svsouqnhtlpcpdvqahmd.supabase.co';
-
-    // Publishable Key — Dashboard → Project Settings → API
     var SUPABASE_ANON_KEY = 'sb_publishable_c2mZqJ7T3rcM0Jlcm_405Q_UqRv7peK';
 
     var client = null;
@@ -33,12 +34,10 @@
         return client;
     }
 
-    /** Client nesnesi oluştuysa bağlantı hazır — toast/uyarı buna bakmalı. */
     function baglantiHazirMi() {
         return !!getClient();
     }
 
-    // Geriye dönük: keyHazirMi = baglantiHazirMi (client oluşabiliyorsa true)
     function keyHazirMi() {
         return baglantiHazirMi();
     }
@@ -50,7 +49,7 @@
     }
 
     /**
-     * firmalar: dogrulanmis boolean (durum sütunu yok)
+     * Firma başvurusu → public.firmalar
      */
     function kaydetFirma(veri) {
         var sb = getClient();
@@ -61,14 +60,14 @@
             });
         }
         var satir = {
-            ad: veri.ad,
+            firma_adi: veri.firma_adi || veri.ad,
             sehir: veri.sehir,
-            tel: veri.tel,
+            kategori: veri.kategori || veri.kategoriId || null,
             aciklama: veri.aciklama,
+            telefon: veri.telefon || veri.tel,
+            email: veri.email || null,
             dogrulanmis: false
         };
-        if (veri.kategori) satir.kategori = veri.kategori;
-        else if (veri.kategoriId) satir.kategori = veri.kategoriId;
 
         return sb.from('firmalar').insert([satir]).then(function (res) {
             if (res.error) return { ok: false, error: hataMesaji(res.error) };
@@ -78,7 +77,6 @@
         });
     }
 
-    /** Form ekstra alanlarını (adet/termin/bütçe) aciklama metnine ekler. */
     function isTalebiAciklamaBirleştir(veri) {
         var parcalar = [];
         if (veri.aciklama) parcalar.push(String(veri.aciklama).trim());
@@ -89,8 +87,7 @@
     }
 
     /**
-     * is_talepleri sütunları: baslik, aciklama, kategori, sehir, durum, created_at
-     * created_at DB default; adet/termin/butce → aciklama içine
+     * İş talebi → public.is_talepleri (durum: Acik)
      */
     function kaydetIsTalebi(veri) {
         var sb = getClient();
@@ -105,7 +102,7 @@
             aciklama: isTalebiAciklamaBirleştir(veri),
             kategori: veri.kategori || veri.kategoriId || null,
             sehir: veri.sehir,
-            durum: veri.durum || 'beklemede'
+            durum: veri.durum || 'Acik'
         }]).then(function (res) {
             if (res.error) return { ok: false, error: hataMesaji(res.error) };
             return { ok: true };
@@ -114,11 +111,7 @@
         });
     }
 
-    /**
-     * İstatistikler — RPC yok.
-     * firmalar: dogrulanmis = true
-     * is_talepleri: tüm okunabilir satırlar
-     */
+    /** Doğrulanmış firma sayısı + Acik iş talebi sayısı */
     function getirIstatistikler() {
         var sb = getClient();
         if (!sb) {
@@ -126,7 +119,7 @@
         }
         return Promise.all([
             sb.from('firmalar').select('*', { count: 'exact', head: true }).eq('dogrulanmis', true),
-            sb.from('is_talepleri').select('*', { count: 'exact', head: true })
+            sb.from('is_talepleri').select('*', { count: 'exact', head: true }).eq('durum', 'Acik')
         ]).then(function (sonuclar) {
             var firmaRes = sonuclar[0];
             var isRes = sonuclar[1];
@@ -143,6 +136,44 @@
         });
     }
 
+    /** dogrulanmis = true firmalar */
+    function getirDogrulanmisFirmalar() {
+        var sb = getClient();
+        if (!sb) {
+            return Promise.resolve({ ok: false, data: [], error: 'Supabase yok' });
+        }
+        return sb.from('firmalar')
+            .select('*')
+            .eq('dogrulanmis', true)
+            .order('created_at', { ascending: false })
+            .then(function (res) {
+                if (res.error) return { ok: false, data: [], error: hataMesaji(res.error) };
+                return { ok: true, data: res.data || [] };
+            })
+            .catch(function (err) {
+                return { ok: false, data: [], error: hataMesaji(err) };
+            });
+    }
+
+    /** durum = 'Acik' iş talepleri, en yeni önce */
+    function getirAcikIsTalepleri() {
+        var sb = getClient();
+        if (!sb) {
+            return Promise.resolve({ ok: false, data: [], error: 'Supabase yok' });
+        }
+        return sb.from('is_talepleri')
+            .select('*')
+            .eq('durum', 'Acik')
+            .order('created_at', { ascending: false })
+            .then(function (res) {
+                if (res.error) return { ok: false, data: [], error: hataMesaji(res.error) };
+                return { ok: true, data: res.data || [] };
+            })
+            .catch(function (err) {
+                return { ok: false, data: [], error: hataMesaji(err) };
+            });
+    }
+
     global.AurixSupabase = {
         url: SUPABASE_URL,
         getClient: getClient,
@@ -150,6 +181,8 @@
         kaydetFirma: kaydetFirma,
         kaydetIsTalebi: kaydetIsTalebi,
         getirIstatistikler: getirIstatistikler,
+        getirDogrulanmisFirmalar: getirDogrulanmisFirmalar,
+        getirAcikIsTalepleri: getirAcikIsTalepleri,
         keyHazirMi: keyHazirMi
     };
 })(typeof window !== 'undefined' ? window : this);
