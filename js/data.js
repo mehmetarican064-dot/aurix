@@ -148,32 +148,24 @@ window.AURIX_DATA = {
         }
     ],
 
-    /* Ana sayfa kategorileri — isSayisi: aktif talep tabanı */
+    /* Ana sayfa kategorileri — sayılar yalnızca canlı veriden gelir */
     ESNAF_ANA_KATEGORILER: [
-        { id: 'cizimci', ad: 'CAD Çizim', sembol: '◇', isSayisi: 14, firmaTaban: 280, aciklama: '3D model, teknik çizim ve STL teslimi.' },
-        { id: 'mumcu', ad: 'Mum Basım', sembol: '◆', isSayisi: 9, firmaTaban: 190, aciklama: 'Kuyumcu mum basım ve model hazırlığı.' },
-        { id: 'dokumcu', ad: 'Döküm', sembol: '⚙', isSayisi: 22, firmaTaban: 420, aciklama: 'Altın, gümüş ve fantezi döküm üretimi.' },
-        { id: 'mihlamaci', ad: 'Mıhlama', sembol: '◈', isSayisi: 11, firmaTaban: 310, aciklama: 'Taş kitleme ve mikro mıhlama işleri.' },
-        { id: 'tas', ad: 'Taş', sembol: '✦', isSayisi: 10, firmaTaban: 350, aciklama: 'Pırlanta ve değerli taş tedariki.' },
-        { id: 'tamir', ad: 'Tamir', sembol: '⊕', isSayisi: 7, firmaTaban: 200, aciklama: 'Bakım, ölçü ve tamir hizmetleri.' },
-        { id: 'malzeme-tedarik', ad: 'Malzeme Tedarik', sembol: '▣', isSayisi: 18, firmaTaban: 320, aciklama: 'Takı ekipmanları, makineler, sarf malzemeleri, el aletleri ve yedek parçalar.', ozelSayfa: 'malzeme' }
+        { id: 'cizimci', ad: 'CAD Çizim', sembol: '◇', aciklama: '3D model, teknik çizim ve STL teslimi.' },
+        { id: 'mumcu', ad: 'Mum Basım', sembol: '◆', aciklama: 'Kuyumcu mum basım ve model hazırlığı.' },
+        { id: 'dokumcu', ad: 'Döküm', sembol: '⚙', aciklama: 'Altın, gümüş ve fantezi döküm üretimi.' },
+        { id: 'mihlamaci', ad: 'Mıhlama', sembol: '◈', aciklama: 'Taş kitleme ve mikro mıhlama işleri.' },
+        { id: 'tas', ad: 'Taş', sembol: '✦', aciklama: 'Pırlanta ve değerli taş tedariki.' },
+        { id: 'tamir', ad: 'Tamir', sembol: '⊕', aciklama: 'Bakım, ölçü ve tamir hizmetleri.' },
+        { id: 'malzeme-tedarik', ad: 'Malzeme Tedarik', sembol: '▣', aciklama: 'Takı ekipmanları, makineler, sarf malzemeleri, el aletleri ve yedek parçalar.', ozelSayfa: 'malzeme' }
     ],
 
+    /* Hero istatistik etiketleri — değerler yalnızca Supabase’den gelir */
     PLATFORM_ISTATISTIK: [
-        { deger: '2.500+', etiket: 'Firma' },
-        { deger: '7.000+', etiket: 'İş Talebi' },
-        { deger: '15.000+', etiket: 'Teklif' },
-        { deger: '4.9', etiket: 'Ortalama Puan' }
+        { key: 'firma', etiket: 'Firma' },
+        { key: 'isTalep', etiket: 'Açık İş Talebi' }
     ],
 
-    CANLI_AKTIVITE: [
-        { tip: 'is', metin: 'İstanbul — 925 gümüş erkek yüzük dökümü talebi açıldı.', zaman: '2 dakika önce' },
-        { tip: 'teklif', metin: 'Denizli — Anadolu CAD Tasarım teklifi kabul edildi.', zaman: '4 dakika önce' },
-        { tip: 'firma', metin: 'Trabzon — Marina Stone profili doğrulandı.', zaman: '8 dakika önce' },
-        { tip: 'is', metin: 'Kahramanmaraş — 22 ayar alyans polisaj işi yayınlandı.', zaman: '12 dakika önce' },
-        { tip: 'teklif', metin: 'Bursa — Atlas Kalıp kalıp hazırlama teklifi gönderdi.', zaman: '18 dakika önce' },
-        { tip: 'is', metin: 'İzmir — pırlanta mıhlama işi 5 teklif aldı.', zaman: '25 dakika önce' }
-    ],
+    CANLI_AKTIVITE: [],
 
     /* Firma profili güven alanları — v1.0 backend ile doldurulacak */
     DOGRULAMA_ALANLARI: [

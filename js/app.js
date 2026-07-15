@@ -32,6 +32,7 @@
         vitrin: { sayfa: 1, boyut: 9, siralama: 'yeni' },
         malzeme: { arama: '', kategoriId: '' },
         liveIstatistik: null,
+        istatistikYukleniyor: true,
         liveFirmalar: [],
         firmalarHata: null,
         firmalarYukleniyor: false,
@@ -508,138 +509,26 @@
     }
 
     function detayGuvenPanelHtml(firma) {
-        var guven = firmaGuvenVerisi(firma);
-        var puanMetin = firma.puan ? firma.puan.toFixed(1) : '—';
-        return '<div class="detay-guven__rozetler">' + firmaDogrulamaRozetleriHtml(firma, false) + '</div>' +
-            '<div class="detay-guven__metrikler">' +
-            '<div class="detay-guven__metrik"><span>Tamamlanan iş</span><strong>' + guven.tamamlananIs + '</strong></div>' +
-            '<div class="detay-guven__metrik"><span>Ortalama puan</span><strong>★ ' + puanMetin + '</strong></div>' +
-            '<div class="detay-guven__metrik"><span>Son aktif</span><strong>' + esc(guven.sonAktif) + '</strong></div>' +
-            '<div class="detay-guven__metrik"><span>Ort. cevap</span><strong>' + esc(guven.cevapSuresi) + '</strong></div>' +
+        var dogrulandi = firma.durum === 'onaylandi';
+        if (!dogrulandi) return '';
+        return '<div class="detay-guven__rozetler">' +
+            '<span class="firma-dogrulama__rozet firma-dogrulama__rozet--aktif">✓ Doğrulanmış firma</span>' +
             '</div>';
     }
 
-    /* Firma profil modalı — kategoriye göre demo içerik (yalnızca detay modal) */
-    var FIRMA_PROFIL_HIZMETLER = {
-        dokumcu: ['Vakum döküm', '18–22 ayar altın', '925 gümüş', 'Prototip üretim'],
-        mihlamaci: ['Mikro mıhlama', 'Tektaş montür', 'Pırlanta kitleme', 'Fantezi taş'],
-        mumcu: ['Mum basım', 'Model hazırlık', 'Seri mum', 'Özel sipariş'],
-        cizimci: ['CAD çizim', 'STL teslim', 'Teknik resim', 'Koleksiyon model'],
-        matrix: ['Matrix modelleme', '3DM arşiv', 'Nişan / alyans', 'Render'],
-        rhino: ['Rhino modelleme', 'Organik form', 'STL / 3DM', 'Render'],
-        tas: ['Pırlanta tedarik', 'Renkli taş', 'GIA sertifika', 'Toptan satış'],
-        ayar: ['Ayar analizi', 'Sertifikalı rapor', '916 / 750 / 585', 'Aynı gün sonuç'],
-        ramat: ['Hurda ramat', 'Altın / gümüş', 'Şeffaf tartım', 'Anında ödeme'],
-        kalipci: ['Silikon kalıp', 'Metal kalıp', 'Mum kalıp', 'Numune'],
-        polisaj: ['Polisaj', 'Parlatma', 'Mine finish', 'Seri yüzey'],
-        lazer: ['Lazer kesim', 'Kazıma', 'Plaka üretim', 'İsim yazımı'],
-        makine: ['Döküm makinesi', 'Lazer ekipman', 'Kurulum', 'Servis'],
-        vitrin: ['Vitrin sistemi', 'LED aydınlatma', 'Montaj', 'Bakım'],
-        kutu: ['Kuyumcu kutu', 'Marka baskı', 'Süet çanta', 'Özel tasarım'],
-        zincir: ['İtalyan zincir', 'Fantezi zincir', '14K–22K', 'Toptan'],
-        kilit: ['Kilit / klips', 'Bağlantı parçası', 'Toptan', 'Perakende'],
-        bilezik: ['22 ayar bilezik', 'İtalyan model', 'Fantezi', 'Toptan sevkiyat'],
-        malzeme: ['Sarf malzeme', 'Aparat', 'Kimyasal', 'Türkiye geneli sevkiyat'],
-        lehim: ['Altın lehim', 'Kaynak teli', 'Flux', 'Toptan stok']
-    };
-
-    var FIRMA_PROFIL_ISLER = {
-        dokumcu: [
-            { baslik: '925 gümüş erkek yüzük dökümü', musteri: 'Kuzey Tasarım', tarih: '05.07.2026', tutar: '₺21.500' },
-            { baslik: '18 ayar fantezi küpe serisi', musteri: 'İnci Gold Design', tarih: '28.06.2026', tutar: '₺38.000' },
-            { baslik: '22 ayar alyans döküm', musteri: 'Safir Jewelry', tarih: '18.06.2026', tutar: '₺16.400' }
-        ],
-        mihlamaci: [
-            { baslik: 'Pırlanta mıhlama — 36 adet', musteri: 'Elmas Stone', tarih: '06.07.2026', tutar: '₺11.400' },
-            { baslik: 'Tektaş montür kitleme', musteri: 'Nova Mıhlama', tarih: '01.07.2026', tutar: '₺8.500' },
-            { baslik: 'Baget taş mikro ayar', musteri: 'Marina Stone', tarih: '22.06.2026', tutar: '₺6.200' }
-        ],
-        cizimci: [
-            { baslik: 'Fantezi kolye CAD + STL', musteri: 'Anadolu CAD', tarih: '04.07.2026', tutar: '₺4.800' },
-            { baslik: 'Nişan yüzüğü teknik çizim', musteri: 'Kuzey Tasarım', tarih: '26.06.2026', tutar: '₺3.200' },
-            { baslik: 'Alyans koleksiyon modeli', musteri: 'Zenith Jewelry', tarih: '15.06.2026', tutar: '₺7.500' }
-        ],
-        matrix: [
-            { baslik: 'Matrix nişan yüzüğü serisi', musteri: 'Prestij Ayar', tarih: '03.07.2026', tutar: '₺9.200' },
-            { baslik: '3DM alyans arşivi', musteri: 'Ahenk Kuyum', tarih: '24.06.2026', tutar: '₺5.600' },
-            { baslik: 'Fantezi kolye render', musteri: 'İnci Gold', tarih: '12.06.2026', tutar: '₺4.100' }
-        ],
-        rhino: [
-            { baslik: 'Organik yüzük modeli', musteri: 'Vizyon Döküm', tarih: '02.07.2026', tutar: '₺6.800' },
-            { baslik: 'Geometrik küpe STL', musteri: 'Atlas Kalıp', tarih: '20.06.2026', tutar: '₺5.200' },
-            { baslik: 'Rhino koleksiyon paketi', musteri: 'Doruk Gold', tarih: '08.06.2026', tutar: '₺11.000' }
-        ],
-        tas: [
-            { baslik: 'GIA pırlanta tedarik — 12 taş', musteri: 'Safir Jewelry', tarih: '07.07.2026', tutar: '₺186.000' },
-            { baslik: 'Safir / zümrüt set', musteri: 'Nova Mıhlama', tarih: '29.06.2026', tutar: '₺42.000' },
-            { baslik: 'Fantezi taş toptan', musteri: 'Ahenk Kuyum', tarih: '14.06.2026', tutar: '₺28.500' }
-        ],
-        mumcu: [
-            { baslik: 'Alyans mum basımı — 60 çift', musteri: 'Mira Döküm', tarih: '05.07.2026', tutar: '₺5.800' },
-            { baslik: 'Tektaş mum model', musteri: 'Atlas Kalıp', tarih: '27.06.2026', tutar: '₺3.400' },
-            { baslik: 'Seri mum hazırlık', musteri: 'Arıcan Kuyumculuk', tarih: '16.06.2026', tutar: '₺7.200' }
-        ],
-        lazer: [
-            { baslik: '14 ayar plaka lazer kesim', musteri: 'Lider Lazer', tarih: '06.07.2026', tutar: '₺8.400' },
-            { baslik: 'İsim kazıma — 80 parça', musteri: 'Doruk Gold', tarih: '25.06.2026', tutar: '₺4.600' },
-            { baslik: 'Fantezi plaka üretim', musteri: 'Altıneller Döküm', tarih: '11.06.2026', tutar: '₺12.800' }
-        ],
-        makine: [
-            { baslik: 'Vakum döküm makinesi kurulumu', musteri: 'Vizyon Döküm', tarih: '30.06.2026', tutar: '₺485.000' },
-            { baslik: 'Fiber lazer servis', musteri: 'Lider Lazer', tarih: '18.06.2026', tutar: '₺14.200' },
-            { baslik: 'Mikromotor tedarik', musteri: 'Ege Polisaj', tarih: '05.06.2026', tutar: '₺12.500' }
-        ],
-        polisaj: [
-            { baslik: '22 ayar alyans polisajı', musteri: 'Ahenk Kuyum', tarih: '07.07.2026', tutar: '₺9.800' },
-            { baslik: 'Mine finish — 200 adet', musteri: 'Marmara Zincir', tarih: '28.06.2026', tutar: '₺22.000' },
-            { baslik: 'Seri parlatma', musteri: 'Kale Kilit', tarih: '10.06.2026', tutar: '₺7.600' }
-        ],
-        kalipci: [
-            { baslik: 'Tektaş montür kalıbı', musteri: 'Nova Mıhlama', tarih: '04.07.2026', tutar: '₺12.400' },
-            { baslik: 'Alyans kalıp seti', musteri: 'Safir Jewelry', tarih: '22.06.2026', tutar: '₺8.900' },
-            { baslik: 'Fantezi silikon kalıp', musteri: 'Anadolu Mum', tarih: '09.06.2026', tutar: '₺6.500' }
-        ]
-    };
-
+    /* Firma profil modalı — sahte hizmet / iş listesi yok */
     function firmaProfilHizmetler(firma) {
-        var list = FIRMA_PROFIL_HIZMETLER[firma.kategoriId];
-        if (list && list.length) return list.slice();
         var kat = kategoriBul(firma.kategoriId);
-        return [kat.ad, firma.sehir + ' hizmet', 'B2B üretim', 'Teklif & teslim'];
+        return kat && kat.ad ? [kat.ad] : [];
     }
 
-    function firmaProfilIsler(firma) {
-        var list = FIRMA_PROFIL_ISLER[firma.kategoriId];
-        if (list && list.length) return list.slice(0, 3);
-        return [
-            { baslik: kategoriBul(firma.kategoriId).ad + ' işi tamamlandı', musteri: 'B2B müşteri', tarih: '01.07.2026', tutar: '₺8.400' },
-            { baslik: 'Seri üretim teslimi', musteri: firma.sehir + ' atölye', tarih: '20.06.2026', tutar: '₺12.600' },
-            { baslik: 'Özel sipariş kapanışı', musteri: 'Platform müşterisi', tarih: '08.06.2026', tutar: '₺6.900' }
-        ];
+    function firmaProfilIsler() {
+        return [];
     }
 
     function firmaProfilGaleri(firma) {
-        var map = AURIX_DATA.KATEGORI_KAPAK_GORSELLERI || {};
         var birincil = firmaKapakGorsel(firma);
-        var adaylar = [birincil];
-        var yedekler = [
-            map[firma.kategoriId],
-            'assets/images/dokum.png',
-            'assets/images/cad.png',
-            'assets/images/mihlama.png',
-            'assets/images/tas.png',
-            'assets/images/mum.png',
-            'assets/images/makine.png',
-            'assets/images/malzeme.jpg',
-            'assets/images/lazer.png',
-            'assets/images/kalip.png',
-            'assets/images/firma.png'
-        ];
-        yedekler.forEach(function (yol) {
-            var g = safeImageUrl(yol, '');
-            if (g && adaylar.indexOf(g) === -1) adaylar.push(g);
-        });
-        return adaylar.slice(0, 4);
+        return birincil ? [birincil] : [];
     }
 
     function detayLogoGuncelle(firma) {
@@ -656,7 +545,15 @@
     function detayHizmetlerGuncelle(firma) {
         var el = $('detayHizmetler');
         if (!el) return;
-        el.innerHTML = firmaProfilHizmetler(firma).map(function (h) {
+        var hizmetler = firmaProfilHizmetler(firma);
+        var bolum = el.closest('.detay-bolum');
+        if (!hizmetler.length) {
+            el.innerHTML = '';
+            if (bolum) bolum.hidden = true;
+            return;
+        }
+        if (bolum) bolum.hidden = false;
+        el.innerHTML = hizmetler.map(function (h) {
             return '<span class="detay-hizmet-chip">' + esc(h) + '</span>';
         }).join('');
     }
@@ -665,8 +562,15 @@
         var el = $('detayGaleri');
         if (!el) return;
         var gorseller = firmaProfilGaleri(firma);
+        var bolum = el.closest('.detay-bolum');
+        if (!gorseller.length) {
+            el.innerHTML = '';
+            if (bolum) bolum.hidden = true;
+            return;
+        }
+        if (bolum) bolum.hidden = false;
         var tema = firmaSektorTema(firma.kategoriId);
-        el.innerHTML = gorseller.map(function (src, i) {
+        el.innerHTML = gorseller.map(function (src) {
             return '<div class="detay-galeri__oge firma-gorsel-alan firma-gorsel-alan--' + safeCss(tema, 'genel') + '">' +
                 '<img class="detay-galeri__img aurix-img-fallback" src="' + esc(src) + '" alt="" width="160" height="120" loading="lazy" decoding="async"' +
                 ' data-fallback-final="' + esc(AurixUtils.PH_MARKER) + '">' +
@@ -680,6 +584,13 @@
         var el = $('detayIsler');
         if (!el) return;
         var isler = firmaProfilIsler(firma);
+        var bolum = el.closest('.detay-bolum');
+        if (!isler.length) {
+            el.innerHTML = '';
+            if (bolum) bolum.hidden = true;
+            return;
+        }
+        if (bolum) bolum.hidden = false;
         el.innerHTML = isler.map(function (is) {
             return '<li class="detay-is">' +
                 '<div class="detay-is__ust">' +
@@ -955,24 +866,16 @@
     }
 
     function firmaGuvenVerisi(firma) {
-        var n = parseInt(String(firma.id || '').replace(/\D/g, ''), 10) || 1;
-        var uyelikYili = firma.uyelikYili;
-        if (!uyelikYili && firma.eklenmeTarihi) {
-            uyelikYili = new Date(firma.eklenmeTarihi).getFullYear();
-        }
-        if (!uyelikYili) uyelikYili = 2022 + (n % 4);
         return {
-            tamamlananIs: firma.tamamlananIs != null ? firma.tamamlananIs : 12 + ((n * 13) % 140),
-            cevapSuresi: firma.cevapSuresi || ['< 1 saat', '2 saat', '4 saat', '6 saat', 'Aynı gün'][n % 5],
-            uyelikYili: uyelikYili,
-            sonAktif: firma.sonAktif || ['Bugün', 'Dün', '2 gün önce', '3 gün önce'][n % 4]
+            tamamlananIs: typeof firma.tamamlananIs === 'number' ? firma.tamamlananIs : null,
+            cevapSuresi: firma.cevapSuresi || null,
+            uyelikYili: firma.uyelikYili || (firma.eklenmeTarihi ? new Date(firma.eklenmeTarihi).getFullYear() : null),
+            sonAktif: firma.sonAktif || null
         };
     }
 
     function kategoriFirmaSayisiGoster(item) {
-        var gercek = onayliFirmalar().filter(function (f) { return f.kategoriId === item.id; }).length;
-        var taban = item.firmaTaban || 0;
-        return Math.max(taban, gercek + taban);
+        return onayliFirmalar().filter(function (f) { return f.kategoriId === item.id; }).length;
     }
 
     function kategoriFirmaSayisi(kategoriId) {
@@ -980,11 +883,9 @@
     }
 
     function kategoriIsSayisi(item) {
-        var taban = item.isSayisi || 0;
-        var acik = onayliIsTalepleri().filter(function (t) {
+        return onayliIsTalepleri().filter(function (t) {
             return t.kategoriId === item.id;
         }).length;
-        return taban + acik;
     }
 
     function platformIstatistikleri() {
@@ -1070,38 +971,67 @@
     function renderHeroIstatistikler(overrides) {
         var el = $('heroIstatistikler');
         if (!el) return;
-        if (overrides) state.liveIstatistik = overrides;
-        var live = overrides || state.liveIstatistik;
-        var stats = platformIstatistikleri().map(function (stat) {
-            var kopya = { deger: stat.deger, etiket: stat.etiket };
-            if (live) {
-                if (stat.etiket === 'Firma' && typeof live.firma === 'number') {
-                    kopya.deger = live.firma.toLocaleString('tr-TR');
-                }
-                if (stat.etiket === 'İş Talebi' && typeof live.isTalep === 'number') {
-                    kopya.deger = live.isTalep.toLocaleString('tr-TR');
-                }
-            }
-            return kopya;
-        });
+        if (overrides) {
+            state.liveIstatistik = overrides;
+            state.istatistikYukleniyor = false;
+        }
+        var live = state.liveIstatistik;
+        var yukleniyor = state.istatistikYukleniyor && !live;
+        var stats = [
+            { key: 'firma', etiket: 'Firma', deger: live && typeof live.firma === 'number' ? live.firma : null },
+            { key: 'isTalep', etiket: 'Açık İş Talebi', deger: live && typeof live.isTalep === 'number' ? live.isTalep : null }
+        ];
+
+        if (yukleniyor) {
+            el.innerHTML = stats.map(function (stat) {
+                return '<div class="hero-istat-kutu hero-istat-kutu--premium hero-istat-kutu--skeleton" role="listitem" aria-busy="true">' +
+                    '<span class="hero-istat-kutu__deger hero-istat-skeleton" aria-hidden="true">&nbsp;</span>' +
+                    '<span class="hero-istat-kutu__etiket">' + esc(stat.etiket) + '</span>' +
+                    '</div>';
+            }).join('');
+            return;
+        }
+
+        if (!live) {
+            el.innerHTML = '';
+            return;
+        }
+
         el.innerHTML = stats.map(function (stat) {
-            var parsed = parseIstatDeger(stat.deger);
+            var metin = typeof stat.deger === 'number' ? Number(stat.deger).toLocaleString('tr-TR') : '—';
+            var parsed = parseIstatDeger(metin);
             var dataAttrs = parsed.numeric != null
-                ? ' data-target="' + parsed.numeric + '" data-raw="' + stat.deger + '"'
-                : ' data-raw="' + stat.deger + '"';
+                ? ' data-target="' + parsed.numeric + '" data-raw="' + esc(metin) + '"'
+                : ' data-raw="' + esc(metin) + '"';
             return '<div class="hero-istat-kutu hero-istat-kutu--premium" role="listitem">' +
-                '<span class="hero-istat-kutu__deger"' + dataAttrs + '>' + (parsed.numeric != null ? '0' + parsed.suffix : stat.deger) + '</span>' +
-                '<span class="hero-istat-kutu__etiket">' + stat.etiket + '</span>' +
+                '<span class="hero-istat-kutu__deger"' + dataAttrs + '>' + (parsed.numeric != null ? '0' : metin) + '</span>' +
+                '<span class="hero-istat-kutu__etiket">' + esc(stat.etiket) + '</span>' +
                 '</div>';
         }).join('');
         initHeroIstatAnimasyon(el);
     }
 
     function yukleHeroIstatistiklerSupabase() {
-        if (!window.AurixSupabase || typeof AurixSupabase.getirIstatistikler !== 'function') return;
+        state.istatistikYukleniyor = true;
+        renderHeroIstatistikler();
+        if (!window.AurixSupabase || typeof AurixSupabase.getirIstatistikler !== 'function') {
+            state.istatistikYukleniyor = false;
+            state.liveIstatistik = null;
+            renderHeroIstatistikler();
+            return;
+        }
         AurixSupabase.getirIstatistikler().then(function (res) {
-            if (!res || !res.ok) return;
+            state.istatistikYukleniyor = false;
+            if (!res || !res.ok) {
+                state.liveIstatistik = null;
+                renderHeroIstatistikler();
+                return;
+            }
             renderHeroIstatistikler({ firma: res.firma, isTalep: res.isTalep });
+        }).catch(function () {
+            state.istatistikYukleniyor = false;
+            state.liveIstatistik = null;
+            renderHeroIstatistikler();
         });
     }
 
@@ -1292,25 +1222,14 @@
     }
 
     function yukleCanliVerilerSupabase() {
-        if (!window.AurixSupabase || !AurixSupabase.baglantiHazirMi()) {
-            yukleHeroIstatistiklerSupabase();
-            yukleFirmalarSupabase();
-            yukleAcikIsTalepleriSupabase();
-            return;
-        }
-        AurixSupabase.getirIstatistikler().then(function (istat) {
-            if (istat && istat.ok) {
-                renderHeroIstatistikler({ firma: istat.firma, isTalep: istat.isTalep });
-            }
-        });
+        yukleHeroIstatistiklerSupabase();
         yukleFirmalarSupabase();
         yukleAcikIsTalepleriSupabase();
     }
 
     function firmaKartAnaProHtml(firma, kapakAttrs) {
         var kat = kategoriBul(firma.kategoriId);
-        var guven = firmaGuvenVerisi(firma);
-        var puanMetin = firma.puan ? firma.puan.toFixed(1) : '—';
+        var aciklama = (firma.aciklama || '').trim();
 
         return '<article class="firma-kart firma-kart--ana firma-kart--kompakt" data-id="' + esc(firma.id) + '">' +
             firmaAnaKapakHtml(firma, firma.ad, kapakAttrs) +
@@ -1321,37 +1240,18 @@
             '</div>' +
             '<p class="firma-kart__hizmet">' + esc(kat.ad) + '</p>' +
             '<p class="firma-kart__sehir">' + esc(firma.sehir) + '</p>' +
-            '<div class="firma-kart__puan-satir">' +
-            '<span class="firma-kart__puan-deger">★ ' + puanMetin + '</span>' +
-            '<span class="firma-kart__puan-etiket">Puan</span></div>' +
-            '<div class="firma-kart__metrik-grid firma-kart__metrik-grid--kompakt">' +
-            '<span class="firma-kart__metrik"><strong>' + guven.tamamlananIs + '</strong> Tamamlanan iş</span>' +
-            '<span class="firma-kart__metrik"><strong>' + esc(guven.cevapSuresi) + '</strong> Ort. cevap</span>' +
-            '<span class="firma-kart__metrik firma-kart__metrik--aktif"><strong>' + esc(guven.sonAktif) + '</strong> Son aktif</span>' +
-            '</div>' +
+            (aciklama ? '<p class="firma-kart__aciklama firma-kart__aciklama--kisa">' + esc(aciklama.length > 120 ? aciklama.slice(0, 117) + '…' : aciklama) + '</p>' : '') +
             '<div class="firma-kart__aksiyon firma-kart__aksiyon--kompakt">' +
             '<button type="button" class="btn btn--primary btn--sm" data-teklif="' + esc(firma.id) + '">Teklif Al</button>' +
             '<button type="button" class="btn btn--ghost btn--sm" data-detay="' + esc(firma.id) + '">Profili Gör</button>' +
             '</div></div></article>';
     }
 
-    function firmaGuvenHtml(firma, anaSayfa) {
-        if (!anaSayfa || firma.durum !== 'onaylandi') {
-            return firma.puan
-                ? '<div class="firma-kart__puan-alan"><span class="firma-kart__puan">' + yildizGoster(firma.puan) + '</span></div>'
-                : '<div class="firma-kart__puan-alan"><span class="firma-kart__puan firma-kart__puan--bos">Değerlendirme bekleniyor</span></div>';
+    function firmaGuvenHtml(firma) {
+        if (firma.durum === 'onaylandi') {
+            return '<div class="firma-kart__puan-alan"><span class="firma-kart__dogrulandi">Doğrulandı</span></div>';
         }
-        var guven = firmaGuvenVerisi(firma);
-        var puanMetin = firma.puan ? firma.puan.toFixed(1) : '—';
-        return '<div class="firma-kart__guven">' +
-            '<div class="firma-kart__guven-ust">' +
-            '<span class="firma-kart__puan firma-kart__puan--sayi">★ ' + puanMetin + '</span>' +
-            '<span class="firma-kart__guven-rozet">Doğrulandı</span>' +
-            '</div>' +
-            '<div class="firma-kart__guven-metrikler">' +
-            '<span class="firma-kart__guven-metrik">' + guven.tamamlananIs + ' iş</span>' +
-            '<span class="firma-kart__guven-metrik">' + esc(guven.cevapSuresi) + '</span>' +
-            '</div></div>';
+        return '';
     }
 
     function firmaKartHtml(firma, opts) {
@@ -1377,7 +1277,7 @@
             height: 200,
             kapakAttrs: kapakAttrs
         });
-        var guvenHtml = firmaGuvenHtml(firma, anaSayfa);
+        var guvenHtml = firmaGuvenHtml(firma);
         var birincilBtn = anaSayfa
             ? '<button type="button" class="btn btn--primary btn--sm" data-teklif="' + esc(firma.id) + '">Teklif Al</button>'
             : '<button type="button" class="btn btn--ghost btn--sm" data-detay="' + esc(firma.id) + '">Profili Gör</button>';
@@ -1735,35 +1635,14 @@
 
     function renderCanliAktivite() {
         var el = $('canliAktiviteListe');
-        if (!el || !AURIX_DATA.CANLI_AKTIVITE) return;
-        el.innerHTML = AURIX_DATA.CANLI_AKTIVITE.map(function (a, i) {
-            return '<li class="canli-aktivite-oge canli-aktivite-oge--' + safeCss(a.tip, 'genel') + '" style="--aktivite-delay:' + (i * 120) + 'ms">' +
-                '<span class="canli-aktivite-oge__nokta" aria-hidden="true"></span>' +
-                '<div class="canli-aktivite-oge__icerik">' +
-                '<span class="canli-aktivite-oge__metin">' + esc(a.metin) + '</span>' +
-                '<time class="canli-aktivite-oge__zaman">' + esc(a.zaman || 'Az önce') + '</time>' +
-                '</div></li>';
-        }).join('');
+        if (!el) return;
+        el.innerHTML = '';
+        var bolum = el.closest('.bolum--canli-aktivite') || document.getElementById('canli-aktivite');
+        if (bolum) bolum.hidden = true;
     }
 
-    var canliAktiviteZamanlar = ['2 dakika önce', '5 dakika önce', '8 dakika önce', '12 dakika önce', '20 dakika önce', '35 dakika önce'];
-
     function initCanliAktiviteCanli() {
-        var el = $('canliAktiviteListe');
-        if (!el || !AURIX_DATA.CANLI_AKTIVITE) return;
-        setInterval(function () {
-            var ogeler = el.querySelectorAll('.canli-aktivite-oge__zaman');
-            ogeler.forEach(function (zamanEl, i) {
-                var idx = canliAktiviteZamanlar.indexOf(zamanEl.textContent);
-                if (idx === -1) idx = 0;
-                zamanEl.textContent = canliAktiviteZamanlar[Math.min(idx + 1, canliAktiviteZamanlar.length - 1)];
-            });
-            var ilk = el.querySelector('.canli-aktivite-oge');
-            if (ilk) {
-                ilk.classList.add('canli-aktivite-oge--pulse');
-                setTimeout(function () { ilk.classList.remove('canli-aktivite-oge--pulse'); }, 800);
-            }
-        }, 15000);
+        /* Sahte canlı aktivite akışı kaldırıldı */
     }
 
     function malzemeKartHtml(urun) {
@@ -2289,7 +2168,10 @@
         var merhaba = headerSag ? headerSag.querySelector('.panel-header__merhaba, .admin-header__merhaba') : null;
         var adminSayfa = document.querySelector('[data-sayfa="admin"]');
         var adminBetaBar = document.querySelector('[data-sayfa="admin"] .panel-beta-bar--admin');
-        if (link) link.hidden = true;
+        if (link) {
+            link.hidden = true;
+            link.setAttribute('aria-hidden', 'true');
+        }
         if (btn) btn.hidden = true;
         renderDevAdminBanner();
         if (adminSayfa) adminSayfa.hidden = !isAdminSession();
@@ -2300,6 +2182,45 @@
         }
         if (merhaba) merhaba.textContent = devAdminMode ? 'Geliştirme modu' : 'Merhaba Admin';
         if (headerSag) headerSag.hidden = false;
+    }
+
+    function renderNavAuth() {
+        var el = $('navAuthAlani');
+        if (!el) return;
+        var user = window.AuthService ? AuthService.getCurrentUser() : null;
+        if (user) {
+            el.innerHTML =
+                '<button type="button" class="nav__link" id="navHesabim" data-nav="panel">Hesabım</button>' +
+                '<button type="button" class="nav__link nav__link--cta" id="navCikis" data-nav-cikis="1">Çıkış Yap</button>';
+        } else {
+            el.innerHTML = '<button type="button" class="nav__link nav__link--cta" id="navKayitOl" data-nav="kayit">Kayıt Ol</button>';
+        }
+    }
+
+    function kullaniciCikis() {
+        if (window.AuthService) AuthService.signOut();
+        renderNavAuth();
+        renderAdminUI();
+        sayfaGoster('ana-sayfa');
+        toast('Çıkış yapıldı.', 'info');
+    }
+
+    function uyelikSekmeSec(sekme) {
+        var hedef = sekme === 'giris' ? 'giris' : 'kayit';
+        document.querySelectorAll('[data-uyelik-sekme]').forEach(function (btn) {
+            var aktif = btn.getAttribute('data-uyelik-sekme') === hedef;
+            btn.classList.toggle('uyelik-sekme--aktif', aktif);
+            btn.setAttribute('aria-selected', aktif ? 'true' : 'false');
+        });
+        var panelGiris = $('uyelikPanelGiris');
+        var panelKayit = $('uyelikPanelKayit');
+        if (panelGiris) panelGiris.hidden = hedef !== 'giris';
+        if (panelKayit) panelKayit.hidden = hedef !== 'kayit';
+    }
+
+    function uyelikModalAc(sekme) {
+        uyelikSekmeSec(sekme || 'kayit');
+        modalAc('girisModal');
     }
 
     function tumunuRenderEt(opts) {
@@ -2322,6 +2243,7 @@
             renderAdminModeration();
         }
         renderAdminUI();
+        renderNavAuth();
         AurixUtils.refreshFirmaGorselleri();
     }
 
@@ -2357,7 +2279,9 @@
         $('detayKat').textContent = kat.ikon + ' ' + kat.ad;
         $('detaySehir').textContent = firma.sehir;
         $('detayAciklama').textContent = firma.aciklama || '—';
-        $('detayPuan').textContent = firma.puan ? yildizGoster(firma.puan) : 'Yeni üye';
+        $('detayPuan').textContent = firma.puan ? yildizGoster(firma.puan) : '';
+        var detayPuanEl = $('detayPuan');
+        if (detayPuanEl) detayPuanEl.hidden = !firma.puan;
         detayGorselGuncelle(firma);
         detayLogoGuncelle(firma);
         detayHizmetlerGuncelle(firma);
@@ -2552,9 +2476,9 @@
     }
 
     function sayfaGoster(id) {
-        if (id === 'giris') {
+        if (id === 'giris' || id === 'kayit') {
             navMenuKapat();
-            modalAc('girisModal');
+            uyelikModalAc(id === 'giris' ? 'giris' : 'kayit');
             return;
         }
         document.querySelectorAll('.modal--acik').forEach(function (m) {
@@ -2564,6 +2488,11 @@
             if (!isAdminSession()) return;
         }
         if (id === 'panel') {
+            var user = window.AuthService ? AuthService.getCurrentUser() : null;
+            if (!user && !demoVideoMode) {
+                uyelikModalAc('giris');
+                return;
+            }
             PanelUI.renderUserPanel();
             PanelUI.panelTabSec('dashboard');
         }
@@ -2650,6 +2579,7 @@
                 return;
             }
             $('kayitForm').reset();
+            modalKapat('girisModal');
             toast('Firma başvurunuz alındı. İnceleme sonrası yayınlanacaktır.', 'success');
             yukleCanliVerilerSupabase();
             sayfaGoster('ana-sayfa');
@@ -2796,6 +2726,7 @@
         }
         AuthService.signOut();
         renderAdminUI();
+        renderNavAuth();
         sayfaGoster('ana-sayfa');
         toast('Çıkış yapıldı.', 'info');
     }
@@ -2842,11 +2773,33 @@
             yukleAdminBekleyenFirmalar();
         }
 
-        // Navigasyon
+        // Navigasyon (delegation — dinamik Hesabım / Kayıt Ol butonları için)
+        var navMenu = $('navMenu');
+        if (navMenu) {
+            navMenu.addEventListener('click', function (e) {
+                var cikisBtn = e.target.closest('[data-nav-cikis]');
+                if (cikisBtn && navMenu.contains(cikisBtn)) {
+                    e.preventDefault();
+                    kullaniciCikis();
+                    return;
+                }
+                var el = e.target.closest('[data-nav]');
+                if (!el || !navMenu.contains(el)) return;
+                e.preventDefault();
+                sayfaGoster(el.getAttribute('data-nav'));
+            });
+        }
         document.querySelectorAll('[data-nav]').forEach(function (el) {
+            if (navMenu && navMenu.contains(el)) return;
             el.addEventListener('click', function (e) {
                 e.preventDefault();
                 sayfaGoster(el.getAttribute('data-nav'));
+            });
+        });
+
+        document.querySelectorAll('[data-uyelik-sekme]').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                uyelikSekmeSec(btn.getAttribute('data-uyelik-sekme'));
             });
         });
 
@@ -2968,9 +2921,10 @@
                     return;
                 }
                 modalKapat('girisModal');
+                renderNavAuth();
                 PanelUI.renderUserPanel();
                 sayfaGoster('panel');
-                toast('Firma paneli açıldı.', 'info');
+                toast('Giriş başarılı.', 'info');
             });
         }
 
@@ -3004,7 +2958,8 @@
         }
 
         // Form
-        $('kayitForm').addEventListener('submit', kayitGonder);
+        var kayitForm = $('kayitForm');
+        if (kayitForm) kayitForm.addEventListener('submit', kayitGonder);
 
         var isTalepAcBtn = $('isTalepAcBtn');
         if (isTalepAcBtn) {

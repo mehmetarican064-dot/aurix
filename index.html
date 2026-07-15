@@ -33,8 +33,9 @@
                 <a href="#" class="nav__link" data-nav="firmalar">Firmalar</a>
                 <a href="#" class="nav__link" data-nav="malzeme">Malzeme Pazarı</a>
                 <a href="#" class="nav__link" data-nav="piyasa">Piyasa</a>
-                <a href="#" class="nav__link" data-nav="panel">Panelim</a>
-                <a href="#" class="nav__link" data-nav="giris">Giriş Yap</a>
+                <div class="nav__auth" id="navAuthAlani" aria-live="polite">
+                    <button type="button" class="nav__link nav__link--cta" id="navKayitOl" data-nav="kayit">Kayıt Ol</button>
+                </div>
             </nav>
             <button type="button" class="nav__toggle" id="menuToggle" aria-label="Menüyü aç" aria-expanded="false" aria-controls="navMenu">
                 <span class="nav__toggle-bar" aria-hidden="true"></span>
@@ -133,20 +134,6 @@
             </div>
         </section>
 
-        <!-- 5b. CANLI AKTİVİTE -->
-        <section class="bolum bolum--canli-aktivite" id="canli-aktivite">
-            <div class="kapsayici">
-                <div class="bolum__ust bolum__ust--fuar">
-                    <div>
-                        <span class="bolum-fuar-badge">Platform Hareketi</span>
-                        <h2 class="bolum__baslik">Canlı Aktivite</h2>
-                        <p class="bolum__alt bolum__alt--fuar">Son platform hareketleri — gerçek zamanlı iş ve teklif akışı.</p>
-                    </div>
-                </div>
-                <ul class="canli-aktivite-liste canli-aktivite-liste--canli" id="canliAktiviteListe" aria-live="polite"></ul>
-            </div>
-        </section>
-
         <!-- 6. PİYASA — kompakt özet şerit -->
         <section class="bolum bolum--piyasa-serit" id="piyasa-serit">
             <div class="kapsayici piyasa-serit__kapsayici">
@@ -192,7 +179,7 @@
                 <header class="vitrin-hero">
                     <span class="bolum-fuar-badge">B2B Firma Ağı</span>
                     <h2 class="bolum__baslik vitrin-hero__baslik">Firma Vitrini</h2>
-                    <p class="bolum__alt vitrin-hero__alt">Onaylı atölye ve tedarikçileri keşfedin; profil inceleyin veya WhatsApp ile doğrudan iletişime geçin.</p>
+                    <p class="bolum__alt vitrin-hero__alt">Onaylı atölye ve tedarikçileri keşfedin; profil inceleyin veya teklif gönderin.</p>
                 </header>
 
                 <div class="vitrin-filtre" role="search">
@@ -230,7 +217,6 @@
                         <select class="filtre-select vitrin-siralama__select" id="vitrinSiralama" aria-label="Sıralama">
                             <option value="yeni" selected>En Yeni</option>
                             <option value="onerilen">Önerilen</option>
-                            <option value="puan">En Yüksek Puan</option>
                             <option value="ad">A → Z</option>
                         </select>
                     </div>
@@ -241,10 +227,6 @@
                     <div class="vitrin-guven-bar__oge">
                         <span class="vitrin-guven-bar__ikon" aria-hidden="true">✓</span>
                         <span class="vitrin-guven-bar__metin">Doğrulanmış Firmalar</span>
-                    </div>
-                    <div class="vitrin-guven-bar__oge">
-                        <span class="vitrin-guven-bar__ikon" aria-hidden="true">★</span>
-                        <span class="vitrin-guven-bar__metin">Gerçek Yorumlar</span>
                     </div>
                     <div class="vitrin-guven-bar__oge">
                         <span class="vitrin-guven-bar__ikon" aria-hidden="true">◆</span>
@@ -338,46 +320,8 @@
         </section>
     </div>
 
-    <!-- ===================== KAYIT ===================== -->
-    <div class="sayfa" data-sayfa="kayit">
-        <section class="bolum">
-            <div class="kapsayici">
-                <h2 class="bolum__baslik" style="text-align:center">Firma Kaydı</h2>
-                <p class="bolum__alt" style="text-align:center;margin:0 auto 32px">Atölyenizi Aurix havuzuna ekleyin. Onay sonrası vitrinde yer alırsınız.</p>
-
-                <div class="form-kutu">
-                    <form id="kayitForm">
-                        <div class="form-grup">
-                            <label class="form-label" for="kayitAd">Firma / Atölye Adı</label>
-                            <input class="form-input" type="text" id="kayitAd" required maxlength="200" placeholder="Ticari unvanınız">
-                        </div>
-                        <div class="form-grup">
-                            <label class="form-label" for="kayitKategori">Branş</label>
-                            <select class="form-select" id="kayitKategori" required></select>
-                        </div>
-                        <div class="form-grup">
-                            <label class="form-label" for="kayitSehir">Şehir</label>
-                            <select class="form-select" id="kayitSehir" required></select>
-                        </div>
-                        <div class="form-grup">
-                            <label class="form-label" for="kayitTel">WhatsApp Numarası</label>
-                            <input class="form-input" type="tel" id="kayitTel" required placeholder="905321112233" pattern="90[0-9]{10}">
-                            <p class="form-yardim">Ülke kodu ile birlikte 12 hane (90XXXXXXXXXX)</p>
-                        </div>
-                        <div class="form-grup">
-                            <label class="form-label" for="kayitEmail">E-posta</label>
-                            <input class="form-input" type="email" id="kayitEmail" required maxlength="120" placeholder="ornek@firma.com" autocomplete="email">
-                        </div>
-                        <div class="form-grup">
-                            <label class="form-label" for="kayitAciklama">Hizmet Detayları</label>
-                            <textarea class="form-textarea" id="kayitAciklama" rows="4" required maxlength="2000" placeholder="Makine parkuru, kapasite, uzmanlık alanları..."></textarea>
-                        </div>
-                        <button type="submit" class="btn btn--primary" style="width:100%">Başvuruyu Gönder</button>
-                    </form>
-                </div>
-            </div>
-        </section>
-    </div>
+    <!-- ===================== KAYIT (üyelik modalına yönlendirilir) ===================== -->
+    <div class="sayfa" data-sayfa="kayit" hidden aria-hidden="true"></div>
 
     <!-- ===================== KULLANICI PANELİ (Beta iskelet) ===================== -->
     <div class="sayfa" data-sayfa="panel">
@@ -572,8 +516,8 @@
                     <p>Ana sayfadaki kayıt formundan atölye veya tedarikçi başvurunuzu iletebilirsiniz. Başvurular inceleme sonrası vitrine alınır.</p>
                     <h2>İş talebi ve teklif</h2>
                     <p>Açık iş taleplerini inceleyebilir, firma profillerinden teklif talebi oluşturabilirsiniz. Tam teklif yönetimi Beta sonrası güçlendirilecektir.</p>
-                    <h2>Panelim</h2>
-                    <p>Giriş yaptıktan sonra işler, gelir özeti, teklifler ve performans görünümlerine erişebilirsiniz. Veriler şu an demo / Beta amaçlıdır.</p>
+                    <h2>Hesabım</h2>
+                    <p>Giriş yaptıktan sonra işler, teklifler ve firma paneline erişebilirsiniz.</p>
                     <h2>Destek almak</h2>
                     <p>Teknik sorun veya geri bildirim için <a href="#iletisim" data-nav="iletisim">İletişim</a> sayfasındaki formu kullanın. Canlı destek hattı henüz aktif değildir.</p>
                 </div>
@@ -672,7 +616,7 @@
                 <p class="icerik-sayfa__ozet">Ücretlendirme modeli henüz kesinleşmemiştir. Bu sayfa yönlendirici bir özet sunar.</p>
                 <div class="icerik-sayfa__govde">
                     <p>Beta sürecinde temel platform kullanımı deneme amaçlıdır. Kalıcı komisyon oranı, tahsilat zamanı ve istisnalar yayına hazırlıkta netleştirilecektir.</p>
-                    <p>Firma panelindeki gelir ve komisyon alanları, ürün deneyimini göstermek için örnek / demo veriler içerebilir; gerçek tahsilat anlamına gelmez.</p>
+                    <p>Firma panelindeki gelir ve komisyon alanları kesinleşene kadar bilgilendirme amaçlıdır; gerçek tahsilat anlamına gelmez.</p>
                     <p>Kesin oranlar belirlendiğinde bu sayfa güncellenir ve kullanıcılar bilgilendirilir. Sorularınız için <a href="#iletisim" data-nav="iletisim">İletişim</a> formunu kullanabilirsiniz.</p>
                 </div>
             </div>
@@ -782,7 +726,7 @@
         </div>
         <div class="footer__alt">
             <div class="kapsayici footer__alt-inner">
-                <p class="footer__not">© 2026 AURIX · Beta v1.0 hazırlık</p>
+                <p class="footer__not">© 2026 AURIX</p>
                 <div class="footer__alt-orta">
                     <a href="#kvkk" data-nav="kvkk">KVKK</a>
                     <span aria-hidden="true">·</span>
@@ -847,26 +791,62 @@
         </div>
     </div>
 
-    <!-- GİRİŞ MODAL -->
-    <div class="modal" id="girisModal">
-        <div class="modal__kutu">
+    <!-- ÜYELİK MODAL (Giriş / Yeni Hesap) -->
+    <div class="modal" id="girisModal" role="dialog" aria-modal="true" aria-labelledby="uyelikModalBaslik">
+        <div class="modal__kutu modal__kutu--uyelik">
             <div class="modal__baslik">
-                <h3>Giriş Yap</h3>
+                <h3 id="uyelikModalBaslik">Üyelik</h3>
                 <button class="modal__kapat" data-modal-kapat="girisModal" aria-label="Kapat">×</button>
             </div>
-            <p class="giris-modal__metin">Firma hesabınıza giriş yapın. Tam entegrasyon v1.0 sürümünde aktif olacaktır.</p>
-            <form id="girisForm">
-            <div class="form-grup">
-                <label class="form-label" for="girisEmail">E-posta</label>
-                <input class="form-input" type="email" id="girisEmail" placeholder="ornek@firma.com" autocomplete="email" required>
+            <div class="uyelik-sekmeler" role="tablist" aria-label="Üyelik sekmeleri">
+                <button type="button" class="uyelik-sekme uyelik-sekme--aktif" role="tab" id="uyelikSekmeGiris" aria-selected="true" aria-controls="uyelikPanelGiris" data-uyelik-sekme="giris">Giriş Yap</button>
+                <button type="button" class="uyelik-sekme" role="tab" id="uyelikSekmeKayit" aria-selected="false" aria-controls="uyelikPanelKayit" data-uyelik-sekme="kayit">Yeni Hesap Oluştur</button>
             </div>
-            <div class="form-grup">
-                <label class="form-label" for="girisSifre">Şifre</label>
-                <input class="form-input" type="password" id="girisSifre" placeholder="••••••••" autocomplete="current-password" required minlength="4">
+            <div class="uyelik-panel" id="uyelikPanelGiris" role="tabpanel" aria-labelledby="uyelikSekmeGiris">
+                <p class="giris-modal__metin">Firma hesabınıza giriş yapın.</p>
+                <form id="girisForm">
+                    <div class="form-grup">
+                        <label class="form-label" for="girisEmail">E-posta</label>
+                        <input class="form-input" type="email" id="girisEmail" placeholder="ornek@firma.com" autocomplete="email" required>
+                    </div>
+                    <div class="form-grup">
+                        <label class="form-label" for="girisSifre">Şifre</label>
+                        <input class="form-input" type="password" id="girisSifre" placeholder="••••••••" autocomplete="current-password" required minlength="4">
+                    </div>
+                    <button type="submit" class="btn btn--primary" id="girisBtn" style="width:100%">Giriş Yap</button>
+                </form>
             </div>
-            <button type="submit" class="btn btn--primary" id="girisBtn" style="width:100%">Giriş Yap</button>
-            </form>
-            <p class="giris-modal__alt"><button type="button" class="giris-modal__kayit-link" data-nav="kayit">Firma kaydı oluştur</button></p>
+            <div class="uyelik-panel" id="uyelikPanelKayit" role="tabpanel" aria-labelledby="uyelikSekmeKayit" hidden>
+                <p class="giris-modal__metin">Atölyenizi AURIX ağına ekleyin. Onay sonrası vitrinde yer alırsınız.</p>
+                <form id="kayitForm">
+                    <div class="form-grup">
+                        <label class="form-label" for="kayitAd">Firma / Atölye Adı</label>
+                        <input class="form-input" type="text" id="kayitAd" required maxlength="200" placeholder="Ticari unvanınız">
+                    </div>
+                    <div class="form-grup">
+                        <label class="form-label" for="kayitKategori">Branş</label>
+                        <select class="form-select" id="kayitKategori" required></select>
+                    </div>
+                    <div class="form-grup">
+                        <label class="form-label" for="kayitSehir">Şehir</label>
+                        <select class="form-select" id="kayitSehir" required></select>
+                    </div>
+                    <div class="form-grup">
+                        <label class="form-label" for="kayitTel">WhatsApp Numarası</label>
+                        <input class="form-input" type="tel" id="kayitTel" required placeholder="905321112233" pattern="90[0-9]{10}">
+                        <p class="form-yardim">Ülke kodu ile birlikte 12 hane (90XXXXXXXXXX)</p>
+                    </div>
+                    <div class="form-grup">
+                        <label class="form-label" for="kayitEmail">E-posta</label>
+                        <input class="form-input" type="email" id="kayitEmail" required maxlength="120" placeholder="ornek@firma.com" autocomplete="email">
+                    </div>
+                    <div class="form-grup">
+                        <label class="form-label" for="kayitAciklama">Hizmet Detayları</label>
+                        <textarea class="form-textarea" id="kayitAciklama" rows="4" required maxlength="2000" placeholder="Makine parkuru, kapasite, uzmanlık alanları..."></textarea>
+                    </div>
+                    <button type="submit" class="btn btn--primary" style="width:100%">Başvuruyu Gönder</button>
+                </form>
+            </div>
         </div>
     </div>
 
