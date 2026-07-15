@@ -46,7 +46,7 @@
     <div class="nav__backdrop" id="navBackdrop" hidden aria-hidden="true"></div>
 
     <div id="devAdminBanner" class="dev-admin-banner" hidden role="alert">
-        <p class="dev-admin-banner__metin">Geliştirme modu aktiftir. Canlı sistemde Supabase Auth + admin role ile değiştirilecektir.</p>
+        <p class="dev-admin-banner__metin">Geçici admin (?devAdmin=1). Onay/red Edge Function ile yapılır (SUPABASE_ADMIN_TOKEN). Anon key ile update yok. service_role frontend’de olmamalı.</p>
     </div>
 
     <!-- ===================== ANA SAYFA ===================== -->
@@ -90,7 +90,7 @@
                         <p class="bolum__alt bolum__alt--fuar">Yeni işler, teklif bekleyen üretim talepleri ve aktif ticaret fırsatları.</p>
                     </div>
                 </div>
-                <div class="is-talepleri-grid" id="isTalepleriGrid"></div>
+                <div class="is-talepleri-grid" id="isTalepleriGrid" aria-live="polite"></div>
             </div>
         </section>
 
@@ -222,15 +222,15 @@
                     <span class="vitrin-sayac" id="vitrinSayac"></span>
                 </div>
 
-                <div class="firma-grid firma-grid--vitrin" id="vitrinGrid"></div>
+                <div class="firma-grid firma-grid--vitrin" id="vitrinGrid" aria-live="polite"></div>
 
                 <div class="vitrin-alt-bar">
                     <div class="vitrin-siralama">
                         <label class="vitrin-siralama__etiket" for="vitrinSiralama">Sırala</label>
                         <select class="filtre-select vitrin-siralama__select" id="vitrinSiralama" aria-label="Sıralama">
+                            <option value="yeni" selected>En Yeni</option>
                             <option value="onerilen">Önerilen</option>
                             <option value="puan">En Yüksek Puan</option>
-                            <option value="yeni">En Yeni</option>
                             <option value="ad">A → Z</option>
                         </select>
                     </div>
@@ -436,8 +436,9 @@
                 </header>
 
                 <div class="panel-beta-bar panel-beta-bar--admin" role="note">
-                    <p class="panel-beta-bar__metin">Yönetim paneli devre dışı — Supabase Auth + role=admin ile etkinleştirilecek.</p>
+                    <p class="panel-beta-bar__metin">Bekleyen firmalar Edge Function üzerinden gelir. Token’ı bir kez girin (sessionStorage). Production’da Auth + admin role kullanın.</p>
                     <div class="admin-demo-bar__aksiyon">
+                        <button type="button" class="btn btn--ghost btn--xs" id="adminTokenBtn">Admin Token</button>
                         <button type="button" class="btn btn--danger-outline btn--xs" id="demoSifirlaBtn">Verileri Sıfırla</button>
                     </div>
                 </div>
@@ -523,30 +524,15 @@
                 </section>
 
                 <div class="admin-toolbar">
-                    <input type="text" class="admin-arama filtre-input" id="adminAramaInput" placeholder="Firma ara...">
-                    <button type="button" class="btn btn--primary btn--sm" id="adminYeniFirmaBtn">+ Yeni Firma</button>
+                    <input type="text" class="admin-arama filtre-input" id="adminAramaInput" placeholder="Firma, şehir, e-posta ara...">
+                    <button type="button" class="btn btn--ghost btn--sm" id="adminBekleyenYenileBtn">Yenile</button>
                 </div>
 
-                <div class="admin-tablo-wrap">
-                    <table class="admin-tablo">
-                        <thead>
-                            <tr>
-                                <th>Firma</th>
-                                <th>Branş</th>
-                                <th>Şehir</th>
-                                <th>Kategori</th>
-                                <th>WhatsApp</th>
-                                <th>Durum</th>
-                                <th>İşlem</th>
-                            </tr>
-                        </thead>
-                        <tbody id="adminTbody"></tbody>
-                    </table>
-                </div>
+                <div id="adminBekleyenListe" class="admin-bekleyen-liste" aria-live="polite"></div>
 
                 <aside class="admin-demo-info">
                     <h3 class="admin-demo-info__baslik">Sistem Notu</h3>
-                    <p class="admin-demo-info__metin">Yönetim paneli Beta sürecindedir. Kimlik doğrulama ve veritabanı bağlantısı v1.0 sürümünde Supabase ile sağlanacaktır.</p>
+                    <p class="admin-demo-info__metin">Onay/red anon key ile yapılmaz. Edge Function + SUPABASE_ADMIN_TOKEN gerekir. Telefon/e-posta yalnızca bu gizli admin ekranında görünür.</p>
                 </aside>
 
                     </div>
@@ -969,6 +955,40 @@
                     <textarea class="form-textarea" id="isTalepAciklama" rows="3" maxlength="1000" placeholder="Teknik detay, malzeme, teslim beklentisi..."></textarea>
                 </div>
                 <button type="submit" class="btn btn--primary" style="width:100%">Talebi Gönder</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal" id="teklifModal">
+        <div class="modal__kutu modal__kutu--genis">
+            <div class="modal__baslik">
+                <h3>Teklif Ver</h3>
+                <button class="modal__kapat" data-modal-kapat="teklifModal" aria-label="Kapat">×</button>
+            </div>
+            <div class="teklif-modal__is-ozet">
+                <p class="teklif-modal__is-baslik" id="teklifIsBaslik">—</p>
+                <p class="teklif-modal__is-meta" id="teklifIsOzet"></p>
+            </div>
+            <form id="teklifForm">
+                <input type="hidden" id="teklifIsId" value="">
+                <div class="form-grup">
+                    <label class="form-label" for="teklifFirma">Firma</label>
+                    <select class="form-select" id="teklifFirma" required></select>
+                </div>
+                <div class="form-grup">
+                    <label class="form-label" for="teklifFiyat">Teklif fiyatı (₺)</label>
+                    <input class="form-input" type="number" id="teklifFiyat" required min="0.01" step="0.01" placeholder="Örn. 45000">
+                    <p class="form-yardim">Fiyat şimdilik yalnızca kayıt altına alınır; herkese gösterilmez.</p>
+                </div>
+                <div class="form-grup">
+                    <label class="form-label" for="teklifTerminGun">Teslim süresi (gün)</label>
+                    <input class="form-input" type="number" id="teklifTerminGun" required min="1" max="3650" step="1" placeholder="Örn. 12">
+                </div>
+                <div class="form-grup">
+                    <label class="form-label" for="teklifMesaj">Mesaj</label>
+                    <textarea class="form-textarea" id="teklifMesaj" rows="3" maxlength="1000" placeholder="Kapsam, malzeme, notlar..."></textarea>
+                </div>
+                <button type="submit" class="btn btn--primary" style="width:100%">Teklifi Gönder</button>
             </form>
         </div>
     </div>

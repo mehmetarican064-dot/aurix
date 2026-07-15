@@ -29,29 +29,32 @@
         adminArama: '',
         adminSilBekleyenId: null,
         filtre: { arama: '', grupId: '', kategoriId: '', sehir: '' },
-        vitrin: { sayfa: 1, boyut: 9, siralama: 'onerilen' },
+        vitrin: { sayfa: 1, boyut: 9, siralama: 'yeni' },
         malzeme: { arama: '', kategoriId: '' },
         liveIstatistik: null,
-        liveFirmalar: null,
-        liveIsTalepleri: null
+        liveFirmalar: [],
+        firmalarHata: null,
+        firmalarYukleniyor: false,
+        liveIsTalepleri: [],
+        isTalepleriHata: null,
+        isTalepleriYukleniyor: false,
+        adminBekleyenFirmalar: [],
+        adminBekleyenHata: null,
+        adminLokalRedler: {}
     };
 
     function cloneJson(obj) {
         return JSON.parse(JSON.stringify(obj));
     }
 
-    /** İş/malzeme moderasyonu oturum içi; admin yetkisi localStorage'a yazılmaz. */
+    /** İş/malzeme moderasyonu oturum içi; admin yetkisi localStorage'a yazılmaz.
+     *  Ana sayfa açık iş talepleri örnek veriden gelmez — yalnızca Supabase. */
     function initModerationQueues() {
         var demo = AURIX_DATA.ADMIN_PANEL_DEMO || {};
-        state.isTalepleri = (AURIX_DATA.ACIK_IS_TALEPLERI || []).map(function (t) {
-            var c = cloneJson(t);
-            c.moderasyon = c.moderasyon || 'onaylandi';
-            return c;
-        });
+        state.isTalepleri = [];
         (demo.bekleyenIsTalepleri || []).forEach(function (t) {
-            if (state.isTalepleri.some(function (x) { return x.id === t.id; })) return;
             var c = cloneJson(t);
-            c.moderasyon = 'beklemede';
+            c.moderasyon = c.moderasyon || 'beklemede';
             state.isTalepleri.push(c);
         });
 
@@ -70,11 +73,9 @@
         state.kullanicilar = cloneJson(demo.kullanicilar || []);
     }
 
+    /** Ana sayfa: yalnızca Supabase durum=Acik kayıtları (örnek veri yok). */
     function onayliIsTalepleri() {
-        if (state.liveIsTalepleri && state.liveIsTalepleri.length) {
-            return state.liveIsTalepleri;
-        }
-        return state.isTalepleri.filter(function (t) { return t.moderasyon === 'onaylandi'; });
+        return Array.isArray(state.liveIsTalepleri) ? state.liveIsTalepleri : [];
     }
 
     function onayliMalzemeler() {
@@ -84,6 +85,20 @@
     function initDevAdminMode() {
         var params = new URLSearchParams(window.location.search);
         devAdminMode = params.get('devAdmin') === '1';
+        if (devAdminMode && window.AurixSupabase) {
+            var hasToken = typeof AurixSupabase.getAdminToken === 'function'
+                ? AurixSupabase.getAdminToken()
+                : AurixSupabase.getAdminDemoToken && AurixSupabase.getAdminDemoToken();
+            if (!hasToken) {
+                var token = window.prompt(
+                    'Admin token girin\n\nSupabase secret: SUPABASE_ADMIN_TOKEN\n(Oturum boyunca sessionStorage’da saklanır; URL/koda yazılmaz)'
+                );
+                if (token) {
+                    if (AurixSupabase.setAdminToken) AurixSupabase.setAdminToken(token);
+                    else if (AurixSupabase.setAdminDemoToken) AurixSupabase.setAdminDemoToken(token);
+                }
+            }
+        }
     }
 
     function initDemoVideoMode() {
@@ -181,6 +196,8 @@
         return temiz;
     }
 
+    /** Ana sayfa / firmalar: örnek listeden beslenmez — yalnızca Supabase canlı kayıtları.
+     *  state.firmalar admin demo / localStorage için kalır. */
     var StorageAdapter = {
         load: function () {
             try {
@@ -198,14 +215,9 @@
             localStorage.removeItem('aurix_beta_v01_firms');
         },
         init: function () {
-            var kayitli = this.load();
-            if (kayitli && kayitli.length) {
-                state.firmalar = kayitli.map(firmaGorselTemizle);
-                this.save(state.firmalar);
-            } else {
-                state.firmalar = JSON.parse(JSON.stringify(AURIX_DATA.ORNEK_FIRMALAR)).map(firmaGorselTemizle);
-                this.save(state.firmalar);
-            }
+            /* Public vitrin yalnızca Supabase. Eski örnek firma localStorage kalıntısını temizle. */
+            this.reset();
+            state.firmalar = [];
         }
     };
 
@@ -686,11 +698,9 @@
         return list.find(function (k) { return k.id === id; }) || { ad: id, ikon: '📦' };
     }
 
+    /** Firmalar sayfası / vitrin: yalnızca Supabase (örnek veri yok). */
     function onayliFirmalar() {
-        if (state.liveFirmalar && state.liveFirmalar.length) {
-            return state.liveFirmalar;
-        }
-        return state.firmalar.filter(function (f) { return f.durum === 'onaylandi'; });
+        return Array.isArray(state.liveFirmalar) ? state.liveFirmalar : [];
     }
 
     function kategoriGrupBul(kategoriId) {
@@ -921,7 +931,7 @@
         var kapak = createKapakSirasi();
         grid.innerHTML = list.slice(0, 3).map(function (f) {
             var kat = kategoriBul(f.kategoriId);
-            var waHref = safeWaHref(f.tel);
+            var waHref = '';
             var gorsel = firmaGorselAlaniHtml(f, f.ad, {
                 imgClass: 'sponsor-alani-kart__img',
                 width: 640,
@@ -1112,11 +1122,13 @@
         var kategoriHam = row.kategori || '';
         return {
             id: 'sb-f-' + (row.id != null ? row.id : Date.now()),
+            supabaseId: row.id,
             ad: row.firma_adi || row.ad || '—',
             kategoriId: kategoriIdBul(kategoriHam),
             sehir: row.sehir || '—',
-            tel: row.telefon || row.tel || '',
-            email: row.email || '',
+            /* telefon/email public API’de yok — ziyaretçiye açık gösterilmez */
+            tel: '',
+            email: '',
             aciklama: row.aciklama || '',
             premium: false,
             sponsor: false,
@@ -1127,7 +1139,8 @@
             sonAktif: '—',
             eklenmeTarihi: row.created_at || new Date().toISOString(),
             kaynak: 'supabase',
-            dogrulanmis: true
+            dogrulanmis: true,
+            gizliIletisim: true
         };
     }
 
@@ -1151,6 +1164,7 @@
         }
         return {
             id: 'sb-it-' + (row.id != null ? row.id : Date.now()),
+            supabaseId: row.id,
             kategoriId: kategoriIdBul(row.kategori),
             baslik: row.baslik || '—',
             sehir: row.sehir || '—',
@@ -1159,7 +1173,7 @@
             butce: aciklamadanAlanCek(aciklama, 'Bütçe') || '—',
             teklifSayisi: 0,
             acilisTarihi: acilis,
-            durum: row.durum || 'Acik',
+            durum: (row.durum === 'Acik' ? 'Açık' : (row.durum || 'Açık')),
             durumTip: 'bekliyor',
             sonGuncelleme: '—',
             aciklama: aciklama,
@@ -1168,42 +1182,129 @@
         };
     }
 
-    function yukleCanliVerilerSupabase() {
-        if (!window.AurixSupabase || !AurixSupabase.baglantiHazirMi()) {
-            yukleHeroIstatistiklerSupabase();
-            return;
+    function teklifSayilariniUygula(counts) {
+        counts = counts || {};
+        (state.liveIsTalepleri || []).forEach(function (t) {
+            var key = t.supabaseId != null ? String(t.supabaseId) : '';
+            t.teklifSayisi = key && counts[key] != null ? counts[key] : 0;
+        });
+    }
+
+    function yukleTeklifSayilariSupabase() {
+        if (!window.AurixSupabase || typeof AurixSupabase.getirTeklifSayilari !== 'function') {
+            return Promise.resolve();
         }
-        Promise.all([
-            AurixSupabase.getirDogrulanmisFirmalar(),
-            AurixSupabase.getirAcikIsTalepleri(),
-            AurixSupabase.getirIstatistikler()
-        ]).then(function (sonuclar) {
-            var firmaRes = sonuclar[0];
-            var isRes = sonuclar[1];
-            var istat = sonuclar[2];
-
-            if (firmaRes && firmaRes.ok && firmaRes.data && firmaRes.data.length) {
-                state.liveFirmalar = firmaRes.data.map(supabaseFirmaMap);
-            } else {
-                state.liveFirmalar = null;
+        if (!AurixSupabase.baglantiHazirMi()) return Promise.resolve();
+        return AurixSupabase.getirTeklifSayilari().then(function (res) {
+            if (res && res.ok) {
+                teklifSayilariniUygula(res.counts);
+                renderIsTalepleri();
             }
+        }).catch(function () { /* sayılar opsiyonel */ });
+    }
 
-            if (isRes && isRes.ok && isRes.data && isRes.data.length) {
-                state.liveIsTalepleri = isRes.data.map(supabaseIsTalebiMap);
-            } else {
-                state.liveIsTalepleri = null;
-            }
+    function yukleAcikIsTalepleriSupabase() {
+        var varsayilanHata = 'Açık iş talepleri yüklenemedi. Lütfen daha sonra tekrar deneyin.';
 
-            if (istat && istat.ok) {
-                renderHeroIstatistikler({ firma: istat.firma, isTalep: istat.isTalep });
-            }
-
+        if (!window.AurixSupabase || typeof AurixSupabase.getirAcikIsTalepleri !== 'function') {
+            state.isTalepleriHata = 'Supabase bağlantısı hazır değil. Sayfayı yenileyip tekrar deneyin.';
+            state.liveIsTalepleri = [];
             renderIsTalepleri();
+            return Promise.resolve();
+        }
+        if (!AurixSupabase.baglantiHazirMi()) {
+            state.isTalepleriHata = 'Supabase bağlantısı hazır değil. Sayfayı yenileyip tekrar deneyin.';
+            state.liveIsTalepleri = [];
+            renderIsTalepleri();
+            return Promise.resolve();
+        }
+
+        state.isTalepleriYukleniyor = true;
+        return AurixSupabase.getirAcikIsTalepleri().then(function (res) {
+            state.isTalepleriYukleniyor = false;
+            if (!res || !res.ok) {
+                state.isTalepleriHata = (res && res.error) ? String(res.error) : varsayilanHata;
+                state.liveIsTalepleri = [];
+                renderIsTalepleri();
+                return;
+            }
+            state.isTalepleriHata = null;
+            state.liveIsTalepleri = (res.data || []).map(supabaseIsTalebiMap);
+            renderIsTalepleri();
+            return yukleTeklifSayilariSupabase();
+        }).catch(function () {
+            state.isTalepleriYukleniyor = false;
+            state.isTalepleriHata = varsayilanHata;
+            state.liveIsTalepleri = [];
+            renderIsTalepleri();
+        });
+    }
+
+    function yukleFirmalarSupabase() {
+        var varsayilanHata = 'Firmalar yüklenemedi. Lütfen daha sonra tekrar deneyin.';
+
+        if (!window.AurixSupabase || typeof AurixSupabase.getirDogrulanmisFirmalar !== 'function') {
+            state.firmalarHata = 'Supabase bağlantısı hazır değil. Sayfayı yenileyip tekrar deneyin.';
+            state.liveFirmalar = [];
+            renderVitrin();
+            renderFirmaBolumleri();
+            renderKategoriGruplari();
+            renderSponsorAnaSayfa();
+            return Promise.resolve();
+        }
+        if (!AurixSupabase.baglantiHazirMi()) {
+            state.firmalarHata = 'Supabase bağlantısı hazır değil. Sayfayı yenileyip tekrar deneyin.';
+            state.liveFirmalar = [];
+            renderVitrin();
+            renderFirmaBolumleri();
+            renderKategoriGruplari();
+            renderSponsorAnaSayfa();
+            return Promise.resolve();
+        }
+
+        state.firmalarYukleniyor = true;
+        return AurixSupabase.getirDogrulanmisFirmalar().then(function (res) {
+            state.firmalarYukleniyor = false;
+            if (!res || !res.ok) {
+                state.firmalarHata = (res && res.error) ? String(res.error) : varsayilanHata;
+                state.liveFirmalar = [];
+                renderVitrin();
+                renderFirmaBolumleri();
+                renderKategoriGruplari();
+                renderSponsorAnaSayfa();
+                return;
+            }
+            state.firmalarHata = null;
+            state.liveFirmalar = (res.data || []).map(supabaseFirmaMap);
+            renderVitrin();
+            renderFirmaBolumleri();
+            renderKategoriGruplari();
+            renderSponsorAnaSayfa();
+        }).catch(function () {
+            state.firmalarYukleniyor = false;
+            state.firmalarHata = varsayilanHata;
+            state.liveFirmalar = [];
             renderVitrin();
             renderFirmaBolumleri();
             renderKategoriGruplari();
             renderSponsorAnaSayfa();
         });
+    }
+
+    function yukleCanliVerilerSupabase() {
+        if (!window.AurixSupabase || !AurixSupabase.baglantiHazirMi()) {
+            yukleHeroIstatistiklerSupabase();
+            yukleFirmalarSupabase();
+            yukleAcikIsTalepleriSupabase();
+            return;
+        }
+        AurixSupabase.getirIstatistikler().then(function (istat) {
+            if (istat && istat.ok) {
+                renderHeroIstatistikler({ firma: istat.firma, isTalep: istat.isTalep });
+            }
+        });
+        yukleFirmalarSupabase();
+        yukleAcikIsTalepleriSupabase();
     }
 
     function firmaKartAnaProHtml(firma, kapakAttrs) {
@@ -1260,8 +1361,9 @@
             return firmaKartAnaProHtml(firma, kapakAttrs);
         }
         var kat = kategoriBul(firma.kategoriId);
-        var tel = telTemizle(firma.tel);
-        var waHref = safeWaHref(tel);
+        /* Kartlarda telefon / e-posta gösterilmez */
+        var tel = '';
+        var waHref = '';
         var anaSayfa = !!opts.anaSayfa;
         var premiumCls = (!anaSayfa && firma.premium) ? ' firma-kart--premium' : '';
         var partnerBadge = (!anaSayfa && firma.sponsor) ? '<span class="firma-kart__partner">PARTNER</span>' : '';
@@ -1302,9 +1404,6 @@
 
     function firmaKartVitrinHtml(firma, kapakAttrs) {
         var kat = kategoriBul(firma.kategoriId);
-        var guven = firmaGuvenVerisi(firma);
-        var premiumCls = firma.premium ? ' firma-kart--premium' : '';
-        var partnerBadge = firma.sponsor ? '<span class="firma-kart__partner">PARTNER</span>' : '';
         var gorselIcerik = firmaGorselAlaniHtml(firma, firma.ad, {
             imgClass: 'firma-kart__gorsel-img',
             width: 400,
@@ -1315,39 +1414,26 @@
         var logoIcerik = logoSrc
             ? '<img class="aurix-img-fallback" src="' + esc(logoSrc) + '" alt="" width="48" height="48" loading="lazy" decoding="async" data-remove-parent=".firma-kart__logo">'
             : '<span class="firma-kart__logo-harf">' + esc(firmaBasHarfleri(firma.ad)) + '</span>';
-        var aciklama = firma.aciklama || '';
-        var puanMetin = firma.puan ? firma.puan.toFixed(1) : '—';
-        var puanHtml = firma.puan
-            ? '<span class="firma-kart__puan-deger">★ ' + puanMetin + '</span>'
-            : '<span class="firma-kart__puan firma-kart__puan--bos">Henüz puan yok</span>';
-        var dogrulandiBadge = firma.durum === 'onaylandi'
-            ? '<span class="firma-kart__dogrulandi firma-kart__dogrulandi--vitrin">Doğrulandı</span>'
-            : '';
+        var aciklama = (firma.aciklama || '').trim();
+        var dogrulandiBadge = '<span class="firma-kart__dogrulandi firma-kart__dogrulandi--vitrin">Doğrulandı</span>';
 
-        return '<article class="firma-kart firma-kart--vitrin' + premiumCls + '" data-id="' + esc(firma.id) + '">' +
-            (firma.premium ? '<span class="firma-kart__premium">PREMIUM</span>' : '') +
-            partnerBadge +
+        return '<article class="firma-kart firma-kart--vitrin" data-id="' + esc(firma.id) + '">' +
             '<div class="firma-kart__gorsel">' + gorselIcerik + '</div>' +
             '<div class="firma-kart__govde">' +
             '<div class="firma-kart__kimlik">' +
             '<div class="firma-kart__logo">' + logoIcerik + '</div>' +
             '<div class="firma-kart__kimlik-metin">' +
             '<div class="firma-kart__baslik-satir">' +
-            '<h3 class="firma-kart__ad">' + esc(firma.ad) + '</h3>' +
+            '<h3 class="firma-kart__ad">' + esc(firma.ad || '—') + '</h3>' +
             dogrulandiBadge +
             '</div>' +
             '<div class="firma-kart__meta">' +
-            '<span class="firma-kart__sehir">' + esc(firma.sehir) + '</span>' +
+            '<span class="firma-kart__sehir">' + esc(firma.sehir || '—') + '</span>' +
             '<span class="firma-kart__kat-rozet">' +
             '<span class="firma-kart__kat-ikon">' + kat.ikon + '</span>' +
-            '<span class="firma-kart__kat-ad">' + esc(kat.ad) + '</span>' +
+            '<span class="firma-kart__kat-ad">' + esc(kat.ad || '—') + '</span>' +
             '</span></div></div></div>' +
-            '<div class="firma-kart__vitrin-metrikler">' +
-            '<span class="firma-kart__vitrin-metrik">' + puanHtml + '</span>' +
-            '<span class="firma-kart__vitrin-metrik"><strong>' + guven.tamamlananIs + '</strong> tamamlanan iş</span>' +
-            '<span class="firma-kart__vitrin-metrik firma-kart__vitrin-metrik--aktif"><strong>' + esc(guven.sonAktif) + '</strong> aktif</span>' +
-            '</div>' +
-            (aciklama ? '<p class="firma-kart__aciklama">' + esc(aciklama) + '</p>' : '') +
+            '<p class="firma-kart__aciklama">' + esc(aciklama || '—') + '</p>' +
             '<div class="firma-kart__aksiyon">' +
             '<button type="button" class="btn btn--ghost btn--sm" data-detay="' + esc(firma.id) + '">Profili Gör</button>' +
             '<button type="button" class="btn btn--primary btn--sm" data-teklif="' + esc(firma.id) + '">Teklif Gönder</button>' +
@@ -1422,9 +1508,7 @@
                         kapakAttrs: kapak.attrs(f)
                     });
                 }).join('')
-                : (bolum.gridId === 'ureticilerGrid'
-                    ? '<p class="bos-metin bos-metin--firma">Doğrulanmış firmalar yakında burada listelenecek.</p>'
-                    : '<p class="bos-metin">Bu bölümde henüz onaylı firma bulunmuyor.</p>');
+                : '<p class="bolum-bos">Henüz doğrulanmış firma bulunmuyor.</p>';
             baglaKartEventleri(el);
         });
     }
@@ -1508,6 +1592,14 @@
             siralamaSel.value = state.vitrin.siralama;
         }
 
+        if (state.firmalarHata) {
+            if (sayac) sayac.textContent = '';
+            el.innerHTML = '<p class="bolum-bos bolum-bos--hata" role="alert">' +
+                esc(state.firmalarHata) + '</p>';
+            renderVitrinSayfalama(0, 1, state.vitrin.boyut || 9);
+            return;
+        }
+
         var list = siraliVitrinFirmalari(filtreliFirmalar());
         var boyut = state.vitrin.boyut || 9;
         var toplamSayfa = Math.max(1, Math.ceil(list.length / boyut));
@@ -1520,7 +1612,7 @@
         if (sayac) {
             if (!list.length) {
                 if (!onayliFirmalar().length) {
-                    sayac.textContent = 'Doğrulanmış firmalar yakında burada listelenecek.';
+                    sayac.textContent = '';
                 } else if (filtreAktifMi()) {
                     sayac.textContent = 'Aramanıza uygun firma bulunamadı.';
                 } else {
@@ -1533,10 +1625,18 @@
             }
         }
 
+        if (!sayfaList.length) {
+            if (!onayliFirmalar().length) {
+                el.innerHTML = '<p class="bolum-bos">Henüz doğrulanmış firma bulunmuyor.</p>';
+            } else {
+                el.innerHTML = '<div class="bos-durum vitrin-bos-durum"><div class="bos-durum__ikon">🔍</div><p>Aramanıza uygun firma bulunamadı.</p><p class="vitrin-bos-durum__alt">Filtreleri temizleyerek tekrar deneyin.</p></div>';
+            }
+            renderVitrinSayfalama(list.length, state.vitrin.sayfa, boyut);
+            return;
+        }
+
         var kapak = createKapakSirasi();
-        el.innerHTML = sayfaList.length
-            ? sayfaList.map(function (f) { return firmaKartVitrinHtml(f, kapak.attrs(f)); }).join('')
-            : '<div class="bos-durum vitrin-bos-durum"><div class="bos-durum__ikon">🔍</div><p>Aramanıza uygun firma bulunamadı.</p><p class="vitrin-bos-durum__alt">Filtreleri temizleyerek tekrar deneyin.</p></div>';
+        el.innerHTML = sayfaList.map(function (f) { return firmaKartVitrinHtml(f, kapak.attrs(f)); }).join('');
         baglaKartEventleri(el);
         renderVitrinSayfalama(list.length, state.vitrin.sayfa, boyut);
         baglaVitrinSayfalama(list.length, boyut);
@@ -1595,14 +1695,23 @@
     function renderIsTalepleri() {
         var el = $('isTalepleriGrid');
         if (!el) return;
-        var liste = onayliIsTalepleri();
-        if (!liste.length) {
-            el.innerHTML = '<p class="bolum-bos">Şu an yayınlanmış iş talebi yok.</p>';
+
+        if (state.isTalepleriHata) {
+            el.innerHTML = '<p class="bolum-bos bolum-bos--hata" role="alert">' +
+                esc(state.isTalepleriHata) + '</p>';
             return;
         }
+
+        var liste = onayliIsTalepleri();
+        if (!liste.length) {
+            el.innerHTML = '<p class="bolum-bos">Henüz açık iş talebi bulunmuyor.</p>';
+            return;
+        }
+
         el.innerHTML = liste.map(function (talep) {
             var durumCls = 'is-talep-kart__durum--' + safeCss(talep.durumTip, 'bekliyor');
-            return '<article class="is-talep-kart is-talep-kart--pro">' +
+            var teklifMetin = (talep.teklifSayisi != null ? talep.teklifSayisi : 0) + ' teklif';
+            return '<article class="is-talep-kart is-talep-kart--pro" data-is-id="' + esc(talep.id) + '">' +
                 '<div class="is-talep-kart__ust">' +
                 '<div class="is-talep-kart__baslik-grup">' +
                 '<h3 class="is-talep-kart__baslik">' + esc(talep.baslik || '—') + '</h3>' +
@@ -1610,7 +1719,7 @@
                 '<span class="is-talep-kart__durum ' + durumCls + '">' + esc(talep.durum || '—') + '</span></div>' +
                 '<ul class="is-talep-kart__detaylar is-talep-kart__detaylar--odak">' +
                 '<li><span>Açılış</span><strong>' + esc(talep.acilisTarihi || '—') + '</strong></li>' +
-                '<li><span>Teklif</span><strong>' + (talep.teklifSayisi != null ? talep.teklifSayisi + ' teklif' : '—') + '</strong></li>' +
+                '<li><span>Teklif</span><strong>' + esc(teklifMetin) + '</strong></li>' +
                 '<li><span>Yaklaşık bütçe</span><strong>' + esc(talep.butce || '—') + '</strong></li>' +
                 '<li><span>Teslim süresi</span><strong>' + esc(talep.termin || '—') + '</strong></li>' +
                 '</ul>' +
@@ -1619,9 +1728,7 @@
         }).join('');
         el.querySelectorAll('[data-teklif-is]').forEach(function (btn) {
             btn.addEventListener('click', function () {
-                toast(demoVideoMode
-                    ? 'Teklif talebiniz alındı. Firmalar en kısa sürede dönüş yapacak.'
-                    : 'Teklif gönderme özelliği çok yakında aktif olacak.', 'info');
+                teklifModalAc(btn.getAttribute('data-teklif-is'));
             });
         });
     }
@@ -1814,30 +1921,23 @@
 
     function adminTabloSatirlari() {
         var arama = (state.adminArama || '').toLowerCase();
-        return state.firmalar.slice().filter(function (f) {
+        var kaynak = state.adminBekleyenFirmalar || [];
+        return kaynak.filter(function (f) {
+            if (state.adminLokalRedler && state.adminLokalRedler[String(f.id)]) return false;
             if (!arama) return true;
-            return f.ad.toLowerCase().indexOf(arama) !== -1;
-        }).sort(function (a, b) {
-            if (a.durum === 'beklemede' && b.durum !== 'beklemede') return -1;
-            if (b.durum === 'beklemede' && a.durum !== 'beklemede') return 1;
-            return 0;
+            var ad = (f.firma_adi || f.ad || '').toLowerCase();
+            var sehir = (f.sehir || '').toLowerCase();
+            var kat = (f.kategori || '').toLowerCase();
+            var email = (f.email || '').toLowerCase();
+            return ad.indexOf(arama) !== -1 || sehir.indexOf(arama) !== -1 ||
+                kat.indexOf(arama) !== -1 || email.indexOf(arama) !== -1;
         });
     }
 
     function adminAksiyonHtml(f) {
-        var html = '';
-        if (f.durum === 'beklemede') {
-            html += '<button type="button" class="admin-btn admin-btn--onay" data-onay="' + f.id + '" title="Onayla">✓</button>';
-            html += '<button type="button" class="admin-btn admin-btn--red" data-red="' + f.id + '" title="Reddet">✕</button>';
-        } else if (f.durum === 'onaylandi') {
-            html += '<button type="button" class="admin-btn admin-btn--askiya" data-askiya="' + f.id + '" title="Askıya Al">⏸</button>';
-        } else {
-            html += '<button type="button" class="admin-btn admin-btn--onay" data-onay="' + f.id + '" title="Onayla">✓</button>';
-        }
-        html += '<button type="button" class="admin-btn admin-btn--premium' + (f.premium ? ' admin-btn--aktif' : '') + '" data-premium="' + f.id + '" title="Premium ' + (f.premium ? 'Kapat' : 'Aç') + '">★</button>';
-        html += '<button type="button" class="admin-btn admin-btn--partner' + (f.sponsor ? ' admin-btn--aktif' : '') + '" data-partner="' + f.id + '" title="Partner ' + (f.sponsor ? 'Kapat' : 'Aç') + '">◆</button>';
-        html += '<button type="button" class="admin-btn admin-btn--sil" data-sil="' + f.id + '" title="Sil">🗑</button>';
-        return html;
+        var id = f.id;
+        return '<button type="button" class="admin-btn admin-btn--onay" data-sb-onay="' + esc(String(id)) + '" title="Onayla">Onayla</button>' +
+            '<button type="button" class="admin-btn admin-btn--red" data-sb-red="' + esc(String(id)) + '" title="Reddet">Reddet</button>';
     }
 
     var DEMO_GELIR = {
@@ -1903,52 +2003,132 @@
         var partner = $('adminPartner');
         var prem = $('adminPremium');
         if (toplam) toplam.textContent = firmalar.length;
-        if (bekleyen) bekleyen.textContent = firmalar.filter(function (f) { return f.durum === 'beklemede'; }).length;
-        if (onayli) onayli.textContent = firmalar.filter(function (f) { return f.durum === 'onaylandi'; }).length;
+        if (bekleyen) bekleyen.textContent = (state.adminBekleyenFirmalar || []).filter(function (f) {
+            return !(state.adminLokalRedler && state.adminLokalRedler[String(f.id)]);
+        }).length;
+        if (onayli) onayli.textContent = (state.liveFirmalar && state.liveFirmalar.length)
+            ? state.liveFirmalar.length
+            : firmalar.filter(function (f) { return f.durum === 'onaylandi'; }).length;
         if (partner) partner.textContent = firmalar.filter(function (f) { return f.sponsor; }).length;
         if (prem) prem.textContent = firmalar.filter(function (f) { return f.premium; }).length;
         renderAdminGelir();
     }
 
+    function adminBasvuruTarihi(iso) {
+        if (!iso) return '—';
+        var d = new Date(iso);
+        if (isNaN(d.getTime())) return '—';
+        return d.toLocaleString('tr-TR', {
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    }
+
+    function adminBekleyenKartHtml(f) {
+        var id = f.id;
+        var ad = f.firma_adi || f.ad || '—';
+        return '<article class="admin-bekleyen-kart" data-id="' + esc(String(id)) + '">' +
+            '<div class="admin-bekleyen-kart__ust">' +
+            '<h3 class="admin-bekleyen-kart__ad">' + esc(ad) + '</h3>' +
+            '<span class="durum durum--beklemede">Beklemede</span>' +
+            '</div>' +
+            '<dl class="admin-bekleyen-kart__meta">' +
+            '<div><dt>Şehir</dt><dd>' + esc(f.sehir || '—') + '</dd></div>' +
+            '<div><dt>Kategori</dt><dd>' + esc(f.kategori || '—') + '</dd></div>' +
+            '<div><dt>Başvuru</dt><dd>' + esc(adminBasvuruTarihi(f.created_at)) + '</dd></div>' +
+            '<div><dt>Telefon</dt><dd>' + esc(f.telefon || f.tel || '—') + '</dd></div>' +
+            '<div><dt>E-posta</dt><dd>' + esc(f.email || '—') + '</dd></div>' +
+            '</dl>' +
+            '<p class="admin-bekleyen-kart__aciklama">' + esc(f.aciklama || '—') + '</p>' +
+            '<div class="admin-aksiyon admin-aksiyon--kart">' +
+            '<button type="button" class="btn btn--primary btn--sm" data-sb-onay="' + esc(String(id)) + '">Onayla</button>' +
+            '<button type="button" class="btn btn--ghost btn--sm" data-sb-red="' + esc(String(id)) + '">Reddet</button>' +
+            '</div></article>';
+    }
+
     function renderAdminTablo() {
-        var tbody = $('adminTbody');
-        if (!tbody) return;
+        var liste = $('adminBekleyenListe');
+        if (!liste) return;
         var rows = adminTabloSatirlari();
 
-        tbody.innerHTML = rows.length ? rows.map(function (f) {
-            var kat = kategoriBul(f.kategoriId);
-            var grupAd = kategoriGrupAdi(f.kategoriId);
-            var durumCls = 'durum durum--' + safeCss(f.durum, 'beklemede');
-            return '<tr class="admin-tablo__satir">' +
-                '<td><span class="admin-tablo__firma">' + esc(f.ad) + '</span></td>' +
-                '<td><span class="admin-tablo__meta">' + kat.ikon + ' ' + esc(kat.ad) + '</span></td>' +
-                '<td><span class="admin-tablo__meta">' + esc(f.sehir) + '</span></td>' +
-                '<td><span class="admin-tablo__kategori">' + esc(grupAd) + '</span></td>' +
-                '<td><span class="admin-tablo__tel">+' + telTemizle(f.tel) + '</span></td>' +
-                '<td><span class="' + durumCls + '">' + adminDurumEtiket(f.durum) + '</span></td>' +
-                '<td><div class="admin-aksiyon">' + adminAksiyonHtml(f) + '</div></td></tr>';
-        }).join('') : '<tr><td colspan="7" class="admin-tablo__bos">Sonuç bulunamadı.</td></tr>';
+        if (state.adminBekleyenHata) {
+            liste.innerHTML = '<p class="admin-bekleyen-bos admin-bekleyen-bos--hata" role="alert">' +
+                esc(state.adminBekleyenHata) + '</p>';
+            renderAdminOzet();
+            return;
+        }
 
-        tbody.querySelectorAll('[data-onay]').forEach(function (btn) {
-            btn.addEventListener('click', function () { adminDurumGuncelle(btn.getAttribute('data-onay'), 'onaylandi'); });
+        if (!rows.length) {
+            liste.innerHTML = '<p class="admin-bekleyen-bos">Henüz bekleyen firma başvurusu yok.</p>';
+            renderAdminOzet();
+            return;
+        }
+
+        liste.innerHTML = rows.map(adminBekleyenKartHtml).join('');
+
+        liste.querySelectorAll('[data-sb-onay]').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                adminSbOnayla(btn.getAttribute('data-sb-onay'), btn);
+            });
         });
-        tbody.querySelectorAll('[data-red]').forEach(function (btn) {
-            btn.addEventListener('click', function () { adminDurumGuncelle(btn.getAttribute('data-red'), 'reddedildi'); });
-        });
-        tbody.querySelectorAll('[data-askiya]').forEach(function (btn) {
-            btn.addEventListener('click', function () { adminDurumGuncelle(btn.getAttribute('data-askiya'), 'askida'); });
-        });
-        tbody.querySelectorAll('[data-premium]').forEach(function (btn) {
-            btn.addEventListener('click', function () { adminTogglePremium(btn.getAttribute('data-premium')); });
-        });
-        tbody.querySelectorAll('[data-partner]').forEach(function (btn) {
-            btn.addEventListener('click', function () { adminTogglePartner(btn.getAttribute('data-partner')); });
-        });
-        tbody.querySelectorAll('[data-sil]').forEach(function (btn) {
-            btn.addEventListener('click', function () { adminSil(btn.getAttribute('data-sil')); });
+        liste.querySelectorAll('[data-sb-red]').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                adminSbReddet(btn.getAttribute('data-sb-red'), btn);
+            });
         });
 
         renderAdminOzet();
+    }
+
+    function yukleAdminBekleyenFirmalar() {
+        if (!isAdminSession() || !window.AurixSupabase || typeof AurixSupabase.adminFirmalar !== 'function') {
+            return;
+        }
+        AurixSupabase.adminFirmalar('list').then(function (res) {
+            if (!res || !res.ok) {
+                state.adminBekleyenFirmalar = [];
+                state.adminBekleyenHata = (res && res.error)
+                    ? String(res.error)
+                    : 'Admin işlemleri için Edge Function deploy edilmeli.';
+                renderAdminTablo();
+                return;
+            }
+            state.adminBekleyenHata = null;
+            state.adminBekleyenFirmalar = res.data || [];
+            renderAdminTablo();
+        });
+    }
+
+    function adminSbOnayla(id, btn) {
+        if (!isAdminSession()) return;
+        if (btn) btn.disabled = true;
+        AurixSupabase.adminFirmalar('approve', { id: id }).then(function (res) {
+            if (btn) btn.disabled = false;
+            if (!res || !res.ok) {
+                toast((res && res.error) || 'Onay başarısız.', 'error');
+                return;
+            }
+            toast(res.message || 'Firma onaylandı.', 'success');
+            yukleAdminBekleyenFirmalar();
+            yukleCanliVerilerSupabase();
+        });
+    }
+
+    function adminSbReddet(id, btn) {
+        if (!isAdminSession()) return;
+        if (btn) btn.disabled = true;
+        AurixSupabase.adminFirmalar('reject', { id: id }).then(function (res) {
+            if (btn) btn.disabled = false;
+            if (!res || !res.ok) {
+                toast((res && res.error) || 'Red işlemi başarısız.', 'error');
+                return;
+            }
+            toast(res.message || 'Firma reddedildi.', 'success');
+            yukleAdminBekleyenFirmalar();
+        });
     }
 
     function adminModDurumEtiket(durum) {
@@ -2165,14 +2345,18 @@
     }
 
     function detayModalAc(id) {
-        var firma = state.firmalar.find(function (f) { return f.id === id; });
+        var firma = onayliFirmalar().find(function (f) { return String(f.id) === String(id); });
+        if (!firma && isAdminSession()) {
+            firma = state.firmalar.find(function (f) { return String(f.id) === String(id); });
+        }
         if (!firma) return;
         var kat = kategoriBul(firma.kategoriId);
-        var tel = telTemizle(firma.tel);
+        /* Public kart/profil: telefon ve e-posta gösterilmez */
+        var tel = '';
         $('detayAd').textContent = firma.ad;
         $('detayKat').textContent = kat.ikon + ' ' + kat.ad;
         $('detaySehir').textContent = firma.sehir;
-        $('detayAciklama').textContent = firma.aciklama || 'Profesyonel B2B üretim ve tedarik hizmeti sunar.';
+        $('detayAciklama').textContent = firma.aciklama || '—';
         $('detayPuan').textContent = firma.puan ? yildizGoster(firma.puan) : 'Yeni üye';
         detayGorselGuncelle(firma);
         detayLogoGuncelle(firma);
@@ -2182,7 +2366,7 @@
 
         var detayWa = $('detayWa');
         if (detayWa) {
-            var waHref = safeWaHref(tel);
+            var waHref = tel ? safeWaHref(tel) : '';
             detayWa.textContent = demoVideoMode ? 'AURIX Mesaj' : 'WhatsApp ile İletişim';
             if (waHref) {
                 detayWa.href = waHref;
@@ -2223,6 +2407,122 @@
     function modalKapat(id) {
         var el = $(id);
         if (el) { el.classList.remove('modal--acik'); document.body.classList.remove('modal-acik'); }
+    }
+
+    function teklifFirmaSelectDoldur() {
+        var sel = $('teklifFirma');
+        if (!sel) return;
+        var firmalar = onayliFirmalar();
+        var opts = '<option value="">Firma seçin</option>';
+        firmalar.forEach(function (f) {
+            if (f.supabaseId == null) return;
+            opts += '<option value="' + esc(String(f.supabaseId)) + '">' +
+                esc(f.ad) + ' · ' + esc(f.sehir) + '</option>';
+        });
+        sel.innerHTML = opts;
+    }
+
+    function teklifModalAc(talepId) {
+        var talep = onayliIsTalepleri().find(function (t) { return String(t.id) === String(talepId); });
+        if (!talep || talep.supabaseId == null) {
+            toast('İş talebi bulunamadı. Listeyi yenileyip tekrar deneyin.', 'error');
+            return;
+        }
+        if (!window.AurixSupabase || !AurixSupabase.baglantiHazirMi()) {
+            toast('Supabase bağlantısı hazır değil. Sayfayı yenileyip tekrar deneyin.', 'error');
+            return;
+        }
+
+        var firmalar = onayliFirmalar().filter(function (f) { return f.supabaseId != null; });
+        if (!firmalar.length) {
+            toast('Teklif vermek için önce doğrulanmış bir firma kaydı gerekli.', 'error');
+            return;
+        }
+
+        var isIdEl = $('teklifIsId');
+        var baslikEl = $('teklifIsBaslik');
+        var ozetEl = $('teklifIsOzet');
+        if (isIdEl) isIdEl.value = String(talep.supabaseId);
+        if (baslikEl) baslikEl.textContent = talep.baslik || 'İş talebi';
+        if (ozetEl) {
+            ozetEl.textContent = (talep.sehir || '—') +
+                (talep.butce && talep.butce !== '—' ? ' · Bütçe: ' + talep.butce : '') +
+                (talep.termin && talep.termin !== '—' ? ' · Termin: ' + talep.termin : '');
+        }
+        teklifFirmaSelectDoldur();
+        if ($('teklifForm')) $('teklifForm').reset();
+        if (isIdEl) isIdEl.value = String(talep.supabaseId);
+        modalAc('teklifModal');
+    }
+
+    function teklifGonder(e) {
+        e.preventDefault();
+        var isId = ($('teklifIsId') && $('teklifIsId').value || '').trim();
+        var firmaId = ($('teklifFirma') && $('teklifFirma').value || '').trim();
+        var fiyatHam = ($('teklifFiyat') && $('teklifFiyat').value || '').trim();
+        var terminHam = ($('teklifTerminGun') && $('teklifTerminGun').value || '').trim();
+        var mesaj = ($('teklifMesaj') && $('teklifMesaj').value || '').trim();
+
+        if (!isId) {
+            toast('İş talebi seçilemedi. Lütfen tekrar deneyin.', 'error');
+            return;
+        }
+        if (!firmaId) {
+            toast('Lütfen teklif verecek firmayı seçin.', 'error');
+            return;
+        }
+        var fiyat = Number(String(fiyatHam).replace(',', '.'));
+        var terminGun = parseInt(terminHam, 10);
+        if (isNaN(fiyat) || fiyat <= 0) {
+            toast('Fiyat 0’dan büyük olmalıdır.', 'error');
+            return;
+        }
+        if (isNaN(terminGun) || terminGun < 1) {
+            toast('Teslim süresi en az 1 gün olmalıdır.', 'error');
+            return;
+        }
+
+        var firmaSecili = onayliFirmalar().some(function (f) {
+            return f.supabaseId != null && String(f.supabaseId) === String(firmaId);
+        });
+        if (!firmaSecili) {
+            toast('Yalnızca doğrulanmış ve onaylı firmalar teklif verebilir.', 'error');
+            return;
+        }
+
+        if (!window.AurixSupabase || typeof AurixSupabase.kaydetTeklif !== 'function') {
+            toast('Supabase bağlantısı hazır değil. Sayfayı yenileyip tekrar deneyin.', 'error');
+            return;
+        }
+
+        var submitBtn = e.target && e.target.querySelector
+            ? e.target.querySelector('[type="submit"]')
+            : null;
+        if (submitBtn) submitBtn.disabled = true;
+
+        var isIdDeger = /^\d+$/.test(isId) ? Number(isId) : isId;
+        var firmaIdDeger = /^\d+$/.test(firmaId) ? Number(firmaId) : firmaId;
+
+        AurixSupabase.kaydetTeklif({
+            is_id: isIdDeger,
+            firma_id: firmaIdDeger,
+            fiyat: fiyat,
+            termin_gun: terminGun,
+            mesaj: mesaj
+        }).then(function (res) {
+            if (submitBtn) submitBtn.disabled = false;
+            if (!res || !res.ok) {
+                toast((res && res.error) || 'Teklif kaydedilemedi.', 'error');
+                return;
+            }
+            if ($('teklifForm')) $('teklifForm').reset();
+            modalKapat('teklifModal');
+            toast('Teklifiniz başarıyla gönderildi.', 'success');
+            yukleTeklifSayilariSupabase();
+        }).catch(function () {
+            if (submitBtn) submitBtn.disabled = false;
+            toast('Teklif kaydedilemedi. Lütfen daha sonra tekrar deneyin.', 'error');
+        });
     }
 
     function navMenuKapat() {
@@ -2278,6 +2578,7 @@
         window.scrollTo({ top: 0, behavior: 'smooth' });
         if (id === 'admin') {
             PanelUI.renderAdminSkeleton();
+            yukleAdminBekleyenFirmalar();
             renderAdminTablo();
             renderAdminModeration();
         }
@@ -2412,7 +2713,8 @@
             if ($('isTalepForm')) $('isTalepForm').reset();
             modalKapat('isTalepModal');
             toast('İş talebiniz alındı.', 'success');
-            yukleCanliVerilerSupabase();
+            yukleAcikIsTalepleriSupabase();
+            yukleHeroIstatistiklerSupabase();
         }).catch(function () {
             if (submitBtn) submitBtn.disabled = false;
             toast('Bağlantı hatası. Lütfen tekrar deneyin.', 'error');
@@ -2526,6 +2828,8 @@
         tumunuRenderEt({ skipPiyasa: true });
         yukleCanliVerilerSupabase();
         setInterval(heroTerminalSaatGuncelle, 1000);
+        setInterval(yukleAcikIsTalepleriSupabase, 30000);
+        setInterval(yukleFirmalarSupabase, 30000);
 
         PanelUI.bindTabs();
         applyDemoVideoUi();
@@ -2535,6 +2839,7 @@
         if (isAdminSession()) {
             PanelUI.renderAdminSkeleton();
             renderAdminModeration();
+            yukleAdminBekleyenFirmalar();
         }
 
         // Navigasyon
@@ -2709,6 +3014,8 @@
         }
         var isTalepForm = $('isTalepForm');
         if (isTalepForm) isTalepForm.addEventListener('submit', isTalepGonder);
+        var teklifForm = $('teklifForm');
+        if (teklifForm) teklifForm.addEventListener('submit', teklifGonder);
 
         // Admin — yalnızca ADMIN_PANEL_ENABLED true iken bağlanır
         if ($('demoSifirlaBtn')) $('demoSifirlaBtn').addEventListener('click', demoVeriSifirla);
@@ -2733,6 +3040,24 @@
         if (adminSilOnay) adminSilOnay.addEventListener('click', adminSilOnayla);
         var adminPanelCikis = $('adminPanelCikisBtn');
         if (adminPanelCikis) adminPanelCikis.addEventListener('click', adminCikis);
+        var adminTokenBtn = $('adminTokenBtn');
+        if (adminTokenBtn) {
+            adminTokenBtn.addEventListener('click', function () {
+                var token = window.prompt('Admin token (Supabase secret: SUPABASE_ADMIN_TOKEN)');
+                if (token && window.AurixSupabase) {
+                    if (AurixSupabase.setAdminToken) AurixSupabase.setAdminToken(token);
+                    else if (AurixSupabase.setAdminDemoToken) AurixSupabase.setAdminDemoToken(token);
+                    toast('Admin token oturuma kaydedildi.', 'info');
+                    yukleAdminBekleyenFirmalar();
+                }
+            });
+        }
+        var adminYenile = $('adminBekleyenYenileBtn');
+        if (adminYenile) {
+            adminYenile.addEventListener('click', function () {
+                yukleAdminBekleyenFirmalar();
+            });
+        }
 
         // Modal kapat
         document.querySelectorAll('[data-modal-kapat]').forEach(function (btn) {
