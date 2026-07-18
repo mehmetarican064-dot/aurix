@@ -9,11 +9,60 @@
     var SUPABASE_URL = 'https://svsouqnhtlpcpdvqahmd.supabase.co';
     var SUPABASE_ANON_KEY = 'sb_publishable_c2mZqJ7T3rcM0Jlcm_405Q_UqRv7peK';
 
-    /** Public liste — telefon/email/durum dönmez (durum migration sonrası DB’de kalır) */
-    var FIRMA_PUBLIC_SELECT = 'id,firma_adi,sehir,kategori,aciklama,dogrulanmis,created_at';
+    /** Public liste — telefon/email çekilmez */
+    var FIRMA_PUBLIC_SELECT = 'id,firma_adi,sehir,kategori,aciklama,dogrulanmis,durum,created_at';
 
     var ADMIN_TOKEN_KEY = 'aurix_supabase_admin_token';
     var client = null;
+
+    function isDevHost() {
+        try {
+            var h = (global.location && global.location.hostname) || '';
+            return h === 'localhost' || h === '127.0.0.1';
+        } catch (e) {
+            return false;
+        }
+    }
+
+    /** Production’da seed kayıtları gizlenir; localhost’ta tümü görülebilir. */
+    function seedFiltreUygula(query) {
+        if (!query || typeof query.eq !== 'function') return query;
+        if (isDevHost()) return query;
+        return query.eq('is_seed', false);
+    }
+
+    function sutunEksikMi(err) {
+        var msg = String((err && err.message) || err || '');
+        return /is_seed|owner_id|user_id|column.*does not exist|PGRST204/i.test(msg);
+    }
+
+    function logSupabaseHata(baglam, err) {
+        try {
+            console.error(baglam, err);
+        } catch (e) { /* ignore */ }
+    }
+
+    function aktifKullaniciId() {
+        try {
+            if (global.AuthService && AuthService.getCurrentUser()) {
+                return AuthService.getCurrentUser().id || null;
+            }
+        } catch (e) { /* ignore */ }
+        return null;
+    }
+
+    function oturumKullaniciId(sb) {
+        if (!sb || !sb.auth || typeof sb.auth.getSession !== 'function') {
+            return Promise.resolve(aktifKullaniciId());
+        }
+        return sb.auth.getSession().then(function (res) {
+            var session = res && res.data ? res.data.session : null;
+            var uid = session && session.user ? session.user.id : null;
+            return uid || aktifKullaniciId();
+        }).catch(function () {
+            return aktifKullaniciId();
+        });
+    }
 
     function keyMetniVarMi() {
         var k = (SUPABASE_ANON_KEY || '').trim();
@@ -28,9 +77,10 @@
         }
         client = global.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY.trim(), {
             auth: {
-                persistSession: false,
-                autoRefreshToken: false,
-                detectSessionInUrl: false
+                persistSession: true,
+                autoRefreshToken: true,
+                detectSessionInUrl: true,
+                storage: global.localStorage
             }
         });
         return client;
@@ -68,7 +118,7 @@
         }
         if (/row-level security|RLS|permission denied|42501|WITH CHECK/i.test(msg)) {
             if (/teklif/i.test(msg) || /teklifler/i.test(String(err.hint || '') + String(err.details || ''))) {
-                return 'Teklif reddedildi. Yalnızca onaylı firmalar açık işlere teklif verebilir.';
+                return 'Teklif reddedildi. Giriş yapmış olmalı ve teklifi kendi onaylı firmanız adına vermelisiniz.';
             }
             return 'Kayıt güvenlik kuralları nedeniyle reddedildi. Lütfen alanları kontrol edin.';
         }
@@ -80,7 +130,7 @@
         }
         if (/PGRST205|Could not find the table|schema cache/i.test(msg)) {
             if (/teklif/i.test(msg)) {
-                return 'Teklif tablosu henüz hazır değil. supabase/migrations/006_teklifler.sql dosyasını çalıştırın.';
+                return 'Teklif özelliği şu anda kullanılamıyor. Lütfen daha sonra tekrar deneyin.';
             }
             return 'Veriler yüklenirken bir sorun oluştu. Lütfen daha sonra tekrar deneyin.';
         }
@@ -99,24 +149,64 @@
         if (!sb) {
             return Promise.resolve({
                 ok: false,
-                error: 'Supabase bağlantısı hazır değil. Sayfayı yenileyip tekrar deneyin.'
+                error: 'Bağlantı kurulamadı. Sayfayı yenileyip tekrar deneyin.'
             });
         }
-        var satir = {
-            firma_adi: veri.firma_adi || veri.ad,
-            sehir: veri.sehir,
-            kategori: veri.kategori || veri.kategoriId || null,
-            aciklama: veri.aciklama,
-            telefon: veri.telefon || veri.tel,
-            email: (veri.email || '').trim().toLowerCase() || null,
-            dogrulanmis: false,
-            durum: 'beklemede'
-        };
 
-        return sb.from('firmalar').insert([satir]).select('id').then(function (res) {
-            if (res.error) return { ok: false, error: hataMesaji(res.error) };
-            return { ok: true };
+        return oturumKullaniciId(sb).then(function (uid) {
+            if (!uid) {
+                return {
+                    ok: false,
+                    needsAuth: true,
+                    error: 'Firma başvurusu için giriş yapmış olmalısınız.'
+                };
+            }
+
+            var userId = veri.user_id || uid;
+            if (userId !== uid) userId = uid;
+
+            var satir = {
+                firma_adi: veri.firma_adi || veri.ad,
+                sehir: veri.sehir,
+                kategori: veri.kategori || veri.kategoriId || null,
+                aciklama: veri.aciklama,
+                telefon: veri.telefon || veri.tel,
+                email: (veri.email || '').trim().toLowerCase() || null,
+                dogrulanmis: false,
+                durum: 'beklemede',
+                is_seed: false,
+                user_id: userId,
+                owner_id: userId
+            };
+
+            function dene(payload) {
+                return sb.from('firmalar').insert([payload]).select('id').then(function (res) {
+                    if (res.error && sutunEksikMi(res.error)) {
+                        var yedek = Object.assign({}, payload);
+                        var msg = String(res.error.message || '');
+                        if (/user_id/i.test(msg)) delete yedek.user_id;
+                        else if (/owner_id/i.test(msg)) delete yedek.owner_id;
+                        else if (/is_seed/i.test(msg)) delete yedek.is_seed;
+                        else {
+                            delete yedek.user_id;
+                            delete yedek.owner_id;
+                            delete yedek.is_seed;
+                        }
+                        if (JSON.stringify(yedek) !== JSON.stringify(payload)) {
+                            return dene(yedek);
+                        }
+                    }
+                    if (res.error) {
+                        logSupabaseHata('firmalar insert', res.error);
+                        return { ok: false, error: hataMesaji(res.error) };
+                    }
+                    return { ok: true, id: res.data && res.data[0] ? res.data[0].id : null };
+                });
+            }
+
+            return dene(satir);
         }).catch(function (err) {
+            logSupabaseHata('firmalar insert', err);
             return { ok: false, error: hataMesaji(err) };
         });
     }
@@ -135,19 +225,34 @@
         if (!sb) {
             return Promise.resolve({
                 ok: false,
-                error: 'Supabase bağlantısı hazır değil. Sayfayı yenileyip tekrar deneyin.'
+                error: 'Bağlantı kurulamadı. Sayfayı yenileyip tekrar deneyin.'
             });
         }
-        return sb.from('is_talepleri').insert([{
+        var ownerId = aktifKullaniciId();
+        var satir = {
             baslik: veri.baslik,
             aciklama: isTalebiAciklamaBirleştir(veri),
             kategori: veri.kategori || veri.kategoriId || null,
             sehir: veri.sehir,
-            durum: veri.durum || 'Acik'
-        }]).select('id').then(function (res) {
-            if (res.error) return { ok: false, error: hataMesaji(res.error) };
-            return { ok: true };
-        }).catch(function (err) {
+            durum: veri.durum || 'Acik',
+            is_seed: false
+        };
+        if (ownerId) satir.owner_id = ownerId;
+
+        function dene(payload) {
+            return sb.from('is_talepleri').insert([payload]).select('id').then(function (res) {
+                if (res.error && sutunEksikMi(res.error) && (payload.owner_id || payload.is_seed === false)) {
+                    var yedek = Object.assign({}, payload);
+                    delete yedek.owner_id;
+                    delete yedek.is_seed;
+                    return dene(yedek);
+                }
+                if (res.error) return { ok: false, error: hataMesaji(res.error) };
+                return { ok: true };
+            });
+        }
+
+        return dene(satir).catch(function (err) {
             return { ok: false, error: hataMesaji(err) };
         });
     }
@@ -158,10 +263,14 @@
             return Promise.resolve({ ok: false, firma: null, isTalep: null });
         }
         return Promise.all([
-            sb.from('firmalar').select('id', { count: 'exact', head: true })
-                .eq('dogrulanmis', true)
-                .eq('durum', 'onaylandi'),
-            sb.from('is_talepleri').select('id', { count: 'exact', head: true }).eq('durum', 'Acik')
+            seedFiltreUygula(
+                sb.from('firmalar').select('id', { count: 'exact', head: true })
+                    .eq('dogrulanmis', true)
+                    .eq('durum', 'onaylandi')
+            ),
+            seedFiltreUygula(
+                sb.from('is_talepleri').select('id', { count: 'exact', head: true }).eq('durum', 'Acik')
+            )
         ]).then(function (sonuclar) {
             var firmaRes = sonuclar[0];
             var isRes = sonuclar[1];
@@ -184,36 +293,44 @@
             return Promise.resolve({
                 ok: false,
                 data: [],
-                error: 'Supabase bağlantısı hazır değil. Sayfayı yenileyip tekrar deneyin.'
+                error: 'Bağlantı kurulamadı. Sayfayı yenileyip tekrar deneyin.'
             });
         }
-        return sb.from('firmalar')
-            .select(FIRMA_PUBLIC_SELECT)
-            .eq('dogrulanmis', true)
-            .eq('durum', 'onaylandi')
-            .order('created_at', { ascending: false })
-            .then(function (res) {
-                if (res.error) {
-                    return {
-                        ok: false,
-                        data: [],
-                        error: hataMesaji(res.error) ||
-                            'Firmalar yüklenemedi. Lütfen daha sonra tekrar deneyin.'
-                    };
-                }
-                var satirlar = (res.data || []).filter(function (row) {
-                    return row && row.dogrulanmis === true;
-                });
-                return { ok: true, data: satirlar };
-            })
-            .catch(function (err) {
+        function sorgu(filtreSeed) {
+            var q = sb.from('firmalar')
+                .select(FIRMA_PUBLIC_SELECT)
+                .eq('dogrulanmis', true)
+                .eq('durum', 'onaylandi');
+            if (filtreSeed) q = seedFiltreUygula(q);
+            return q.order('created_at', { ascending: false });
+        }
+
+        return sorgu(true).then(function (res) {
+            if (res.error && sutunEksikMi(res.error)) {
+                return sorgu(false);
+            }
+            return res;
+        }).then(function (res) {
+            if (res.error) {
                 return {
                     ok: false,
                     data: [],
-                    error: hataMesaji(err) ||
+                    error: hataMesaji(res.error) ||
                         'Firmalar yüklenemedi. Lütfen daha sonra tekrar deneyin.'
                 };
+            }
+            var satirlar = (res.data || []).filter(function (row) {
+                return row && row.dogrulanmis === true;
             });
+            return { ok: true, data: satirlar };
+        }).catch(function (err) {
+            return {
+                ok: false,
+                data: [],
+                error: hataMesaji(err) ||
+                    'Firmalar yüklenemedi. Lütfen daha sonra tekrar deneyin.'
+            };
+        });
     }
 
     function getirAcikIsTalepleri() {
@@ -222,35 +339,43 @@
             return Promise.resolve({
                 ok: false,
                 data: [],
-                error: 'Supabase bağlantısı hazır değil. Sayfayı yenileyip tekrar deneyin.'
+                error: 'Bağlantı kurulamadı. Sayfayı yenileyip tekrar deneyin.'
             });
         }
-        return sb.from('is_talepleri')
-            .select('id,baslik,aciklama,kategori,sehir,durum,created_at')
-            .eq('durum', 'Acik')
-            .order('created_at', { ascending: false })
-            .then(function (res) {
-                if (res.error) {
-                    return {
-                        ok: false,
-                        data: [],
-                        error: hataMesaji(res.error) ||
-                            'Açık iş talepleri yüklenemedi. Lütfen daha sonra tekrar deneyin.'
-                    };
-                }
-                var satirlar = (res.data || []).filter(function (row) {
-                    return row && String(row.durum || '') === 'Acik';
-                });
-                return { ok: true, data: satirlar };
-            })
-            .catch(function (err) {
+        function sorgu(filtreSeed) {
+            var q = sb.from('is_talepleri')
+                .select('id,baslik,aciklama,kategori,sehir,durum,created_at')
+                .eq('durum', 'Acik');
+            if (filtreSeed) q = seedFiltreUygula(q);
+            return q.order('created_at', { ascending: false });
+        }
+
+        return sorgu(true).then(function (res) {
+            if (res.error && sutunEksikMi(res.error)) {
+                return sorgu(false);
+            }
+            return res;
+        }).then(function (res) {
+            if (res.error) {
                 return {
                     ok: false,
                     data: [],
-                    error: hataMesaji(err) ||
+                    error: hataMesaji(res.error) ||
                         'Açık iş talepleri yüklenemedi. Lütfen daha sonra tekrar deneyin.'
                 };
+            }
+            var satirlar = (res.data || []).filter(function (row) {
+                return row && String(row.durum || '') === 'Acik';
             });
+            return { ok: true, data: satirlar };
+        }).catch(function (err) {
+            return {
+                ok: false,
+                data: [],
+                error: hataMesaji(err) ||
+                    'Açık iş talepleri yüklenemedi. Lütfen daha sonra tekrar deneyin.'
+            };
+        });
     }
 
     /** Public özet view — fiyat/mesaj dönmez */
@@ -261,7 +386,7 @@
         if (!sb) {
             return Promise.resolve({
                 ok: false,
-                error: 'Supabase bağlantısı hazır değil. Sayfayı yenileyip tekrar deneyin.'
+                error: 'Bağlantı kurulamadı. Sayfayı yenileyip tekrar deneyin.'
             });
         }
         var fiyat = Number(veri.fiyat);
@@ -277,6 +402,12 @@
         }
         if (isNaN(terminGun) || terminGun < 1) {
             return Promise.resolve({ ok: false, error: 'Teslim süresi en az 1 gün olmalıdır.' });
+        }
+        if (!aktifKullaniciId()) {
+            return Promise.resolve({
+                ok: false,
+                error: 'Teklif vermek için giriş yapmanız gerekir.'
+            });
         }
 
         return Promise.all([
@@ -379,7 +510,7 @@
                                 ok: false,
                                 counts: {},
                                 error: hataMesaji(res2.error) ||
-                                    'Teklif sayıları yüklenemedi. 006_teklifler.sql çalıştırıldı mı?'
+                                    'Teklif sayıları şu anda yüklenemiyor.'
                             };
                         }
                         return sayilariIsle(res2.data);
@@ -417,16 +548,19 @@
         var m = String(msg || '');
         var st = status || 0;
         if (st === 404 || /404|not found|FunctionsHttpError|Function not found/i.test(m)) {
-            return 'admin-firmalar Edge Function bulunamadı. Önce deploy edin: supabase functions deploy admin-firmalar';
+            return 'Admin onay servisi bulunamadı. Deploy gerekli (kurulum raporu).';
         }
-        if (st === 401 || st === 403 || /401|403|Yetkisiz|unauthorized|admin token|Forbidden/i.test(m)) {
-            return 'Yetkisiz. Admin token’ı kontrol edin (Supabase secret: SUPABASE_ADMIN_TOKEN).';
+        if (st === 403 || /Origin izni yok/i.test(m)) {
+            return 'Bu kaynaktan admin işlemine izin verilmiyor.';
+        }
+        if (st === 401 || /401|Yetkisiz|unauthorized|admin token|Forbidden/i.test(m)) {
+            return 'Yetkisiz. Admin token’ı kontrol edin.';
         }
         if (/Failed to send|FunctionsFetchError|Failed to fetch|NetworkError/i.test(m)) {
-            return 'Edge Function’a bağlanılamadı. Deploy ve ağ bağlantısını kontrol edin.';
+            return 'Admin servisine bağlanılamadı. Deploy ve ağ bağlantısını kontrol edin.';
         }
         if (/CORS/i.test(m)) {
-            return 'Bağlantı engellendi (CORS). Siteyi aurixb2b.com veya localhost üzerinden açın.';
+            return 'Bağlantı engellendi. Lütfen sayfayı yenileyip tekrar deneyin.';
         }
         return m || 'İşlem başarısız.';
     }
@@ -434,14 +568,14 @@
     /**
      * Admin — Edge Function (service_role sunucuda).
      * GET list / POST approve|reject
-     * Header: x-aurix-admin-token = SUPABASE_ADMIN_TOKEN secret
+     * Header: x-admin-token = SUPABASE_ADMIN_TOKEN secret (sessionStorage)
      * Deploy edilmeden başarılı gibi davranmaz.
      */
     function adminFirmalar(action, payload) {
         if (!keyMetniVarMi()) {
             return Promise.resolve({
                 ok: false,
-                error: 'Supabase bağlantısı hazır değil.'
+                error: 'Bağlantı kurulamadı.'
             });
         }
         var token = getAdminToken();
@@ -458,7 +592,7 @@
             'Content-Type': 'application/json',
             'apikey': SUPABASE_ANON_KEY.trim(),
             'Authorization': 'Bearer ' + SUPABASE_ANON_KEY.trim(),
-            'x-aurix-admin-token': token
+            'x-admin-token': token
         };
 
         var opts;

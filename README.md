@@ -28,7 +28,6 @@ Türkiye kuyumculuk sektörü için B2B platform demosu. Frontend ağırlıklı,
 - ✅ Firma vitrini (arama + filtre)
 - ✅ Firma detay modalı
 - ✅ Firma kayıt formu
-- ✅ WhatsApp iletişim
 - ✅ Demo canlı piyasa bandı
 - ⏸ Admin paneli (v1.0'da Supabase Auth ile — şu an devre dışı)
 - ✅ Mobil uyumlu responsive tasarım

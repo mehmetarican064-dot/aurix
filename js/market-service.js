@@ -1,5 +1,5 @@
 /**
- * Aurix Beta v0.1 — Kuyumcu piyasa veri katmanı (demo simülasyon)
+ * AURIX — Kuyumcu piyasa veri katmanı (bilgilendirme / mock kaynak)
  */
 (function (window) {
     'use strict';
@@ -240,12 +240,18 @@
         return intPart + ',' + pair[1];
     }
 
-    function formatDegisim(delta, meta) {
-        meta = meta || { degisimDecimals: 2 };
-        var sign = delta >= 0 ? '+' : '-';
-        var abs = Math.abs(delta);
-        if (meta.degisimDecimals === 0) return sign + Math.round(abs);
-        return sign + abs.toFixed(meta.degisimDecimals).replace('.', ',');
+    function formatDegisimPct(delta, deger) {
+        var base = Number(deger) || 0;
+        if (!base) return { text: '0,00%', yon: 'flat' };
+        var pct = (Number(delta) || 0) / base * 100;
+        if (!isFinite(pct) || Math.abs(pct) < 0.005) {
+            return { text: '0,00%', yon: 'flat' };
+        }
+        var sign = pct > 0 ? '+' : '';
+        return {
+            text: sign + pct.toFixed(2).replace('.', ',') + '%',
+            yon: pct > 0 ? 'up' : 'down'
+        };
     }
 
     function initMockState(seed) {
@@ -275,13 +281,14 @@
     function toDisplayQuote(raw) {
         var meta = INSTRUMENT_META[raw.id] || {};
         var delta = raw.degisim || 0;
+        var deg = formatDegisimPct(delta, raw.deger);
         return {
             id: raw.id,
             etiket: raw.etiket,
             deger: formatTrNumber(raw.deger, meta),
             birim: raw.birim,
-            degisim: formatDegisim(delta, meta),
-            yon: delta >= 0 ? 'up' : 'down',
+            degisim: deg.text,
+            yon: deg.yon,
             grup: meta.grup || 'doviz',
             premium: !!meta.premium
         };

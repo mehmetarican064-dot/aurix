@@ -1,74 +1,102 @@
 /**
  * AURIX — Admin firma moderasyonu (Edge Function)
  *
- * service_role yalnızca bu fonksiyonda (Supabase secrets) kullanılır.
- * Frontend ASLA service_role / sb_secret içermemelidir.
+ * service_role YALNIZCA bu fonksiyonun ortam değişkeninden alınır.
+ * Frontend ASLA service_role / sb_secret / admin token içermemelidir.
  *
  * Secrets:
- *   SUPABASE_ADMIN_TOKEN     — geçici geliştirme admin token’ı
- *   SUPABASE_URL             — otomatik
+ *   SUPABASE_ADMIN_TOKEN      — geçici admin token (x-admin-token header)
+ *   SUPABASE_URL              — otomatik
  *   SUPABASE_SERVICE_ROLE_KEY — otomatik (Edge ortamında)
  *
+ * JWT: Bu geçici token modeli nedeniyle deploy’da --no-verify-jwt gerekir
+ * (gateway JWT’si yerine x-admin-token doğrulanır).
+ * Uzun vadede: Supabase Auth + profiles.rol='admin' + JWT doğrulaması.
+ *
  * API:
- *   GET  /admin-firmalar              → durum=beklemede firmalar
- *   POST /admin-firmalar { action, id }
- *        action=approve → durum=onaylandi, dogrulanmis=true
- *        action=reject  → durum=reddedildi, dogrulanmis=false
+ *   GET  → durum=beklemede firmalar (telefon/email dahil)
+ *   POST { action: 'approve'|'reject', id }
  */
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.1';
 
 const ALLOWED_ORIGINS = [
   'https://aurixb2b.com',
   'https://www.aurixb2b.com',
-  'http://localhost',
-  'http://127.0.0.1',
-  'http://localhost:8765',
   'http://127.0.0.1:8765',
-  'http://localhost:5500',
-  'http://127.0.0.1:5500',
-  'http://localhost:3000',
-  'http://127.0.0.1:3000',
+  'http://localhost:8765',
 ];
 
-function corsHeaders(req) {
-  const origin = req.headers.get('Origin') || '';
-  const allowed = ALLOWED_ORIGINS.some((o) =>
-    origin === o || origin.startsWith(o + ':') || origin.startsWith(o + '/')
-  );
-  const allowOrigin = allowed ? origin : ALLOWED_ORIGINS[0];
+function originIzinliMi(origin: string): boolean {
+  if (!origin) return false;
+  return ALLOWED_ORIGINS.includes(origin);
+}
+
+function corsHeaders(origin: string): Record<string, string> {
   return {
-    'Access-Control-Allow-Origin': allowOrigin,
+    'Access-Control-Allow-Origin': origin,
     'Access-Control-Allow-Headers':
-      'authorization, x-client-info, apikey, content-type, x-aurix-admin-token',
+      'authorization, x-client-info, apikey, content-type, x-admin-token, x-aurix-admin-token',
     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
     'Vary': 'Origin',
   };
 }
 
-function json(req, body, status = 200) {
+function json(
+  origin: string,
+  body: Record<string, unknown>,
+  status = 200,
+): Response {
   return new Response(JSON.stringify(body), {
     status,
-    headers: { ...corsHeaders(req), 'Content-Type': 'application/json' },
+    headers: { ...corsHeaders(origin), 'Content-Type': 'application/json; charset=utf-8' },
   });
 }
 
-function yetkiKontrol(req) {
-  const secret = Deno.env.get('SUPABASE_ADMIN_TOKEN') || '';
-  const incoming = req.headers.get('x-aurix-admin-token') || '';
-  if (!secret) {
-    return { ok: false, error: 'Sunucu yapılandırması eksik: SUPABASE_ADMIN_TOKEN secret tanımlı değil.' };
+/** Timing-safe string compare (UTF-8) */
+function timingSafeEqual(a: string, b: string): boolean {
+  const enc = new TextEncoder();
+  const aa = enc.encode(a);
+  const bb = enc.encode(b);
+  const len = Math.max(aa.length, bb.length);
+  let diff = aa.length ^ bb.length;
+  for (let i = 0; i < len; i++) {
+    diff |= (aa[i] ?? 0) ^ (bb[i] ?? 0);
   }
-  if (!incoming || incoming !== secret) {
+  return diff === 0;
+}
+
+function adminTokenAl(req: Request): string {
+  return (
+    req.headers.get('x-admin-token') ||
+    req.headers.get('x-aurix-admin-token') ||
+    ''
+  ).trim();
+}
+
+function yetkiKontrol(req: Request): { ok: true } | { ok: false; error: string } {
+  const secret = (Deno.env.get('SUPABASE_ADMIN_TOKEN') || '').trim();
+  const incoming = adminTokenAl(req);
+  if (!secret) {
+    return {
+      ok: false,
+      error: 'Sunucu yapılandırması eksik: SUPABASE_ADMIN_TOKEN tanımlı değil.',
+    };
+  }
+  if (!incoming || !timingSafeEqual(incoming, secret)) {
     return { ok: false, error: 'Yetkisiz. Geçerli admin token gerekli.' };
   }
   return { ok: true };
 }
 
-function adminClient() {
+function adminClient():
+  | { client: ReturnType<typeof createClient> }
+  | { error: string } {
   const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
   const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
   if (!supabaseUrl || !serviceKey) {
-    return { error: 'Sunucu yapılandırması eksik (SERVICE_ROLE yalnızca Edge Function içinde).' };
+    return {
+      error: 'Sunucu yapılandırması eksik (SERVICE_ROLE yalnızca Edge Function içinde).',
+    };
   }
   return {
     client: createClient(supabaseUrl, serviceKey, {
@@ -77,62 +105,109 @@ function adminClient() {
   };
 }
 
-async function listeleBekleyen(admin) {
+async function listeleBekleyen(admin: ReturnType<typeof createClient>) {
   return admin
     .from('firmalar')
-    .select('id,firma_adi,sehir,kategori,aciklama,telefon,email,dogrulanmis,durum,created_at')
+    .select(
+      'id,firma_adi,sehir,kategori,aciklama,telefon,email,dogrulanmis,durum,owner_id,is_seed,created_at',
+    )
     .eq('durum', 'beklemede')
     .order('created_at', { ascending: false });
 }
 
 Deno.serve(async (req) => {
+  const origin = req.headers.get('Origin') || '';
+
+  // OPTIONS: izinli origin için CORS; aksi halde 403
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders(req) });
+    if (!originIzinliMi(origin)) {
+      return new Response(JSON.stringify({ ok: false, error: 'Origin izni yok.' }), {
+        status: 403,
+        headers: { 'Content-Type': 'application/json; charset=utf-8' },
+      });
+    }
+    return new Response('ok', { status: 200, headers: corsHeaders(origin) });
+  }
+
+  if (!originIzinliMi(origin)) {
+    return new Response(JSON.stringify({ ok: false, error: 'Origin izni yok.' }), {
+      status: 403,
+      headers: { 'Content-Type': 'application/json; charset=utf-8' },
+    });
   }
 
   try {
     const yetki = yetkiKontrol(req);
-    if (!yetki.ok) return json(req, { ok: false, error: yetki.error }, 401);
+    if (!yetki.ok) return json(origin, { ok: false, error: yetki.error }, 401);
 
-    const { client: admin, error: cfgErr } = adminClient();
-    if (cfgErr) return json(req, { ok: false, error: cfgErr }, 500);
+    const created = adminClient();
+    if ('error' in created) {
+      return json(origin, { ok: false, error: created.error }, 500);
+    }
+    const admin = created.client;
 
     if (req.method === 'GET') {
       const { data, error } = await listeleBekleyen(admin);
       if (error) {
-        return json(req, { ok: false, error: 'Bekleyen firmalar alınamadı: ' + error.message }, 400);
+        return json(
+          origin,
+          { ok: false, error: 'Bekleyen firmalar alınamadı.' },
+          500,
+        );
       }
-      return json(req, { ok: true, data: data || [] });
+      return json(origin, { ok: true, data: data || [] });
     }
 
     if (req.method === 'POST') {
-      const body = await req.json().catch(() => ({}));
-      const action = body.action;
+      const body = await req.json().catch(() => null);
+      if (!body || typeof body !== 'object') {
+        return json(origin, { ok: false, error: 'Geçersiz istek gövdesi.' }, 400);
+      }
+
+      const action = (body as { action?: string }).action;
+      const id = (body as { id?: string | number }).id;
 
       if (action === 'list') {
         const { data, error } = await listeleBekleyen(admin);
         if (error) {
-          return json(req, { ok: false, error: 'Bekleyen firmalar alınamadı: ' + error.message }, 400);
+          return json(
+            origin,
+            { ok: false, error: 'Bekleyen firmalar alınamadı.' },
+            500,
+          );
         }
-        return json(req, { ok: true, data: data || [] });
+        return json(origin, { ok: true, data: data || [] });
       }
 
       if (action === 'approve' || action === 'reject') {
-        const id = body.id;
         if (id == null || id === '') {
-          return json(req, { ok: false, error: 'Firma id gerekli.' }, 400);
+          return json(origin, { ok: false, error: 'Geçersiz veya eksik firma id.' }, 400);
         }
 
         const patch = action === 'approve'
           ? { durum: 'onaylandi', dogrulanmis: true }
           : { durum: 'reddedildi', dogrulanmis: false };
 
-        const { error } = await admin.from('firmalar').update(patch).eq('id', id);
+        const { data, error } = await admin
+          .from('firmalar')
+          .update(patch)
+          .eq('id', id)
+          .select('id')
+          .maybeSingle();
+
         if (error) {
-          const islem = action === 'approve' ? 'Onay' : 'Red';
-          return json(req, { ok: false, error: islem + ' işlemi başarısız: ' + error.message }, 400);
+          return json(origin, {
+            ok: false,
+            error: action === 'approve'
+              ? 'Onay işlemi başarısız.'
+              : 'Red işlemi başarısız.',
+          }, 500);
         }
-        return json(req, {
+        if (!data) {
+          return json(origin, { ok: false, error: 'Firma bulunamadı.' }, 400);
+        }
+
+        return json(origin, {
           ok: true,
           action,
           message: action === 'approve'
@@ -141,14 +216,14 @@ Deno.serve(async (req) => {
         });
       }
 
-      return json(req, { ok: false, error: 'Bilinmeyen işlem. action: list | approve | reject' }, 400);
+      return json(origin, {
+        ok: false,
+        error: 'Geçersiz action. Kullanım: approve | reject | list',
+      }, 400);
     }
 
-    return json(req, { ok: false, error: 'Desteklenmeyen HTTP metodu.' }, 405);
-  } catch (err) {
-    return json(req, {
-      ok: false,
-      error: err && err.message ? ('Sunucu hatası: ' + err.message) : 'Sunucu hatası.',
-    }, 500);
+    return json(origin, { ok: false, error: 'Desteklenmeyen HTTP metodu.' }, 405);
+  } catch (_err) {
+    return json(origin, { ok: false, error: 'Beklenmeyen sunucu hatası.' }, 500);
   }
 });

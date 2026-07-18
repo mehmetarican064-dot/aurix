@@ -311,7 +311,7 @@
         var a = demo.ayarlar || {};
         var satirlar = [
             { key: 'firmaBildirim', label: 'Firma bildirimleri', aciklama: 'Yeni iş ve teklif bildirimleri', varsayilan: a.firmaBildirim },
-            { key: 'whatsappBildirim', label: 'Panel Bildirimleri', aciklama: 'Kritik iş güncellemeleri', varsayilan: a.whatsappBildirim },
+            { key: 'panelBildirim', label: 'Panel Bildirimleri', aciklama: 'Kritik iş güncellemeleri', varsayilan: a.panelBildirim },
             { key: 'odemeBildirim', label: 'Ödeme bildirimi', aciklama: 'Hakediş ve ödeme durumu', varsayilan: a.odemeBildirim },
             { key: 'profilGorunurluk', label: 'Profil görünürlüğü', aciklama: 'Firma profiliniz arama sonuçlarında', varsayilan: a.profilGorunurluk }
         ];
@@ -426,9 +426,15 @@
         var panelCikis = $('panelCikisBtn');
         if (panelCikis) {
             panelCikis.addEventListener('click', function () {
-                if (global.AuthService) AuthService.signOut();
-                if (global.Aurix && Aurix.sayfaGoster) Aurix.sayfaGoster('ana-sayfa');
-                if (global.Aurix && Aurix.toast) Aurix.toast('Oturum kapatıldı.', 'info');
+                var bitir = function () {
+                    if (global.Aurix && Aurix.sayfaGoster) Aurix.sayfaGoster('ana-sayfa');
+                    if (global.Aurix && Aurix.toast) Aurix.toast('Oturum kapatıldı.', 'info');
+                };
+                if (global.AuthService && typeof AuthService.signOut === 'function') {
+                    AuthService.signOut().then(bitir).catch(bitir);
+                } else {
+                    bitir();
+                }
             });
         }
     }

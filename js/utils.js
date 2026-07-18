@@ -37,12 +37,6 @@
         return safeUrl(s, fallback) || fallback;
     }
 
-    function safeWhatsAppHref(tel) {
-        var t = String(tel || '').replace(/\D/g, '');
-        if (!/^90[0-9]{10}$/.test(t)) return '';
-        return 'https://wa.me/' + t;
-    }
-
     function safeCssClass(str, fallback) {
         fallback = fallback || 'default';
         var s = String(str || '').replace(/[^a-z0-9_-]/gi, '');
@@ -175,7 +169,6 @@
         escapeHtml: escapeHtml,
         safeImageUrl: safeImageUrl,
         safeUrl: safeUrl,
-        safeWhatsAppHref: safeWhatsAppHref,
         safeCssClass: safeCssClass,
         initImageFallbackHandler: initImageFallbackHandler,
         syncFirmaGorselAlanlar: syncFirmaGorselAlanlar,

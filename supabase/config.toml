@@ -1,0 +1,11 @@
+# AURIX Supabase CLI yapılandırması (kısmi)
+# admin-firmalar geçici x-admin-token modeli kullandığı için JWT doğrulaması kapalıdır.
+# Uzun vadede Auth admin rolü + JWT doğrulamasına geçilmelidir.
+#
+# Hosted projede: Authentication → Providers → Email → Confirm email = ON
+
+[auth.email]
+enable_confirmations = true
+
+[functions.admin-firmalar]
+verify_jwt = false

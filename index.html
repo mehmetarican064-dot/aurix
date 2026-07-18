@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="AURIX — Kuyumculuk sektöründe iş al, iş ver, teklif topla. Üreticiler, ustalar ve tedarikçiler tek profesyonel ağda.">
     <title>AURIX | Kuyumculuk İş Ağı</title>
+    <link rel="canonical" href="https://aurixb2b.com/">
 
     <link rel="icon" type="image/png" href="assets/logo.png">
     <link rel="apple-touch-icon" href="assets/logo.png">
@@ -17,6 +18,8 @@
     <meta property="og:image:height" content="630">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://aurixb2b.com/">
+    <meta property="og:locale" content="tr_TR">
+    <meta property="og:site_name" content="AURIX">
 
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="AURIX | Kuyumculuk İş Ağı">
@@ -58,10 +61,10 @@
                 <a href="#" class="nav__link" data-nav="firmalar">Firmalar</a>
                 <a href="#" class="nav__link" data-nav="malzeme">Malzeme Pazarı</a>
                 <a href="#" class="nav__link" data-nav="piyasa">Piyasa</a>
-                <div class="nav__auth" id="navAuthAlani" aria-live="polite">
-                    <button type="button" class="nav__link nav__link--cta" id="navKayitOl" data-nav="kayit">Kayıt Ol</button>
-                </div>
             </nav>
+            <div class="nav__auth" id="navAuthAlani" aria-live="polite">
+                <button type="button" class="nav__link nav__link--cta nav__cta-sm" id="navKayitOl" data-nav="kayit">Kayıt Ol</button>
+            </div>
             <button type="button" class="nav__toggle" id="menuToggle" aria-label="Menüyü aç" aria-expanded="false" aria-controls="navMenu">
                 <span class="nav__toggle-bar" aria-hidden="true"></span>
                 <span class="nav__toggle-bar" aria-hidden="true"></span>
@@ -72,7 +75,7 @@
     <div class="nav__backdrop" id="navBackdrop" hidden aria-hidden="true"></div>
 
     <div id="devAdminBanner" class="dev-admin-banner" hidden role="alert">
-        <p class="dev-admin-banner__metin">Geçici admin (?devAdmin=1). Onay/red Edge Function ile yapılır (SUPABASE_ADMIN_TOKEN). Anon key ile update yok. service_role frontend’de olmamalı.</p>
+        <p class="dev-admin-banner__metin">Geçici admin (?devAdmin=1). Onay/red yalnızca sunucu tarafı admin fonksiyonu ile yapılır. Token oturuma yazılır; URL’ye eklenmez.</p>
     </div>
 
     <!-- ===================== ANA SAYFA ===================== -->
@@ -139,11 +142,39 @@
                     <div>
                         <span class="bolum-fuar-badge">Güvenilir Üreticiler</span>
                         <h2 class="bolum__baslik">Doğrulanmış Firmalar</h2>
-                        <p class="bolum__alt bolum__alt--fuar">Onaylı atölye ve tedarikçiler — teklif alın veya doğrudan iletişime geçin.</p>
+                        <p class="bolum__alt bolum__alt--fuar">Firma başvuruları, paylaşılan bilgiler incelendikten sonra onaylanır.</p>
                     </div>
                     <button type="button" class="btn btn--ghost btn--sm" data-nav="firmalar">Tümünü Gör</button>
                 </div>
                 <div class="firma-grid firma-grid--kompakt firma-grid--ana-vitrin" id="ureticilerGrid"></div>
+            </div>
+        </section>
+
+        <!-- 4b. NASIL ÇALIŞIR? -->
+        <section class="bolum bolum--fuar bolum--nasil-calisir" id="nasil-calisir" aria-labelledby="nasilCalisirBaslik">
+            <div class="kapsayici">
+                <div class="bolum__ust bolum__ust--fuar bolum__ust--merkez">
+                    <div>
+                        <h2 id="nasilCalisirBaslik" class="bolum__baslik bolum__baslik--merkez">Nasıl Çalışır?</h2>
+                    </div>
+                </div>
+                <ol class="nasil-adimlar">
+                    <li class="nasil-adim">
+                        <span class="nasil-adim__no" aria-hidden="true">1</span>
+                        <h3 class="nasil-adim__baslik">İş Talebini Oluştur</h3>
+                        <p class="nasil-adim__metin">Kategori, şehir ve iş detaylarını paylaş.</p>
+                    </li>
+                    <li class="nasil-adim">
+                        <span class="nasil-adim__no" aria-hidden="true">2</span>
+                        <h3 class="nasil-adim__baslik">Teklifleri Karşılaştır</h3>
+                        <p class="nasil-adim__metin">Doğrulanmış firmalardan gelen teklifleri AURIX üzerinden incele.</p>
+                    </li>
+                    <li class="nasil-adim">
+                        <span class="nasil-adim__no" aria-hidden="true">3</span>
+                        <h3 class="nasil-adim__baslik">Anlaş ve Üretime Başla</h3>
+                        <p class="nasil-adim__metin">Uygun firmayı seçerek iş sürecini başlat.</p>
+                    </li>
+                </ol>
             </div>
         </section>
 
@@ -156,6 +187,10 @@
                     </div>
                 </div>
                 <div class="neden-grid neden-grid--aurix neden-grid--reveal" id="nedenGrid"></div>
+                <aside class="yol-haritasi" aria-label="Yol haritası">
+                    <p class="yol-haritasi__baslik">Yol Haritası</p>
+                    <p class="yol-haritasi-not" role="note">Yakında — Güvenli ödeme ve işlem koruma altyapısı planlanmaktadır.</p>
+                </aside>
             </div>
         </section>
 
@@ -164,19 +199,19 @@
             <div class="kapsayici piyasa-serit__kapsayici">
                 <div class="piyasa-serit__ust">
                     <div class="piyasa-serit__baslik-grup">
-                        <span class="bolum-fuar-badge">Canlı Veri</span>
-                        <h2 class="bolum__baslik bolum__baslik--serit">Canlı Piyasa</h2>
+                        <span class="bolum-fuar-badge">Piyasa</span>
+                        <h2 class="bolum__baslik bolum__baslik--serit">Piyasa</h2>
                     </div>
                     <button type="button" class="btn btn--ghost btn--sm" data-nav="piyasa">Detaylı Gör</button>
                 </div>
                 <div class="piyasa-wrap piyasa-wrap--serit">
-                    <div class="piyasa-page-tabs piyasa-page-tabs--serit" role="tablist" aria-label="Canlı piyasa sekmeleri">
+                    <div class="piyasa-page-tabs piyasa-page-tabs--serit" role="tablist" aria-label="Piyasa sekmeleri">
                         <button type="button" class="piyasa-page-tab piyasa-page-tab--aktif" data-piyasa-tab="kuyumcu" role="tab" aria-selected="true">Kuyumcu</button>
                         <button type="button" class="piyasa-page-tab" data-piyasa-tab="doviz" role="tab" aria-selected="false">Döviz</button>
                         <button type="button" class="piyasa-page-tab" data-piyasa-tab="altin" role="tab" aria-selected="false">Altın</button>
                     </div>
                     <div class="piyasa-ticker piyasa-ticker--serit">
-                        <div class="piyasa-ticker__track" id="piyasaBandiAna" aria-live="polite" aria-label="Canlı piyasa fiyatları">
+                        <div class="piyasa-ticker__track" id="piyasaBandiAna" aria-live="polite" aria-label="Piyasa fiyatları">
                             <div class="piyasa-yukleniyor">Piyasa verileri yükleniyor…</div>
                         </div>
                     </div>
@@ -193,7 +228,6 @@
             <div id="uretimDestekGrid"></div>
             <div id="vitrinMagazaGrid"></div>
             <div id="makineGrid"></div>
-            <div id="malzemeGrid"></div>
         </div>
     </div>
 
@@ -212,22 +246,34 @@
                         <label class="vitrin-sr-only" for="aramaInput">Firma adı veya anahtar kelime</label>
                         <input type="search" class="filtre-input vitrin-filtre__input" id="aramaInput" placeholder="Firma adı, branş veya anahtar kelime..." autocomplete="off">
                     </div>
-                    <div class="vitrin-filtre__sehir-select">
-                        <label class="filtre-grup__etiket" for="filtreSehir">Şehir</label>
-                        <select class="filtre-select vitrin-filtre__select" id="filtreSehir" aria-label="Şehir filtresi">
-                            <option value="">Tüm Şehirler</option>
-                        </select>
-                    </div>
-                    <div class="vitrin-filtre__chip-gruplar">
-                        <div class="vitrin-filtre__chip-blok vitrin-filtre__chip-blok--sehir">
-                            <span class="filtre-grup__etiket">Şehir</span>
-                            <div class="filtre-chips vitrin-filtre__chip-list vitrin-filtre__chip-list--sehir" id="filtreSehirChips"></div>
+                    <button type="button" class="btn btn--ghost btn--sm vitrin-filtre-ac" id="vitrinFiltreAcBtn" aria-controls="vitrinFiltrePanel" aria-expanded="false">Filtrele</button>
+                    <div class="vitrin-filtre__panel" id="vitrinFiltrePanel">
+                        <div class="vitrin-filtre__panel-ust">
+                            <span class="vitrin-filtre__panel-baslik">Filtreler</span>
+                            <button type="button" class="modal__kapat vitrin-filtre-kapat" id="vitrinFiltreKapatBtn" aria-label="Filtreleri kapat">×</button>
                         </div>
-                        <div class="vitrin-filtre__chip-blok vitrin-filtre__chip-blok--kategori">
-                            <span class="filtre-grup__etiket">Kategori</span>
-                            <div class="filtre-chips vitrin-filtre__chip-list" id="filtreGrupChips"></div>
+                        <div class="vitrin-filtre__sehir-select">
+                            <label class="filtre-grup__etiket" for="filtreSehir">Şehir</label>
+                            <select class="filtre-select vitrin-filtre__select" id="filtreSehir" aria-label="Şehir filtresi">
+                                <option value="">Tüm Şehirler</option>
+                            </select>
+                        </div>
+                        <div class="vitrin-filtre__chip-gruplar">
+                            <div class="vitrin-filtre__chip-blok vitrin-filtre__chip-blok--sehir">
+                                <span class="filtre-grup__etiket">Şehir</span>
+                                <div class="filtre-chips vitrin-filtre__chip-list vitrin-filtre__chip-list--sehir" id="filtreSehirChips"></div>
+                            </div>
+                            <div class="vitrin-filtre__chip-blok vitrin-filtre__chip-blok--kategori">
+                                <span class="filtre-grup__etiket">Kategori</span>
+                                <div class="filtre-chips vitrin-filtre__chip-list" id="filtreGrupChips"></div>
+                            </div>
+                        </div>
+                        <div class="vitrin-filtre__panel-aksiyon">
+                            <button type="button" class="btn btn--ghost btn--sm" id="vitrinFiltreTemizleBtn">Temizle</button>
+                            <button type="button" class="btn btn--primary btn--sm" id="vitrinFiltreUygulaBtn">Uygula</button>
                         </div>
                     </div>
+                    <div class="vitrin-filtre__backdrop" id="vitrinFiltreBackdrop" hidden aria-hidden="true"></div>
                 </div>
 
                 <div class="vitrin-sonuc-bar">
@@ -255,11 +301,11 @@
                     </div>
                     <div class="vitrin-guven-bar__oge">
                         <span class="vitrin-guven-bar__ikon" aria-hidden="true">◆</span>
-                        <span class="vitrin-guven-bar__metin">Güvenli İletişim</span>
+                        <span class="vitrin-guven-bar__metin">Platform İçi Teklif</span>
                     </div>
                     <div class="vitrin-guven-bar__oge">
                         <span class="vitrin-guven-bar__ikon" aria-hidden="true">⚡</span>
-                        <span class="vitrin-guven-bar__metin">Hızlı Erişim</span>
+                        <span class="vitrin-guven-bar__metin">Kayıtlı İş Akışı</span>
                     </div>
                 </div>
             </div>
@@ -293,19 +339,18 @@
         <section class="bolum bolum--piyasa-sayfa">
             <div class="kapsayici piyasa-sayfa__kapsayici">
                 <header class="piyasa-sayfa__hero">
-                    <span class="bolum-fuar-badge">Canlı Veri</span>
-                    <h2 class="bolum__baslik">Canlı Piyasa</h2>
-                    <p class="bolum__alt bolum__alt--fuar">Kuyumcu, döviz ve altın fiyatları — anlık takip.</p>
-                    <span class="piyasa-sayfa__canli" aria-hidden="true"><span class="piyasa-sayfa__dot"></span> CANLI</span>
+                    <span class="bolum-fuar-badge">Piyasa</span>
+                    <h2 class="bolum__baslik">Piyasa</h2>
+                    <p class="bolum__alt bolum__alt--fuar">Kuyumcu, döviz ve altın fiyatları — bilgilendirme amaçlı gösterim.</p>
                 </header>
                 <div class="piyasa-wrap piyasa-wrap--sayfa" id="piyasaSection">
-                    <div class="piyasa-page-tabs piyasa-page-tabs--sayfa" id="piyasaPageTabs" role="tablist" aria-label="Canlı piyasa sekmeleri">
+                    <div class="piyasa-page-tabs piyasa-page-tabs--sayfa" id="piyasaPageTabs" role="tablist" aria-label="Piyasa sekmeleri">
                         <button type="button" class="piyasa-page-tab piyasa-page-tab--aktif" data-piyasa-tab="kuyumcu" role="tab" aria-selected="true">Kuyumcu</button>
                         <button type="button" class="piyasa-page-tab" data-piyasa-tab="doviz" role="tab" aria-selected="false">Döviz</button>
                         <button type="button" class="piyasa-page-tab" data-piyasa-tab="altin" role="tab" aria-selected="false">Altın</button>
                     </div>
                     <div class="piyasa-ticker piyasa-ticker--sayfa">
-                        <div class="piyasa-ticker__track" id="piyasaBandi" aria-live="polite" aria-label="Canlı piyasa fiyatları">
+                        <div class="piyasa-ticker__track" id="piyasaBandi" aria-live="polite" aria-label="Piyasa fiyatları">
                             <div class="piyasa-yukleniyor">Piyasa verileri yükleniyor…</div>
                         </div>
                     </div>
@@ -348,7 +393,7 @@
     <!-- ===================== KAYIT (üyelik modalına yönlendirilir) ===================== -->
     <div class="sayfa" data-sayfa="kayit" hidden aria-hidden="true"></div>
 
-    <!-- ===================== KULLANICI PANELİ (Beta iskelet) ===================== -->
+    <!-- ===================== KULLANICI PANELİ ===================== -->
     <div class="sayfa" data-sayfa="panel">
         <section class="bolum bolum--panel">
             <div class="kapsayici">
@@ -405,7 +450,7 @@
                 </header>
 
                 <div class="panel-beta-bar panel-beta-bar--admin" role="note">
-                    <p class="panel-beta-bar__metin">Bekleyen firmalar Edge Function üzerinden gelir. Token’ı bir kez girin (sessionStorage). Production’da Auth + admin role kullanın.</p>
+                    <p class="panel-beta-bar__metin">Bekleyen firmalar admin fonksiyonu üzerinden gelir. Token’ı bir kez girin (oturum deposu). Canlıda Auth + admin rolü kullanılmalıdır.</p>
                     <div class="admin-demo-bar__aksiyon">
                         <button type="button" class="btn btn--ghost btn--xs" id="adminTokenBtn">Admin Token</button>
                         <button type="button" class="btn btn--danger-outline btn--xs" id="demoSifirlaBtn">Verileri Sıfırla</button>
@@ -454,7 +499,7 @@
                 <section class="admin-gelir" aria-labelledby="adminGelirBaslik">
                     <div class="admin-gelir__ust">
                         <h3 class="admin-gelir__baslik" id="adminGelirBaslik">Gelir Özeti</h3>
-                        <p class="admin-gelir__not">Gelirler tahmini hesaplanır; ödeme entegrasyonu v1.0’da eklenecektir.</p>
+                        <p class="admin-gelir__not">Gelir alanları bilgilendirme amaçlıdır; ödeme entegrasyonu henüz aktif değildir.</p>
                     </div>
 
                     <div class="admin-gelir__kartlar">
@@ -501,7 +546,7 @@
 
                 <aside class="admin-demo-info">
                     <h3 class="admin-demo-info__baslik">Sistem Notu</h3>
-                    <p class="admin-demo-info__metin">Onay/red anon key ile yapılmaz. Edge Function + SUPABASE_ADMIN_TOKEN gerekir. Telefon/e-posta yalnızca bu gizli admin ekranında görünür.</p>
+                    <p class="admin-demo-info__metin">Onay/red yalnızca admin fonksiyonu ve oturum token’ı ile yapılır. Telefon/e-posta yalnızca bu gizli admin ekranında görünür.</p>
                 </aside>
 
                     </div>
@@ -518,13 +563,13 @@
     <div class="sayfa" data-sayfa="hakkimizda">
         <section class="bolum bolum--icerik">
             <div class="kapsayici icerik-sayfa">
-                <p class="icerik-sayfa__rozet">Beta</p>
+                <p class="icerik-sayfa__rozet">Kurumsal</p>
                 <h1 class="icerik-sayfa__baslik">Hakkımızda</h1>
                 <p class="icerik-sayfa__ozet">AURIX, Türkiye’deki kuyumculuk ekosistemini tek çatı altında buluşturmayı hedefleyen bir B2B iş ağıdır.</p>
                 <div class="icerik-sayfa__govde">
-                    <p>Platform; dökümcüler, mıhlamacılar, CAD / Matrix / Rhino uzmanları, mumcular, taş tedarikçileri, makine ve malzeme satıcıları ile atölyeleri aynı ağda buluşturmak için geliştirilmektedir.</p>
-                    <p>AURIX şu anda <strong>Beta</strong> aşamasındadır. Temel akışlar (firma vitrini, iş talepleri, malzeme pazarı, piyasa bandı ve firma paneli) deneme amaçlı sunulur. Bazı özellikler henüz tamamlanmamış olabilir.</p>
-                    <p>Amacımız; sektörde iş bulmayı, teklif toplamayı ve güvenilir eşleşmeyi daha şeffaf ve hızlı hale getirmektir. Resmi şirket unvanı, adres ve vergi bilgileri yayına hazırlık sürecinde netleştirilecektir.</p>
+                    <p>Platform; dökümcüler, mıhlamacılar, CAD / Matrix / Rhino uzmanları, mumcular, taş tedarikçileri, makine ve malzeme satıcıları ile atölyeleri aynı ağda buluşturur.</p>
+                    <p>AURIX üzerinden firma vitrini, iş talepleri, teklif süreçleri ve malzeme fırsatlarına erişebilirsiniz. Firma başvuruları, paylaşılan bilgiler incelendikten sonra onaylanır.</p>
+                    <p>Amacımız; sektörde iş bulmayı, teklif toplamayı ve eşleşmeyi daha şeffaf ve kontrollü hale getirmektir.</p>
                 </div>
             </div>
         </section>
@@ -535,16 +580,16 @@
             <div class="kapsayici icerik-sayfa">
                 <p class="icerik-sayfa__rozet">Destek</p>
                 <h1 class="icerik-sayfa__baslik">Yardım Merkezi</h1>
-                <p class="icerik-sayfa__ozet">Beta döneminde en sık ihtiyaç duyulan konulara kısa yanıtlar.</p>
+                <p class="icerik-sayfa__ozet">En sık sorulan konulara kısa yanıtlar.</p>
                 <div class="icerik-sayfa__govde">
                     <h2>Firma kaydı</h2>
-                    <p>Ana sayfadaki kayıt formundan atölye veya tedarikçi başvurunuzu iletebilirsiniz. Başvurular inceleme sonrası vitrine alınır.</p>
+                    <p>Kayıt formundan atölye veya tedarikçi başvurunuzu iletebilirsiniz. Firma başvuruları, paylaşılan bilgiler incelendikten sonra onaylanır.</p>
                     <h2>İş talebi ve teklif</h2>
-                    <p>Açık iş taleplerini inceleyebilir, firma profillerinden teklif talebi oluşturabilirsiniz. Tam teklif yönetimi Beta sonrası güçlendirilecektir.</p>
+                    <p>Açık iş taleplerini inceleyebilir, doğrulanmış firmalar üzerinden teklif süreçlerini AURIX içinde yürütebilirsiniz.</p>
                     <h2>Hesabım</h2>
                     <p>Giriş yaptıktan sonra işler, teklifler ve firma paneline erişebilirsiniz.</p>
                     <h2>Destek almak</h2>
-                    <p>Teknik sorun veya geri bildirim için <a href="#iletisim" data-nav="iletisim">İletişim</a> sayfasındaki formu kullanın. Canlı destek hattı henüz aktif değildir.</p>
+                    <p>Sorularınız için <a href="#iletisim" data-nav="iletisim">İletişim</a> sayfasındaki formu kullanabilirsiniz.</p>
                 </div>
             </div>
         </section>
@@ -562,19 +607,23 @@
                     </details>
                     <details class="icerik-sss__madde">
                         <summary>Platform ücretli mi?</summary>
-                        <p>Beta döneminde temel kullanım deneme amaçlıdır. Komisyon ve ücret modeli netleştikçe <a href="#komisyon" data-nav="komisyon">Komisyon Politikası</a> sayfasında duyurulacaktır.</p>
+                        <p>Güncel ücret ve komisyon bilgileri için <a href="#komisyon" data-nav="komisyon">Komisyon Politikası</a> sayfasını inceleyebilirsiniz.</p>
                     </details>
                     <details class="icerik-sss__madde">
                         <summary>Firma bilgilerim ne kadar güvenli?</summary>
-                        <p>Beta’da veriler sınırlı tutulur. Gizlilik yaklaşımımız için <a href="#gizlilik" data-nav="gizlilik">Gizlilik Politikası</a> ve <a href="#kvkk" data-nav="kvkk">KVKK Aydınlatma</a> metinlerine bakabilirsiniz.</p>
+                        <p>Gizlilik yaklaşımımız için <a href="#gizlilik" data-nav="gizlilik">Gizlilik Politikası</a> ve <a href="#kvkk" data-nav="kvkk">KVKK Aydınlatma</a> metinlerine bakabilirsiniz.</p>
+                    </details>
+                    <details class="icerik-sss__madde">
+                        <summary>Firmalar nasıl doğrulanır?</summary>
+                        <p>Firma başvuruları, paylaşılan bilgiler incelendikten sonra onaylanır.</p>
                     </details>
                     <details class="icerik-sss__madde">
                         <summary>Mobil uygulama var mı?</summary>
-                        <p>Henüz yok. Web sürümü önceliklidir; mobil uygulama planı “Yakında” olarak işaretlenmiştir.</p>
+                        <p>Web sürümü önceliklidir. Mobil uygulama yol haritamızdadır.</p>
                     </details>
                     <details class="icerik-sss__madde">
                         <summary>Nasıl destek alırım?</summary>
-                        <p><a href="#iletisim" data-nav="iletisim">İletişim formu</a> üzerinden mesaj bırakabilirsiniz. Yanıt süreleri Beta döneminde değişken olabilir.</p>
+                        <p><a href="#iletisim" data-nav="iletisim">İletişim formu</a> üzerinden mesaj bırakabilirsiniz.</p>
                     </details>
                 </div>
             </div>
@@ -584,13 +633,13 @@
     <div class="sayfa" data-sayfa="kvkk">
         <section class="bolum bolum--icerik">
             <div class="kapsayici icerik-sayfa">
-                <p class="icerik-sayfa__rozet">Yasal · Beta</p>
+                <p class="icerik-sayfa__rozet">Yasal</p>
                 <h1 class="icerik-sayfa__baslik">KVKK Aydınlatma Metni</h1>
-                <p class="icerik-sayfa__ozet">Bu metin bilgilendirme amaçlıdır; Beta sürecinde güncellenebilir. Hukuki danışmanlık yerine geçmez.</p>
+                <p class="icerik-sayfa__ozet">Bu metin bilgilendirme amaçlıdır; gerektiğinde güncellenebilir. Hukuki danışmanlık yerine geçmez.</p>
                 <div class="icerik-sayfa__govde">
                     <p>AURIX platformunu kullanırken ad, iletişim bilgisi, firma profili ve işlem kayıtları gibi kişisel veriler işlenebilir. Amaç; üyelik, eşleşme, destek ve platform güvenliğini sağlamaktır.</p>
-                    <p>Veriler, hizmetin sunulması için gerekli süre boyunca ve yürürlükteki mevzuata uygun şekilde saklanmaya çalışılır. Beta aşamasında bazı süreçler henüz tam otomasyona bağlanmamıştır.</p>
-                    <p>Başvuru, düzeltme veya silme taleplerinizi <a href="#iletisim" data-nav="iletisim">İletişim</a> formu ile iletebilirsiniz. Resmi veri sorumlusu unvanı ve iletişim kanalları yayına hazırlıkta tamamlanacaktır.</p>
+                    <p>Veriler, hizmetin sunulması için gerekli süre boyunca ve yürürlükteki mevzuata uygun şekilde saklanır.</p>
+                    <p>Başvuru, düzeltme veya silme taleplerinizi <a href="#iletisim" data-nav="iletisim">İletişim</a> formu ile iletebilirsiniz.</p>
                     <p>Detaylı yaklaşım için <a href="#gizlilik" data-nav="gizlilik">Gizlilik Politikası</a> sayfasını da inceleyebilirsiniz.</p>
                 </div>
             </div>
@@ -600,18 +649,18 @@
     <div class="sayfa" data-sayfa="gizlilik">
         <section class="bolum bolum--icerik">
             <div class="kapsayici icerik-sayfa">
-                <p class="icerik-sayfa__rozet">Yasal · Beta</p>
+                <p class="icerik-sayfa__rozet">Yasal</p>
                 <h1 class="icerik-sayfa__baslik">Gizlilik Politikası</h1>
-                <p class="icerik-sayfa__ozet">AURIX’in Beta döneminde kişisel verileri nasıl ele aldığına dair özet bilgilendirme.</p>
+                <p class="icerik-sayfa__ozet">AURIX’in kişisel verileri nasıl ele aldığına dair özet bilgilendirme.</p>
                 <div class="icerik-sayfa__govde">
                     <h2>Toplanan bilgiler</h2>
                     <p>Hesap ve firma başvurusu sırasında paylaştığınız bilgiler, kullanım sırasında oluşan teknik kayıtlar ve destek mesajlarınız.</p>
                     <h2>Kullanım amacı</h2>
                     <p>Platformu işletmek, güvenliği artırmak, eşleşmeleri kolaylaştırmak ve kullanıcı taleplerine yanıt vermek.</p>
                     <h2>Paylaşım</h2>
-                    <p>Verileriniz, yasal zorunluluk veya hizmetin zorunlu altyapı sağlayıcıları dışında üçüncü taraflarla ticari amaçla paylaşılmaz. Beta’da entegrasyonlar sınırlıdır.</p>
+                    <p>Verileriniz, yasal zorunluluk veya hizmetin zorunlu altyapı sağlayıcıları dışında üçüncü taraflarla ticari amaçla paylaşılmaz.</p>
                     <h2>Güncellemeler</h2>
-                    <p>Bu politika Beta ilerledikçe sadeleştirilerek güncellenebilir. Önemli değişiklikler platform üzerinden duyurulur.</p>
+                    <p>Bu politika gerektiğinde güncellenebilir. Önemli değişiklikler platform üzerinden duyurulur.</p>
                 </div>
             </div>
         </section>
@@ -620,14 +669,28 @@
     <div class="sayfa" data-sayfa="kullanim-sartlari">
         <section class="bolum bolum--icerik">
             <div class="kapsayici icerik-sayfa">
-                <p class="icerik-sayfa__rozet">Yasal · Beta</p>
-                <h1 class="icerik-sayfa__baslik">Kullanım Şartları</h1>
-                <p class="icerik-sayfa__ozet">Platformu kullanarak aşağıdaki genel kuralları kabul etmiş sayılırsınız. Metin Beta bilgilendirmesidir.</p>
+                <p class="icerik-sayfa__rozet">Yasal</p>
+                <h1 class="icerik-sayfa__baslik">Kullanım Koşulları</h1>
+                <p class="icerik-sayfa__ozet">Platformu kullanarak aşağıdaki genel kuralları kabul etmiş sayılırsınız.</p>
                 <div class="icerik-sayfa__govde">
-                    <p>AURIX; firmalar arasında tanışma, teklif ve iş akışını kolaylaştırmayı amaçlar. Platform üzerinden yapılan ticari anlaşmaların tarafı kullanıcılar arasındadır; AURIX aracılık taahhüdü vermez.</p>
+                    <p>AURIX; firmalar arasında teklif ve iş akışını kolaylaştırmayı amaçlar. Platform üzerinden yapılan ticari anlaşmaların tarafı kullanıcılar arasındadır; AURIX aracılık taahhüdü vermez.</p>
                     <p>Paylaştığınız içeriklerin doğru ve yasalara uygun olması sizin sorumluluğunuzdadır. Yanıltıcı, hak ihlali içeren veya sektör etiğine aykırı kullanımlar kısıtlanabilir.</p>
-                    <p>Beta döneminde hizmet kesintileri, veri kaybı riski veya özellik değişiklikleri yaşanabilir. Kritik iş süreçlerinizi yalnızca Beta’ya dayandırmamanızı öneririz.</p>
                     <p>Komisyon ve ücretler için <a href="#komisyon" data-nav="komisyon">Komisyon Politikası</a> sayfasına bakın.</p>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <div class="sayfa" data-sayfa="cerez">
+        <section class="bolum bolum--icerik">
+            <div class="kapsayici icerik-sayfa">
+                <p class="icerik-sayfa__rozet">Yasal</p>
+                <h1 class="icerik-sayfa__baslik">Çerez Politikası</h1>
+                <p class="icerik-sayfa__ozet">Bu metin bilgilendirme amaçlıdır; gerektiğinde güncellenebilir.</p>
+                <div class="icerik-sayfa__govde">
+                    <p>AURIX, sitenin temel işlevleri ve oturum deneyimi için gerekli çerezler veya benzeri teknolojiler kullanabilir.</p>
+                    <p>Tercih ve analitik çerezler kullanıldığında, kapsam ve amaç bu sayfada güncellenir.</p>
+                    <p>Sorularınız için <a href="#iletisim" data-nav="iletisim">İletişim</a> formunu kullanabilirsiniz.</p>
                 </div>
             </div>
         </section>
@@ -636,13 +699,13 @@
     <div class="sayfa" data-sayfa="komisyon">
         <section class="bolum bolum--icerik">
             <div class="kapsayici icerik-sayfa">
-                <p class="icerik-sayfa__rozet">Politika · Beta</p>
+                <p class="icerik-sayfa__rozet">Politika</p>
                 <h1 class="icerik-sayfa__baslik">Komisyon Politikası</h1>
-                <p class="icerik-sayfa__ozet">Ücretlendirme modeli henüz kesinleşmemiştir. Bu sayfa yönlendirici bir özet sunar.</p>
+                <p class="icerik-sayfa__ozet">Ücretlendirme modeli netleştikçe bu sayfa güncellenir.</p>
                 <div class="icerik-sayfa__govde">
-                    <p>Beta sürecinde temel platform kullanımı deneme amaçlıdır. Kalıcı komisyon oranı, tahsilat zamanı ve istisnalar yayına hazırlıkta netleştirilecektir.</p>
-                    <p>Firma panelindeki gelir ve komisyon alanları kesinleşene kadar bilgilendirme amaçlıdır; gerçek tahsilat anlamına gelmez.</p>
-                    <p>Kesin oranlar belirlendiğinde bu sayfa güncellenir ve kullanıcılar bilgilendirilir. Sorularınız için <a href="#iletisim" data-nav="iletisim">İletişim</a> formunu kullanabilirsiniz.</p>
+                    <p>Komisyon oranı, tahsilat zamanı ve istisnalar belirlendiğinde burada duyurulur.</p>
+                    <p>Şu an emanet hesabı veya ödeme güvencesi sunulmamaktadır.</p>
+                    <p>Sorularınız için <a href="#iletisim" data-nav="iletisim">İletişim</a> formunu kullanabilirsiniz.</p>
                 </div>
             </div>
         </section>
@@ -651,12 +714,12 @@
     <div class="sayfa" data-sayfa="iletisim">
         <section class="bolum bolum--icerik">
             <div class="kapsayici icerik-sayfa">
-                <p class="icerik-sayfa__rozet">İletişim · Beta</p>
+                <p class="icerik-sayfa__rozet">İletişim</p>
                 <h1 class="icerik-sayfa__baslik">İletişim</h1>
-                <p class="icerik-sayfa__ozet">Doğrulanmış genel merkez adresi, sabit hat veya resmi destek e-postası henüz yayınlanmamıştır. Beta döneminde taleplerinizi form ile iletebilirsiniz.</p>
+                <p class="icerik-sayfa__ozet">Taleplerinizi aşağıdaki form ile iletebilirsiniz.</p>
                 <div class="icerik-sayfa__govde">
                     <div class="icerik-yakinda" role="note">
-                        <strong>Yakında:</strong> Resmi e-posta, telefon ve adres bilgileri yayına hazırlıkta eklenecektir.
+                        <strong>Yakında:</strong> Resmi e-posta, telefon ve adres bilgileri eklenecektir.
                     </div>
                     <form class="icerik-form" id="iletisimForm" novalidate>
                         <div class="form-grup">
@@ -683,7 +746,7 @@
                             <textarea class="form-input" id="iletisimMesaj" name="mesaj" rows="5" required maxlength="2000" placeholder="Talebinizi kısaca yazın"></textarea>
                         </div>
                         <button type="submit" class="btn btn--gold">Mesajı Gönder</button>
-                        <p class="icerik-form__not">Form Beta’da kayıt amaçlıdır; anında yanıt garantisi yoktur.</p>
+                        <p class="icerik-form__not">Mesajınız alındıktan sonra en kısa sürede dönüş yapılır.</p>
                     </form>
                 </div>
             </div>
@@ -716,6 +779,7 @@
             <div class="footer__kolon">
                 <h4 class="footer__baslik">Destek</h4>
                 <nav class="footer__nav">
+                    <a href="#firma-basvuru" data-nav="firma-basvuru">Firma Başvurusu</a>
                     <a href="#hakkimizda" data-nav="hakkimizda">Hakkımızda</a>
                     <a href="#yardim" data-nav="yardim">Yardım Merkezi</a>
                     <a href="#sss" data-nav="sss">SSS</a>
@@ -726,27 +790,21 @@
                 <h4 class="footer__baslik">Yasal</h4>
                 <nav class="footer__nav">
                     <a href="#komisyon" data-nav="komisyon">Komisyon Politikası</a>
-                    <a href="#kullanim-sartlari" data-nav="kullanim-sartlari">Kullanım Şartları</a>
+                    <a href="#kullanim-sartlari" data-nav="kullanim-sartlari">Kullanım Koşulları</a>
                     <a href="#gizlilik" data-nav="gizlilik">Gizlilik Politikası</a>
-                    <a href="#kvkk" data-nav="kvkk">KVKK Aydınlatma</a>
+                    <a href="#cerez" data-nav="cerez">Çerez Politikası</a>
+                    <a href="#kvkk" data-nav="kvkk">KVKK Aydınlatma Metni</a>
                 </nav>
-            </div>
-            <div class="footer__kolon footer__kolon--mobil">
-                <h4 class="footer__baslik">Mobil Uygulama</h4>
-                <p class="footer__metin footer__metin--vurgu">Yakında</p>
-                <div class="footer__magaza">
-                    <a href="#mobil-uygulama" class="footer__magaza-link" data-yakinda="mobil" aria-label="Google Play — Yakında">Google Play</a>
-                    <a href="#mobil-uygulama" class="footer__magaza-link" data-yakinda="mobil" aria-label="App Store — Yakında">App Store</a>
-                </div>
             </div>
             <div class="footer__kolon">
                 <h4 class="footer__baslik">İletişim</h4>
-                <p class="footer__metin">Beta döneminde destek taleplerinizi iletişim formu üzerinden iletebilirsiniz.</p>
-                <p class="footer__metin"><a href="#iletisim" data-nav="iletisim">İletişim formuna git</a></p>
-                <div class="footer__sosyal" aria-label="Sosyal medya">
-                    <a href="#sosyal-yakinda" class="footer__sosyal-link" data-yakinda="sosyal" aria-label="Instagram — Yakında">Instagram</a>
-                    <a href="#sosyal-yakinda" class="footer__sosyal-link" data-yakinda="sosyal" aria-label="LinkedIn — Yakında">LinkedIn</a>
-                </div>
+                <p class="footer__metin">Destek taleplerinizi iletişim formu üzerinden iletebilirsiniz.</p>
+                <p class="footer__metin"><a href="#iletisim" data-nav="iletisim">İletişim</a></p>
+            </div>
+        </div>
+        <div class="footer__sorumluluk">
+            <div class="kapsayici">
+                <p class="footer__sorumluluk-metin">AURIX, kuyumculuk profesyonellerini bir araya getiren dijital bir iş platformudur. Taraflar arasındaki ticari ve mali süreçler ilgili kullanıcıların sorumluluğundadır.</p>
             </div>
         </div>
         <div class="footer__alt">
@@ -756,6 +814,8 @@
                     <a href="#kvkk" data-nav="kvkk">KVKK</a>
                     <span aria-hidden="true">·</span>
                     <a href="#gizlilik" data-nav="gizlilik">Gizlilik</a>
+                    <span aria-hidden="true">·</span>
+                    <a href="#cerez" data-nav="cerez">Çerez</a>
                     <span aria-hidden="true">·</span>
                     <a href="#iletisim" data-nav="iletisim">İletişim</a>
                 </div>
@@ -811,7 +871,7 @@
 
             <div class="detay-aksiyon">
                 <button type="button" class="btn btn--gold" id="detayTeklifBtn" style="width:100%">Teklif Gönder</button>
-                <a class="btn btn--ghost" id="detayWa" href="#" target="_blank" rel="noopener" style="width:100%">WhatsApp ile İletişim</a>
+                <p class="detay-mesaj-not" id="detayMesajNot" role="note">Mesajlaşma yakında kullanıma açılacaktır.</p>
             </div>
         </div>
     </div>
@@ -828,7 +888,7 @@
                 <button type="button" class="uyelik-sekme" role="tab" id="uyelikSekmeKayit" aria-selected="false" aria-controls="uyelikPanelKayit" data-uyelik-sekme="kayit">Yeni Hesap Oluştur</button>
             </div>
             <div class="uyelik-panel" id="uyelikPanelGiris" role="tabpanel" aria-labelledby="uyelikSekmeGiris">
-                <p class="giris-modal__metin">Firma hesabınıza giriş yapın.</p>
+                <p class="giris-modal__metin">Hesabınıza giriş yapın.</p>
                 <form id="girisForm">
                     <div class="form-grup">
                         <label class="form-label" for="girisEmail">E-posta</label>
@@ -836,42 +896,100 @@
                     </div>
                     <div class="form-grup">
                         <label class="form-label" for="girisSifre">Şifre</label>
-                        <input class="form-input" type="password" id="girisSifre" placeholder="••••••••" autocomplete="current-password" required minlength="4">
+                        <input class="form-input" type="password" id="girisSifre" placeholder="••••••••" autocomplete="current-password" required minlength="8">
                     </div>
                     <button type="submit" class="btn btn--primary" id="girisBtn" style="width:100%">Giriş Yap</button>
+                    <p class="form-yardim uyelik-alt-link">
+                        <button type="button" class="link-btn" id="sifreUnuttumBtn">Şifremi unuttum</button>
+                    </p>
+                </form>
+                <form id="sifreSifirlaForm" hidden>
+                    <p class="giris-modal__metin">Şifre sıfırlama bağlantısı e-posta adresinize gönderilir.</p>
+                    <div class="form-grup">
+                        <label class="form-label" for="sifreSifirlaEmail">E-posta</label>
+                        <input class="form-input" type="email" id="sifreSifirlaEmail" placeholder="ornek@firma.com" autocomplete="email" required>
+                    </div>
+                    <button type="submit" class="btn btn--primary" style="width:100%">Bağlantı Gönder</button>
+                    <p class="form-yardim uyelik-alt-link">
+                        <button type="button" class="link-btn" id="sifreSifirlaGeriBtn">Girişe dön</button>
+                    </p>
                 </form>
             </div>
             <div class="uyelik-panel" id="uyelikPanelKayit" role="tabpanel" aria-labelledby="uyelikSekmeKayit" hidden>
-                <p class="giris-modal__metin">Atölyenizi AURIX ağına ekleyin. Onay sonrası vitrinde yer alırsınız.</p>
+                <p class="giris-modal__metin">Yeni üyelik oluşturun. Firma başvurusunu giriş sonrası yapabilirsiniz.</p>
                 <form id="kayitForm">
                     <div class="form-grup">
-                        <label class="form-label" for="kayitAd">Firma / Atölye Adı</label>
-                        <input class="form-input" type="text" id="kayitAd" required maxlength="200" placeholder="Ticari unvanınız">
-                    </div>
-                    <div class="form-grup">
-                        <label class="form-label" for="kayitKategori">Branş</label>
-                        <select class="form-select" id="kayitKategori" required></select>
-                    </div>
-                    <div class="form-grup">
-                        <label class="form-label" for="kayitSehir">Şehir</label>
-                        <select class="form-select" id="kayitSehir" required></select>
-                    </div>
-                    <div class="form-grup">
-                        <label class="form-label" for="kayitTel">WhatsApp Numarası</label>
-                        <input class="form-input" type="tel" id="kayitTel" required placeholder="905321112233" pattern="90[0-9]{10}">
-                        <p class="form-yardim">Ülke kodu ile birlikte 12 hane (90XXXXXXXXXX)</p>
+                        <label class="form-label" for="kayitAdSoyad">Ad Soyad</label>
+                        <input class="form-input" type="text" id="kayitAdSoyad" required maxlength="120" placeholder="Adınız ve soyadınız" autocomplete="name">
                     </div>
                     <div class="form-grup">
                         <label class="form-label" for="kayitEmail">E-posta</label>
                         <input class="form-input" type="email" id="kayitEmail" required maxlength="120" placeholder="ornek@firma.com" autocomplete="email">
                     </div>
                     <div class="form-grup">
-                        <label class="form-label" for="kayitAciklama">Hizmet Detayları</label>
-                        <textarea class="form-textarea" id="kayitAciklama" rows="4" required maxlength="2000" placeholder="Makine parkuru, kapasite, uzmanlık alanları..."></textarea>
+                        <label class="form-label" for="kayitSifre">Şifre</label>
+                        <input class="form-input" type="password" id="kayitSifre" required minlength="8" maxlength="72" placeholder="En az 8 karakter" autocomplete="new-password">
                     </div>
-                    <button type="submit" class="btn btn--primary" style="width:100%">Başvuruyu Gönder</button>
+                    <div class="form-grup">
+                        <label class="form-label" for="kayitSifreTekrar">Şifre Tekrar</label>
+                        <input class="form-input" type="password" id="kayitSifreTekrar" required minlength="8" maxlength="72" placeholder="Şifrenizi tekrar girin" autocomplete="new-password">
+                    </div>
+                    <button type="submit" class="btn btn--primary" style="width:100%">Hesap Oluştur</button>
+                    <p class="form-yardim">Hesap oluşturduktan sonra firma başvurusu yapabilirsiniz.</p>
                 </form>
             </div>
+            <div id="emailDogrulamaBekleyen" class="email-dogrulama-bekleyen" hidden>
+                <p class="giris-modal__metin" id="emailDogrulamaMetin">E-posta adresinize doğrulama bağlantısı gönderildi. E-postanızı doğruladıktan sonra giriş yapın.</p>
+                <button type="button" class="btn btn--primary" id="emailDogrulamaYenidenBtn" style="width:100%">Tekrar doğrulama e-postası gönder</button>
+                <p class="form-yardim uyelik-alt-link">
+                    <button type="button" class="link-btn" id="emailDogrulamaGirisBtn">Girişe dön</button>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- FİRMA BAŞVURU MODAL -->
+    <div class="modal" id="firmaBasvuruModal" role="dialog" aria-modal="true" aria-labelledby="firmaBasvuruBaslik">
+        <div class="modal__kutu modal__kutu--uyelik">
+            <div class="modal__baslik">
+                <h3 id="firmaBasvuruBaslik">Firma Başvurusu</h3>
+                <button class="modal__kapat" data-modal-kapat="firmaBasvuruModal" aria-label="Kapat">×</button>
+            </div>
+            <p class="giris-modal__metin">Atölyenizi AURIX ağına ekleyin. İnceleme sonrası vitrinde yer alırsınız.</p>
+            <form id="firmaBasvuruForm">
+                <div class="form-grup">
+                    <label class="form-label" for="firmaBasvuruAd">Firma / Atölye Adı</label>
+                    <input class="form-input" type="text" id="firmaBasvuruAd" required maxlength="200" placeholder="Ticari unvanınız">
+                </div>
+                <div class="form-grup">
+                    <label class="form-label" for="firmaBasvuruKategori">Branş</label>
+                    <select class="form-select" id="firmaBasvuruKategori" required></select>
+                </div>
+                <div class="form-grup">
+                    <label class="form-label" for="firmaBasvuruSehir">Şehir</label>
+                    <select class="form-select" id="firmaBasvuruSehir" required></select>
+                </div>
+                <div class="form-grup">
+                    <label class="form-label" for="firmaBasvuruTel">Telefon numarası</label>
+                    <div class="tel-input" role="group" aria-label="Telefon numarası">
+                        <span class="tel-input__kod" aria-hidden="true">+90</span>
+                        <input class="form-input tel-input__alan" type="tel" id="firmaBasvuruTel"
+                            inputmode="tel" autocomplete="tel" required
+                            placeholder="5XX XXX XX XX" maxlength="13"
+                            aria-describedby="firmaBasvuruTelYardim">
+                    </div>
+                    <p class="form-yardim" id="firmaBasvuruTelYardim">Public profilde gösterilmez.</p>
+                </div>
+                <div class="form-grup">
+                    <label class="form-label" for="firmaBasvuruEmail">E-posta</label>
+                    <input class="form-input" type="email" id="firmaBasvuruEmail" required maxlength="120" placeholder="ornek@firma.com" autocomplete="email">
+                </div>
+                <div class="form-grup">
+                    <label class="form-label" for="firmaBasvuruAciklama">Hizmet Detayları</label>
+                    <textarea class="form-textarea" id="firmaBasvuruAciklama" rows="4" required maxlength="2000" placeholder="Makine parkuru, kapasite, uzmanlık alanları..."></textarea>
+                </div>
+                <button type="submit" class="btn btn--primary" style="width:100%">Başvuruyu Gönder</button>
+            </form>
         </div>
     </div>
 
@@ -896,9 +1014,13 @@
                     <select class="form-select" id="adminKayitSehir" required></select>
                 </div>
                 <div class="form-grup">
-                    <label class="form-label" for="adminKayitTel">WhatsApp Numarası</label>
-                    <input class="form-input" type="tel" id="adminKayitTel" required placeholder="905321112233" pattern="90[0-9]{10}">
-                    <p class="form-yardim">Ülke kodu ile birlikte 12 hane (90XXXXXXXXXX)</p>
+                    <label class="form-label" for="adminKayitTel">Telefon numarası</label>
+                    <div class="tel-input" role="group" aria-label="Telefon numarası">
+                        <span class="tel-input__kod" aria-hidden="true">+90</span>
+                        <input class="form-input tel-input__alan" type="tel" id="adminKayitTel"
+                            inputmode="tel" autocomplete="tel" required
+                            placeholder="5XX XXX XX XX" maxlength="13">
+                    </div>
                 </div>
                 <div class="form-grup">
                     <label class="form-label" for="adminKayitAciklama">Hizmet Detayları</label>

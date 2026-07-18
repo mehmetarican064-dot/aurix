@@ -167,13 +167,8 @@ window.AURIX_DATA = {
 
     CANLI_AKTIVITE: [],
 
-    /* Firma profili güven alanları — v1.0 backend ile doldurulacak */
-    DOGRULAMA_ALANLARI: [
-        { id: 'vergi', etiket: 'Vergi doğrulandı' },
-        { id: 'telefon', etiket: 'Telefon doğrulandı' },
-        { id: 'adres', etiket: 'Adres doğrulandı' },
-        { id: 'whatsapp', etiket: 'AURIX Mesaj doğrulandı' }
-    ],
+    /* Public’te ayrıntılı doğrulama rozetleri gösterilmez; yalnızca firma inceleme onayı */
+    DOGRULAMA_ALANLARI: [],
 
     /* Malzeme Pazarı kategorileri */
     MALZEME_KATEGORILER: [
@@ -233,10 +228,10 @@ window.AURIX_DATA = {
     ],
 
     NEDEN_AURIX: [
-        { ikon: 'shield', baslik: 'Doğrulanmış Firmalar', metin: 'Onaylı profiller ve şeffaf firma bilgileri.' },
-        { ikon: 'teklif', baslik: 'Teklif Toplama', metin: 'Birden fazla firmadan hızlı teklif alın.' },
-        { ikon: 'guven', baslik: 'Güvenli İş Süreci', metin: 'Doğrudan iletişim ve güvenilir eşleşme.' },
-        { ikon: 'ag', baslik: 'Profesyonel Ağ', metin: 'Tüm kuyumculuk ekosistemi tek çatıda.' }
+        { ikon: 'shield', baslik: 'Doğrulanmış Firmalar', metin: 'Firma başvuruları, paylaşılan bilgiler incelendikten sonra onaylanır.' },
+        { ikon: 'teklif', baslik: 'Teklif Toplama', metin: 'Açık iş taleplerine birden fazla firmadan teklif toplayın.' },
+        { ikon: 'guven', baslik: 'Güvenli İş Süreci', metin: 'İş talepleri ve teklifler AURIX üzerinden yürütülür. Onaylı firma yapısı ve kayıtlı işlem akışı, tarafların süreci daha düzenli yönetmesini sağlar.' },
+        { ikon: 'ag', baslik: 'Profesyonel Ağ', metin: 'Kuyumculuk sektöründeki üretici, atölye ve tedarikçiler tek profesyonel ağda.' }
     ],
 
     VARSAYILAN_GORSEL: 'assets/images/firma.png',
@@ -385,7 +380,7 @@ window.AURIX_DATA = {
         },
         ayarlar: {
             firmaBildirim: true,
-            whatsappBildirim: true,
+            panelBildirim: true,
             odemeBildirim: false,
             profilGorunurluk: true
         }
