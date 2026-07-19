@@ -9,14 +9,11 @@
     var listeners = [];
     var readyPromise = null;
 
+    /** E-posta doğrulama / kayıt linkleri her zaman canlı siteye dönsün */
+    var EMAIL_REDIRECT_TO = 'https://aurixb2b.com';
+
     function redirectUrl() {
-        try {
-            var host = window.location.hostname || '';
-            if (host === 'localhost' || host === '127.0.0.1') {
-                return window.location.origin + '/';
-            }
-        } catch (e) { /* ignore */ }
-        return 'https://aurixb2b.com/';
+        return EMAIL_REDIRECT_TO;
     }
 
     function getSb() {
@@ -169,7 +166,7 @@
             email: email,
             password: password,
             options: {
-                emailRedirectTo: redirectUrl(),
+                emailRedirectTo: EMAIL_REDIRECT_TO,
                 data: {
                     ad_soyad: adSoyad,
                     telefon: telefon || null
@@ -288,7 +285,9 @@
         return sb.auth.resend({
             type: 'signup',
             email: email,
-            options: { emailRedirectTo: redirectUrl() }
+            options: {
+                emailRedirectTo: EMAIL_REDIRECT_TO
+            }
         }).then(function (res) {
             if (res.error) return { ok: false, error: turkceAuthHata(res.error) };
             return {
