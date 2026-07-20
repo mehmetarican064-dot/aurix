@@ -2424,8 +2424,37 @@
         if (panelKayit) panelKayit.hidden = hedef !== 'kayit';
         var girisForm = $('girisForm');
         var sifreSifirlaForm = $('sifreSifirlaForm');
+        var sifreYenileForm = $('sifreYenileForm');
         if (girisForm) girisForm.hidden = false;
         if (sifreSifirlaForm) sifreSifirlaForm.hidden = true;
+        if (sifreYenileForm) sifreYenileForm.hidden = true;
+        var sekmeler = document.querySelector('.uyelik-sekmeler');
+        if (sekmeler) sekmeler.hidden = false;
+    }
+
+    function sifreYenileFormGoster() {
+        emailDogrulamaBekleyenGizle();
+        var sekmeler = document.querySelector('.uyelik-sekmeler');
+        var panelGiris = $('uyelikPanelGiris');
+        var panelKayit = $('uyelikPanelKayit');
+        var girisForm = $('girisForm');
+        var sifreSifirlaForm = $('sifreSifirlaForm');
+        var sifreYenileForm = $('sifreYenileForm');
+        if (sekmeler) sekmeler.hidden = true;
+        if (panelGiris) panelGiris.hidden = false;
+        if (panelKayit) panelKayit.hidden = true;
+        if (girisForm) girisForm.hidden = true;
+        if (sifreSifirlaForm) sifreSifirlaForm.hidden = true;
+        if (sifreYenileForm) sifreYenileForm.hidden = false;
+        modalAc('girisModal');
+    }
+
+    function paneleYonlendir() {
+        renderNavAuth();
+        if (window.PanelUI && typeof PanelUI.renderUserPanel === 'function') {
+            PanelUI.renderUserPanel();
+        }
+        sayfaGoster('panel');
     }
 
     function uyelikModalAc(sekme) {
@@ -2720,6 +2749,25 @@
         if (id === 'panel') {
             var user = window.AuthService ? AuthService.getCurrentUser() : null;
             if (!user && !demoVideoMode) {
+                /* Init henüz bitmediyse oturumu bekle — yanlışlıkla giriş isteme */
+                if (window.AuthService && typeof AuthService.isReady === 'function') {
+                    AuthService.isReady().then(function (u) {
+                        if (u || AuthService.getCurrentUser()) {
+                            PanelUI.renderUserPanel();
+                            PanelUI.panelTabSec('dashboard');
+                            state.aktifSayfa = 'panel';
+                            document.querySelectorAll('[data-sayfa]').forEach(function (s) {
+                                s.classList.toggle('sayfa--aktif', s.getAttribute('data-sayfa') === 'panel');
+                            });
+                            document.querySelectorAll('[data-nav]').forEach(function (n) {
+                                n.classList.toggle('nav__link--aktif', n.getAttribute('data-nav') === 'panel');
+                            });
+                        } else {
+                            uyelikModalAc('giris');
+                        }
+                    });
+                    return;
+                }
                 uyelikModalAc('giris');
                 return;
             }
@@ -2799,20 +2847,23 @@
             if (submitBtn) submitBtn.disabled = false;
             if (!res || !res.ok) {
                 toast((res && res.error) || 'Kayıt başarısız.', 'error');
+                if (res && res.alreadyRegistered) {
+                    if ($('girisEmail')) $('girisEmail').value = res.email || email;
+                    uyelikSekmeSec('giris');
+                }
                 return;
             }
             if ($('kayitForm')) $('kayitForm').reset();
             /* Session yoksa firma insert YAPILMAZ — pendingFirmaBasvurusu bekler */
             if (res.needsEmailConfirmation) {
                 emailDogrulamaBekleyenGoster(res.email || email);
-                toast(EMAIL_DOGRULAMA_MESAJ, 'success');
+                toast(res.message || EMAIL_DOGRULAMA_MESAJ, 'success');
                 return;
             }
             modalKapat('girisModal');
-            renderNavAuth();
             toast('Hesabınız oluşturuldu.', 'success');
             pendingFirmaGonder().then(function () {
-                sayfaGoster('panel');
+                paneleYonlendir();
             });
         }).catch(function () {
             if (submitBtn) submitBtn.disabled = false;
@@ -3144,16 +3195,46 @@
             }
         }
 
-        if (window.AuthService && typeof AuthService.init === 'function') {
-            AuthService.init().then(function () {
-                authHazirSonrasi();
+        function authIntentIsle(user) {
+            var intent = (window.AuthService && typeof AuthService.consumeAuthIntent === 'function')
+                ? AuthService.consumeAuthIntent()
+                : null;
+            if (intent === 'recovery') {
+                sifreYenileFormGoster();
+                toast('Yeni şifrenizi belirleyin.', 'info');
+                return;
+            }
+            if (intent === 'confirmed' && user) {
+                toast('E-posta adresiniz doğrulandı. Hoş geldiniz!', 'success');
+                pendingFirmaGonder().then(function () {
+                    paneleYonlendir();
+                });
+                return;
+            }
+            /* Oturum kalıcı — sayfa yenilemede tekrar giriş isteme; sadece nav güncelle */
+            if (user) {
                 pendingFirmaGonder();
+            }
+        }
+
+        if (window.AuthService && typeof AuthService.init === 'function') {
+            AuthService.init().then(function (user) {
+                authHazirSonrasi();
+                authIntentIsle(user);
             }).catch(authHazirSonrasi);
             if (typeof AuthService.onAuthStateChange === 'function') {
-                AuthService.onAuthStateChange(function (user) {
+                AuthService.onAuthStateChange(function (user, event) {
                     renderNavAuth();
                     renderAdminUI();
+                    if (event === 'PASSWORD_RECOVERY') {
+                        sifreYenileFormGoster();
+                        return;
+                    }
                     if (user && user.id) pendingFirmaGonder();
+                    /* Oturum düştüyse paneldeyse ana sayfaya dön */
+                    if (!user && state.aktifSayfa === 'panel' && !demoVideoMode) {
+                        sayfaGoster('ana-sayfa');
+                    }
                 });
             }
         } else {
@@ -3324,18 +3405,16 @@
                     if (!result || !result.ok) {
                         if (result && result.needsEmailConfirmation) {
                             emailDogrulamaBekleyenGoster(result.email || email);
-                            toast(EMAIL_DOGRULAMA_MESAJ, 'info');
+                            toast(result.error || EMAIL_DOGRULAMA_MESAJ, 'info');
                             return;
                         }
                         toast((result && result.error) || 'Giriş başarısız.', 'error');
                         return;
                     }
                     modalKapat('girisModal');
-                    renderNavAuth();
-                    PanelUI.renderUserPanel();
-                    toast('Giriş başarılı.', 'info');
+                    toast('Giriş başarılı.', 'success');
                     pendingFirmaGonder().then(function () {
-                        sayfaGoster('panel');
+                        paneleYonlendir();
                     });
                 }).catch(function () {
                     if (btn) btn.disabled = false;
@@ -3383,9 +3462,11 @@
         var sifreUnuttumBtn = $('sifreUnuttumBtn');
         var sifreSifirlaForm = $('sifreSifirlaForm');
         var sifreSifirlaGeriBtn = $('sifreSifirlaGeriBtn');
+        var sifreYenileForm = $('sifreYenileForm');
         if (sifreUnuttumBtn && sifreSifirlaForm && girisForm) {
             sifreUnuttumBtn.addEventListener('click', function () {
                 girisForm.hidden = true;
+                if (sifreYenileForm) sifreYenileForm.hidden = true;
                 sifreSifirlaForm.hidden = false;
                 var ge = $('girisEmail');
                 var se = $('sifreSifirlaEmail');
@@ -3395,6 +3476,7 @@
         if (sifreSifirlaGeriBtn && sifreSifirlaForm && girisForm) {
             sifreSifirlaGeriBtn.addEventListener('click', function () {
                 sifreSifirlaForm.hidden = true;
+                if (sifreYenileForm) sifreYenileForm.hidden = true;
                 girisForm.hidden = false;
             });
         }
@@ -3406,7 +3488,10 @@
                     return;
                 }
                 var email = ($('sifreSifirlaEmail') && $('sifreSifirlaEmail').value) || '';
+                var btn = e.target.querySelector('[type="submit"]');
+                if (btn) btn.disabled = true;
                 AuthService.resetPasswordForEmail(email).then(function (res) {
+                    if (btn) btn.disabled = false;
                     if (!res || !res.ok) {
                         toast((res && res.error) || 'İşlem başarısız.', 'error');
                         return;
@@ -3414,6 +3499,36 @@
                     toast(res.message || 'Şifre sıfırlama bağlantısı gönderildi.', 'success');
                     sifreSifirlaForm.hidden = true;
                     if (girisForm) girisForm.hidden = false;
+                }).catch(function () {
+                    if (btn) btn.disabled = false;
+                    toast('Bağlantı hatası. Lütfen tekrar deneyin.', 'error');
+                });
+            });
+        }
+        if (sifreYenileForm) {
+            sifreYenileForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+                if (!window.AuthService || typeof AuthService.updatePassword !== 'function') {
+                    toast('Şifre güncelleme servisi hazır değil.', 'error');
+                    return;
+                }
+                var yeni = ($('sifreYenileYeni') && $('sifreYenileYeni').value) || '';
+                var tekrar = ($('sifreYenileTekrar') && $('sifreYenileTekrar').value) || '';
+                var btn = $('sifreYenileBtn');
+                if (btn) btn.disabled = true;
+                AuthService.updatePassword(yeni, tekrar).then(function (res) {
+                    if (btn) btn.disabled = false;
+                    if (!res || !res.ok) {
+                        toast((res && res.error) || 'Şifre güncellenemedi.', 'error');
+                        return;
+                    }
+                    sifreYenileForm.reset();
+                    modalKapat('girisModal');
+                    toast(res.message || 'Şifreniz güncellendi.', 'success');
+                    paneleYonlendir();
+                }).catch(function () {
+                    if (btn) btn.disabled = false;
+                    toast('Bağlantı hatası. Lütfen tekrar deneyin.', 'error');
                 });
             });
         }

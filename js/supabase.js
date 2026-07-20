@@ -80,7 +80,8 @@
                 persistSession: true,
                 autoRefreshToken: true,
                 detectSessionInUrl: true,
-                storage: global.localStorage
+                storage: global.localStorage,
+                flowType: 'pkce'
             }
         });
         return client;

@@ -41,7 +41,7 @@
     <link rel="preconnect" href="https://svsouqnhtlpcpdvqahmd.supabase.co" crossorigin>
     <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/styles.css?v=11">
+    <link rel="stylesheet" href="css/styles.css?v=12">
 </head>
 <body>
 
@@ -916,6 +916,18 @@
                         <button type="button" class="link-btn" id="sifreSifirlaGeriBtn">Girişe dön</button>
                     </p>
                 </form>
+                <form id="sifreYenileForm" hidden>
+                    <p class="giris-modal__metin">Yeni şifrenizi belirleyin.</p>
+                    <div class="form-grup">
+                        <label class="form-label" for="sifreYenileYeni">Yeni şifre</label>
+                        <input class="form-input" type="password" id="sifreYenileYeni" required minlength="8" maxlength="72" placeholder="En az 8 karakter" autocomplete="new-password">
+                    </div>
+                    <div class="form-grup">
+                        <label class="form-label" for="sifreYenileTekrar">Yeni şifre tekrar</label>
+                        <input class="form-input" type="password" id="sifreYenileTekrar" required minlength="8" maxlength="72" placeholder="Şifrenizi tekrar girin" autocomplete="new-password">
+                    </div>
+                    <button type="submit" class="btn btn--primary" id="sifreYenileBtn" style="width:100%">Şifreyi Güncelle</button>
+                </form>
             </div>
             <div class="uyelik-panel" id="uyelikPanelKayit" role="tabpanel" aria-labelledby="uyelikSekmeKayit" hidden>
                 <p class="giris-modal__metin">Yeni üyelik oluşturun. Firma başvurusunu giriş sonrası yapabilirsiniz.</p>
@@ -1121,12 +1133,12 @@
 
     <!-- UMD build: GitHub Pages’te window.supabase global’i için zorunlu -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.2/dist/umd/supabase.js" defer></script>
-    <script src="js/utils.js?v=11" defer></script>
-    <script src="js/data.js?v=11" defer></script>
-    <script src="js/supabase.js?v=11" defer></script>
-    <script src="js/authService.js?v=11" defer></script>
-    <script src="js/panels.js?v=11" defer></script>
-    <script src="js/market-service.js?v=11" defer></script>
-    <script src="js/app.js?v=11" defer></script>
+    <script src="js/utils.js?v=12" defer></script>
+    <script src="js/data.js?v=12" defer></script>
+    <script src="js/supabase.js?v=12" defer></script>
+    <script src="js/authService.js?v=12" defer></script>
+    <script src="js/panels.js?v=12" defer></script>
+    <script src="js/market-service.js?v=12" defer></script>
+    <script src="js/app.js?v=12" defer></script>
 </body>
 </html>
