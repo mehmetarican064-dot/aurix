@@ -33,7 +33,7 @@
 
     function sutunEksikMi(err) {
         var msg = String((err && err.message) || err || '');
-        return /is_seed|owner_id|user_id|column.*does not exist|PGRST204/i.test(msg);
+        return /is_seed|owner_id|user_id|kapak_url|logo_url|calisma_gorselleri|column.*does not exist|PGRST204/i.test(msg);
     }
 
     function logSupabaseHata(baglam, err) {
@@ -109,6 +109,9 @@
             if (/teklifler_is_firma|teklifler.*unique|is_id.*firma_id|teklif/i.test(msg)) {
                 return 'Bu firma bu işe zaten teklif vermiş.';
             }
+            if (/firmalar|firma/i.test(msg)) {
+                return 'Bu bilgilerle zaten bir firma kaydı var. Panelinizden durumunuzu kontrol edin.';
+            }
             return 'Bu e-posta veya firma adı ile zaten başvuru yapılmış.';
         }
         if (/teklifler_fiyat|fiyat.*check|violates check constraint.*fiyat/i.test(msg)) {
@@ -120,6 +123,9 @@
         if (/row-level security|RLS|permission denied|42501|WITH CHECK/i.test(msg)) {
             if (/teklif/i.test(msg) || /teklifler/i.test(String(err.hint || '') + String(err.details || ''))) {
                 return 'Teklif reddedildi. Giriş yapmış olmalı ve teklifi kendi onaylı firmanız adına vermelisiniz.';
+            }
+            if (/firmalar|firma/i.test(msg)) {
+                return 'Firma başvurusu kaydedilemedi. Giriş yaptığınızdan emin olun; zaten başvurunuz varsa panelden kontrol edin.';
             }
             return 'Kayıt güvenlik kuralları nedeniyle reddedildi. Lütfen alanları kontrol edin.';
         }
@@ -163,57 +169,93 @@
                 };
             }
 
-            var userId = veri.user_id || uid;
-            if (userId !== uid) userId = uid;
+            var userId = uid;
 
-            var satir = {
-                firma_adi: veri.firma_adi || veri.ad,
-                sehir: veri.sehir,
-                kategori: veri.kategori || veri.kategoriId || null,
-                aciklama: veri.aciklama,
-                telefon: veri.telefon || veri.tel || null,
-                email: (veri.email || '').trim().toLowerCase() || null,
-                dogrulanmis: false,
-                durum: 'beklemede',
-                is_seed: false,
-                user_id: userId
-            };
-
-            if (veri.logo_url) satir.logo_url = veri.logo_url;
-            if (veri.calisma_gorselleri != null) {
-                satir.calisma_gorselleri = Array.isArray(veri.calisma_gorselleri)
-                    ? veri.calisma_gorselleri
-                    : [];
-            }
-
-            function dene(payload) {
-                return sb.from('firmalar').insert([payload]).select('id').then(function (res) {
-                    if (res.error && sutunEksikMi(res.error)) {
-                        var yedek = Object.assign({}, payload);
-                        var msg = String(res.error.message || '');
-                        if (/is_seed/i.test(msg)) delete yedek.is_seed;
-                        else if (/user_id/i.test(msg)) delete yedek.user_id;
-                        else if (/logo_url|calisma_gorselleri/i.test(msg)) {
-                            delete yedek.logo_url;
-                            delete yedek.calisma_gorselleri;
-                        } else {
-                            delete yedek.is_seed;
-                            delete yedek.logo_url;
-                            delete yedek.calisma_gorselleri;
-                        }
-                        if (JSON.stringify(yedek) !== JSON.stringify(payload)) {
-                            return dene(yedek);
-                        }
+            /* Aynı kullanıcının ikinci firma başvurusunu engelle */
+            return sb.from('firmalar')
+                .select('id,durum,dogrulanmis')
+                .eq('user_id', userId)
+                .order('created_at', { ascending: false })
+                .limit(1)
+                .maybeSingle()
+                .then(function (mevcutRes) {
+                    if (mevcutRes.error && !/user_id|column|PGRST/i.test(String(mevcutRes.error.message || ''))) {
+                        logSupabaseHata('firmalar mevcut kontrol', mevcutRes.error);
                     }
-                    if (res.error) {
-                        logSupabaseHata('firmalar insert', res.error);
-                        return { ok: false, error: hataMesaji(res.error) };
+                    if (mevcutRes.data && mevcutRes.data.id) {
+                        return {
+                            ok: false,
+                            alreadyExists: true,
+                            firma: mevcutRes.data,
+                            error: 'Zaten bir firma başvurunuz var. Durumunu panelinizden takip edebilirsiniz.'
+                        };
                     }
-                    return { ok: true, id: res.data && res.data[0] ? res.data[0].id : null };
+
+                    var satir = {
+                        firma_adi: veri.firma_adi || veri.ad,
+                        sehir: veri.sehir,
+                        kategori: veri.kategori || veri.kategoriId || null,
+                        aciklama: veri.aciklama,
+                        telefon: veri.telefon || veri.tel || null,
+                        email: (veri.email || '').trim().toLowerCase() || null,
+                        dogrulanmis: false,
+                        durum: 'beklemede',
+                        is_seed: false,
+                        user_id: userId
+                    };
+
+                    if (veri.logo_url) satir.logo_url = veri.logo_url;
+                    if (veri.kapak_url) satir.kapak_url = veri.kapak_url;
+                    if (veri.calisma_gorselleri != null) {
+                        satir.calisma_gorselleri = Array.isArray(veri.calisma_gorselleri)
+                            ? veri.calisma_gorselleri
+                            : [];
+                    }
+
+                    function dene(payload) {
+                        return sb.from('firmalar').insert([payload]).select('id,durum,dogrulanmis,firma_adi').then(function (res) {
+                            if (res.error && sutunEksikMi(res.error)) {
+                                var yedek = Object.assign({}, payload);
+                                var msg = String(res.error.message || '');
+                                if (/is_seed/i.test(msg)) delete yedek.is_seed;
+                                else if (/kapak_url/i.test(msg)) delete yedek.kapak_url;
+                                else if (/logo_url|calisma_gorselleri/i.test(msg)) {
+                                    delete yedek.logo_url;
+                                    delete yedek.calisma_gorselleri;
+                                    delete yedek.kapak_url;
+                                } else if (/user_id/i.test(msg)) {
+                                    /* user_id zorunlu — silme; hata döndür */
+                                    return {
+                                        ok: false,
+                                        error: 'Firma kaydı için kullanıcı kimliği gerekli. Lütfen çıkış yapıp tekrar giriş yapın.'
+                                    };
+                                } else {
+                                    delete yedek.is_seed;
+                                    delete yedek.logo_url;
+                                    delete yedek.kapak_url;
+                                    delete yedek.calisma_gorselleri;
+                                }
+                                if (JSON.stringify(yedek) !== JSON.stringify(payload)) {
+                                    return dene(yedek);
+                                }
+                            }
+                            if (res.error) {
+                                logSupabaseHata('firmalar insert', res.error);
+                                return { ok: false, error: hataMesaji(res.error) };
+                            }
+                            var row = res.data && res.data[0] ? res.data[0] : null;
+                            return {
+                                ok: true,
+                                id: row ? row.id : null,
+                                durum: row ? row.durum : 'beklemede',
+                                dogrulanmis: false,
+                                firma: row
+                            };
+                        });
+                    }
+
+                    return dene(satir);
                 });
-            }
-
-            return dene(satir);
         }).catch(function (err) {
             logSupabaseHata('firmalar insert', err);
             return { ok: false, error: hataMesaji(err) };
@@ -309,9 +351,14 @@
             }
 
             return firmaSorgula(
-                'id,firma_adi,sehir,kategori,aciklama,durum,dogrulanmis,created_at,user_id,logo_url,calisma_gorselleri'
+                'id,firma_adi,sehir,kategori,aciklama,telefon,durum,dogrulanmis,created_at,user_id,logo_url,kapak_url,calisma_gorselleri'
             ).then(function (res) {
-                if (res.error && /user_id|logo_url|calisma_gorselleri|column|PGRST/i.test(String(res.error.message || ''))) {
+                if (res.error && /kapak_url|logo_url|calisma_gorselleri|telefon|column|PGRST/i.test(String(res.error.message || ''))) {
+                    return firmaSorgula('id,firma_adi,sehir,kategori,aciklama,durum,dogrulanmis,created_at,user_id,logo_url');
+                }
+                return res;
+            }).then(function (res) {
+                if (res.error && /user_id|logo_url|column|PGRST/i.test(String(res.error.message || ''))) {
                     return firmaSorgula('id,firma_adi,sehir,kategori,aciklama,durum,dogrulanmis,created_at,user_id');
                 }
                 return res;

@@ -165,19 +165,36 @@
     function renderFirmaDashboard(veri) {
         var f = (veri && veri.firma) || null;
         var teklifler = (veri && veri.teklifler) || [];
-        var durum = f ? (f.durum || (f.dogrulanmis ? 'onaylandi' : 'beklemede')) : '—';
-        var durumMetin = {
-            beklemede: 'Başvurunuz inceleniyor',
-            onaylandi: 'Firma hesabınız aktif',
-            reddedildi: 'Başvuru reddedildi'
-        };
+        var durum = f ? (f.durum || (f.dogrulanmis ? 'onaylandi' : 'beklemede')) : 'beklemede';
+        var incelemede = !f || durum === 'beklemede' ||
+            (f && !f.dogrulanmis && durum !== 'onaylandi' && durum !== 'reddedildi');
+        var onayli = !!(f && (durum === 'onaylandi' || f.dogrulanmis === true));
+
+        var durumKutu = '';
+        if (incelemede) {
+            durumKutu = '<div class="fp-basvuru-durum fp-basvuru-durum--beklemede" role="status">' +
+                '<strong class="fp-basvuru-durum__baslik">Firma başvurunuz incelemede</strong>' +
+                '<p class="fp-basvuru-durum__metin">Başvurunuz alındı' +
+                (f && f.firma_adi ? ' (' + esc(f.firma_adi) + ')' : '') +
+                '. Admin onayından sonra Firmalar sayfasında görüneceksiniz.</p>' +
+                '</div>';
+        } else if (durum === 'reddedildi') {
+            durumKutu = '<div class="fp-basvuru-durum fp-basvuru-durum--red" role="status">' +
+                '<strong class="fp-basvuru-durum__baslik">Başvuru reddedildi</strong>' +
+                '<p class="fp-basvuru-durum__metin">Destek için iletişim formunu kullanabilirsiniz.</p>' +
+                '</div>';
+        } else if (onayli) {
+            durumKutu = '<div class="fp-basvuru-durum fp-basvuru-durum--onay" role="status">' +
+                '<strong class="fp-basvuru-durum__baslik">Firma hesabınız aktif</strong>' +
+                '<p class="fp-basvuru-durum__metin">' +
+                esc(f && f.firma_adi ? f.firma_adi : 'Firmanız') +
+                ' vitrinde yayınlandı.</p>' +
+                '</div>';
+        }
 
         return '<div class="fp-karsilama fp-karsilama--firma">' +
             '<h2 class="fp-karsilama__baslik">Firma Paneli</h2>' +
-            '<p class="fp-karsilama__aciklama">' +
-            esc(durumMetin[durum] || 'Firma hesabınız') +
-            (f && f.firma_adi ? ' · ' + esc(f.firma_adi) : '') +
-            '</p>' +
+            durumKutu +
             '<div class="fp-karsilama__kartlar fp-karsilama__kartlar--3">' +
             '<button type="button" class="fp-karsilama-kart" data-panel-aksiyon="gelen">' +
             '<span class="fp-karsilama-kart__baslik">Gelen İşler</span>' +
@@ -257,34 +274,40 @@
                 '</div>';
         }
         var durumEtiket = f.durum || (f.dogrulanmis ? 'onaylandi' : 'beklemede');
+        var durumInsan = {
+            beklemede: 'İncelemede',
+            onaylandi: 'Onaylandı',
+            reddedildi: 'Reddedildi'
+        };
         var logoHtml = f.logo_url
             ? '<img class="fp-profil-logo" src="' + esc(f.logo_url) + '" alt="" width="72" height="72">'
             : '';
-        var gorseller = Array.isArray(f.calisma_gorselleri) ? f.calisma_gorselleri : [];
-        var galeri = gorseller.length
-            ? '<div class="fp-profil-galeri">' + gorseller.map(function (u) {
-                return '<img src="' + esc(u) + '" alt="" loading="lazy">';
-            }).join('') + '</div>'
+        var kapakHtml = f.kapak_url
+            ? '<div class="fp-profil-kapak"><img src="' + esc(f.kapak_url) + '" alt="" loading="lazy"></div>'
+            : '';
+        var incelemeNotu = (durumEtiket === 'beklemede')
+            ? '<p class="fp-basvuru-durum fp-basvuru-durum--beklemede" style="margin-top:12px">Firma başvurunuz incelemede. Onaylanmadan Firmalar sayfasında görünmezsiniz.</p>'
             : '';
 
         return '<div class="fp-profil-grid">' +
             '<article class="fp-profil-kart fp-profil-kart--ana">' +
+            kapakHtml +
             '<div class="fp-profil-kart__ust">' +
             logoHtml +
             '<h3 class="fp-profil-kart__firma">' + esc(f.firma_adi || '—') + '</h3>' +
-            fpDurumBadge(durumEtiket) +
+            fpDurumBadge(durumInsan[durumEtiket] || durumEtiket) +
             '</div>' +
             '<dl class="fp-profil-dl">' +
-            '<div><dt>Hizmet alanı</dt><dd>' + esc(f.kategori || '—') + '</dd></div>' +
+            '<div><dt>Hizmet kategorisi</dt><dd>' + esc(f.kategori || '—') + '</dd></div>' +
             '<div><dt>Şehir</dt><dd>' + esc(f.sehir || '—') + '</dd></div>' +
             '<div><dt>Açıklama</dt><dd>' + esc(f.aciklama || '—') + '</dd></div>' +
             '</dl>' +
-            galeri +
+            incelemeNotu +
             '</article>' +
             '<article class="fp-profil-kart">' +
             '<h4 class="fp-profil-kart__alt-baslik">Hesap</h4>' +
             '<p class="fp-profil-hesap">' + esc(user ? user.email : 'Oturum açılmadı') + '</p>' +
-            '<p class="panel-not">Firma hesabınız oluşturuldu. Onay sonrası vitrinde yer alırsınız.</p>' +
+            '<p class="panel-not">Çıkış yapıp tekrar giriş yapsanız da firma bilgileriniz korunur.</p>' +
             '</article></div>';
     }
 

@@ -2371,10 +2371,12 @@
             return;
         }
         if (user.isFirmaHesabi || (window.PanelUI && PanelUI.hasFirmaHesabi && PanelUI.hasFirmaHesabi())) {
-            toast('Firma hesabınız zaten oluşturulmuş.', 'info');
+            toast('Firma hesabınız zaten oluşturulmuş. Durumunu panelinizden görebilirsiniz.', 'info');
             sayfaGoster('panel');
             return;
         }
+        baglaTelInput('firmaBasvuruTel');
+        renderKategoriSelectler();
         modalAc('firmaBasvuruModal');
     }
 
@@ -2800,7 +2802,8 @@
 
     function firmaBasvuruDogrula(ad, aciklama, telDigitsOrE164, email) {
         if (ad.length < 2) return 'Firma adı en az 2 karakter olmalı.';
-        if (aciklama.length < 10) return 'Açıklama en az 10 karakter olmalı.';
+        if (aciklama.length < 10) return 'Kısa açıklama en az 10 karakter olmalı.';
+        if (aciklama.length > 500) return 'Kısa açıklama en fazla 500 karakter olabilir.';
         if (telDigitsOrE164 !== undefined && telDigitsOrE164 !== null) {
             var digits = normalizeTrCepDigits(telDigitsOrE164);
             if (!isValidTrCep(digits)) return TEL_HATA_MESAJ;
@@ -2877,13 +2880,18 @@
         var aciklama = ($('firmaBasvuruAciklama') && $('firmaBasvuruAciklama').value || '').trim();
         var kategoriId = $('firmaBasvuruKategori') ? $('firmaBasvuruKategori').value : '';
         var sehir = $('firmaBasvuruSehir') ? $('firmaBasvuruSehir').value : '';
+        var telDigits = normalizeTrCepDigits(($('firmaBasvuruTel') && $('firmaBasvuruTel').value) || '');
         var logoInput = $('firmaBasvuruLogo');
-        var gorselInput = $('firmaBasvuruGorseller');
+        var kapakInput = $('firmaBasvuruKapak');
 
-        var hata = firmaBasvuruDogrula(ad, aciklama);
+        if ($('firmaBasvuruTel')) {
+            $('firmaBasvuruTel').value = formatTrCepDisplay(telDigits);
+        }
+
+        var hata = firmaBasvuruDogrula(ad, aciklama, telDigits);
         if (hata) { toast(hata, 'error'); return; }
         if (!kategoriId || !sehir) {
-            toast('Şehir ve hizmet alanı seçin.', 'error');
+            toast('Şehir ve hizmet kategorisi seçin.', 'error');
             return;
         }
 
@@ -2916,22 +2924,23 @@
 
         function medyaYukle() {
             var logoFile = logoInput && logoInput.files && logoInput.files[0] ? logoInput.files[0] : null;
-            var gorselFiles = gorselInput && gorselInput.files ? Array.prototype.slice.call(gorselInput.files, 0, 6) : [];
+            var kapakFile = kapakInput && kapakInput.files && kapakInput.files[0] ? kapakInput.files[0] : null;
             var logoPromise = logoFile && typeof AurixSupabase.yukleFirmaMedya === 'function'
                 ? AurixSupabase.yukleFirmaMedya(logoFile, 'logo')
                 : Promise.resolve({ ok: true, url: null });
-            var gorselPromises = gorselFiles.map(function (f) {
-                return AurixSupabase.yukleFirmaMedya(f, 'calisma');
-            });
-            return Promise.all([logoPromise].concat(gorselPromises)).then(function (sonuclar) {
+            var kapakPromise = kapakFile && typeof AurixSupabase.yukleFirmaMedya === 'function'
+                ? AurixSupabase.yukleFirmaMedya(kapakFile, 'kapak')
+                : Promise.resolve({ ok: true, url: null });
+            return Promise.all([logoPromise, kapakPromise]).then(function (sonuclar) {
                 var logoUrl = sonuclar[0] && sonuclar[0].ok ? sonuclar[0].url : null;
-                var gorseller = [];
-                for (var i = 1; i < sonuclar.length; i++) {
-                    if (sonuclar[i] && sonuclar[i].ok && sonuclar[i].url) {
-                        gorseller.push(sonuclar[i].url);
-                    }
+                var kapakUrl = sonuclar[1] && sonuclar[1].ok ? sonuclar[1].url : null;
+                if (logoFile && !logoUrl) {
+                    toast('Logo yüklenemedi. Başvuru görselsiz devam edecek.', 'info');
                 }
-                return { logo_url: logoUrl, calisma_gorselleri: gorseller };
+                if (kapakFile && !kapakUrl) {
+                    toast('Kapak görseli yüklenemedi. Başvuru görselsiz devam edecek.', 'info');
+                }
+                return { logo_url: logoUrl, kapak_url: kapakUrl };
             });
         }
 
@@ -2942,9 +2951,9 @@
                 sehir: sehir,
                 aciklama: aciklama,
                 email: (mevcut.email || '').trim().toLowerCase() || null,
-                telefon: mevcut.telefon || null,
+                telefon: toE164TrCep(telDigits),
                 logo_url: medya.logo_url || null,
-                calisma_gorselleri: medya.calisma_gorselleri || []
+                kapak_url: medya.kapak_url || null
             };
 
             return AurixSupabase.kaydetFirma(payload);
@@ -2957,18 +2966,22 @@
                     uyelikModalAc('giris');
                     return;
                 }
-                toast((res && res.error) || 'Firma hesabı oluşturulamadı.', 'error');
+                if (res && res.alreadyExists) {
+                    toast(res.error || 'Zaten bir firma başvurunuz var.', 'info');
+                    modalKapat('firmaBasvuruModal');
+                    paneleYonlendir();
+                    return;
+                }
+                toast((res && res.error) || 'Firma başvurusu kaydedilemedi.', 'error');
                 return;
             }
             pendingFirmaSil();
             if ($('firmaBasvuruForm')) $('firmaBasvuruForm').reset();
+            if ($('firmaBasvuruTel')) $('firmaBasvuruTel').value = '';
             modalKapat('firmaBasvuruModal');
-            toast('Firma hesabınız oluşturuldu. İnceleme sonrası vitrinde yayınlanır.', 'success');
+            toast('Firma başvurunuz incelemede. Onaylanınca Firmalar sayfasında görünür.', 'success');
             var yenile = function () {
-                if (window.PanelUI && typeof PanelUI.renderUserPanel === 'function') {
-                    PanelUI.renderUserPanel();
-                }
-                sayfaGoster('panel');
+                paneleYonlendir();
             };
             if (window.AuthService && typeof AuthService.refreshProfile === 'function') {
                 AuthService.refreshProfile().then(yenile).catch(yenile);
@@ -3012,6 +3025,7 @@
     }
 
     function baglaFirmaTelInput() {
+        baglaTelInput('firmaBasvuruTel');
         baglaTelInput('adminKayitTel', false);
     }
 

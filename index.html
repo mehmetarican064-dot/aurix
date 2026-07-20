@@ -41,7 +41,7 @@
     <link rel="preconnect" href="https://svsouqnhtlpcpdvqahmd.supabase.co" crossorigin>
     <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/styles.css?v=12">
+    <link rel="stylesheet" href="css/styles.css?v=13">
 </head>
 <body>
 
@@ -969,23 +969,34 @@
                 <h3 id="firmaBasvuruBaslik">Firma Hesabı Oluştur</h3>
                 <button class="modal__kapat" data-modal-kapat="firmaBasvuruModal" aria-label="Kapat">×</button>
             </div>
-            <p class="giris-modal__metin">İş almak istiyorsanız firma hesabınızı oluşturun. Onay sonrası vitrinde yer alırsınız. Doğrulama belgesi şimdilik gerekmez.</p>
+            <p class="giris-modal__metin">Firma hesabınızı oluşturun. Başvuru incelenir; onaylanmadan Firmalar sayfasında görünmez.</p>
             <form id="firmaBasvuruForm">
                 <div class="form-grup">
                     <label class="form-label" for="firmaBasvuruAd">Firma Adı</label>
-                    <input class="form-input" type="text" id="firmaBasvuruAd" required maxlength="200" placeholder="Ticari unvanınız">
+                    <input class="form-input" type="text" id="firmaBasvuruAd" required maxlength="200" placeholder="Ticari unvanınız" autocomplete="organization">
                 </div>
                 <div class="form-grup">
                     <label class="form-label" for="firmaBasvuruSehir">Şehir</label>
                     <select class="form-select" id="firmaBasvuruSehir" required></select>
                 </div>
                 <div class="form-grup">
-                    <label class="form-label" for="firmaBasvuruKategori">Hizmet Alanı</label>
+                    <label class="form-label" for="firmaBasvuruKategori">Hizmet Kategorisi</label>
                     <select class="form-select" id="firmaBasvuruKategori" required></select>
                 </div>
                 <div class="form-grup">
-                    <label class="form-label" for="firmaBasvuruAciklama">Firma Açıklaması</label>
-                    <textarea class="form-textarea" id="firmaBasvuruAciklama" rows="4" required maxlength="2000" placeholder="Uzmanlık alanlarınız, kapasite ve hizmet detayları..."></textarea>
+                    <label class="form-label" for="firmaBasvuruTel">Telefon</label>
+                    <div class="tel-input" role="group" aria-label="Telefon numarası">
+                        <span class="tel-input__kod" aria-hidden="true">+90</span>
+                        <input class="form-input tel-input__alan" type="tel" id="firmaBasvuruTel"
+                            inputmode="tel" autocomplete="tel" required
+                            placeholder="5XX XXX XX XX" maxlength="13"
+                            aria-describedby="firmaBasvuruTelYardim">
+                    </div>
+                    <p class="form-yardim" id="firmaBasvuruTelYardim">Başvuru için iletişim numarası. Public vitrinde gösterilmez.</p>
+                </div>
+                <div class="form-grup">
+                    <label class="form-label" for="firmaBasvuruAciklama">Kısa Açıklama</label>
+                    <textarea class="form-textarea" id="firmaBasvuruAciklama" rows="3" required maxlength="500" placeholder="Hizmetlerinizi kısaca anlatın (en az 10 karakter)"></textarea>
                 </div>
                 <div class="form-grup">
                     <label class="form-label" for="firmaBasvuruLogo">Logo</label>
@@ -993,11 +1004,11 @@
                     <p class="form-yardim">Opsiyonel. En fazla 5 MB (JPG, PNG, WebP).</p>
                 </div>
                 <div class="form-grup">
-                    <label class="form-label" for="firmaBasvuruGorseller">Çalışma Görselleri</label>
-                    <input class="form-input" type="file" id="firmaBasvuruGorseller" accept="image/jpeg,image/png,image/webp,image/gif" multiple>
-                    <p class="form-yardim">Opsiyonel. En fazla 6 görsel.</p>
+                    <label class="form-label" for="firmaBasvuruKapak">Kapak Görseli</label>
+                    <input class="form-input" type="file" id="firmaBasvuruKapak" accept="image/jpeg,image/png,image/webp,image/gif">
+                    <p class="form-yardim">Opsiyonel. Firma kartında kullanılacak kapak görseli.</p>
                 </div>
-                <button type="submit" class="btn btn--primary" style="width:100%">Firma Hesabını Oluştur</button>
+                <button type="submit" class="btn btn--primary" style="width:100%">Başvuruyu Gönder</button>
             </form>
         </div>
     </div>
@@ -1133,12 +1144,12 @@
 
     <!-- UMD build: GitHub Pages’te window.supabase global’i için zorunlu -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.2/dist/umd/supabase.js" defer></script>
-    <script src="js/utils.js?v=12" defer></script>
-    <script src="js/data.js?v=12" defer></script>
-    <script src="js/supabase.js?v=12" defer></script>
-    <script src="js/authService.js?v=12" defer></script>
-    <script src="js/panels.js?v=12" defer></script>
-    <script src="js/market-service.js?v=12" defer></script>
-    <script src="js/app.js?v=12" defer></script>
+    <script src="js/utils.js?v=13" defer></script>
+    <script src="js/data.js?v=13" defer></script>
+    <script src="js/supabase.js?v=13" defer></script>
+    <script src="js/authService.js?v=13" defer></script>
+    <script src="js/panels.js?v=13" defer></script>
+    <script src="js/market-service.js?v=13" defer></script>
+    <script src="js/app.js?v=13" defer></script>
 </body>
 </html>
