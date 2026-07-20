@@ -1,13 +1,20 @@
 -- AURIX — Dashboard SQL Editor'da bir kez çalıştırın
 -- Firma insert: authenticated + WITH CHECK (auth.uid() = user_id)
+-- Not: Bu veritabanında sahiplik sütunu user_id (owner_id yok).
 
-ALTER TABLE public.firmalar
-    ADD COLUMN IF NOT EXISTS user_id UUID REFERENCES auth.users (id) ON DELETE SET NULL;
-
-UPDATE public.firmalar
-SET user_id = owner_id
-WHERE user_id IS NULL
-  AND owner_id IS NOT NULL;
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1
+        FROM information_schema.columns
+        WHERE table_schema = 'public'
+          AND table_name = 'firmalar'
+          AND column_name = 'user_id'
+    ) THEN
+        ALTER TABLE public.firmalar
+            ADD COLUMN user_id UUID REFERENCES auth.users (id) ON DELETE SET NULL;
+    END IF;
+END $$;
 
 CREATE INDEX IF NOT EXISTS idx_firmalar_user_id ON public.firmalar (user_id);
 
@@ -17,16 +24,47 @@ DROP POLICY IF EXISTS "firmalar_public_insert" ON public.firmalar;
 DROP POLICY IF EXISTS "firmalar_anon_insert" ON public.firmalar;
 DROP POLICY IF EXISTS "firmalar_authenticated_insert" ON public.firmalar;
 
-CREATE POLICY "firmalar_authenticated_insert"
-    ON public.firmalar
-    FOR INSERT
-    TO authenticated
-    WITH CHECK (
-        dogrulanmis IS FALSE
-        AND durum = 'beklemede'
-        AND COALESCE(is_seed, FALSE) IS FALSE
-        AND auth.uid() = user_id
+DO $$
+DECLARE
+    has_is_seed boolean;
+    has_dogrulanmis boolean;
+    has_durum boolean;
+    check_expr text := 'auth.uid() = user_id';
+BEGIN
+    SELECT EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_schema = 'public' AND table_name = 'firmalar' AND column_name = 'is_seed'
+    ) INTO has_is_seed;
+
+    SELECT EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_schema = 'public' AND table_name = 'firmalar' AND column_name = 'dogrulanmis'
+    ) INTO has_dogrulanmis;
+
+    SELECT EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_schema = 'public' AND table_name = 'firmalar' AND column_name = 'durum'
+    ) INTO has_durum;
+
+    IF has_dogrulanmis THEN
+        check_expr := check_expr || ' AND dogrulanmis IS FALSE';
+    END IF;
+    IF has_durum THEN
+        check_expr := check_expr || ' AND durum = ''beklemede''';
+    END IF;
+    IF has_is_seed THEN
+        check_expr := check_expr || ' AND COALESCE(is_seed, FALSE) IS FALSE';
+    END IF;
+
+    EXECUTE format(
+        'CREATE POLICY "firmalar_authenticated_insert"
+            ON public.firmalar
+            FOR INSERT
+            TO authenticated
+            WITH CHECK (%s)',
+        check_expr
     );
+END $$;
 
 DO $$
 DECLARE
@@ -38,7 +76,7 @@ DECLARE
     ];
     grant_list text := '';
 BEGIN
-    SELECT array_agg(a.attname::text)
+    SELECT array_agg(a.attname::text ORDER BY a.attname::text)
     INTO cols
     FROM pg_catalog.pg_attribute a
     JOIN pg_catalog.pg_class c ON c.oid = a.attrelid

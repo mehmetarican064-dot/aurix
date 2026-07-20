@@ -61,6 +61,8 @@
     function mapUser(sessionUser, profile) {
         if (!sessionUser) return null;
         var meta = sessionUser.user_metadata || {};
+        var hesapTipi = (profile && profile.hesap_tipi) || 'normal';
+        if (hesapTipi !== 'firma') hesapTipi = 'normal';
         return {
             id: sessionUser.id,
             email: sessionUser.email || '',
@@ -68,6 +70,8 @@
                 (sessionUser.email ? sessionUser.email.split('@')[0] : 'Kullanıcı'),
             telefon: (profile && profile.telefon) || meta.telefon || '',
             role: (profile && profile.rol) || 'kullanici',
+            hesapTipi: hesapTipi,
+            isFirmaHesabi: hesapTipi === 'firma',
             emailConfirmed: !!(sessionUser.email_confirmed_at || sessionUser.confirmed_at)
         };
     }
@@ -75,15 +79,38 @@
     function profilYukle(userId) {
         var sb = getSb();
         if (!sb || !userId) return Promise.resolve(null);
-        return sb.from('profiles')
-            .select('id,ad_soyad,telefon,rol,created_at')
-            .eq('id', userId)
-            .maybeSingle()
+        function dene(cols) {
+            return sb.from('profiles')
+                .select(cols)
+                .eq('id', userId)
+                .maybeSingle();
+        }
+        return dene('id,ad_soyad,telefon,rol,hesap_tipi,created_at')
+            .then(function (res) {
+                if (res.error && /hesap_tipi|column/i.test(String(res.error.message || ''))) {
+                    return dene('id,ad_soyad,telefon,rol,created_at');
+                }
+                return res;
+            })
             .then(function (res) {
                 if (res.error) return null;
                 return res.data || null;
             })
             .catch(function () { return null; });
+    }
+
+    /** Profil / hesap tipini oturumdan yeniden yükler (firma hesabı sonrası). */
+    function refreshProfile() {
+        if (!currentUser || !currentUser.id) return Promise.resolve(null);
+        var sb = getSb();
+        if (!sb) return Promise.resolve(currentUser);
+        return sb.auth.getSession().then(function (res) {
+            var session = res && res.data ? res.data.session : null;
+            return setCurrentFromSession(session).then(function (u) {
+                notify();
+                return u;
+            });
+        }).catch(function () { return currentUser; });
     }
 
     function setCurrentFromSession(session) {
@@ -362,6 +389,7 @@
         resendSignupEmail: resendSignupEmail,
         getSession: getSession,
         getCurrentUser: getCurrentUser,
+        refreshProfile: refreshProfile,
         isAdmin: isAdmin,
         onAuthStateChange: onAuthStateChange,
         redirectUrl: redirectUrl

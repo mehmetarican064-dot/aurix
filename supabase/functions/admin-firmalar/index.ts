@@ -109,7 +109,7 @@ async function listeleBekleyen(admin: ReturnType<typeof createClient>) {
   return admin
     .from('firmalar')
     .select(
-      'id,firma_adi,sehir,kategori,aciklama,telefon,email,dogrulanmis,durum,owner_id,is_seed,created_at',
+      'id,firma_adi,sehir,kategori,aciklama,telefon,email,dogrulanmis,durum,user_id,is_seed,created_at',
     )
     .eq('durum', 'beklemede')
     .order('created_at', { ascending: false });

@@ -41,7 +41,7 @@
     <link rel="preconnect" href="https://svsouqnhtlpcpdvqahmd.supabase.co" crossorigin>
     <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/styles.css?v=11">
 </head>
 <body>
 
@@ -399,7 +399,7 @@
             <div class="kapsayici">
                 <header class="panel-header">
                     <div class="panel-header__sol">
-                        <h2 class="panel-header__baslik">Firma Paneli</h2>
+                        <h2 class="panel-header__baslik">Hesabım</h2>
                         <p class="panel-header__alt" id="panelUserGreeting">Hoş geldiniz</p>
                     </div>
                     <div class="panel-header__sag">
@@ -408,26 +408,28 @@
                 </header>
 
                 <div class="panel-beta-bar" role="note">
-                    <p class="panel-beta-bar__metin">İşlerinizi, gelirlerinizi ve tekliflerinizi tek panelden yönetin.</p>
+                    <p class="panel-beta-bar__metin">Canlı piyasayı takip edin, firmaları inceleyin veya iş talebi oluşturun.</p>
+                </div>
+
+                <div id="panelFirmaUyari" class="panel-firma-uyari" hidden>
+                    <p class="panel-firma-uyari__metin">İsterseniz firma hesabı oluşturarak iş almaya başlayabilirsiniz.</p>
+                    <button type="button" class="btn btn--gold btn--sm" id="panelFirmaOlusturBtn">Firma Hesabı Oluştur</button>
                 </div>
 
                 <nav class="panel-tabs" id="panelTabs" role="tablist" aria-label="Panel sekmeleri">
-                    <button type="button" class="panel-tab panel-tab--aktif" data-panel-tab="dashboard" role="tab" aria-selected="true">Dashboard</button>
-                    <button type="button" class="panel-tab" data-panel-tab="isler" role="tab" aria-selected="false">İşlerim</button>
-                    <button type="button" class="panel-tab" data-panel-tab="gelirler" role="tab" aria-selected="false">Gelirlerim</button>
-                    <button type="button" class="panel-tab" data-panel-tab="teklifler" role="tab" aria-selected="false">Teklifler</button>
-                    <button type="button" class="panel-tab" data-panel-tab="profil" role="tab" aria-selected="false">Firma Profili</button>
-                    <button type="button" class="panel-tab" data-panel-tab="performans" role="tab" aria-selected="false">Performans</button>
-                    <button type="button" class="panel-tab" data-panel-tab="ayarlar" role="tab" aria-selected="false">Ayarlar</button>
+                    <button type="button" class="panel-tab panel-tab--aktif" data-panel-tab="dashboard" role="tab" aria-selected="true">Ana Sayfa</button>
+                    <button type="button" class="panel-tab" data-panel-tab="islerim" role="tab" aria-selected="false">İş Taleplerim</button>
+                    <button type="button" class="panel-tab" data-panel-tab="mesajlar" role="tab" aria-selected="false">Mesajlar</button>
+                    <button type="button" class="panel-tab panel-tab--aksiyon" data-panel-tab="firma-olustur" role="tab" aria-selected="false">Firma Hesabı Oluştur</button>
                 </nav>
 
                 <div class="panel-icerik" id="panelIcerik">
                     <div class="panel-sekme panel-sekme--aktif" data-panel-icerik="dashboard" id="panelSekmeDashboard" role="tabpanel"></div>
-                    <div class="panel-sekme" data-panel-icerik="isler" id="panelSekmeIsler" role="tabpanel" hidden></div>
-                    <div class="panel-sekme" data-panel-icerik="gelirler" id="panelSekmeGelirler" role="tabpanel" hidden></div>
+                    <div class="panel-sekme" data-panel-icerik="islerim" id="panelSekmeIslerim" role="tabpanel" hidden></div>
+                    <div class="panel-sekme" data-panel-icerik="gelen" id="panelSekmeGelen" role="tabpanel" hidden></div>
                     <div class="panel-sekme" data-panel-icerik="teklifler" id="panelSekmeTeklifler" role="tabpanel" hidden></div>
                     <div class="panel-sekme" data-panel-icerik="profil" id="panelSekmeProfil" role="tabpanel" hidden></div>
-                    <div class="panel-sekme" data-panel-icerik="performans" id="panelSekmePerformans" role="tabpanel" hidden></div>
+                    <div class="panel-sekme" data-panel-icerik="mesajlar" id="panelSekmeMesajlar" role="tabpanel" hidden></div>
                     <div class="panel-sekme" data-panel-icerik="ayarlar" id="panelSekmeAyarlar" role="tabpanel" hidden></div>
                 </div>
             </div>
@@ -779,7 +781,7 @@
             <div class="footer__kolon">
                 <h4 class="footer__baslik">Destek</h4>
                 <nav class="footer__nav">
-                    <a href="#firma-basvuru" data-nav="firma-basvuru">Firma Başvurusu</a>
+                    <a href="#firma-basvuru" data-nav="firma-basvuru">Firma Hesabı Oluştur</a>
                     <a href="#hakkimizda" data-nav="hakkimizda">Hakkımızda</a>
                     <a href="#yardim" data-nav="yardim">Yardım Merkezi</a>
                     <a href="#sss" data-nav="sss">SSS</a>
@@ -948,47 +950,42 @@
         </div>
     </div>
 
-    <!-- FİRMA BAŞVURU MODAL -->
+    <!-- FİRMA HESABI OLUŞTUR MODAL -->
     <div class="modal" id="firmaBasvuruModal" role="dialog" aria-modal="true" aria-labelledby="firmaBasvuruBaslik">
         <div class="modal__kutu modal__kutu--uyelik">
             <div class="modal__baslik">
-                <h3 id="firmaBasvuruBaslik">Firma Başvurusu</h3>
+                <h3 id="firmaBasvuruBaslik">Firma Hesabı Oluştur</h3>
                 <button class="modal__kapat" data-modal-kapat="firmaBasvuruModal" aria-label="Kapat">×</button>
             </div>
-            <p class="giris-modal__metin">Atölyenizi AURIX ağına ekleyin. İnceleme sonrası vitrinde yer alırsınız.</p>
+            <p class="giris-modal__metin">İş almak istiyorsanız firma hesabınızı oluşturun. Onay sonrası vitrinde yer alırsınız. Doğrulama belgesi şimdilik gerekmez.</p>
             <form id="firmaBasvuruForm">
                 <div class="form-grup">
-                    <label class="form-label" for="firmaBasvuruAd">Firma / Atölye Adı</label>
+                    <label class="form-label" for="firmaBasvuruAd">Firma Adı</label>
                     <input class="form-input" type="text" id="firmaBasvuruAd" required maxlength="200" placeholder="Ticari unvanınız">
-                </div>
-                <div class="form-grup">
-                    <label class="form-label" for="firmaBasvuruKategori">Branş</label>
-                    <select class="form-select" id="firmaBasvuruKategori" required></select>
                 </div>
                 <div class="form-grup">
                     <label class="form-label" for="firmaBasvuruSehir">Şehir</label>
                     <select class="form-select" id="firmaBasvuruSehir" required></select>
                 </div>
                 <div class="form-grup">
-                    <label class="form-label" for="firmaBasvuruTel">Telefon numarası</label>
-                    <div class="tel-input" role="group" aria-label="Telefon numarası">
-                        <span class="tel-input__kod" aria-hidden="true">+90</span>
-                        <input class="form-input tel-input__alan" type="tel" id="firmaBasvuruTel"
-                            inputmode="tel" autocomplete="tel" required
-                            placeholder="5XX XXX XX XX" maxlength="13"
-                            aria-describedby="firmaBasvuruTelYardim">
-                    </div>
-                    <p class="form-yardim" id="firmaBasvuruTelYardim">Public profilde gösterilmez.</p>
+                    <label class="form-label" for="firmaBasvuruKategori">Hizmet Alanı</label>
+                    <select class="form-select" id="firmaBasvuruKategori" required></select>
                 </div>
                 <div class="form-grup">
-                    <label class="form-label" for="firmaBasvuruEmail">E-posta</label>
-                    <input class="form-input" type="email" id="firmaBasvuruEmail" required maxlength="120" placeholder="ornek@firma.com" autocomplete="email">
+                    <label class="form-label" for="firmaBasvuruAciklama">Firma Açıklaması</label>
+                    <textarea class="form-textarea" id="firmaBasvuruAciklama" rows="4" required maxlength="2000" placeholder="Uzmanlık alanlarınız, kapasite ve hizmet detayları..."></textarea>
                 </div>
                 <div class="form-grup">
-                    <label class="form-label" for="firmaBasvuruAciklama">Hizmet Detayları</label>
-                    <textarea class="form-textarea" id="firmaBasvuruAciklama" rows="4" required maxlength="2000" placeholder="Makine parkuru, kapasite, uzmanlık alanları..."></textarea>
+                    <label class="form-label" for="firmaBasvuruLogo">Logo</label>
+                    <input class="form-input" type="file" id="firmaBasvuruLogo" accept="image/jpeg,image/png,image/webp,image/gif">
+                    <p class="form-yardim">Opsiyonel. En fazla 5 MB (JPG, PNG, WebP).</p>
                 </div>
-                <button type="submit" class="btn btn--primary" style="width:100%">Başvuruyu Gönder</button>
+                <div class="form-grup">
+                    <label class="form-label" for="firmaBasvuruGorseller">Çalışma Görselleri</label>
+                    <input class="form-input" type="file" id="firmaBasvuruGorseller" accept="image/jpeg,image/png,image/webp,image/gif" multiple>
+                    <p class="form-yardim">Opsiyonel. En fazla 6 görsel.</p>
+                </div>
+                <button type="submit" class="btn btn--primary" style="width:100%">Firma Hesabını Oluştur</button>
             </form>
         </div>
     </div>
@@ -1124,12 +1121,12 @@
 
     <!-- UMD build: GitHub Pages’te window.supabase global’i için zorunlu -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.2/dist/umd/supabase.js" defer></script>
-    <script src="js/utils.js" defer></script>
-    <script src="js/data.js" defer></script>
-    <script src="js/supabase.js" defer></script>
-    <script src="js/authService.js" defer></script>
-    <script src="js/panels.js" defer></script>
-    <script src="js/market-service.js" defer></script>
-    <script src="js/app.js" defer></script>
+    <script src="js/utils.js?v=11" defer></script>
+    <script src="js/data.js?v=11" defer></script>
+    <script src="js/supabase.js?v=11" defer></script>
+    <script src="js/authService.js?v=11" defer></script>
+    <script src="js/panels.js?v=11" defer></script>
+    <script src="js/market-service.js?v=11" defer></script>
+    <script src="js/app.js?v=11" defer></script>
 </body>
 </html>
