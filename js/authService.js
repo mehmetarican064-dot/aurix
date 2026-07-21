@@ -15,17 +15,62 @@
     var lastAuthEvent = null;
     var pendingAuthIntent = null;
 
-    var SITE_ORIGIN = 'https://aurixb2b.com';
-    var EMAIL_CONFIRM_REDIRECT = SITE_ORIGIN + '/?auth=confirmed';
-    var PASSWORD_RECOVERY_REDIRECT = SITE_ORIGIN + '/?auth=recovery';
-
     var MSG_DOGRULAMA =
-        'E-posta adresinize doğrulama bağlantısı gönderildi. Bağlantıyı açtıktan sonra giriş yapın.';
+        'E-posta adresinize doğrulama bağlantısı gönderildi. Bağlantıyı açtığınızda hesabınız doğrulanır ve otomatik olarak giriş yapılır.';
     var MSG_SIFRE_LINK =
         'Şifre sıfırlama bağlantısı e-posta adresinize gönderildi. Gelen kutunuzu (ve spam klasörünü) kontrol edin.';
 
+    var authStateSubscribed = false;
+    var urlCallbackDone = false;
+
+    /**
+     * Auth redirect tabanı — ortama göre (hardcoded production yok).
+     * - localhost / 127.0.0.1 → mevcut origin (port dahil)
+     * - *.github.io → origin + repo path (project pages)
+     * - aurixb2b.com / www → https://aurixb2b.com
+     * - diğer → mevcut origin
+     */
+    function resolveAuthBase() {
+        try {
+            var loc = global.location;
+            if (!loc || !loc.protocol || loc.protocol === 'file:') {
+                return 'https://aurixb2b.com';
+            }
+            var host = String(loc.hostname || '').toLowerCase();
+            var origin = String(loc.origin || '');
+
+            if (host === 'localhost' || host === '127.0.0.1' || host === '[::1]') {
+                return origin.replace(/\/$/, '');
+            }
+
+            if (host === 'aurixb2b.com' || host === 'www.aurixb2b.com') {
+                return 'https://aurixb2b.com';
+            }
+
+            if (/\.github\.io$/i.test(host)) {
+                var parts = String(loc.pathname || '/').split('/').filter(Boolean);
+                if (parts.length >= 1 && !/\.(html?|js|css|png|jpg|svg|webp|ico)$/i.test(parts[0])) {
+                    return (origin + '/' + parts[0]).replace(/\/$/, '');
+                }
+                return origin.replace(/\/$/, '');
+            }
+
+            return origin.replace(/\/$/, '') || 'https://aurixb2b.com';
+        } catch (e) {
+            return 'https://aurixb2b.com';
+        }
+    }
+
     function redirectUrl() {
-        return SITE_ORIGIN;
+        return resolveAuthBase();
+    }
+
+    function emailConfirmRedirect() {
+        return resolveAuthBase() + '/?auth=confirmed';
+    }
+
+    function passwordRecoveryRedirect() {
+        return resolveAuthBase() + '/?auth=recovery';
     }
 
     function getSb() {
@@ -116,7 +161,7 @@
             displayName: (profile && profile.ad_soyad) || meta.ad_soyad || meta.full_name ||
                 (sessionUser.email ? sessionUser.email.split('@')[0] : 'Kullanıcı'),
             telefon: (profile && profile.telefon) || meta.telefon || '',
-            role: (profile && profile.rol) || 'kullanici',
+            role: (profile && profile.role) || 'user',
             hesapTipi: hesapTipi,
             isFirmaHesabi: hesapTipi === 'firma',
             emailConfirmed: emailOnayliMi(sessionUser)
@@ -132,15 +177,21 @@
                 .eq('id', userId)
                 .maybeSingle();
         }
-        return dene('id,ad_soyad,telefon,rol,hesap_tipi,created_at')
+        return dene('id,ad_soyad,telefon,role,hesap_tipi,created_at')
             .then(function (res) {
                 if (res.error && /hesap_tipi|column/i.test(String(res.error.message || ''))) {
-                    return dene('id,ad_soyad,telefon,rol,created_at');
+                    return dene('id,ad_soyad,telefon,role,created_at');
                 }
                 return res;
             })
             .then(function (res) {
-                if (res.error) return null;
+                if (res.error && /role|column|PGRST/i.test(String(res.error.message || ''))) {
+                    return null;
+                }
+                return res;
+            })
+            .then(function (res) {
+                if (!res || res.error) return null;
                 return res.data || null;
             })
             .catch(function () { return null; });
@@ -196,38 +247,180 @@
             var typeH = (hash.get('type') || search.get('type') || '').toLowerCase();
 
             if (authQ === 'recovery' || typeH === 'recovery') return 'recovery';
-            if (authQ === 'confirmed' || typeH === 'signup' || typeH === 'email' || typeH === 'magiclink') {
+            if (authQ === 'confirmed' || typeH === 'signup' || typeH === 'email' ||
+                typeH === 'magiclink' || typeH === 'invite') {
                 return 'confirmed';
             }
-            if (hash.get('access_token') && typeH) return typeH === 'recovery' ? 'recovery' : 'confirmed';
+            if (search.get('code') && !typeH) return 'confirmed';
+            if (hash.get('access_token') && typeH) {
+                return typeH === 'recovery' ? 'recovery' : 'confirmed';
+            }
         } catch (e) { /* ignore */ }
         return null;
+    }
+
+    function authCallbackParamsVarMi() {
+        try {
+            var search = new URLSearchParams(global.location.search || '');
+            var hash = new URLSearchParams(String(global.location.hash || '').replace(/^#/, ''));
+            return !!(
+                search.get('code') ||
+                search.get('token_hash') ||
+                search.get('error') ||
+                search.get('error_description') ||
+                hash.get('access_token') ||
+                hash.get('error') ||
+                hash.get('error_description') ||
+                hash.get('type')
+            );
+        } catch (e) {
+            return false;
+        }
     }
 
     function cleanAuthUrl() {
         try {
             var url = new URL(global.location.href);
             var dirty = false;
-            ['auth', 'code', 'type', 'error', 'error_description', 'error_code'].forEach(function (k) {
+            [
+                'auth', 'code', 'type', 'token_hash', 'error', 'error_description', 'error_code'
+            ].forEach(function (k) {
                 if (url.searchParams.has(k)) {
                     url.searchParams.delete(k);
                     dirty = true;
                 }
             });
-            if (url.hash && /(access_token|refresh_token|type=|error=)/i.test(url.hash)) {
+            if (url.hash && /(access_token|refresh_token|type=|error=|token_type=)/i.test(url.hash)) {
                 url.hash = '';
                 dirty = true;
             }
             if (dirty && global.history && typeof global.history.replaceState === 'function') {
-                global.history.replaceState({}, document.title, url.pathname + url.search);
+                var next = url.pathname + (url.search || '');
+                if (!next || next === '') next = '/';
+                global.history.replaceState({}, document.title, next);
             }
         } catch (e) { /* ignore */ }
+    }
+
+    /**
+     * Doğrulama / OAuth dönüşü:
+     * 1) URLSearchParams → code
+     * 2) code varsa exchangeCodeForSession
+     * 3) başarılıysa URL temizle + getSession
+     */
+    function recoverSessionFromUrl(sb) {
+        if (!sb) return Promise.resolve(null);
+        if (urlCallbackDone) {
+            return sb.auth.getSession().then(function (res) {
+                return res && res.data ? res.data.session : null;
+            });
+        }
+
+        var params = new URLSearchParams(global.location.search || '');
+        var hash = new URLSearchParams(String(global.location.hash || '').replace(/^#/, ''));
+        var errDesc = params.get('error_description') || hash.get('error_description') ||
+            params.get('error') || hash.get('error');
+
+        if (errDesc) {
+            urlCallbackDone = true;
+            try { console.error('auth callback', errDesc); } catch (e) { /* ignore */ }
+            cleanAuthUrl();
+            return Promise.resolve(null);
+        }
+
+        var code = params.get('code');
+        var tokenHash = params.get('token_hash');
+        var otpType = (params.get('type') || hash.get('type') || '').toLowerCase();
+        var authHint = String(params.get('auth') || '').toLowerCase();
+
+        function markIntent() {
+            if (pendingAuthIntent) return;
+            if (otpType === 'recovery' || authHint === 'recovery') {
+                pendingAuthIntent = 'recovery';
+            } else if (code || tokenHash || authHint === 'confirmed' ||
+                otpType === 'signup' || otpType === 'email' || otpType === 'invite') {
+                pendingAuthIntent = 'confirmed';
+            }
+        }
+
+        function finishWithSession(session) {
+            urlCallbackDone = true;
+            markIntent();
+            cleanAuthUrl();
+            return session || null;
+        }
+
+        /* 1–2) code varsa tek seferlik exchange (PKCE code bir kez tüketilir) */
+        if (code) {
+            urlCallbackDone = true;
+            markIntent();
+            return sb.auth.exchangeCodeForSession(code).then(function (ex) {
+                if (ex.error) {
+                    try { console.error('exchangeCodeForSession', ex.error); } catch (e) { /* ignore */ }
+                    cleanAuthUrl();
+                    return sb.auth.getSession().then(function (res) {
+                        return (res && res.data ? res.data.session : null) || null;
+                    });
+                }
+                var session = ex.data && ex.data.session;
+                cleanAuthUrl();
+                return sb.auth.getSession().then(function (res) {
+                    var s2 = res && res.data ? res.data.session : null;
+                    return s2 || session || null;
+                });
+            }).catch(function (err) {
+                try { console.error('exchangeCodeForSession', err); } catch (e) { /* ignore */ }
+                cleanAuthUrl();
+                return sb.auth.getSession().then(function (res) {
+                    return res && res.data ? res.data.session : null;
+                });
+            });
+        }
+
+        /* token_hash (alternatif e-posta şablonu) */
+        if (tokenHash && otpType) {
+            return sb.auth.verifyOtp({ token_hash: tokenHash, type: otpType }).then(function (vr) {
+                if (vr.error) {
+                    try { console.error('verifyOtp', vr.error); } catch (e) { /* ignore */ }
+                    urlCallbackDone = true;
+                    cleanAuthUrl();
+                    return null;
+                }
+                finishWithSession(vr.data && vr.data.session);
+                return sb.auth.getSession().then(function (res) {
+                    return (res && res.data && res.data.session) || (vr.data && vr.data.session) || null;
+                });
+            }).catch(function (err) {
+                try { console.error('verifyOtp', err); } catch (e) { /* ignore */ }
+                urlCallbackDone = true;
+                cleanAuthUrl();
+                return null;
+            });
+        }
+
+        /* 4) Normal / kalıcı oturum */
+        return sb.auth.getSession().then(function (res) {
+            var session = res && res.data ? res.data.session : null;
+            if (authHint || hash.get('access_token')) {
+                markIntent();
+                if (hash.get('access_token') || authHint) cleanAuthUrl();
+                urlCallbackDone = true;
+            }
+            return session || null;
+        }).catch(function () {
+            urlCallbackDone = true;
+            return null;
+        });
     }
 
     function consumeAuthIntent() {
         var intent = pendingAuthIntent;
         pendingAuthIntent = null;
         return intent;
+    }
+
+    function peekAuthIntent() {
+        return pendingAuthIntent;
     }
 
     function getLastAuthEvent() {
@@ -244,13 +437,9 @@
 
         pendingAuthIntent = parseAuthIntentFromLocation();
 
-        readyPromise = sb.auth.getSession().then(function (res) {
-            var session = res && res.data ? res.data.session : null;
-            return setCurrentFromSession(session);
-        }).catch(function () {
-            currentUser = null;
-            return null;
-        }).then(function (user) {
+        /* Listener’ı exchange’den önce bağla — SIGNED_IN kaçmasın */
+        if (!authStateSubscribed) {
+            authStateSubscribed = true;
             sb.auth.onAuthStateChange(function (event, session) {
                 lastAuthEvent = event;
                 if (event === 'PASSWORD_RECOVERY') {
@@ -265,10 +454,17 @@
                     notify(event);
                 });
             });
+        }
 
-            /* URL’deki token işlendikten sonra temizle (oturum localStorage’da kalır) */
-            cleanAuthUrl();
-            return user;
+        readyPromise = recoverSessionFromUrl(sb).then(function (session) {
+            /* Her durumda getSession ile doğrula */
+            return sb.auth.getSession().then(function (res) {
+                var s = (res && res.data && res.data.session) || session || null;
+                return setCurrentFromSession(s);
+            });
+        }).catch(function () {
+            currentUser = null;
+            return null;
         });
 
         return readyPromise;
@@ -304,7 +500,7 @@
             email: email,
             password: password,
             options: {
-                emailRedirectTo: EMAIL_CONFIRM_REDIRECT,
+                emailRedirectTo: emailConfirmRedirect(),
                 data: {
                     ad_soyad: adSoyad,
                     telefon: telefon || null
@@ -437,7 +633,7 @@
             type: 'signup',
             email: email,
             options: {
-                emailRedirectTo: EMAIL_CONFIRM_REDIRECT
+                emailRedirectTo: emailConfirmRedirect()
             }
         }).then(function (res) {
             if (res.error) return { ok: false, error: turkceAuthHata(res.error) };
@@ -473,7 +669,7 @@
             return Promise.resolve({ ok: false, error: 'Bağlantı kurulamadı. Sayfayı yenileyip tekrar deneyin.' });
         }
         return sb.auth.resetPasswordForEmail(email, {
-            redirectTo: PASSWORD_RECOVERY_REDIRECT
+            redirectTo: passwordRecoveryRedirect()
         }).then(function (res) {
             if (res.error) return { ok: false, error: turkceAuthHata(res.error) };
             /* Güvenlik: e-posta yoksa da aynı mesaj (enumeration engeli) */
@@ -563,9 +759,14 @@
         isAdmin: isAdmin,
         onAuthStateChange: onAuthStateChange,
         redirectUrl: redirectUrl,
+        emailConfirmRedirect: emailConfirmRedirect,
+        passwordRecoveryRedirect: passwordRecoveryRedirect,
+        resolveAuthBase: resolveAuthBase,
         consumeAuthIntent: consumeAuthIntent,
+        peekAuthIntent: peekAuthIntent,
         getLastAuthEvent: getLastAuthEvent,
-        EMAIL_CONFIRM_REDIRECT: EMAIL_CONFIRM_REDIRECT,
-        PASSWORD_RECOVERY_REDIRECT: PASSWORD_RECOVERY_REDIRECT
+        get EMAIL_CONFIRM_REDIRECT() { return emailConfirmRedirect(); },
+        get PASSWORD_RECOVERY_REDIRECT() { return passwordRecoveryRedirect(); },
+        get SITE_ORIGIN() { return resolveAuthBase(); }
     };
 })(typeof window !== 'undefined' ? window : this);

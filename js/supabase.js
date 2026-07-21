@@ -79,7 +79,8 @@
             auth: {
                 persistSession: true,
                 autoRefreshToken: true,
-                detectSessionInUrl: true,
+                /* Manuel exchangeCodeForSession (authService) — çift PKCE tüketimini önle */
+                detectSessionInUrl: false,
                 storage: global.localStorage,
                 flowType: 'pkce'
             }
@@ -351,8 +352,13 @@
             }
 
             return firmaSorgula(
-                'id,firma_adi,sehir,kategori,aciklama,telefon,durum,dogrulanmis,created_at,user_id,logo_url,kapak_url,calisma_gorselleri'
+                'id,firma_adi,sehir,kategori,aciklama,telefon,durum,dogrulanmis,created_at,user_id,logo_url,kapak_url,calisma_gorselleri,red_nedeni,askiya_alindi,askiya_alma_nedeni'
             ).then(function (res) {
+                if (res.error && /red_nedeni|askiya_alindi|askiya_alma_nedeni|kapak_url|logo_url|calisma_gorselleri|telefon|column|PGRST/i.test(String(res.error.message || ''))) {
+                    return firmaSorgula('id,firma_adi,sehir,kategori,aciklama,telefon,durum,dogrulanmis,created_at,user_id,logo_url,kapak_url,calisma_gorselleri');
+                }
+                return res;
+            }).then(function (res) {
                 if (res.error && /kapak_url|logo_url|calisma_gorselleri|telefon|column|PGRST/i.test(String(res.error.message || ''))) {
                     return firmaSorgula('id,firma_adi,sehir,kategori,aciklama,durum,dogrulanmis,created_at,user_id,logo_url');
                 }
@@ -449,18 +455,27 @@
                 error: 'Bağlantı kurulamadı. Sayfayı yenileyip tekrar deneyin.'
             });
         }
-        function sorgu(filtreSeed) {
+        function sorgu(filtreSeed, filtreAski) {
             var q = sb.from('firmalar')
                 .select(FIRMA_PUBLIC_SELECT)
                 .eq('dogrulanmis', true)
                 .eq('durum', 'onaylandi');
+            if (filtreAski) q = q.eq('askiya_alindi', false);
             if (filtreSeed) q = seedFiltreUygula(q);
             return q.order('created_at', { ascending: false });
         }
 
-        return sorgu(true).then(function (res) {
+        return sorgu(true, true).then(function (res) {
+            if (res.error && /askiya_alindi/i.test(String(res.error.message || ''))) {
+                return sorgu(true, false);
+            }
             if (res.error && sutunEksikMi(res.error)) {
-                return sorgu(false);
+                return sorgu(false, true).then(function (r2) {
+                    if (r2.error && /askiya_alindi/i.test(String(r2.error.message || ''))) {
+                        return sorgu(false, false);
+                    }
+                    return r2;
+                });
             }
             return res;
         }).then(function (res) {
@@ -473,7 +488,9 @@
                 };
             }
             var satirlar = (res.data || []).filter(function (row) {
-                return row && row.dogrulanmis === true;
+                if (!row || row.dogrulanmis !== true) return false;
+                if (row.askiya_alindi === true) return false;
+                return true;
             });
             return { ok: true, data: satirlar };
         }).catch(function (err) {

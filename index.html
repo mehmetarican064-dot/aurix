@@ -41,7 +41,8 @@
     <link rel="preconnect" href="https://svsouqnhtlpcpdvqahmd.supabase.co" crossorigin>
     <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/styles.css?v=13">
+    <link rel="stylesheet" href="css/styles.css?v=19">
+    <link rel="stylesheet" href="css/admin.css?v=19">
 </head>
 <body>
 
@@ -436,126 +437,36 @@
         </section>
     </div>
 
-    <!-- ===================== ADMIN (pasif iskelet) ===================== -->
+    <!-- ===================== ADMIN (gizli rota: #admin / /admin) ===================== -->
     <div class="sayfa" data-sayfa="admin" hidden>
         <section class="bolum bolum--admin bolum--panel">
-            <div class="kapsayici">
-                <header class="panel-header panel-header--admin">
-                    <div class="panel-header__sol">
-                        <h2 class="panel-header__baslik">Yönetim Paneli</h2>
-                        <p class="panel-header__alt">Aurix Yönetim Paneli</p>
+            <div class="kapsayici" id="apRoot">
+                <div class="ap-shell">
+                    <aside class="ap-sidebar" id="apSidebar" aria-label="Admin menü">
+                        <div class="ap-sidebar__marka">AURIX ADMIN</div>
+                        <nav class="ap-nav">
+                            <button type="button" class="ap-nav__item ap-nav__item--aktif" data-ap-bolum="genel">Genel Bakış</button>
+                            <button type="button" class="ap-nav__item" data-ap-bolum="onaylar">Firma Onayları</button>
+                            <button type="button" class="ap-nav__item" data-ap-bolum="firmalar">Firmalar</button>
+                            <button type="button" class="ap-nav__item" data-ap-bolum="kullanicilar">Kullanıcılar</button>
+                            <button type="button" class="ap-nav__item" data-ap-bolum="isler">İş Talepleri</button>
+                            <button type="button" class="ap-nav__item" data-ap-bolum="teklifler">Teklifler</button>
+                            <button type="button" class="ap-nav__item" data-ap-bolum="sikayetler">Şikâyetler</button>
+                            <button type="button" class="ap-nav__item" data-ap-bolum="islemler">İşlem Kayıtları</button>
+                            <button type="button" class="ap-nav__item" data-ap-bolum="sistem">Sistem Durumu</button>
+                            <div class="ap-nav__ayrac" aria-hidden="true"></div>
+                            <button type="button" class="ap-nav__item" data-ap-siteye-don="1">Siteye Dön</button>
+                            <button type="button" class="ap-nav__item" data-ap-cikis="1">Çıkış Yap</button>
+                        </nav>
+                    </aside>
+                    <div class="ap-main">
+                        <header class="ap-ust">
+                            <button type="button" class="ap-menu-toggle" id="apMenuToggle" aria-label="Menüyü aç">Menü</button>
+                            <h1 class="ap-ust__baslik" id="apUstBaslik">Genel Bakış</h1>
+                            <span class="ap-muted" id="apUstKullanici"></span>
+                        </header>
+                        <div class="ap-icerik" id="apIcerik" aria-live="polite"></div>
                     </div>
-                    <div class="panel-header__sag" id="adminHeaderSag" hidden>
-                        <span class="panel-header__merhaba">Merhaba Admin</span>
-                        <button type="button" class="btn btn--ghost btn--sm" id="adminPanelCikisBtn">Çıkış</button>
-                    </div>
-                </header>
-
-                <div class="panel-beta-bar panel-beta-bar--admin" role="note">
-                    <p class="panel-beta-bar__metin">Bekleyen firmalar admin fonksiyonu üzerinden gelir. Token’ı bir kez girin (oturum deposu). Canlıda Auth + admin rolü kullanılmalıdır.</p>
-                    <div class="admin-demo-bar__aksiyon">
-                        <button type="button" class="btn btn--ghost btn--xs" id="adminTokenBtn">Admin Token</button>
-                        <button type="button" class="btn btn--danger-outline btn--xs" id="demoSifirlaBtn">Verileri Sıfırla</button>
-                    </div>
-                </div>
-
-                <nav class="panel-tabs" id="adminPanelTabs" role="tablist" aria-label="Admin sekmeleri">
-                    <button type="button" class="panel-tab panel-tab--aktif" data-admin-tab="firmalar" role="tab" aria-selected="true">Bekleyen Firmalar</button>
-                    <button type="button" class="panel-tab" data-admin-tab="is-talepleri" role="tab" aria-selected="false">Bekleyen İş Talepleri</button>
-                    <button type="button" class="panel-tab" data-admin-tab="malzemeler" role="tab" aria-selected="false">Bekleyen Malzemeler</button>
-                    <button type="button" class="panel-tab" data-admin-tab="kullanicilar" role="tab" aria-selected="false">Kullanıcılar</button>
-                    <button type="button" class="panel-tab" data-admin-tab="raporlar" role="tab" aria-selected="false">Raporlar</button>
-                </nav>
-
-                <div class="panel-icerik">
-                    <div class="panel-sekme panel-sekme--aktif" data-admin-icerik="firmalar" role="tabpanel">
-
-                <div class="admin-ozet">
-                    <div class="admin-kart">
-                        <div class="admin-kart__ikon" aria-hidden="true">🏢</div>
-                        <div class="admin-kart__etiket">Toplam Firma</div>
-                        <div class="admin-kart__sayi" id="adminToplam">0</div>
-                    </div>
-                    <div class="admin-kart admin-kart--uyari">
-                        <div class="admin-kart__ikon" aria-hidden="true">⏳</div>
-                        <div class="admin-kart__etiket">Onay Bekleyen</div>
-                        <div class="admin-kart__sayi" id="adminBekleyen">0</div>
-                    </div>
-                    <div class="admin-kart admin-kart--yesil">
-                        <div class="admin-kart__ikon" aria-hidden="true">✓</div>
-                        <div class="admin-kart__etiket">Onaylı</div>
-                        <div class="admin-kart__sayi" id="adminOnayli">0</div>
-                    </div>
-                    <div class="admin-kart">
-                        <div class="admin-kart__ikon" aria-hidden="true">◆</div>
-                        <div class="admin-kart__etiket">Partner</div>
-                        <div class="admin-kart__sayi" id="adminPartner">0</div>
-                    </div>
-                    <div class="admin-kart admin-kart--premium">
-                        <div class="admin-kart__ikon" aria-hidden="true">★</div>
-                        <div class="admin-kart__etiket">Premium</div>
-                        <div class="admin-kart__sayi" id="adminPremium">0</div>
-                    </div>
-                </div>
-
-                <section class="admin-gelir" aria-labelledby="adminGelirBaslik">
-                    <div class="admin-gelir__ust">
-                        <h3 class="admin-gelir__baslik" id="adminGelirBaslik">Gelir Özeti</h3>
-                        <p class="admin-gelir__not">Gelir alanları bilgilendirme amaçlıdır; ödeme entegrasyonu henüz aktif değildir.</p>
-                    </div>
-
-                    <div class="admin-gelir__kartlar">
-                        <div class="admin-gelir-kart">
-                            <div class="admin-gelir-kart__ikon" aria-hidden="true">📋</div>
-                            <div class="admin-gelir-kart__etiket">Aylık Üyelik Geliri</div>
-                            <div class="admin-gelir-kart__tutar" id="adminGelirUyelik">₺0</div>
-                        </div>
-                        <div class="admin-gelir-kart admin-gelir-kart--premium">
-                            <div class="admin-gelir-kart__ikon" aria-hidden="true">★</div>
-                            <div class="admin-gelir-kart__etiket">Premium Üyelik Geliri</div>
-                            <div class="admin-gelir-kart__tutar" id="adminGelirPremium">₺0</div>
-                        </div>
-                        <div class="admin-gelir-kart admin-gelir-kart--partner">
-                            <div class="admin-gelir-kart__ikon" aria-hidden="true">◆</div>
-                            <div class="admin-gelir-kart__etiket">Partner/Sponsor Geliri</div>
-                            <div class="admin-gelir-kart__tutar" id="adminGelirPartner">₺0</div>
-                        </div>
-                        <div class="admin-gelir-kart">
-                            <div class="admin-gelir-kart__ikon" aria-hidden="true">%</div>
-                            <div class="admin-gelir-kart__etiket">Komisyon Geliri</div>
-                            <div class="admin-gelir-kart__tutar" id="adminGelirKomisyon">₺0</div>
-                        </div>
-                    </div>
-
-                    <div class="admin-gelir__toplam">
-                        <div class="admin-gelir-toplam">
-                            <span class="admin-gelir-toplam__etiket">Toplam Tahmini Aylık Gelir</span>
-                            <span class="admin-gelir-toplam__tutar" id="adminGelirAylik">₺0</span>
-                        </div>
-                        <div class="admin-gelir-toplam admin-gelir-toplam--yillik">
-                            <span class="admin-gelir-toplam__etiket">Toplam Tahmini Yıllık Gelir</span>
-                            <span class="admin-gelir-toplam__tutar" id="adminGelirYillik">₺0</span>
-                        </div>
-                    </div>
-                </section>
-
-                <div class="admin-toolbar">
-                    <input type="text" class="admin-arama filtre-input" id="adminAramaInput" placeholder="Firma, şehir, e-posta ara...">
-                    <button type="button" class="btn btn--ghost btn--sm" id="adminBekleyenYenileBtn">Yenile</button>
-                </div>
-
-                <div id="adminBekleyenListe" class="admin-bekleyen-liste" aria-live="polite"></div>
-
-                <aside class="admin-demo-info">
-                    <h3 class="admin-demo-info__baslik">Sistem Notu</h3>
-                    <p class="admin-demo-info__metin">Onay/red yalnızca admin fonksiyonu ve oturum token’ı ile yapılır. Telefon/e-posta yalnızca bu gizli admin ekranında görünür.</p>
-                </aside>
-
-                    </div>
-                    <div class="panel-sekme" data-admin-icerik="is-talepleri" id="adminSekmeIsTalepleri" role="tabpanel" hidden></div>
-                    <div class="panel-sekme" data-admin-icerik="malzemeler" id="adminSekmeMalzemeler" role="tabpanel" hidden></div>
-                    <div class="panel-sekme" data-admin-icerik="kullanicilar" id="adminSekmeKullanicilar" role="tabpanel" hidden></div>
-                    <div class="panel-sekme" data-admin-icerik="raporlar" id="adminSekmeRaporlar" role="tabpanel" hidden></div>
                 </div>
             </div>
         </section>
@@ -1144,12 +1055,14 @@
 
     <!-- UMD build: GitHub Pages’te window.supabase global’i için zorunlu -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.2/dist/umd/supabase.js" defer></script>
-    <script src="js/utils.js?v=13" defer></script>
-    <script src="js/data.js?v=13" defer></script>
-    <script src="js/supabase.js?v=13" defer></script>
-    <script src="js/authService.js?v=13" defer></script>
-    <script src="js/panels.js?v=13" defer></script>
-    <script src="js/market-service.js?v=13" defer></script>
-    <script src="js/app.js?v=13" defer></script>
+    <script src="js/utils.js?v=19" defer></script>
+    <script src="js/data.js?v=19" defer></script>
+    <script src="js/supabase.js?v=19" defer></script>
+    <script src="js/authService.js?v=19" defer></script>
+    <script src="js/panels.js?v=19" defer></script>
+    <script src="js/market-service.js?v=19" defer></script>
+    <script src="js/admin-service.js?v=19" defer></script>
+    <script src="js/admin.js?v=19" defer></script>
+    <script src="js/app.js?v=19" defer></script>
 </body>
 </html>

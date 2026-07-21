@@ -36,14 +36,6 @@ window.AURIX_DATA = {
 
     SEHIRLER: ['İSTANBUL', 'İZMİR', 'ANKARA', 'BURSA', 'DENİZLİ', 'KAHRAMANMARAŞ', 'TRABZON', 'GAZİANTEP', 'ADANA', 'KONYA'],
 
-    PIYASA_DEMO: {
-        dolar: { etiket: 'DOLAR ($)', deger: '34,18', birim: 'TL', degisim: '+0,12' },
-        euro: { etiket: 'EURO (€)', deger: '37,42', birim: 'TL', degisim: '-0,05' },
-        hasAltin: { etiket: 'HAS ALTIN', deger: '3.124', birim: 'TL', degisim: '+18' },
-        ons: { etiket: 'ONS', deger: '2.338', birim: '$', degisim: '+4,2' },
-        gumus: { etiket: 'GÜMÜŞ', deger: '38,42', birim: 'TL', degisim: '-0,28' }
-    },
-
     /* Firma vitrini filtre grupları (chip) */
     FILTRE_GRUPLARI: [
         { id: '', baslik: 'Tümü', kategoriler: null },

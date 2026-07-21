@@ -6,9 +6,9 @@
     'use strict';
 
     var STORAGE_KEY = 'aurix_beta_v03_firms';
-    // Admin panel v1.0'da Supabase Auth + profiles.role='admin' ile etkinleştirilecek.
-    var ADMIN_PANEL_ENABLED = false;
-    // TODO: Supabase Auth sonrası devAdmin parametresi tamamen kaldırılacak.
+    // Admin: yalnızca profiles.role = 'admin' (AuthService.isAdmin).
+    // ?devAdmin=1 yalnızca Edge Function token testi için; panel içeriği RPC ile gelir.
+    var ADMIN_PANEL_ENABLED = true;
     var devAdminMode = false;
     /** Tanıtım videosu sunum modu — yalnızca ?demoVideo=1 */
     var demoVideoMode = false;
@@ -129,7 +129,20 @@
     }
 
     function isAdminSession() {
-        return devAdminMode || (ADMIN_PANEL_ENABLED && AuthService.isAdmin());
+        if (window.AuthService && typeof AuthService.isAdmin === 'function' && AuthService.isAdmin()) {
+            return true;
+        }
+        return false;
+    }
+
+    function adminRouteIsteniyorMu() {
+        try {
+            var path = String(window.location.pathname || '').replace(/\/+$/, '');
+            if (/\/admin$/i.test(path)) return true;
+            var hash = String(window.location.hash || '').replace(/^#/, '').split('?')[0];
+            if (hash === 'admin') return true;
+        } catch (e) { /* ignore */ }
+        return false;
     }
 
     function renderDevAdminBanner() {
@@ -826,7 +839,7 @@
     var piyasaVeriGeldi = false;
 
     function piyasaBosMesaj() {
-        return '<div class="piyasa-hata" role="status">Piyasa verilerine şu anda ulaşılamıyor.</div>';
+        return '<div class="piyasa-hata" role="status">Piyasa verileri güncellenemiyor.</div>';
     }
 
     function renderPiyasaBandi() {
@@ -862,7 +875,7 @@
         var filtered = quotes && quotes.length ? piyasaFiltreliKotasyonlar() : [];
         if (!filtered.length) {
             body.innerHTML = piyasaVeriGeldi
-                ? '<div class="hero-terminal__yukleniyor">' + esc('Piyasa verilerine şu anda ulaşılamıyor.') + '</div>'
+                ? '<div class="hero-terminal__yukleniyor">' + esc('Piyasa verileri güncellenemiyor.') + '</div>'
                 : '<div class="hero-terminal__yukleniyor">Piyasa verileri yükleniyor…</div>';
             return;
         }
@@ -904,15 +917,13 @@
                 renderHeroTerminal([]);
             }
         }, 8000);
-        marketService = MarketService.create('mock', { intervalMs: 5000 });
+        marketService = MarketService.create('live', { intervalMs: 60000 });
         marketService.subscribe(function (quotes) {
             marketQuotes = quotes || [];
-            if (marketQuotes.length) {
-                piyasaVeriGeldi = true;
-                if (piyasaYuklemeTimeout) {
-                    clearTimeout(piyasaYuklemeTimeout);
-                    piyasaYuklemeTimeout = null;
-                }
+            piyasaVeriGeldi = true;
+            if (piyasaYuklemeTimeout) {
+                clearTimeout(piyasaYuklemeTimeout);
+                piyasaYuklemeTimeout = null;
             }
             renderPiyasaBandi();
             renderHeroTerminal(quotes);
@@ -924,6 +935,13 @@
             if (marketService) marketService.stop();
             if (piyasaYuklemeTimeout) clearTimeout(piyasaYuklemeTimeout);
         });
+    }
+
+    function getMarketStatus() {
+        if (!marketService || typeof marketService.getStatus !== 'function') {
+            return { ok: false, checked: !!window.MarketService, detail: 'Piyasa servisi yok', lastUpdate: null };
+        }
+        return marketService.getStatus();
     }
 
     function sponsorFirmalar() {
@@ -2255,7 +2273,7 @@
                 return '<tr class="admin-tablo__satir">' +
                     '<td><span class="admin-tablo__firma">' + esc(u.ad || '—') + '</span></td>' +
                     '<td><span class="admin-tablo__meta">' + esc(u.email || '—') + '</span></td>' +
-                    '<td><span class="admin-tablo__meta">' + esc(u.rol || '—') + '</span></td>' +
+                    '<td><span class="admin-tablo__meta">' + esc(u.role || '—') + '</span></td>' +
                     '<td><span class="admin-tablo__meta">' + esc(u.sehir || '—') + '</span></td>' +
                     '<td><span class="admin-tablo__meta">' + esc(u.kayit || '—') + '</span></td>' +
                     '<td>' + adminKullaniciDurumHtml(u) + '</td></tr>';
@@ -2301,26 +2319,17 @@
     }
 
     function renderAdminUI() {
-        var link = $('navAdmin');
-        var btn = $('adminGirisBtn');
-        var headerSag = $('adminHeaderSag');
-        var merhaba = headerSag ? headerSag.querySelector('.panel-header__merhaba, .admin-header__merhaba') : null;
         var adminSayfa = document.querySelector('[data-sayfa="admin"]');
-        var adminBetaBar = document.querySelector('[data-sayfa="admin"] .panel-beta-bar--admin');
-        if (link) {
-            link.hidden = true;
-            link.setAttribute('aria-hidden', 'true');
-        }
-        if (btn) btn.hidden = true;
         renderDevAdminBanner();
-        if (adminSayfa) adminSayfa.hidden = !isAdminSession();
-        if (adminBetaBar) adminBetaBar.hidden = devAdminMode;
-        if (!isAdminSession()) {
-            if (headerSag) headerSag.hidden = true;
-            return;
+        if (adminSayfa) {
+            /* Admin sayfa DOM’da kalır ama yalnızca yetkili oturumda aktif sınıf alır */
+            adminSayfa.hidden = false;
         }
-        if (merhaba) merhaba.textContent = devAdminMode ? 'Geliştirme modu' : 'Merhaba Admin';
-        if (headerSag) headerSag.hidden = false;
+        var ustKul = document.getElementById('apUstKullanici');
+        if (ustKul && window.AuthService) {
+            var u = AuthService.getCurrentUser();
+            ustKul.textContent = (u && isAdminSession()) ? (u.displayName || u.email || '') : '';
+        }
     }
 
     function renderNavAuth() {
@@ -2534,7 +2543,8 @@
         var rozetler = $('detayRozetler');
         if (rozetler) {
             rozetler.innerHTML =
-                (firma.durum === 'onaylandi' ? '<span class="rozet rozet--dogrulandi">Doğrulandı</span>' : '') +
+                (firma.durum === 'onaylandi' && firma.dogrulanmis && !firma.askiya_alindi
+                    ? '<span class="rozet rozet--dogrulandi">Doğrulandı</span>' : '') +
                 (firma.premium ? '<span class="rozet rozet--premium">PREMIUM</span>' : '') +
                 (firma.sponsor ? '<span class="rozet rozet--partner">PARTNER</span>' : '');
         }
@@ -2746,7 +2756,11 @@
             modalKapat(m.id);
         });
         if (id === 'admin') {
-            if (!isAdminSession()) return;
+            if (!isAdminSession()) {
+                toast('Bu alana erişim yetkiniz bulunmuyor.', 'error');
+                id = 'ana-sayfa';
+                if (window.AurixAdmin && AurixAdmin.panelKapat) AurixAdmin.panelKapat();
+            }
         }
         if (id === 'panel') {
             var user = window.AuthService ? AuthService.getCurrentUser() : null;
@@ -2786,10 +2800,11 @@
         });
         window.scrollTo({ top: 0, behavior: 'smooth' });
         if (id === 'admin') {
-            PanelUI.renderAdminSkeleton();
-            yukleAdminBekleyenFirmalar();
-            renderAdminTablo();
-            renderAdminModeration();
+            if (window.AurixAdmin && typeof AurixAdmin.panelAc === 'function') {
+                AurixAdmin.panelAc();
+            }
+        } else if (window.AurixAdmin && AurixAdmin.panelKapat) {
+            AurixAdmin.panelKapat();
         }
         if (id === 'malzeme') renderMalzemePazari();
         if (id === 'piyasa') {
@@ -3186,6 +3201,11 @@
     // ================================================================
 
     function init() {
+        /* PKCE code başka sorgudan önce tüketilsin — AuthService ilk */
+        var authBoot = (window.AuthService && typeof AuthService.init === 'function')
+            ? AuthService.init()
+            : Promise.resolve(null);
+
         initDevAdminMode();
         initDemoVideoMode();
         StorageAdapter.init();
@@ -3199,13 +3219,39 @@
         initMarketService();
         tumunuRenderEt({ skipPiyasa: true });
 
+        var emailConfirmBekleniyor = false;
+        var authAppListenerBound = false;
+
+        function emailDogrulamaSonrasi(user) {
+            if (!user) return;
+            emailConfirmBekleniyor = false;
+            toast('E-posta adresiniz doğrulandı. Hoş geldiniz!', 'success');
+            pendingFirmaGonder().then(function () {
+                paneleYonlendir();
+            });
+        }
+
         function authHazirSonrasi() {
             renderNavAuth();
+            renderAdminUI();
             yukleCanliVerilerSupabase();
-            if (isAdminSession()) {
-                PanelUI.renderAdminSkeleton();
-                renderAdminModeration();
-                yukleAdminBekleyenFirmalar();
+            if (window.AurixAdmin && typeof AurixAdmin.init === 'function') {
+                AurixAdmin.init();
+            }
+            if (adminRouteIsteniyorMu()) {
+                if (isAdminSession()) {
+                    sayfaGoster('admin');
+                } else {
+                    toast('Bu alana erişim yetkiniz bulunmuyor.', 'error');
+                    sayfaGoster('ana-sayfa');
+                    try {
+                        var temiz = window.location.pathname + (window.location.search || '');
+                        if (/\/admin$/i.test(String(window.location.pathname || '').replace(/\/+$/, ''))) {
+                            temiz = temiz.replace(/\/admin\/?$/i, '/') || '/';
+                        }
+                        window.history.replaceState({}, '', temiz);
+                    } catch (e) { /* ignore */ }
+                }
             }
         }
 
@@ -3218,42 +3264,69 @@
                 toast('Yeni şifrenizi belirleyin.', 'info');
                 return;
             }
-            if (intent === 'confirmed' && user) {
-                toast('E-posta adresiniz doğrulandı. Hoş geldiniz!', 'success');
-                pendingFirmaGonder().then(function () {
-                    paneleYonlendir();
-                });
+            if (intent === 'confirmed') {
+                if (user && user.id) {
+                    emailDogrulamaSonrasi(user);
+                    return;
+                }
+                emailConfirmBekleniyor = true;
+                setTimeout(function () {
+                    if (!emailConfirmBekleniyor) return;
+                    var uLate = window.AuthService ? AuthService.getCurrentUser() : null;
+                    if (uLate && uLate.id) {
+                        emailDogrulamaSonrasi(uLate);
+                        return;
+                    }
+                    emailConfirmBekleniyor = false;
+                    toast('E-posta adresiniz doğrulandı. Devam etmek için giriş yapın.', 'info');
+                    uyelikModalAc('giris');
+                }, 2800);
                 return;
             }
-            /* Oturum kalıcı — sayfa yenilemede tekrar giriş isteme; sadece nav güncelle */
             if (user) {
                 pendingFirmaGonder();
             }
         }
 
-        if (window.AuthService && typeof AuthService.init === 'function') {
-            AuthService.init().then(function (user) {
-                authHazirSonrasi();
-                authIntentIsle(user);
-            }).catch(authHazirSonrasi);
-            if (typeof AuthService.onAuthStateChange === 'function') {
-                AuthService.onAuthStateChange(function (user, event) {
-                    renderNavAuth();
-                    renderAdminUI();
-                    if (event === 'PASSWORD_RECOVERY') {
-                        sifreYenileFormGoster();
-                        return;
+        if (!authAppListenerBound && window.AuthService && typeof AuthService.onAuthStateChange === 'function') {
+            authAppListenerBound = true;
+            AuthService.onAuthStateChange(function (user, event) {
+                renderNavAuth();
+                renderAdminUI();
+                if (event === 'PASSWORD_RECOVERY') {
+                    sifreYenileFormGoster();
+                    return;
+                }
+                if (event === 'SIGNED_IN' && user && user.id) {
+                    if (emailConfirmBekleniyor) {
+                        emailDogrulamaSonrasi(user);
+                    } else {
+                        pendingFirmaGonder();
                     }
-                    if (user && user.id) pendingFirmaGonder();
-                    /* Oturum düştüyse paneldeyse ana sayfaya dön */
-                    if (!user && state.aktifSayfa === 'panel' && !demoVideoMode) {
-                        sayfaGoster('ana-sayfa');
-                    }
-                });
-            }
-        } else {
-            authHazirSonrasi();
+                } else if (emailConfirmBekleniyor && user && user.id &&
+                    (event === 'INITIAL_SESSION' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED')) {
+                    emailDogrulamaSonrasi(user);
+                } else if (user && user.id) {
+                    pendingFirmaGonder();
+                }
+                if (!user && state.aktifSayfa === 'panel' && !demoVideoMode) {
+                    sayfaGoster('ana-sayfa');
+                }
+                if ((!user || !isAdminSession()) && state.aktifSayfa === 'admin') {
+                    toast('Bu alana erişim yetkiniz bulunmuyor.', 'error');
+                    sayfaGoster('ana-sayfa');
+                }
+            });
         }
+
+        authBoot.then(function (user) {
+            authHazirSonrasi();
+            authIntentIsle(user);
+            if (emailConfirmBekleniyor) {
+                var u2 = AuthService.getCurrentUser();
+                if (u2 && u2.id) emailDogrulamaSonrasi(u2);
+            }
+        }).catch(authHazirSonrasi);
 
         setInterval(heroTerminalSaatGuncelle, 1000);
         setInterval(yukleAcikIsTalepleriSupabase, 30000);
@@ -3715,7 +3788,17 @@
 
         renderAdminUI();
 
-        if (devAdminMode) {
+        window.addEventListener('hashchange', function () {
+            if (adminRouteIsteniyorMu()) {
+                if (isAdminSession()) sayfaGoster('admin');
+                else {
+                    toast('Bu alana erişim yetkiniz bulunmuyor.', 'error');
+                    sayfaGoster('ana-sayfa');
+                }
+            }
+        });
+
+        if (devAdminMode && isAdminSession()) {
             sayfaGoster('admin');
         }
     }
@@ -3730,7 +3813,8 @@
         renderAdminModeration: renderAdminModeration,
         isDemoVideoMode: isDemoVideoMode,
         firmaBasvuruModalAc: firmaBasvuruModalAc,
-        isTalepModalAc: isTalepModalAc
+        isTalepModalAc: isTalepModalAc,
+        getMarketStatus: getMarketStatus
     };
 
     document.addEventListener('DOMContentLoaded', init);

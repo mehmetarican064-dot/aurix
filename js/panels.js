@@ -166,30 +166,39 @@
         var f = (veri && veri.firma) || null;
         var teklifler = (veri && veri.teklifler) || [];
         var durum = f ? (f.durum || (f.dogrulanmis ? 'onaylandi' : 'beklemede')) : 'beklemede';
-        var incelemede = !f || durum === 'beklemede' ||
-            (f && !f.dogrulanmis && durum !== 'onaylandi' && durum !== 'reddedildi');
-        var onayli = !!(f && (durum === 'onaylandi' || f.dogrulanmis === true));
+        var aski = !!(f && f.askiya_alindi);
+        var incelemede = !aski && (!f || durum === 'beklemede' ||
+            (f && !f.dogrulanmis && durum !== 'onaylandi' && durum !== 'reddedildi'));
+        var onayli = !aski && !!(f && (durum === 'onaylandi' || f.dogrulanmis === true));
 
         var durumKutu = '';
-        if (incelemede) {
+        if (aski) {
+            durumKutu = '<div class="fp-basvuru-durum fp-basvuru-durum--red" role="status">' +
+                '<strong class="fp-basvuru-durum__baslik">Firma hesabınız geçici olarak askıya alındı.</strong>' +
+                '<p class="fp-basvuru-durum__metin">' +
+                esc(f.askiya_alma_nedeni || 'Detay için destek ile iletişime geçin.') +
+                '</p></div>';
+        } else if (incelemede) {
             durumKutu = '<div class="fp-basvuru-durum fp-basvuru-durum--beklemede" role="status">' +
-                '<strong class="fp-basvuru-durum__baslik">Firma başvurunuz incelemede</strong>' +
-                '<p class="fp-basvuru-durum__metin">Başvurunuz alındı' +
+                '<strong class="fp-basvuru-durum__baslik">Firma hesabınız inceleniyor.</strong>' +
+                '<p class="fp-basvuru-durum__metin">Onaylandığında işlere teklif verebilir ve firma listenizde görünür olabilirsiniz.' +
                 (f && f.firma_adi ? ' (' + esc(f.firma_adi) + ')' : '') +
-                '. Admin onayından sonra Firmalar sayfasında görüneceksiniz.</p>' +
-                '</div>';
+                '</p></div>';
         } else if (durum === 'reddedildi') {
             durumKutu = '<div class="fp-basvuru-durum fp-basvuru-durum--red" role="status">' +
-                '<strong class="fp-basvuru-durum__baslik">Başvuru reddedildi</strong>' +
-                '<p class="fp-basvuru-durum__metin">Destek için iletişim formunu kullanabilirsiniz.</p>' +
-                '</div>';
+                '<strong class="fp-basvuru-durum__baslik">Firma başvurunuz onaylanmadı.</strong>' +
+                '<p class="fp-basvuru-durum__metin">' +
+                esc(f.red_nedeni || 'Başvurunuz mevcut kriterlere uygun bulunmadı.') +
+                '</p>' +
+                '<p class="fp-aksiyon-satir" style="margin-top:10px">' +
+                '<button type="button" class="btn btn--gold btn--sm" data-panel-aksiyon="firma-yeniden">Bilgileri Düzenle ve Yeniden Gönder</button>' +
+                '</p></div>';
         } else if (onayli) {
             durumKutu = '<div class="fp-basvuru-durum fp-basvuru-durum--onay" role="status">' +
-                '<strong class="fp-basvuru-durum__baslik">Firma hesabınız aktif</strong>' +
+                '<strong class="fp-basvuru-durum__baslik">Firma hesabınız onaylandı.</strong>' +
                 '<p class="fp-basvuru-durum__metin">' +
                 esc(f && f.firma_adi ? f.firma_adi : 'Firmanız') +
-                ' vitrinde yayınlandı.</p>' +
-                '</div>';
+                ' doğrulanmış firma olarak listede görünür.</p></div>';
         }
 
         return '<div class="fp-karsilama fp-karsilama--firma">' +
@@ -279,15 +288,31 @@
             onaylandi: 'Onaylandı',
             reddedildi: 'Reddedildi'
         };
+        if (f.askiya_alindi) durumInsan[durumEtiket] = 'Askıda';
         var logoHtml = f.logo_url
             ? '<img class="fp-profil-logo" src="' + esc(f.logo_url) + '" alt="" width="72" height="72">'
             : '';
         var kapakHtml = f.kapak_url
             ? '<div class="fp-profil-kapak"><img src="' + esc(f.kapak_url) + '" alt="" loading="lazy"></div>'
             : '';
-        var incelemeNotu = (durumEtiket === 'beklemede')
-            ? '<p class="fp-basvuru-durum fp-basvuru-durum--beklemede" style="margin-top:12px">Firma başvurunuz incelemede. Onaylanmadan Firmalar sayfasında görünmezsiniz.</p>'
-            : '';
+        var incelemeNotu = '';
+        if (f.askiya_alindi) {
+            incelemeNotu = '<div class="fp-basvuru-durum fp-basvuru-durum--red" style="margin-top:12px" role="status">' +
+                '<strong>Firma hesabınız geçici olarak askıya alındı.</strong>' +
+                '<p>' + esc(f.askiya_alma_nedeni || '') + '</p></div>';
+        } else if (durumEtiket === 'beklemede') {
+            incelemeNotu = '<p class="fp-basvuru-durum fp-basvuru-durum--beklemede" style="margin-top:12px">' +
+                'Firma hesabınız inceleniyor. Onaylandığında işlere teklif verebilir ve firma listenizde görünür olabilirsiniz.</p>';
+        } else if (durumEtiket === 'reddedildi') {
+            incelemeNotu = '<div class="fp-basvuru-durum fp-basvuru-durum--red" style="margin-top:12px" role="status">' +
+                '<strong>Firma başvurunuz onaylanmadı.</strong>' +
+                '<p>' + esc(f.red_nedeni || '') + '</p>' +
+                '<button type="button" class="btn btn--gold btn--sm" data-panel-aksiyon="firma-yeniden">Bilgileri Düzenle ve Yeniden Gönder</button>' +
+                '</div>';
+        } else if (durumEtiket === 'onaylandi' && f.dogrulanmis) {
+            incelemeNotu = '<p class="fp-basvuru-durum fp-basvuru-durum--onay" style="margin-top:12px">' +
+                'Firma hesabınız onaylandı. Doğrulanmış firma rozeti aktiftir.</p>';
+        }
 
         return '<div class="fp-profil-grid">' +
             '<article class="fp-profil-kart fp-profil-kart--ana">' +
@@ -364,6 +389,23 @@
             if (global.Aurix && typeof Aurix.firmaBasvuruModalAc === 'function') {
                 Aurix.firmaBasvuruModalAc();
             }
+            return;
+        }
+        if (aksiyon === 'firma-yeniden') {
+            if (!global.AurixAdminService || typeof AurixAdminService.firmaYenidenBasvur !== 'function') {
+                toastInfo('Yeniden başvuru servisi hazır değil.');
+                return;
+            }
+            AurixAdminService.firmaYenidenBasvur().then(function (res) {
+                if (!res.ok) {
+                    if (global.Aurix && Aurix.toast) Aurix.toast(res.error || 'İşlem başarısız.', 'error');
+                    return;
+                }
+                if (global.Aurix && Aurix.toast) {
+                    Aurix.toast('Başvurunuz yeniden incelemeye alındı.', 'success');
+                }
+                renderUserPanel();
+            });
             return;
         }
         if (aksiyon === 'acik-isler') {
