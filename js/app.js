@@ -176,12 +176,12 @@
         var temiz = Object.assign({}, firma);
         if (temiz.gorsel) {
             var g = safeImageUrl(temiz.gorsel, '');
-            if (!g || g.indexOf('assets/') !== 0) delete temiz.gorsel;
+            if (!g) delete temiz.gorsel;
             else temiz.gorsel = g;
         }
         if (temiz.logo) {
             var l = safeImageUrl(temiz.logo, '');
-            if (!l || l.indexOf('assets/') !== 0) delete temiz.logo;
+            if (!l) delete temiz.logo;
             else temiz.logo = l;
         }
         return temiz;
@@ -306,7 +306,7 @@
             }
             pendingFirmaSil();
             toast('Firma hesabınız oluşturuldu. İnceleme sonrası yayınlanır.', 'success');
-            if (typeof yukleCanliVerilerSupabase === 'function') yukleCanliVerilerSupabase();
+            if (typeof yukleCanliVerilerSupabase === 'function') yukleCanliVerilerSupabase({ force: true });
             if (window.AuthService && typeof AuthService.refreshProfile === 'function') {
                 AuthService.refreshProfile();
             }
@@ -410,7 +410,7 @@
     function firmaKapakGorsel(firma) {
         if (firma && firma.gorsel) {
             var yerel = safeImageUrl(firma.gorsel, '');
-            if (yerel && yerel.indexOf('assets/') === 0) return yerel;
+            if (yerel) return yerel;
         }
         return firmaKategoriGorseli(firma);
     }
@@ -613,7 +613,7 @@
         var el = $('detayLogo');
         if (!el) return;
         var logoSrc = firma.logo ? safeImageUrl(firma.logo, '') : '';
-        if (logoSrc && logoSrc.indexOf('assets/') === 0) {
+        if (logoSrc) {
             el.innerHTML = '<img class="detay-logo__img aurix-img-fallback" src="' + esc(logoSrc) + '" alt="" width="72" height="72" loading="lazy" decoding="async" data-fallback-final="' + esc(AurixUtils.PH_MARKER) + '">';
         } else {
             el.innerHTML = '<span class="detay-logo__harf">' + esc(firmaBasHarfleri(firma.ad)) + '</span>';
@@ -1180,6 +1180,8 @@
             tel: '',
             email: '',
             aciklama: row.aciklama || '',
+            logo: row.logo_url || '',
+            gorsel: row.kapak_url || row.logo_url || '',
             premium: false,
             sponsor: false,
             durum: row.durum === 'onaylandi' || row.dogrulanmis === true ? 'onaylandi' : (row.durum || 'onaylandi'),
@@ -1253,6 +1255,9 @@
         }).catch(function () { /* sayılar opsiyonel */ });
     }
 
+    var firmalarYukleInFlight = null;
+    var isTalepleriYukleInFlight = null;
+
     function yukleAcikIsTalepleriSupabase() {
         var varsayilanHata = 'Açık iş talepleri yüklenemedi. Lütfen daha sonra tekrar deneyin.';
 
@@ -1268,10 +1273,12 @@
             renderIsTalepleri();
             return Promise.resolve();
         }
+        if (isTalepleriYukleInFlight) return isTalepleriYukleInFlight;
 
         state.isTalepleriYukleniyor = true;
-        return AurixSupabase.getirAcikIsTalepleri().then(function (res) {
+        isTalepleriYukleInFlight = AurixSupabase.getirAcikIsTalepleri().then(function (res) {
             state.isTalepleriYukleniyor = false;
+            isTalepleriYukleInFlight = null;
             if (!res || !res.ok) {
                 state.isTalepleriHata = (res && res.error) ? String(res.error) : varsayilanHata;
                 state.liveIsTalepleri = [];
@@ -1284,10 +1291,12 @@
             return yukleTeklifSayilariSupabase();
         }).catch(function () {
             state.isTalepleriYukleniyor = false;
+            isTalepleriYukleInFlight = null;
             state.isTalepleriHata = varsayilanHata;
             state.liveIsTalepleri = [];
             renderIsTalepleri();
         });
+        return isTalepleriYukleInFlight;
     }
 
     function yukleFirmalarSupabase() {
@@ -1311,10 +1320,12 @@
             renderSponsorAnaSayfa();
             return Promise.resolve();
         }
+        if (firmalarYukleInFlight) return firmalarYukleInFlight;
 
         state.firmalarYukleniyor = true;
-        return AurixSupabase.getirDogrulanmisFirmalar().then(function (res) {
+        firmalarYukleInFlight = AurixSupabase.getirDogrulanmisFirmalar().then(function (res) {
             state.firmalarYukleniyor = false;
+            firmalarYukleInFlight = null;
             if (!res || !res.ok) {
                 state.firmalarHata = (res && res.error) ? String(res.error) : varsayilanHata;
                 state.liveFirmalar = [];
@@ -1332,6 +1343,7 @@
             renderSponsorAnaSayfa();
         }).catch(function () {
             state.firmalarYukleniyor = false;
+            firmalarYukleInFlight = null;
             state.firmalarHata = varsayilanHata;
             state.liveFirmalar = [];
             renderVitrin();
@@ -1339,12 +1351,40 @@
             renderKategoriGruplari();
             renderSponsorAnaSayfa();
         });
+        return firmalarYukleInFlight;
     }
 
-    function yukleCanliVerilerSupabase() {
-        yukleHeroIstatistiklerSupabase();
-        yukleFirmalarSupabase();
-        yukleAcikIsTalepleriSupabase();
+    var canliVeriYuklendi = false;
+    var canliVeriInFlight = null;
+
+    function heroIstatistikCanliListeden() {
+        state.istatistikYukleniyor = false;
+        var firmaN = Array.isArray(state.liveFirmalar) ? state.liveFirmalar.length : 0;
+        var isN = Array.isArray(state.liveIsTalepleri) ? state.liveIsTalepleri.length : 0;
+        state.liveIstatistik = { firma: firmaN, isTalep: isN };
+        renderHeroIstatistikler({ firma: firmaN, isTalep: isN });
+    }
+
+    function yukleCanliVerilerSupabase(opts) {
+        opts = opts || {};
+        /* Sayfa açılışında bir kez; zorla yenileme yalnızca opts.force ile */
+        if (canliVeriYuklendi && !opts.force) {
+            return canliVeriInFlight || Promise.resolve();
+        }
+        if (canliVeriInFlight) return canliVeriInFlight;
+        canliVeriYuklendi = true;
+        /* Ayrı istatistik COUNT yok — firmalar/is_talepleri en fazla 1’er GET */
+        canliVeriInFlight = Promise.all([
+            yukleFirmalarSupabase(),
+            yukleAcikIsTalepleriSupabase()
+        ]).then(function () {
+            heroIstatistikCanliListeden();
+            canliVeriInFlight = null;
+        }).catch(function () {
+            heroIstatistikCanliListeden();
+            canliVeriInFlight = null;
+        });
+        return canliVeriInFlight;
     }
 
     function firmaKartAnaProHtml(firma, kapakAttrs) {
@@ -1918,6 +1958,11 @@
         var firmaBasvuruSehir = $('firmaBasvuruSehir');
         if (firmaBasvuruSehir) firmaBasvuruSehir.innerHTML = sehirOpts;
 
+        var firmaProfilKat = $('firmaProfilKategori');
+        if (firmaProfilKat) firmaProfilKat.innerHTML = opts;
+        var firmaProfilSehir = $('firmaProfilSehir');
+        if (firmaProfilSehir) firmaProfilSehir.innerHTML = sehirOpts;
+
         var isTalepKat = $('isTalepKategori');
         if (isTalepKat) isTalepKat.innerHTML = opts;
         var isTalepSehir = $('isTalepSehir');
@@ -2149,7 +2194,7 @@
             }
             toast(res.message || 'Firma onaylandı.', 'success');
             yukleAdminBekleyenFirmalar();
-            yukleCanliVerilerSupabase();
+            yukleCanliVerilerSupabase({ force: true });
         });
     }
 
@@ -2387,6 +2432,132 @@
         baglaTelInput('firmaBasvuruTel');
         renderKategoriSelectler();
         modalAc('firmaBasvuruModal');
+    }
+
+    function firmaProfilFormHazirla(firma) {
+        if (!firma || !firma.id) return;
+        renderKategoriSelectler();
+        var sehirEl = $('firmaProfilSehir');
+        var katEl = $('firmaProfilKategori');
+        if (sehirEl && firma.sehir) {
+            sehirEl.value = firma.sehir;
+            if (sehirEl.value !== firma.sehir) {
+                var opt = document.createElement('option');
+                opt.value = firma.sehir;
+                opt.textContent = firma.sehir;
+                sehirEl.appendChild(opt);
+                sehirEl.value = firma.sehir;
+            }
+        }
+        if (katEl && firma.kategori) {
+            var hedef = firma.kategori;
+            var found = false;
+            Array.prototype.forEach.call(katEl.options, function (o) {
+                if (o.value === hedef || o.textContent === hedef) {
+                    katEl.value = o.value;
+                    found = true;
+                }
+            });
+            if (!found) {
+                var opt2 = document.createElement('option');
+                opt2.value = hedef;
+                opt2.textContent = hedef;
+                katEl.appendChild(opt2);
+                katEl.value = hedef;
+            }
+        }
+        baglaTelInput('firmaProfilTel');
+        var form = $('firmaProfilDuzenleForm');
+        if (form && !form.getAttribute('data-bound')) {
+            form.setAttribute('data-bound', '1');
+            form.addEventListener('submit', firmaProfilGonder);
+        }
+    }
+
+    function firmaProfilGonder(e) {
+        e.preventDefault();
+        var ad = ($('firmaProfilAd') && $('firmaProfilAd').value || '').trim();
+        var aciklama = ($('firmaProfilAciklama') && $('firmaProfilAciklama').value || '').trim();
+        var kategoriId = $('firmaProfilKategori') ? $('firmaProfilKategori').value : '';
+        var sehir = $('firmaProfilSehir') ? $('firmaProfilSehir').value : '';
+        var telDigits = normalizeTrCepDigits(($('firmaProfilTel') && $('firmaProfilTel').value) || '');
+        var yeniden = ($('firmaProfilYeniden') && $('firmaProfilYeniden').value) === '1';
+        var logoInput = $('firmaProfilLogo');
+        var kapakInput = $('firmaProfilKapak');
+
+        if ($('firmaProfilTel')) {
+            $('firmaProfilTel').value = formatTrCepDisplay(telDigits);
+        }
+
+        var hata = firmaBasvuruDogrula(ad, aciklama, telDigits);
+        if (hata) { toast(hata, 'error'); return; }
+        if (!kategoriId || !sehir) {
+            toast('Şehir ve hizmet kategorisi seçin.', 'error');
+            return;
+        }
+        if (!window.AurixSupabase || typeof AurixSupabase.guncelleFirma !== 'function') {
+            toast('Profil güncelleme şu anda kullanılamıyor.', 'error');
+            return;
+        }
+
+        var submitBtn = $('firmaProfilKaydetBtn');
+        if (submitBtn) submitBtn.disabled = true;
+
+        var kategoriAd = kategoriId;
+        if (window.AURIX_DATA && AURIX_DATA.KATEGORILER) {
+            var katBul = AURIX_DATA.KATEGORILER.find(function (k) { return k.id === kategoriId; });
+            if (katBul) kategoriAd = katBul.ad;
+        }
+
+        var logoFile = logoInput && logoInput.files && logoInput.files[0] ? logoInput.files[0] : null;
+        var kapakFile = kapakInput && kapakInput.files && kapakInput.files[0] ? kapakInput.files[0] : null;
+        var logoPromise = logoFile
+            ? AurixSupabase.yukleFirmaMedya(logoFile, 'logo')
+            : Promise.resolve({ ok: true, url: undefined });
+        var kapakPromise = kapakFile
+            ? AurixSupabase.yukleFirmaMedya(kapakFile, 'kapak')
+            : Promise.resolve({ ok: true, url: undefined });
+
+        Promise.all([logoPromise, kapakPromise]).then(function (sonuclar) {
+            var payload = {
+                firma_adi: ad,
+                kategori: kategoriAd,
+                sehir: sehir,
+                aciklama: aciklama,
+                telefon: toE164TrCep(telDigits),
+                yenidenBasvur: yeniden
+            };
+            if (logoFile) {
+                payload.logo_url = (sonuclar[0] && sonuclar[0].ok && sonuclar[0].url) || undefined;
+                if (logoFile && !payload.logo_url) {
+                    toast('Logo yüklenemedi. Diğer bilgiler kaydedilecek.', 'info');
+                    delete payload.logo_url;
+                }
+            }
+            if (kapakFile) {
+                payload.kapak_url = (sonuclar[1] && sonuclar[1].ok && sonuclar[1].url) || undefined;
+                if (kapakFile && !payload.kapak_url) {
+                    toast('Kapak yüklenemedi. Diğer bilgiler kaydedilecek.', 'info');
+                    delete payload.kapak_url;
+                }
+            }
+            return AurixSupabase.guncelleFirma(payload);
+        }).then(function (res) {
+            if (submitBtn) submitBtn.disabled = false;
+            if (!res || !res.ok) {
+                toast((res && res.error) || 'Profil güncellenemedi.', 'error');
+                return;
+            }
+            toast(yeniden
+                ? 'Bilgileriniz güncellendi ve başvuru yeniden incelemeye alındı.'
+                : 'Firma profiliniz güncellendi.', 'success');
+            if (window.PanelUI && typeof PanelUI.renderUserPanel === 'function') {
+                PanelUI.renderUserPanel();
+            }
+        }).catch(function () {
+            if (submitBtn) submitBtn.disabled = false;
+            toast('Bağlantı hatası. Lütfen tekrar deneyin.', 'error');
+        });
     }
 
     function isTalepModalAc() {
@@ -3201,6 +3372,8 @@
     // ================================================================
 
     function init() {
+        if (init.started) return;
+        init.started = true;
         /* PKCE code başka sorgudan önce tüketilsin — AuthService ilk */
         var authBoot = (window.AuthService && typeof AuthService.init === 'function')
             ? AuthService.init()
@@ -3297,6 +3470,7 @@
                     sifreYenileFormGoster();
                     return;
                 }
+                /* TOKEN_REFRESHED / USER_UPDATED veri yüklemez — sonsuz RPC/GET döngüsü önlenir */
                 if (event === 'SIGNED_IN' && user && user.id) {
                     if (emailConfirmBekleniyor) {
                         emailDogrulamaSonrasi(user);
@@ -3304,10 +3478,8 @@
                         pendingFirmaGonder();
                     }
                 } else if (emailConfirmBekleniyor && user && user.id &&
-                    (event === 'INITIAL_SESSION' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED')) {
+                    (event === 'INITIAL_SESSION' || event === 'USER_UPDATED')) {
                     emailDogrulamaSonrasi(user);
-                } else if (user && user.id) {
-                    pendingFirmaGonder();
                 }
                 if (!user && state.aktifSayfa === 'panel' && !demoVideoMode) {
                     sayfaGoster('ana-sayfa');
@@ -3329,8 +3501,7 @@
         }).catch(authHazirSonrasi);
 
         setInterval(heroTerminalSaatGuncelle, 1000);
-        setInterval(yukleAcikIsTalepleriSupabase, 30000);
-        setInterval(yukleFirmalarSupabase, 30000);
+        /* firmalar / iş talepleri periyodik yok — yalnızca açılışta yukleCanliVerilerSupabase */
 
         PanelUI.bindTabs();
         applyDemoVideoUi();
@@ -3813,6 +3984,7 @@
         renderAdminModeration: renderAdminModeration,
         isDemoVideoMode: isDemoVideoMode,
         firmaBasvuruModalAc: firmaBasvuruModalAc,
+        firmaProfilFormHazirla: firmaProfilFormHazirla,
         isTalepModalAc: isTalepModalAc,
         getMarketStatus: getMarketStatus
     };

@@ -22,6 +22,8 @@
 
     var authStateSubscribed = false;
     var urlCallbackDone = false;
+    var ensureProfileUserId = null;
+    var ensureProfileInFlight = null;
 
     /**
      * Auth redirect tabanı — ortama göre (hardcoded production yok).
@@ -197,28 +199,42 @@
             .catch(function () { return null; });
     }
 
-    /** profiles satırını garanti et (RPC yoksa sadece SELECT). */
-    function ensureProfil(sessionUser) {
+    /** profiles satırını garanti et (RPC yoksa sadece SELECT). Aynı uid için tekrar RPC yok. */
+    function ensureProfil(sessionUser, opts) {
+        opts = opts || {};
         if (!sessionUser || !sessionUser.id) return Promise.resolve(null);
+        var uid = sessionUser.id;
+        if (!opts.force && ensureProfileUserId === uid) {
+            return profilYukle(uid);
+        }
+        if (ensureProfileInFlight && ensureProfileUserId === uid) {
+            return ensureProfileInFlight;
+        }
         var sb = getSb();
         if (!sb) return Promise.resolve(null);
 
-        return sb.rpc('ensure_own_profile').then(function (res) {
+        ensureProfileUserId = uid;
+        ensureProfileInFlight = sb.rpc('ensure_own_profile').then(function (res) {
+            ensureProfileInFlight = null;
             if (!res.error && res.data) {
                 return Array.isArray(res.data) ? (res.data[0] || null) : res.data;
             }
-            return profilYukle(sessionUser.id);
+            return profilYukle(uid);
         }).catch(function () {
-            return profilYukle(sessionUser.id);
+            ensureProfileInFlight = null;
+            return profilYukle(uid);
         });
+        return ensureProfileInFlight;
     }
 
-    function setCurrentFromSession(session) {
+    function setCurrentFromSession(session, opts) {
+        opts = opts || {};
         if (!session || !session.user) {
             currentUser = null;
+            ensureProfileUserId = null;
             return Promise.resolve(null);
         }
-        return ensureProfil(session.user).then(function (profile) {
+        return ensureProfil(session.user, opts).then(function (profile) {
             currentUser = mapUser(session.user, profile);
             return currentUser;
         });
@@ -447,7 +463,12 @@
                 }
                 if (event === 'SIGNED_OUT') {
                     currentUser = null;
+                    ensureProfileUserId = null;
                     notify(event);
+                    return;
+                }
+                /* Token yenilemede ensure_own_profile / notify yok — network fırtınası engeli */
+                if (event === 'TOKEN_REFRESHED') {
                     return;
                 }
                 setCurrentFromSession(session).then(function () {
@@ -713,14 +734,23 @@
 
     function refreshProfile() {
         if (!currentUser || !currentUser.id) return Promise.resolve(null);
-        var sb = getSb();
-        if (!sb) return Promise.resolve(currentUser);
-        return sb.auth.getSession().then(function (res) {
-            var session = res && res.data ? res.data.session : null;
-            return setCurrentFromSession(session).then(function (u) {
-                notify('USER_UPDATED');
-                return u;
+        var prev = currentUser;
+        return profilYukle(prev.id).then(function (profile) {
+            currentUser = mapUser({
+                id: prev.id,
+                email: prev.email,
+                email_confirmed_at: prev.emailConfirmed ? '1' : null,
+                user_metadata: {
+                    ad_soyad: prev.displayName,
+                    telefon: prev.telefon
+                }
+            }, profile || {
+                ad_soyad: prev.displayName,
+                telefon: prev.telefon,
+                role: prev.role,
+                hesap_tipi: prev.hesapTipi
             });
+            return currentUser;
         }).catch(function () { return currentUser; });
     }
 

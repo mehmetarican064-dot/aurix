@@ -307,11 +307,65 @@
             incelemeNotu = '<div class="fp-basvuru-durum fp-basvuru-durum--red" style="margin-top:12px" role="status">' +
                 '<strong>Firma başvurunuz onaylanmadı.</strong>' +
                 '<p>' + esc(f.red_nedeni || '') + '</p>' +
-                '<button type="button" class="btn btn--gold btn--sm" data-panel-aksiyon="firma-yeniden">Bilgileri Düzenle ve Yeniden Gönder</button>' +
+                '<p class="panel-not">Bilgileri güncelleyip kaydedince başvuru yeniden incelemeye alınır.</p>' +
                 '</div>';
         } else if (durumEtiket === 'onaylandi' && f.dogrulanmis) {
             incelemeNotu = '<p class="fp-basvuru-durum fp-basvuru-durum--onay" style="margin-top:12px">' +
                 'Firma hesabınız onaylandı. Doğrulanmış firma rozeti aktiftir.</p>';
+        }
+
+        var duzenleForm = '';
+        if (!f.askiya_alindi) {
+            var telGoster = String(f.telefon || '').replace(/^\+90/, '').replace(/\D/g, '');
+            if (telGoster.length === 10) {
+                telGoster = telGoster.slice(0, 3) + ' ' + telGoster.slice(3, 6) + ' ' +
+                    telGoster.slice(6, 8) + ' ' + telGoster.slice(8);
+            }
+            duzenleForm =
+                '<article class="fp-profil-kart" style="margin-top:16px">' +
+                '<h4 class="fp-profil-kart__alt-baslik">Profili Düzenle</h4>' +
+                '<form id="firmaProfilDuzenleForm" class="fp-profil-form">' +
+                '<input type="hidden" id="firmaProfilYeniden" value="' +
+                (durumEtiket === 'reddedildi' ? '1' : '0') + '">' +
+                '<div class="form-grup">' +
+                '<label class="form-label" for="firmaProfilAd">Firma Adı</label>' +
+                '<input class="form-input" type="text" id="firmaProfilAd" required maxlength="200" value="' +
+                esc(f.firma_adi || '') + '">' +
+                '</div>' +
+                '<div class="form-grup">' +
+                '<label class="form-label" for="firmaProfilSehir">Şehir</label>' +
+                '<select class="form-select" id="firmaProfilSehir" required></select>' +
+                '</div>' +
+                '<div class="form-grup">' +
+                '<label class="form-label" for="firmaProfilKategori">Hizmet Kategorisi</label>' +
+                '<select class="form-select" id="firmaProfilKategori" required></select>' +
+                '</div>' +
+                '<div class="form-grup">' +
+                '<label class="form-label" for="firmaProfilTel">Telefon</label>' +
+                '<div class="tel-input" role="group">' +
+                '<span class="tel-input__kod" aria-hidden="true">+90</span>' +
+                '<input class="form-input tel-input__alan" type="tel" id="firmaProfilTel" ' +
+                'inputmode="tel" maxlength="13" value="' + esc(telGoster) + '">' +
+                '</div></div>' +
+                '<div class="form-grup">' +
+                '<label class="form-label" for="firmaProfilAciklama">Kısa Açıklama</label>' +
+                '<textarea class="form-textarea" id="firmaProfilAciklama" rows="3" required maxlength="500">' +
+                esc(f.aciklama || '') + '</textarea>' +
+                '</div>' +
+                '<div class="form-grup">' +
+                '<label class="form-label" for="firmaProfilLogo">Yeni Logo</label>' +
+                '<input class="form-input" type="file" id="firmaProfilLogo" accept="image/jpeg,image/png,image/webp,image/gif">' +
+                '<p class="form-yardim">Boş bırakırsanız mevcut logo korunur.</p>' +
+                '</div>' +
+                '<div class="form-grup">' +
+                '<label class="form-label" for="firmaProfilKapak">Yeni Kapak</label>' +
+                '<input class="form-input" type="file" id="firmaProfilKapak" accept="image/jpeg,image/png,image/webp,image/gif">' +
+                '</div>' +
+                '<p class="fp-aksiyon-satir">' +
+                '<button type="submit" class="btn btn--gold btn--sm" id="firmaProfilKaydetBtn">' +
+                (durumEtiket === 'reddedildi' ? 'Güncelle ve Yeniden Gönder' : 'Kaydet') +
+                '</button></p>' +
+                '</form></article>';
         }
 
         return '<div class="fp-profil-grid">' +
@@ -328,6 +382,7 @@
             '<div><dt>Açıklama</dt><dd>' + esc(f.aciklama || '—') + '</dd></div>' +
             '</dl>' +
             incelemeNotu +
+            duzenleForm +
             '</article>' +
             '<article class="fp-profil-kart">' +
             '<h4 class="fp-profil-kart__alt-baslik">Hesap</h4>' +
@@ -480,7 +535,12 @@
         if (teklifEl) teklifEl.innerHTML = renderTeklifler(veri);
 
         var profilEl = $('panelSekmeProfil');
-        if (profilEl) profilEl.innerHTML = renderProfil(veri, user);
+        if (profilEl) {
+            profilEl.innerHTML = renderProfil(veri, user);
+            if (global.Aurix && typeof Aurix.firmaProfilFormHazirla === 'function') {
+                Aurix.firmaProfilFormHazirla(veri && veri.firma ? veri.firma : null);
+            }
+        }
 
         var mesajEl = $('panelSekmeMesajlar');
         if (mesajEl) mesajEl.innerHTML = renderMesajlar();
@@ -522,9 +582,7 @@
                 teklifler: res.teklifler || [],
                 kullaniciIsleri: (isRes.ok && isRes.data) ? isRes.data : []
             });
-            if (res.hasFirma && global.AuthService && typeof AuthService.refreshProfile === 'function') {
-                AuthService.refreshProfile();
-            }
+            /* refreshProfile kaldırıldı — ensure_own_profile / auth notify döngüsü yaratıyordu */
         }).catch(function () {
             panelIcerikYukle(sifir);
         });
