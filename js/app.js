@@ -263,6 +263,47 @@
     var kayitBekleyenEmail = '';
     var pendingFirmaPromise = null;
 
+    function authBtnYukle(btn, yukleniyor) {
+        if (!btn) return;
+        if (yukleniyor) {
+            if (!btn.dataset.authLabel) btn.dataset.authLabel = btn.textContent || '';
+            var loadingText = btn.getAttribute('data-auth-loading') || 'İşlem yapılıyor...';
+            btn.disabled = true;
+            btn.classList.add('is-loading');
+            btn.setAttribute('aria-busy', 'true');
+            btn.textContent = loadingText;
+            return;
+        }
+        btn.disabled = false;
+        btn.classList.remove('is-loading');
+        btn.removeAttribute('aria-busy');
+        if (btn.dataset.authLabel) btn.textContent = btn.dataset.authLabel;
+    }
+
+    function sifreKurallarGuncelle(listeEl, password) {
+        if (!listeEl) return false;
+        var kurallar = (window.AuthService && typeof AuthService.sifreKurallari === 'function')
+            ? AuthService.sifreKurallari(password)
+            : { minLen: false, upper: false, lower: false, digit: false, ok: false };
+        Array.prototype.forEach.call(listeEl.querySelectorAll('[data-rule]'), function (li) {
+            var key = li.getAttribute('data-rule');
+            var ok = !!(kurallar && kurallar[key]);
+            li.classList.toggle('sifre-kurallar__ok', ok);
+        });
+        return !!(kurallar && kurallar.ok);
+    }
+
+    function baglaSifreKurallar(inputId, listeId) {
+        var input = $(inputId);
+        var liste = $(listeId);
+        if (!input || !liste || input.dataset.sifreKurallarBag) return;
+        input.dataset.sifreKurallarBound = '1';
+        var guncelle = function () { sifreKurallarGuncelle(liste, input.value || ''); };
+        input.addEventListener('input', guncelle);
+        input.addEventListener('focus', guncelle);
+        guncelle();
+    }
+
     function pendingFirmaOku() {
         try {
             var ham = localStorage.getItem(PENDING_FIRMA_KEY);
@@ -2399,25 +2440,45 @@
         var el = $('navAuthAlani');
         var menu = $('navMenu');
         if (!el) return;
-        var eskiMenuCikis = menu ? menu.querySelector('#navCikisMenu') : null;
-        if (eskiMenuCikis) eskiMenuCikis.remove();
 
-        var user = window.AuthService ? AuthService.getCurrentUser() : null;
-        if (user) {
-            el.innerHTML =
-                '<button type="button" class="nav__link nav__link--cta nav__cta-sm" id="navHesabim" data-nav="panel">Hesabım</button>' +
-                '<button type="button" class="nav__link nav__cikis-desktop" id="navCikis" data-nav-cikis="1">Çıkış Yap</button>';
-            if (menu) {
-                var menuCikis = document.createElement('button');
-                menuCikis.type = 'button';
-                menuCikis.id = 'navCikisMenu';
-                menuCikis.className = 'nav__link nav__cikis-menu';
-                menuCikis.setAttribute('data-nav-cikis', '1');
-                menuCikis.textContent = 'Çıkış Yap';
-                menu.appendChild(menuCikis);
+        function applyNavAuth() {
+            var eskiMenuCikis = menu ? menu.querySelector('#navCikisMenu') : null;
+            if (eskiMenuCikis) eskiMenuCikis.remove();
+
+            var user = window.AuthService ? AuthService.getCurrentUser() : null;
+            var adminMi = !!(
+                user &&
+                (
+                    (typeof AuthService.isAdmin === 'function' && AuthService.isAdmin()) ||
+                    String(user.role || '').toLowerCase() === 'admin'
+                )
+            );
+            if (user) {
+                el.innerHTML =
+                    '<button type="button" class="nav__link nav__link--cta nav__cta-sm" id="navHesabim" data-nav="' +
+                    (adminMi ? 'admin' : 'panel') +
+                    '">' +
+                    (adminMi ? 'Admin Paneli' : 'Hesabım') +
+                    '</button>' +
+                    '<button type="button" class="nav__link nav__cikis-desktop" id="navCikis" data-nav-cikis="1">Çıkış Yap</button>';
+                if (menu) {
+                    var menuCikis = document.createElement('button');
+                    menuCikis.type = 'button';
+                    menuCikis.id = 'navCikisMenu';
+                    menuCikis.className = 'nav__link nav__cikis-menu';
+                    menuCikis.setAttribute('data-nav-cikis', '1');
+                    menuCikis.textContent = 'Çıkış Yap';
+                    menu.appendChild(menuCikis);
+                }
+            } else {
+                el.innerHTML = '<button type="button" class="nav__link nav__link--cta nav__cta-sm" id="navKayitOl" data-nav="kayit">Kayıt Ol</button>';
             }
-        } else {
-            el.innerHTML = '<button type="button" class="nav__link nav__link--cta nav__cta-sm" id="navKayitOl" data-nav="kayit">Kayıt Ol</button>';
+        }
+
+        /* Anlık durum + init sonrası yeniden çiz (onAuthStateChange da renderNavAuth çağırır) */
+        applyNavAuth();
+        if (window.AuthService && typeof AuthService.isReady === 'function') {
+            AuthService.isReady().then(applyNavAuth).catch(applyNavAuth);
         }
     }
 
@@ -2617,10 +2678,16 @@
         var sekmeler = document.querySelector('.uyelik-sekmeler');
         var panelGiris = $('uyelikPanelGiris');
         var panelKayit = $('uyelikPanelKayit');
-        if (metin) metin.textContent = EMAIL_DOGRULAMA_MESAJ;
+        var basari = $('sifreYenileBasari');
+        if (metin) {
+            metin.textContent = (window.AuthService && AuthService.MSG && AuthService.MSG.DOGRULAMA_DETAY)
+                ? AuthService.MSG.DOGRULAMA_DETAY
+                : EMAIL_DOGRULAMA_MESAJ;
+        }
         if (sekmeler) sekmeler.hidden = true;
         if (panelGiris) panelGiris.hidden = true;
         if (panelKayit) panelKayit.hidden = true;
+        if (basari) basari.hidden = true;
         if (bekleyen) bekleyen.hidden = false;
         if ($('girisEmail') && kayitBekleyenEmail) $('girisEmail').value = kayitBekleyenEmail;
     }
@@ -2630,6 +2697,25 @@
         var sekmeler = document.querySelector('.uyelik-sekmeler');
         if (bekleyen) bekleyen.hidden = true;
         if (sekmeler) sekmeler.hidden = false;
+    }
+
+    function sifreYenileBasariGoster() {
+        emailDogrulamaBekleyenGizle();
+        var sekmeler = document.querySelector('.uyelik-sekmeler');
+        var panelGiris = $('uyelikPanelGiris');
+        var panelKayit = $('uyelikPanelKayit');
+        var girisForm = $('girisForm');
+        var sifreSifirlaForm = $('sifreSifirlaForm');
+        var sifreYenileForm = $('sifreYenileForm');
+        var basari = $('sifreYenileBasari');
+        if (sekmeler) sekmeler.hidden = true;
+        if (panelGiris) panelGiris.hidden = false;
+        if (panelKayit) panelKayit.hidden = true;
+        if (girisForm) girisForm.hidden = true;
+        if (sifreSifirlaForm) sifreSifirlaForm.hidden = true;
+        if (sifreYenileForm) sifreYenileForm.hidden = true;
+        if (basari) basari.hidden = false;
+        modalAc('girisModal');
     }
 
     function uyelikSekmeSec(sekme) {
@@ -2647,9 +2733,11 @@
         var girisForm = $('girisForm');
         var sifreSifirlaForm = $('sifreSifirlaForm');
         var sifreYenileForm = $('sifreYenileForm');
+        var basari = $('sifreYenileBasari');
         if (girisForm) girisForm.hidden = false;
         if (sifreSifirlaForm) sifreSifirlaForm.hidden = true;
         if (sifreYenileForm) sifreYenileForm.hidden = true;
+        if (basari) basari.hidden = true;
         var sekmeler = document.querySelector('.uyelik-sekmeler');
         if (sekmeler) sekmeler.hidden = false;
     }
@@ -2662,12 +2750,15 @@
         var girisForm = $('girisForm');
         var sifreSifirlaForm = $('sifreSifirlaForm');
         var sifreYenileForm = $('sifreYenileForm');
+        var basari = $('sifreYenileBasari');
         if (sekmeler) sekmeler.hidden = true;
         if (panelGiris) panelGiris.hidden = false;
         if (panelKayit) panelKayit.hidden = true;
         if (girisForm) girisForm.hidden = true;
         if (sifreSifirlaForm) sifreSifirlaForm.hidden = true;
         if (sifreYenileForm) sifreYenileForm.hidden = false;
+        if (basari) basari.hidden = true;
+        baglaSifreKurallar('sifreYenileYeni', 'sifreYenileKurallar');
         modalAc('girisModal');
     }
 
@@ -3062,10 +3153,15 @@
         var sifre = ($('kayitSifre') && $('kayitSifre').value || '');
         var sifreTekrar = ($('kayitSifreTekrar') && $('kayitSifreTekrar').value || '');
 
-        var submitBtn = e.target && e.target.querySelector
+        if (typeof AuthService.sifreGecerliMi === 'function' && !AuthService.sifreGecerliMi(sifre)) {
+            toast(AuthService.sifreGecersizMesaji(sifre), 'error');
+            return;
+        }
+
+        var submitBtn = $('kayitBtn') || (e.target && e.target.querySelector
             ? e.target.querySelector('[type="submit"]')
-            : null;
-        if (submitBtn) submitBtn.disabled = true;
+            : null);
+        authBtnYukle(submitBtn, true);
 
         AuthService.signUp({
             adSoyad: adSoyad,
@@ -3073,7 +3169,7 @@
             password: sifre,
             passwordAgain: sifreTekrar
         }).then(function (res) {
-            if (submitBtn) submitBtn.disabled = false;
+            authBtnYukle(submitBtn, false);
             if (!res || !res.ok) {
                 toast((res && res.error) || 'Kayıt başarısız.', 'error');
                 if (res && res.alreadyRegistered) {
@@ -3083,20 +3179,26 @@
                 return;
             }
             if ($('kayitForm')) $('kayitForm').reset();
+            sifreKurallarGuncelle($('kayitSifreKurallar'), '');
             /* Session yoksa firma insert YAPILMAZ — pendingFirmaBasvurusu bekler */
             if (res.needsEmailConfirmation) {
                 emailDogrulamaBekleyenGoster(res.email || email);
-                toast(res.message || EMAIL_DOGRULAMA_MESAJ, 'success');
+                toast(res.message || 'Doğrulama e-postası gönderildi.', 'success');
                 return;
             }
             modalKapat('girisModal');
-            toast('Hesabınız oluşturuldu.', 'success');
+            toast((res && res.message) || 'Hoş geldiniz.', 'success');
             pendingFirmaGonder().then(function () {
                 paneleYonlendir();
             });
-        }).catch(function () {
-            if (submitBtn) submitBtn.disabled = false;
-            toast('Bağlantı hatası. Lütfen tekrar deneyin.', 'error');
+        }).catch(function (err) {
+            authBtnYukle(submitBtn, false);
+            toast(
+                (window.AuthService && AuthService.turkceAuthHata)
+                    ? AuthService.turkceAuthHata(err)
+                    : 'İnternet bağlantınızı kontrol edin.',
+                'error'
+            );
         });
     }
 
@@ -3698,26 +3800,31 @@
                 var email = $('girisEmail') ? $('girisEmail').value : '';
                 var sifre = $('girisSifre') ? $('girisSifre').value : '';
                 var btn = $('girisBtn');
-                if (btn) btn.disabled = true;
+                authBtnYukle(btn, true);
                 AuthService.signIn(email, sifre).then(function (result) {
-                    if (btn) btn.disabled = false;
+                    authBtnYukle(btn, false);
                     if (!result || !result.ok) {
                         if (result && result.needsEmailConfirmation) {
                             emailDogrulamaBekleyenGoster(result.email || email);
-                            toast(result.error || EMAIL_DOGRULAMA_MESAJ, 'info');
+                            toast(result.error || 'Lütfen e-posta adresinizi doğrulayın.', 'info');
                             return;
                         }
                         toast((result && result.error) || 'Giriş başarısız.', 'error');
                         return;
                     }
                     modalKapat('girisModal');
-                    toast('Giriş başarılı.', 'success');
+                    toast((result && result.message) || 'Hoş geldiniz.', 'success');
                     pendingFirmaGonder().then(function () {
                         paneleYonlendir();
                     });
-                }).catch(function () {
-                    if (btn) btn.disabled = false;
-                    toast('Bağlantı hatası. Lütfen tekrar deneyin.', 'error');
+                }).catch(function (err) {
+                    authBtnYukle(btn, false);
+                    toast(
+                        (window.AuthService && AuthService.turkceAuthHata)
+                            ? AuthService.turkceAuthHata(err)
+                            : 'İnternet bağlantınızı kontrol edin.',
+                        'error'
+                    );
                 });
             });
         }
@@ -3735,18 +3842,23 @@
                     toast('Geçerli bir e-posta girin.', 'error');
                     return;
                 }
-                emailDogrulamaYenidenBtn.disabled = true;
+                authBtnYukle(emailDogrulamaYenidenBtn, true);
                 AuthService.resendSignupEmail(email).then(function (res) {
-                    emailDogrulamaYenidenBtn.disabled = false;
+                    authBtnYukle(emailDogrulamaYenidenBtn, false);
                     if (!res || !res.ok) {
                         toast((res && res.error) || 'E-posta gönderilemedi.', 'error');
                         return;
                     }
                     kayitBekleyenEmail = email;
-                    toast(res.message || EMAIL_DOGRULAMA_MESAJ, 'success');
-                }).catch(function () {
-                    emailDogrulamaYenidenBtn.disabled = false;
-                    toast('Bağlantı hatası. Lütfen tekrar deneyin.', 'error');
+                    toast(res.message || 'Doğrulama e-postası gönderildi.', 'success');
+                }).catch(function (err) {
+                    authBtnYukle(emailDogrulamaYenidenBtn, false);
+                    toast(
+                        (window.AuthService && AuthService.turkceAuthHata)
+                            ? AuthService.turkceAuthHata(err)
+                            : 'İnternet bağlantınızı kontrol edin.',
+                        'error'
+                    );
                 });
             });
         }
@@ -3766,6 +3878,7 @@
             sifreUnuttumBtn.addEventListener('click', function () {
                 girisForm.hidden = true;
                 if (sifreYenileForm) sifreYenileForm.hidden = true;
+                if ($('sifreYenileBasari')) $('sifreYenileBasari').hidden = true;
                 sifreSifirlaForm.hidden = false;
                 var ge = $('girisEmail');
                 var se = $('sifreSifirlaEmail');
@@ -3776,6 +3889,7 @@
             sifreSifirlaGeriBtn.addEventListener('click', function () {
                 sifreSifirlaForm.hidden = true;
                 if (sifreYenileForm) sifreYenileForm.hidden = true;
+                if ($('sifreYenileBasari')) $('sifreYenileBasari').hidden = true;
                 girisForm.hidden = false;
             });
         }
@@ -3787,10 +3901,10 @@
                     return;
                 }
                 var email = ($('sifreSifirlaEmail') && $('sifreSifirlaEmail').value) || '';
-                var btn = e.target.querySelector('[type="submit"]');
-                if (btn) btn.disabled = true;
+                var btn = $('sifreSifirlaBtn') || e.target.querySelector('[type="submit"]');
+                authBtnYukle(btn, true);
                 AuthService.resetPasswordForEmail(email).then(function (res) {
-                    if (btn) btn.disabled = false;
+                    authBtnYukle(btn, false);
                     if (!res || !res.ok) {
                         toast((res && res.error) || 'İşlem başarısız.', 'error');
                         return;
@@ -3798,9 +3912,14 @@
                     toast(res.message || 'Şifre sıfırlama bağlantısı gönderildi.', 'success');
                     sifreSifirlaForm.hidden = true;
                     if (girisForm) girisForm.hidden = false;
-                }).catch(function () {
-                    if (btn) btn.disabled = false;
-                    toast('Bağlantı hatası. Lütfen tekrar deneyin.', 'error');
+                }).catch(function (err) {
+                    authBtnYukle(btn, false);
+                    toast(
+                        (window.AuthService && AuthService.turkceAuthHata)
+                            ? AuthService.turkceAuthHata(err)
+                            : 'İnternet bağlantınızı kontrol edin.',
+                        'error'
+                    );
                 });
             });
         }
@@ -3813,24 +3932,43 @@
                 }
                 var yeni = ($('sifreYenileYeni') && $('sifreYenileYeni').value) || '';
                 var tekrar = ($('sifreYenileTekrar') && $('sifreYenileTekrar').value) || '';
+                if (typeof AuthService.sifreGecerliMi === 'function' && !AuthService.sifreGecerliMi(yeni)) {
+                    toast(AuthService.sifreGecersizMesaji(yeni), 'error');
+                    return;
+                }
                 var btn = $('sifreYenileBtn');
-                if (btn) btn.disabled = true;
+                authBtnYukle(btn, true);
                 AuthService.updatePassword(yeni, tekrar).then(function (res) {
-                    if (btn) btn.disabled = false;
+                    authBtnYukle(btn, false);
                     if (!res || !res.ok) {
                         toast((res && res.error) || 'Şifre güncellenemedi.', 'error');
                         return;
                     }
                     sifreYenileForm.reset();
-                    modalKapat('girisModal');
-                    toast(res.message || 'Şifreniz güncellendi.', 'success');
-                    paneleYonlendir();
-                }).catch(function () {
-                    if (btn) btn.disabled = false;
-                    toast('Bağlantı hatası. Lütfen tekrar deneyin.', 'error');
+                    sifreKurallarGuncelle($('sifreYenileKurallar'), '');
+                    toast(res.toast || res.message || 'Yeni şifreniz kaydedildi.', 'success');
+                    sifreYenileBasariGoster();
+                }).catch(function (err) {
+                    authBtnYukle(btn, false);
+                    toast(
+                        (window.AuthService && AuthService.turkceAuthHata)
+                            ? AuthService.turkceAuthHata(err)
+                            : 'İnternet bağlantınızı kontrol edin.',
+                        'error'
+                    );
                 });
             });
         }
+
+        var sifreYenileBasariGirisBtn = $('sifreYenileBasariGirisBtn');
+        if (sifreYenileBasariGirisBtn) {
+            sifreYenileBasariGirisBtn.addEventListener('click', function () {
+                uyelikSekmeSec('giris');
+            });
+        }
+
+        baglaSifreKurallar('kayitSifre', 'kayitSifreKurallar');
+        baglaSifreKurallar('sifreYenileYeni', 'sifreYenileKurallar');
 
         // Arama
         var aramaInput = $('aramaInput');
