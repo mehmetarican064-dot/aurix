@@ -32,6 +32,9 @@
         fallback = fallback == null ? '' : String(fallback);
         if (url == null || url === '') return fallback;
         var s = String(url).trim();
+        if (/[\x00-\x1f\x7f]/.test(s)) return fallback;
+        /* Supabase Storage (firma logo/kapak) — yalnızca storage yolu */
+        if (/^https:\/\/[a-z0-9-]+\.supabase\.co\/storage\//i.test(s)) return s;
         if (/^https?:\/\//i.test(s)) return fallback;
         if (s.indexOf('assets/') === 0) return s;
         return safeUrl(s, fallback) || fallback;

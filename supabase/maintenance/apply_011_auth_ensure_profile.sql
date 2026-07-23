@@ -1,5 +1,6 @@
 -- AURIX — 011 hızlı uygulama (Dashboard SQL Editor)
 -- Kaynak: supabase/migrations/011_auth_ensure_profile.sql
+-- profiles.role ('user'|'admin') — eski rol kolonu kullanılmaz.
 
 DO $$
 BEGIN
@@ -10,6 +11,40 @@ END $$;
 
 ALTER TABLE public.profiles
     ADD COLUMN IF NOT EXISTS hesap_tipi TEXT NOT NULL DEFAULT 'normal';
+
+ALTER TABLE public.profiles
+    ADD COLUMN IF NOT EXISTS role TEXT;
+
+UPDATE public.profiles
+SET role = CASE
+    WHEN lower(btrim(COALESCE(role::text, ''))) = 'admin' THEN 'admin'
+    ELSE 'user'
+END;
+
+ALTER TABLE public.profiles ALTER COLUMN role SET DEFAULT 'user';
+ALTER TABLE public.profiles ALTER COLUMN role SET NOT NULL;
+
+DO $$
+BEGIN
+    IF EXISTS (
+        SELECT 1 FROM pg_constraint
+        WHERE conname = 'profiles_rol_check'
+          AND conrelid = 'public.profiles'::regclass
+    ) THEN
+        ALTER TABLE public.profiles DROP CONSTRAINT profiles_rol_check;
+    END IF;
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_constraint
+        WHERE conname = 'profiles_role_check'
+          AND conrelid = 'public.profiles'::regclass
+    ) THEN
+        ALTER TABLE public.profiles
+            ADD CONSTRAINT profiles_role_check
+            CHECK (role IN ('user', 'admin'));
+    END IF;
+END $$;
+
+ALTER TABLE public.profiles DROP COLUMN IF EXISTS rol;
 
 DO $$
 BEGIN
@@ -31,7 +66,7 @@ SECURITY DEFINER
 SET search_path TO public, pg_temp
 AS $$
 BEGIN
-    INSERT INTO public.profiles (id, ad_soyad, telefon, rol, hesap_tipi)
+    INSERT INTO public.profiles (id, ad_soyad, telefon, role, hesap_tipi)
     VALUES (
         NEW.id,
         COALESCE(
@@ -40,7 +75,7 @@ BEGIN
             ''
         ),
         COALESCE(NEW.raw_user_meta_data->>'telefon', NULL),
-        'kullanici',
+        'user',
         'normal'
     )
     ON CONFLICT (id) DO NOTHING;
@@ -73,12 +108,12 @@ BEGIN
     FROM auth.users
     WHERE id = uid;
 
-    INSERT INTO public.profiles (id, ad_soyad, telefon, rol, hesap_tipi)
+    INSERT INTO public.profiles (id, ad_soyad, telefon, role, hesap_tipi)
     VALUES (
         uid,
         COALESCE(meta->>'ad_soyad', meta->>'full_name', ''),
         COALESCE(meta->>'telefon', NULL),
-        'kullanici',
+        'user',
         'normal'
     )
     ON CONFLICT (id) DO UPDATE

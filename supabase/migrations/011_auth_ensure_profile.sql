@@ -34,7 +34,7 @@ SECURITY DEFINER
 SET search_path TO public, pg_temp
 AS $$
 BEGIN
-    INSERT INTO public.profiles (id, ad_soyad, telefon, rol, hesap_tipi)
+    INSERT INTO public.profiles (id, ad_soyad, telefon, role, hesap_tipi)
     VALUES (
         NEW.id,
         COALESCE(
@@ -43,7 +43,7 @@ BEGIN
             ''
         ),
         COALESCE(NEW.raw_user_meta_data->>'telefon', NULL),
-        'kullanici',
+        'user',
         'normal'
     )
     ON CONFLICT (id) DO NOTHING;
@@ -77,12 +77,12 @@ BEGIN
     FROM auth.users
     WHERE id = uid;
 
-    INSERT INTO public.profiles (id, ad_soyad, telefon, rol, hesap_tipi)
+    INSERT INTO public.profiles (id, ad_soyad, telefon, role, hesap_tipi)
     VALUES (
         uid,
         COALESCE(meta->>'ad_soyad', meta->>'full_name', ''),
         COALESCE(meta->>'telefon', NULL),
-        'kullanici',
+        'user',
         'normal'
     )
     ON CONFLICT (id) DO UPDATE

@@ -42,21 +42,61 @@ CREATE TABLE IF NOT EXISTS public.profiles (
     id UUID PRIMARY KEY,
     ad_soyad TEXT,
     telefon TEXT,
-    rol TEXT NOT NULL DEFAULT 'kullanici',
+    role TEXT NOT NULL DEFAULT 'user',
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 DO $$
 BEGIN
+    -- Eski rol → role geçişi (varsa)
+    IF EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_schema = 'public' AND table_name = 'profiles' AND column_name = 'rol'
+    ) AND NOT EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_schema = 'public' AND table_name = 'profiles' AND column_name = 'role'
+    ) THEN
+        ALTER TABLE public.profiles RENAME COLUMN rol TO role;
+    END IF;
+
     IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_schema = 'public' AND table_name = 'profiles' AND column_name = 'role'
+    ) THEN
+        ALTER TABLE public.profiles
+            ADD COLUMN role TEXT;
+    END IF;
+
+    UPDATE public.profiles
+    SET role = CASE
+        WHEN lower(btrim(COALESCE(role::text, ''))) = 'admin' THEN 'admin'
+        ELSE 'user'
+    END
+    WHERE role IS NULL
+       OR lower(btrim(role::text)) NOT IN ('user', 'admin');
+
+    ALTER TABLE public.profiles ALTER COLUMN role SET DEFAULT 'user';
+    ALTER TABLE public.profiles ALTER COLUMN role SET NOT NULL;
+
+    IF EXISTS (
         SELECT 1 FROM pg_constraint
         WHERE conname = 'profiles_rol_check'
           AND conrelid = 'public.profiles'::regclass
     ) THEN
-        ALTER TABLE public.profiles
-            ADD CONSTRAINT profiles_rol_check
-            CHECK (rol IN ('kullanici', 'admin'));
+        ALTER TABLE public.profiles DROP CONSTRAINT profiles_rol_check;
     END IF;
+
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_constraint
+        WHERE conname = 'profiles_role_check'
+          AND conrelid = 'public.profiles'::regclass
+    ) THEN
+        ALTER TABLE public.profiles
+            ADD CONSTRAINT profiles_role_check
+            CHECK (role IN ('user', 'admin'));
+    END IF;
+
+    ALTER TABLE public.profiles DROP COLUMN IF EXISTS rol;
 END $$;
 
 -- orphan + FK: profiles.id -> auth.users(id) ON DELETE CASCADE
@@ -119,7 +159,7 @@ CREATE POLICY "profiles_select_own"
     TO authenticated
     USING (id = auth.uid());
 
--- Kullanıcı yalnızca kendi satırını güncelleyebilir (rol column-grant ile korunur)
+-- Kullanıcı yalnızca kendi satırını güncelleyebilir (role column-grant ile korunur)
 CREATE POLICY "profiles_update_own"
     ON public.profiles
     FOR UPDATE
@@ -133,7 +173,7 @@ REVOKE ALL ON TABLE public.profiles FROM anon, authenticated;
 GRANT SELECT ON TABLE public.profiles TO authenticated;
 GRANT UPDATE (ad_soyad, telefon) ON TABLE public.profiles TO authenticated;
 
--- Yeni auth kullanıcısı → profile (rol asla metadata’dan gelmez)
+-- Yeni auth kullanıcısı → profile (role asla metadata’dan gelmez)
 CREATE OR REPLACE FUNCTION public.handle_new_user_profile()
 RETURNS TRIGGER
 LANGUAGE plpgsql
@@ -141,12 +181,12 @@ SECURITY DEFINER
 SET search_path TO public, pg_temp
 AS $$
 BEGIN
-    INSERT INTO public.profiles (id, ad_soyad, telefon, rol)
+    INSERT INTO public.profiles (id, ad_soyad, telefon, role)
     VALUES (
         NEW.id,
         COALESCE(NEW.raw_user_meta_data->>'ad_soyad', NEW.raw_user_meta_data->>'full_name', ''),
         COALESCE(NEW.raw_user_meta_data->>'telefon', NULL),
-        'kullanici'
+        'user'
     )
     ON CONFLICT (id) DO NOTHING;
     RETURN NEW;

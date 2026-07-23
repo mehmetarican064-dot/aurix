@@ -11,7 +11,7 @@
  *
  * JWT: Bu geçici token modeli nedeniyle deploy’da --no-verify-jwt gerekir
  * (gateway JWT’si yerine x-admin-token doğrulanır).
- * Uzun vadede: Supabase Auth + profiles.rol='admin' + JWT doğrulaması.
+ * Uzun vadede: Supabase Auth + profiles.role='admin' + JWT doğrulaması.
  *
  * API:
  *   GET  → durum=beklemede firmalar (telefon/email dahil)
