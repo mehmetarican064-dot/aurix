@@ -12,7 +12,7 @@ Kesinleşmiş resmi logo + tek premium beyaz kart tasarımı. Supabase’e doğr
 ## Logo
 - Mark: `assets/logo-mark.png` (resmi sembol)
 - E-posta: `assets/logo-email-horizontal.png` → `https://aurixb2b.com/assets/logo-email-horizontal.png`
-- Görünen genişlik: **250 px**
+- Görünen genişlik: **220 px** (mark–yazı boşluğu sıkı)
 
 ## Ortak yapı
 Logo → ayırıcı (çizgi + nokta) → başlık → metin → siyah CTA → geçerlilik notu → güvenlik → yardım/iletişim → footer
