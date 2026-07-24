@@ -18,6 +18,7 @@
         islemler: [],
         sistem: null,
         harita: null,
+        haritaIl: null,
         analitik: null
     };
 
@@ -530,34 +531,57 @@
     }
 
     function bindTurkeyMapInteractions(wrap, agg) {
-        var tip = $('apMapTooltip');
+        /* Eski body tooltip varsa kaldır */
+        var stale = document.getElementById('apMapTooltip');
+        if (stale && stale.parentNode !== wrap) stale.parentNode.removeChild(stale);
+
+        var tip = wrap.querySelector('.ap-map-tooltip');
         if (!tip) {
             tip = document.createElement('div');
-            tip.id = 'apMapTooltip';
             tip.className = 'ap-map-tooltip';
+            tip.setAttribute('aria-hidden', 'true');
             tip.hidden = true;
-            document.body.appendChild(tip);
+            wrap.appendChild(tip);
         }
+
+        var tipW = 180;
+        var tipH = 110;
 
         function hideTip() {
             tip.hidden = true;
+            tip.setAttribute('aria-hidden', 'true');
         }
 
         function showTip(plaka, evt) {
-            var row = agg.byPlaka[plaka];
-            var c = row && row.counts ? row.counts : { kullanici: 0, firma: 0, is: 0 };
+            var d = ilDetayPlaka(plaka);
             tip.innerHTML =
                 '<strong>' + esc(haritaIlAdi(plaka)) + '</strong>' +
-                '<span>Kullanıcı: <b>' + esc(String(c.kullanici || 0)) + '</b></span>' +
-                '<span>Firma: <b>' + esc(String(c.firma || 0)) + '</b></span>' +
-                '<span>İş talebi: <b>' + esc(String(c.is || 0)) + '</b></span>' +
+                '<span>Kullanıcı: <b>' + esc(String(d.kullanici)) + '</b></span>' +
+                '<span>Firma: <b>' + esc(String(d.firma)) + '</b></span>' +
+                '<span>İş talebi: <b>' + esc(String(d.is)) + '</b></span>' +
                 '<em>' + esc(haritaAralikEtiket()) + '</em>';
             tip.hidden = false;
-            var x = (evt && evt.clientX) || 0;
-            var y = (evt && evt.clientY) || 0;
-            tip.style.left = Math.min(window.innerWidth - 220, Math.max(8, x + 14)) + 'px';
-            tip.style.top = Math.min(window.innerHeight - 120, Math.max(8, y + 14)) + 'px';
+            tip.setAttribute('aria-hidden', 'false');
+
+            var rect = wrap.getBoundingClientRect();
+            var relX = (evt.clientX - rect.left) + wrap.scrollLeft;
+            var relY = (evt.clientY - rect.top) + wrap.scrollTop;
+            var left = relX + 12;
+            var top = relY + 12;
+            var maxL = Math.max(4, wrap.clientWidth - tipW - 4);
+            var maxT = Math.max(4, wrap.clientHeight - tipH - 4);
+            if (left > maxL) left = relX - tipW - 12;
+            if (top > maxT) top = relY - tipH - 12;
+            left = Math.max(4, Math.min(maxL, left));
+            top = Math.max(4, Math.min(maxT, top));
+            tip.style.left = left + 'px';
+            tip.style.top = top + 'px';
         }
+
+        wrap.addEventListener('mouseenter', function (e) {
+            var g = e.target.closest && e.target.closest('g[data-ap-il]');
+            if (g && wrap.contains(g)) showTip(g.getAttribute('data-ap-il'), e);
+        }, true);
 
         wrap.addEventListener('mousemove', function (e) {
             var g = e.target.closest && e.target.closest('g[data-ap-il]');
@@ -567,6 +591,7 @@
             }
             showTip(g.getAttribute('data-ap-il'), e);
         });
+
         wrap.addEventListener('mouseleave', hideTip);
     }
 
@@ -587,12 +612,104 @@
             svg.classList.add('ap-map__svg');
             var count = applyTurkeyMapColors(svg, agg);
             mount.setAttribute('data-ap-il-count', String(count));
+            mount.classList.add('ap-map-wrap--ready');
             bindTurkeyMapInteractions(mount, agg);
         }).catch(function () {
             if ($('apMapMount')) {
                 mount.innerHTML = hataDurum('Türkiye haritası yüklenemedi.');
             }
         });
+    }
+
+    function emptyIlDetay() {
+        return {
+            kullanici: 0,
+            firma: 0,
+            is: 0,
+            teklif: 0,
+            onayli_firma: 0,
+            bekleyen_firma: 0,
+            aktif_kategori: null,
+            son_kayit: null
+        };
+    }
+
+    /** Ham şehir satırlarını plakaya göre birleştir (il ozet RPC) */
+    function haritaIlOzetByPlaka() {
+        var map = {};
+        var rows = asArray(cache.haritaIl && cache.haritaIl.satirlar);
+        rows.forEach(function (r) {
+            var il = ilBul(r && r.sehir);
+            if (!il) return;
+            if (!map[il.p]) {
+                map[il.p] = emptyIlDetay();
+                map[il.p]._katIs = 0;
+            }
+            var d = map[il.p];
+            var isAdet = Number(r.is_adet != null ? r.is_adet : r.is) || 0;
+            d.kullanici += Number(r.kullanici) || 0;
+            d.firma += Number(r.firma) || 0;
+            d.is += isAdet;
+            d.teklif += Number(r.teklif) || 0;
+            d.onayli_firma += Number(r.onayli_firma) || 0;
+            d.bekleyen_firma += Number(r.bekleyen_firma) || 0;
+            if (r.aktif_kategori && isAdet >= (d._katIs || 0)) {
+                d.aktif_kategori = r.aktif_kategori;
+                d._katIs = isAdet;
+            }
+            if (r.son_kayit) {
+                var t = new Date(r.son_kayit).getTime();
+                var prev = d.son_kayit ? new Date(d.son_kayit).getTime() : 0;
+                if (!prev || t > prev) d.son_kayit = r.son_kayit;
+            }
+        });
+        return map;
+    }
+
+    function ilDetayPlaka(plaka) {
+        var fromOzet = haritaIlOzetByPlaka()[plaka];
+        if (fromOzet) return fromOzet;
+        /* RPC yoksa harita dağılımından güvenli düşüş */
+        var agg = haritaAggrege();
+        var row = agg.byPlaka[plaka];
+        var c = row && row.counts ? row.counts : {};
+        var d = emptyIlDetay();
+        d.kullanici = Number(c.kullanici) || 0;
+        d.firma = Number(c.firma) || 0;
+        d.is = Number(c.is) || 0;
+        return d;
+    }
+
+    function renderIlDetayKarti() {
+        if (!genelUI.seciliPlaka) {
+            return '<aside class="ap-map-detay-card ap-map-detay-card--bos" role="status">' +
+                '<p class="ap-muted">Detayları görmek için haritadan bir il seçin</p></aside>';
+        }
+        var d = ilDetayPlaka(genelUI.seciliPlaka);
+        var kat = d.aktif_kategori ? String(d.aktif_kategori) : 'Veri yok';
+        var son = d.son_kayit ? tarihKisa(d.son_kayit) : '—';
+        function cell(label, value, gold) {
+            return '<div class="ap-map-detay-card__cell">' +
+                '<dt>' + esc(label) + '</dt>' +
+                '<dd' + (gold ? ' class="ap-map-detay-card__val--gold"' : '') + '>' +
+                esc(String(value)) + '</dd></div>';
+        }
+        return '<aside class="ap-map-detay-card" role="status">' +
+            '<div class="ap-map-detay-card__ust">' +
+            '<h4>' + esc(haritaIlAdi(genelUI.seciliPlaka)) + '</h4>' +
+            '<button type="button" class="btn btn--ghost btn--xs" data-ap-il-temizle="1">Kapat</button>' +
+            '</div>' +
+            '<p class="ap-map-detay-card__aralik">' + esc(haritaAralikEtiket()) + '</p>' +
+            '<dl class="ap-map-detay-card__grid">' +
+            cell('Kullanıcı', d.kullanici, true) +
+            cell('Firma', d.firma, true) +
+            cell('İş talebi', d.is, true) +
+            cell('Toplam teklif', d.teklif, false) +
+            cell('Onaylanan firma', d.onayli_firma, false) +
+            cell('Onay bekleyen', d.bekleyen_firma, false) +
+            cell('En aktif kategori', kat, false) +
+            cell('Son kayıt', son, false) +
+            '</dl></aside>';
     }
 
     function renderHaritaBolum() {
@@ -620,25 +737,7 @@
             esc(metrikEtiket) + '</span></div>' +
             '</div>';
 
-        var detay = '';
-        if (genelUI.seciliPlaka) {
-            var row = agg.byPlaka[genelUI.seciliPlaka];
-            var c = row && row.counts ? row.counts : { kullanici: 0, firma: 0, is: 0 };
-            detay = '<aside class="ap-map-detay-card" role="status">' +
-                '<div class="ap-map-detay-card__ust">' +
-                '<h4>' + esc(haritaIlAdi(genelUI.seciliPlaka)) + '</h4>' +
-                '<button type="button" class="btn btn--ghost btn--xs" data-ap-il-temizle="1">Kapat</button>' +
-                '</div>' +
-                '<p class="ap-muted">' + esc(haritaAralikEtiket()) + ' · aktif metrik: ' + esc(metrikEtiket) + '</p>' +
-                '<dl class="ap-map-detay-card__dl">' +
-                '<div><dt>Kullanıcı</dt><dd>' + esc(String(c.kullanici || 0)) + '</dd></div>' +
-                '<div><dt>Firma</dt><dd>' + esc(String(c.firma || 0)) + '</dd></div>' +
-                '<div><dt>İş talebi</dt><dd>' + esc(String(c.is || 0)) + '</dd></div>' +
-                '</dl></aside>';
-        } else {
-            detay = '<aside class="ap-map-detay-card ap-map-detay-card--bos" aria-hidden="true">' +
-                '<p class="ap-muted">Detay için bir ile tıklayın.</p></aside>';
-        }
+        var detay = renderIlDetayKarti();
 
         var eslesmeyenHtml = '';
         if (agg.eslesmeyen.length) {
@@ -859,15 +958,19 @@
         var pHarita = typeof s.haritaDagilim === 'function'
             ? s.haritaDagilim(genelUI.haritaAralik)
             : Promise.resolve({ ok: false, error: 'Harita API yok (019).' });
+        var pHaritaIl = typeof s.haritaIlOzet === 'function'
+            ? s.haritaIlOzet(genelUI.haritaAralik)
+            : Promise.resolve({ ok: false, error: 'İl özet API yok (020).' });
         var pAnalitik = typeof s.analitikOzet === 'function'
             ? s.analitikOzet(genelUI.analitikAralik)
             : Promise.resolve({ ok: false, error: 'Analitik API yok (019).' });
 
-        Promise.all([pOzet, pSon, pHarita, pAnalitik]).then(function (arr) {
+        Promise.all([pOzet, pSon, pHarita, pHaritaIl, pAnalitik]).then(function (arr) {
             var ozet = arr[0];
             var son = arr[1];
             var harita = arr[2];
-            var analitik = arr[3];
+            var haritaIl = arr[3];
+            var analitik = arr[4];
 
             function bitir() {
                 setBolumLoading('genel', false);
@@ -881,6 +984,7 @@
             }
 
             cache.harita = harita.ok ? (harita.data || {}) : { __error: harita.error || 'Harita yüklenemedi.' };
+            cache.haritaIl = haritaIl.ok ? (haritaIl.data || {}) : null;
             cache.analitik = analitik.ok ? (analitik.data || {}) : { __error: analitik.error || 'Analitik yüklenemedi.' };
             cache.son = normalizeSonData(son.ok ? son.data : {});
 
@@ -932,9 +1036,14 @@
     function yukleHaritaSadece() {
         var s = svc();
         if (!s || typeof s.haritaDagilim !== 'function') return;
-        s.haritaDagilim(genelUI.haritaAralik).then(function (res) {
+        var p1 = s.haritaDagilim(genelUI.haritaAralik);
+        var p2 = typeof s.haritaIlOzet === 'function'
+            ? s.haritaIlOzet(genelUI.haritaAralik)
+            : Promise.resolve({ ok: false });
+        Promise.all([p1, p2]).then(function (arr) {
             if (aktifBolum !== 'genel') return;
-            cache.harita = res.ok ? (res.data || {}) : { __error: res.error || 'Harita yüklenemedi.' };
+            cache.harita = arr[0].ok ? (arr[0].data || {}) : { __error: arr[0].error || 'Harita yüklenemedi.' };
+            cache.haritaIl = arr[1].ok ? (arr[1].data || {}) : null;
             renderGenel();
         });
     }
@@ -1580,14 +1689,14 @@
             var haritaMetrikBtn = e.target.closest('[data-ap-harita-metrik]');
             if (haritaMetrikBtn) {
                 genelUI.haritaMetrik = haritaMetrikBtn.getAttribute('data-ap-harita-metrik') || 'firma';
-                genelUI.seciliPlaka = null;
+                /* seçili şehir kartı korunur — yalnızca renklendirme metriği değişir */
                 if (aktifBolum === 'genel') renderGenel();
                 return;
             }
             var haritaAralikBtn = e.target.closest('[data-ap-harita-aralik]');
             if (haritaAralikBtn) {
                 genelUI.haritaAralik = haritaAralikBtn.getAttribute('data-ap-harita-aralik') || 'tum';
-                genelUI.seciliPlaka = null;
+                /* seçim korunur; zaman bağımlı veriler yeniden yüklenir */
                 yukleHaritaSadece();
                 return;
             }

@@ -67,6 +67,11 @@
         return rpc('admin_analitik_ozet', { p_aralik: aralik || '30g' });
     }
 
+    /** Genel Bakış harita il detay özeti */
+    function haritaIlOzet(aralik) {
+        return rpc('admin_harita_il_ozet', { p_aralik: aralik || 'tum' });
+    }
+
     function firmaListesi(filtre) {
         return rpc('admin_firma_listesi', { p_filtre: filtre || 'hepsi' });
     }
@@ -208,6 +213,7 @@
         sonKayitlar: sonKayitlar,
         haritaDagilim: haritaDagilim,
         analitikOzet: analitikOzet,
+        haritaIlOzet: haritaIlOzet,
         firmaListesi: firmaListesi,
         firmaOnayla: firmaOnayla,
         firmaReddet: firmaReddet,
