@@ -17,6 +17,7 @@
         teklifler: [],
         islemler: [],
         sistem: null,
+        aktiviteler: null,
         harita: null,
         haritaIl: null,
         analitik: null
@@ -184,6 +185,26 @@
         'antakya': 'Hatay'
     };
 
+    var TR_IL_BOLGE = {
+        '01': 'Akdeniz', '02': 'Güneydoğu Anadolu', '03': 'Ege', '04': 'Doğu Anadolu', '05': 'Karadeniz',
+        '06': 'İç Anadolu', '07': 'Akdeniz', '08': 'Karadeniz', '09': 'Ege', '10': 'Marmara',
+        '11': 'Marmara', '12': 'Doğu Anadolu', '13': 'Doğu Anadolu', '14': 'Karadeniz', '15': 'Akdeniz',
+        '16': 'Marmara', '17': 'Marmara', '18': 'İç Anadolu', '19': 'Karadeniz', '20': 'Ege',
+        '21': 'Güneydoğu Anadolu', '22': 'Marmara', '23': 'Doğu Anadolu', '24': 'Doğu Anadolu', '25': 'Doğu Anadolu',
+        '26': 'İç Anadolu', '27': 'Güneydoğu Anadolu', '28': 'Karadeniz', '29': 'Karadeniz', '30': 'Doğu Anadolu',
+        '31': 'Akdeniz', '32': 'Akdeniz', '33': 'Akdeniz', '34': 'Marmara', '35': 'Ege',
+        '36': 'Doğu Anadolu', '37': 'Karadeniz', '38': 'İç Anadolu', '39': 'Marmara', '40': 'İç Anadolu',
+        '41': 'Marmara', '42': 'İç Anadolu', '43': 'Ege', '44': 'Doğu Anadolu', '45': 'Ege',
+        '46': 'Akdeniz', '47': 'Güneydoğu Anadolu', '48': 'Ege', '49': 'Doğu Anadolu', '50': 'İç Anadolu',
+        '51': 'İç Anadolu', '52': 'Karadeniz', '53': 'Karadeniz', '54': 'Marmara', '55': 'Karadeniz',
+        '56': 'Güneydoğu Anadolu', '57': 'Karadeniz', '58': 'İç Anadolu', '59': 'Marmara', '60': 'Karadeniz',
+        '61': 'Karadeniz', '62': 'Doğu Anadolu', '63': 'Güneydoğu Anadolu', '64': 'Ege', '65': 'Doğu Anadolu',
+        '66': 'İç Anadolu', '67': 'Karadeniz', '68': 'İç Anadolu', '69': 'Karadeniz', '70': 'İç Anadolu',
+        '71': 'İç Anadolu', '72': 'Güneydoğu Anadolu', '73': 'Güneydoğu Anadolu', '74': 'Karadeniz', '75': 'Doğu Anadolu',
+        '76': 'Doğu Anadolu', '77': 'Marmara', '78': 'Karadeniz', '79': 'Güneydoğu Anadolu', '80': 'Akdeniz', '81': 'Karadeniz'
+    };
+    var TR_BOLGE_SIRASI = ['Marmara', 'Ege', 'Akdeniz', 'İç Anadolu', 'Karadeniz', 'Doğu Anadolu', 'Güneydoğu Anadolu'];
+
     var TR_IL_BY_NORM = null;
 
     function sehirNormalize(raw) {
@@ -225,6 +246,52 @@
             return TR_ILLER.filter(function (x) { return x.ad === ad; })[0] || null;
         }
         return null;
+    }
+
+    function illerAlfabetik() {
+        return TR_ILLER.slice().sort(function (a, b) {
+            return a.ad.localeCompare(b.ad, 'tr');
+        });
+    }
+
+    function sehirSelectHtml(id, selectedValue) {
+        var secili = selectedValue == null ? '' : String(selectedValue);
+        var opts = '<option value="">Tüm Şehirler</option>' +
+            illerAlfabetik().map(function (il) {
+                var sel = secili && secili === il.ad ? ' selected' : '';
+                return '<option value="' + esc(il.ad) + '"' + sel + '>' + esc(il.ad) + '</option>';
+            }).join('');
+        return '<select class="form-input" id="' + esc(id) + '">' + opts + '</select>';
+    }
+
+    function sehirEslesir(ham, secili) {
+        if (!secili) return true;
+        var il = ilBul(ham);
+        var hedef = ilBul(secili) || TR_ILLER.filter(function (x) { return x.ad === secili; })[0] || null;
+        if (!hedef) return sehirNormalize(ham) === sehirNormalize(secili);
+        if (!il) return false;
+        return il.p === hedef.p;
+    }
+
+    function kpiTrendHtml(curr, prev) {
+        var c = Number(curr) || 0;
+        var p = Number(prev);
+        var hafta = (c > 0 ? '+' : '') + c + ' bu hafta';
+        var pctTxt = '—';
+        var dir = 'flat';
+        if (prev != null && !isNaN(p) && p !== 0) {
+            var pct = ((c - p) / p) * 100;
+            if (isFinite(pct)) {
+                var rounded = Math.round(pct);
+                pctTxt = 'Önceki döneme göre ' + (rounded > 0 ? '+' : '') + rounded + '%';
+                dir = pct > 0 ? 'up' : (pct < 0 ? 'down' : 'flat');
+            }
+        } else if (c > 0) {
+            dir = 'up';
+        }
+        return '<div class="ap-kpi__trend ap-kpi__trend--' + dir + '">' +
+            '<span>' + esc(hafta) + '</span>' +
+            '<span>' + esc(pctTxt) + '</span></div>';
     }
 
     function paraTR(n) {
@@ -712,6 +779,148 @@
             '</dl></aside>';
     }
 
+    function renderHizliIslemler() {
+        var btns = [
+            ['onaylar', 'Firma Onayları'],
+            ['kullanicilar', 'Kullanıcılar'],
+            ['isler', 'İş Talepleri'],
+            ['sikayetler', 'Şikâyetler'],
+            ['islemler', 'İşlem Kayıtları'],
+            ['sistem', 'Sistem Durumu']
+        ];
+        return '<section class="ap-panel ap-hizli">' +
+            '<h3 class="ap-panel__baslik">Hızlı İşlemler</h3>' +
+            '<div class="ap-hizli__grup">' + btns.map(function (b) {
+                return '<button type="button" class="ap-hizli__btn" data-ap-bolum="' + esc(b[0]) + '">' +
+                    esc(b[1]) + '</button>';
+            }).join('') + '</div></section>';
+    }
+
+    function renderEnAktifSehirler() {
+        var agg = haritaAggrege();
+        var metrik = genelUI.haritaMetrik;
+        var metrikEtiket = metrik === 'kullanici' ? 'Kullanıcı' : (metrik === 'is' ? 'İş' : 'Firma');
+        var sirali = Object.keys(agg.byPlaka).map(function (p) {
+            return agg.byPlaka[p];
+        }).filter(function (row) {
+            return row.adet > 0;
+        }).sort(function (a, b) {
+            return b.adet - a.adet;
+        }).slice(0, 5);
+
+        var icerik = sirali.length
+            ? '<ol class="ap-rank">' + sirali.map(function (row, i) {
+                return '<li class="ap-rank__item">' +
+                    '<button type="button" class="ap-rank__btn" data-ap-il="' + esc(row.il.p) + '">' +
+                    '<span class="ap-rank__no">' + esc(String(i + 1)) + '</span>' +
+                    '<span class="ap-rank__ad">' + esc(row.il.ad) + '</span>' +
+                    '<span class="ap-rank__adet">' + esc(String(row.adet)) + ' ' + esc(metrikEtiket) + '</span>' +
+                    '</button></li>';
+            }).join('') + '</ol>'
+            : bosDurum('Bu metrikte veri olan şehir yok.');
+
+        return '<div class="ap-panel ap-panel--compact">' +
+            '<h4 class="ap-panel__baslik">En Aktif Şehirler</h4>' +
+            '<p class="ap-muted">' + esc(haritaAralikEtiket()) + ' · ' + esc(metrikEtiket) + '</p>' +
+            icerik + '</div>';
+    }
+
+    function renderBolgeselDagilim() {
+        var agg = haritaAggrege();
+        var bolgeTop = {};
+        var total = 0;
+        TR_BOLGE_SIRASI.forEach(function (b) { bolgeTop[b] = 0; });
+
+        Object.keys(agg.byPlaka).forEach(function (p) {
+            var adet = agg.byPlaka[p].adet || 0;
+            if (!adet) return;
+            var bolge = TR_IL_BOLGE[p] || 'Diğer';
+            if (!bolgeTop[bolge]) bolgeTop[bolge] = 0;
+            bolgeTop[bolge] += adet;
+            total += adet;
+        });
+
+        if (!total) {
+            return '<div class="ap-panel ap-panel--compact">' +
+                '<h4 class="ap-panel__baslik">Bölgesel Dağılım</h4>' +
+                bosDurum('Dağılım için yeterli veri yok.') + '</div>';
+        }
+
+        var raw = TR_BOLGE_SIRASI.map(function (b) {
+            return { bolge: b, adet: bolgeTop[b] || 0 };
+        });
+        var pctler = raw.map(function (r) {
+            return total > 0 ? (r.adet / total) * 100 : 0;
+        });
+        var floored = pctler.map(function (p) { return Math.floor(p); });
+        var kalan = 100 - floored.reduce(function (a, b) { return a + b; }, 0);
+        var fracs = pctler.map(function (p, i) {
+            return { i: i, frac: p - floored[i] };
+        }).sort(function (a, b) { return b.frac - a.frac; });
+        for (var k = 0; k < kalan; k++) {
+            floored[fracs[k % fracs.length].i] += 1;
+        }
+
+        var satirlar = raw.map(function (r, i) {
+            var pct = floored[i];
+            return '<div class="ap-bolge__satir">' +
+                '<div class="ap-bolge__ust">' +
+                '<span class="ap-bolge__ad">' + esc(r.bolge) + '</span>' +
+                '<span class="ap-bolge__sayi">' + esc(String(r.adet)) + ' · %' + esc(String(pct)) + '</span>' +
+                '</div>' +
+                '<div class="ap-bolge__bar" role="presentation">' +
+                '<div class="ap-bolge__fill" style="width:' + pct + '%"></div>' +
+                '</div></div>';
+        }).join('');
+
+        return '<div class="ap-panel ap-panel--compact">' +
+            '<h4 class="ap-panel__baslik">Bölgesel Dağılım</h4>' +
+            '<div class="ap-bolge">' + satirlar + '</div></div>';
+    }
+
+    function renderPlatformSagligiOzeti() {
+        var d = cache.sistem;
+        if (!d) {
+            return '<section class="ap-panel ap-saglik-ozet">' +
+                '<h3 class="ap-panel__baslik">Platform Sağlığı</h3>' +
+                bosDurum('Sistem durumu yüklenemedi.') + '</section>';
+        }
+        var kalemler = [
+            ['Supabase', d.supabase],
+            ['Oturum', d.oturum],
+            ['Storage', d.storage],
+            ['Realtime', d.realtime],
+            ['Piyasa', d.piyasa]
+        ];
+        var kartlar = kalemler.map(function (k) {
+            var obj = k[1] || {};
+            return '<div class="ap-saglik-ozet__kart">' +
+                '<span class="ap-saglik-ozet__ad">' + esc(k[0]) + '</span>' +
+                sistemEtiket(obj.durum) +
+                '<span class="ap-saglik-ozet__detay">' + esc(obj.detay || '—') + '</span></div>';
+        }).join('');
+        return '<section class="ap-panel ap-saglik-ozet">' +
+            '<h3 class="ap-panel__baslik">Platform Sağlığı</h3>' +
+            '<div class="ap-saglik-ozet__grid">' + kartlar + '</div></section>';
+    }
+
+    function renderSonAktiviteler() {
+        var rows = asArray(cache.aktiviteler);
+        var tablo = rows.length
+            ? '<div class="ap-tablo-wrap ap-aktivite"><table class="ap-tablo ap-tablo--compact">' +
+            '<thead><tr><th>İşlem</th><th>İlgili</th><th>Tarih</th><th>Admin</th></tr></thead><tbody>' +
+            rows.map(function (r) {
+                return '<tr>' +
+                    '<td>' + esc(r.islem || '—') + '</td>' +
+                    '<td>' + esc(r.ilgili || '—') + '</td>' +
+                    '<td>' + esc(tarihTR(r.ts)) + '</td>' +
+                    '<td>' + esc(r.admin_ad || '—') + '</td></tr>';
+            }).join('') + '</tbody></table></div>'
+            : bosDurum('Henüz aktivite yok.');
+        return '<section class="ap-panel ap-aktivite-panel">' +
+            '<h3 class="ap-panel__baslik">Son Aktiviteler</h3>' + tablo + '</section>';
+    }
+
     function renderHaritaBolum() {
         var agg = haritaAggrege();
         var metrik = genelUI.haritaMetrik;
@@ -776,6 +985,10 @@
             detay +
             '</div>' +
             ozetKartlar + eslesmeyenHtml +
+            '<div class="ap-map-alt-grid">' +
+            renderEnAktifSehirler() +
+            renderBolgeselDagilim() +
+            '</div>' +
             '</section>';
     }
 
@@ -893,21 +1106,23 @@
 
     function renderPlatformKpi(o) {
         var kartlar = [
-            ['Toplam kullanıcı', o.toplam_kullanici],
-            ['Toplam firma', o.toplam_firma],
-            ['Onay bekleyen firma', o.bekleyen_firma],
-            ['Onaylanan firma', o.onayli_firma],
-            ['Açık iş talebi', o.acik_is],
-            ['Toplam teklif', o.toplam_teklif],
-            ['Son 7 günde kullanıcı', o.kullanici_7g],
-            ['Son 7 günde iş', o.is_7g]
+            ['Toplam kullanıcı', o.toplam_kullanici, o.kullanici_7g, o.kullanici_onceki_7g],
+            ['Toplam firma', o.toplam_firma, o.firma_7g, o.firma_onceki_7g],
+            ['Onay bekleyen firma', o.bekleyen_firma, null, null],
+            ['Onaylanan firma', o.onayli_firma, null, null],
+            ['Açık iş talebi', o.acik_is, null, null],
+            ['Toplam teklif', o.toplam_teklif, o.teklif_7g, o.teklif_onceki_7g],
+            ['Son 7 günde kullanıcı', o.kullanici_7g, null, null],
+            ['Son 7 günde iş', o.is_7g, o.is_7g, o.is_onceki_7g]
         ];
         return '<section class="ap-panel">' +
             '<h3 class="ap-panel__baslik">Platform KPI</h3>' +
             '<div class="ap-kpi-grid">' + kartlar.map(function (k) {
+                var trend = (k[2] != null && k[3] != null) ? kpiTrendHtml(k[2], k[3]) : '';
                 return '<div class="ap-kpi">' +
                     '<span class="ap-kpi__etiket">' + esc(k[0]) + '</span>' +
-                    '<span class="ap-kpi__deger">' + esc(String(k[1] != null ? k[1] : '—')) + '</span></div>';
+                    '<span class="ap-kpi__deger">' + esc(String(k[1] != null ? k[1] : '—')) + '</span>' +
+                    trend + '</div>';
             }).join('') + '</div></section>';
     }
 
@@ -964,13 +1179,21 @@
         var pAnalitik = typeof s.analitikOzet === 'function'
             ? s.analitikOzet(genelUI.analitikAralik)
             : Promise.resolve({ ok: false, error: 'Analitik API yok (019).' });
+        var pAktiviteler = typeof s.aktiviteler === 'function'
+            ? s.aktiviteler(40)
+            : Promise.resolve({ ok: false, data: [] });
+        var pSistem = typeof s.sistemDurumu === 'function'
+            ? s.sistemDurumu()
+            : Promise.resolve({ ok: false, data: null });
 
-        Promise.all([pOzet, pSon, pHarita, pHaritaIl, pAnalitik]).then(function (arr) {
+        Promise.all([pOzet, pSon, pHarita, pHaritaIl, pAnalitik, pAktiviteler, pSistem]).then(function (arr) {
             var ozet = arr[0];
             var son = arr[1];
             var harita = arr[2];
             var haritaIl = arr[3];
             var analitik = arr[4];
+            var aktivite = arr[5];
+            var sistem = arr[6];
 
             function bitir() {
                 setBolumLoading('genel', false);
@@ -987,6 +1210,8 @@
             cache.haritaIl = haritaIl.ok ? (haritaIl.data || {}) : null;
             cache.analitik = analitik.ok ? (analitik.data || {}) : { __error: analitik.error || 'Analitik yüklenemedi.' };
             cache.son = normalizeSonData(son.ok ? son.data : {});
+            cache.aktiviteler = aktivite.ok ? asArray(aktivite.data) : [];
+            cache.sistem = sistem.ok ? (sistem.data || {}) : null;
 
             var o = ozet.ok ? (ozet.data || {}) : {};
             var needKul = !cache.son.kullanicilar.length && (Number(o.toplam_kullanici) || 0) > 0;
@@ -1139,8 +1364,13 @@
 
         $('apIcerik').innerHTML =
             '<div class="ap-genel">' +
-            renderHaritaBolum() +
+            renderHizliIslemler() +
             renderPlatformKpi(o) +
+            renderHaritaBolum() +
+            '<div class="ap-genel-ikili">' +
+            renderPlatformSagligiOzeti() +
+            renderSonAktiviteler() +
+            '</div>' +
             renderFinansBolum() +
             renderAnalitikBolum() +
             listeler +
@@ -1178,11 +1408,15 @@
                 '" data-ap-onay-sekme="' + t[0] + '">' + esc(t[1]) + '</button>';
         }).join('');
 
-        var liste = cache.firmalar || [];
+        var sehirSec = ($('apOnaySehir') && $('apOnaySehir').value) || '';
+        var liste = (cache.firmalar || []).filter(function (f) {
+            return sehirEslesir(f.sehir, sehirSec);
+        });
         var kartlar = liste.length ? liste.map(firmaKartHtml).join('') : bosDurum('Bu sekmede kayıt yok.');
 
         $('apIcerik').innerHTML =
             '<div class="ap-sekmeler" role="tablist">' + tabHtml + '</div>' +
+            '<div class="ap-filtreler ap-filtreler--tek">' + sehirSelectHtml('apOnaySehir', sehirSec) + '</div>' +
             '<div class="ap-kart-liste">' + kartlar + '</div>';
     }
 
@@ -1241,13 +1475,13 @@
 
     function renderFirmalarTablo() {
         var q = (($('apFirmaAra') && $('apFirmaAra').value) || '').toLowerCase().trim();
-        var sehir = (($('apFirmaSehir') && $('apFirmaSehir').value) || '').toLowerCase().trim();
+        var sehir = ($('apFirmaSehir') && $('apFirmaSehir').value) || '';
         var kat = (($('apFirmaKat') && $('apFirmaKat').value) || '').toLowerCase().trim();
         var durum = (($('apFirmaDurum') && $('apFirmaDurum').value) || '').toLowerCase().trim();
 
         var liste = (cache.firmalar || []).filter(function (f) {
             if (q && String(f.firma_adi || '').toLowerCase().indexOf(q) === -1) return false;
-            if (sehir && String(f.sehir || '').toLowerCase().indexOf(sehir) === -1) return false;
+            if (!sehirEslesir(f.sehir, sehir)) return false;
             if (kat && String(f.kategori || '').toLowerCase().indexOf(kat) === -1) return false;
             if (durum === 'aski' && !f.askiya_alindi) return false;
             if (durum && durum !== 'aski' && String(f.durum || '') !== durum) return false;
@@ -1286,7 +1520,7 @@
         $('apIcerik').innerHTML =
             '<div class="ap-filtreler">' +
             '<input type="search" class="form-input" id="apFirmaAra" placeholder="Firma adı ara…" value="' + esc(q) + '">' +
-            '<input type="text" class="form-input" id="apFirmaSehir" placeholder="Şehir" value="' + esc(sehir) + '">' +
+            sehirSelectHtml('apFirmaSehir', sehir) +
             '<input type="text" class="form-input" id="apFirmaKat" placeholder="Kategori" value="' + esc(kat) + '">' +
             '<select class="form-input" id="apFirmaDurum">' +
             '<option value="">Tüm durumlar</option>' +
@@ -1323,7 +1557,9 @@
 
     function renderKullanicilar() {
         var filtre = (($('apKulFiltre') && $('apKulFiltre').value) || 'hepsi');
+        var sehirSec = ($('apKulSehir') && $('apKulSehir').value) || '';
         var liste = (cache.kullanicilar || []).filter(function (u) {
+            if (!sehirEslesir(u.firma_sehir, sehirSec)) return false;
             if (filtre === 'normal' && u.hesap_tipi === 'firma') return false;
             if (filtre === 'firma' && u.hesap_tipi !== 'firma' && !u.firma_var) return false;
             if (filtre === 'admin' && u.role !== 'admin') return false;
@@ -1365,7 +1601,9 @@
             '<option value="dogrulanmamis"' + (filtre === 'dogrulanmamis' ? ' selected' : '') + '>Doğrulanmamış</option>' +
             '<option value="aktif"' + (filtre === 'aktif' ? ' selected' : '') + '>Aktif</option>' +
             '<option value="aski"' + (filtre === 'aski' ? ' selected' : '') + '>Askıda</option>' +
-            '</select></div>' +
+            '</select>' +
+            sehirSelectHtml('apKulSehir', sehirSec) +
+            '</div>' +
             (liste.length
                 ? '<div class="ap-tablo-wrap"><table class="ap-tablo"><thead><tr>' +
                 '<th>Ad soyad</th><th>E-posta</th><th>Hesap</th><th>Firma</th><th>E-posta OK</th>' +
@@ -1393,7 +1631,9 @@
 
     function renderIsler() {
         var filtre = (($('apIsFiltre') && $('apIsFiltre').value) || 'hepsi');
+        var sehirSec = ($('apIsSehir') && $('apIsSehir').value) || '';
         var liste = (cache.isler || []).filter(function (i) {
+            if (!sehirEslesir(i.sehir, sehirSec)) return false;
             var mod = String(i.moderasyon_durumu || 'aktif');
             var d = String(i.durum || '');
             if (filtre === 'acik' && d !== 'Acik') return false;
@@ -1429,7 +1669,9 @@
             '<option value="iptal"' + (filtre === 'iptal' ? ' selected' : '') + '>İptal</option>' +
             '<option value="incelemede"' + (filtre === 'incelemede' ? ' selected' : '') + '>İncelemede</option>' +
             '<option value="kaldirildi"' + (filtre === 'kaldirildi' ? ' selected' : '') + '>Kaldırıldı</option>' +
-            '</select></div>' +
+            '</select>' +
+            sehirSelectHtml('apIsSehir', sehirSec) +
+            '</div>' +
             (liste.length
                 ? '<div class="ap-tablo-wrap"><table class="ap-tablo"><thead><tr>' +
                 '<th>Başlık</th><th>Kategori</th><th>Oluşturan</th><th>Şehir</th><th>Teklif</th><th>Tarih</th><th>Durum</th><th>İşlem</th>' +
@@ -1558,6 +1800,7 @@
             satir('Supabase bağlantısı', d.supabase) +
             satir('Kullanıcı oturumu', d.oturum) +
             satir('Storage', d.storage) +
+            satir('Realtime', d.realtime) +
             satir('Canlı piyasa servisi', d.piyasa) +
             '<tr><td>Son başarılı veri güncellemesi</td><td colspan="2">' +
             esc(d.sonGuncelleme ? tarihTR(d.sonGuncelleme) : 'Kontrol edilemedi') +
@@ -1857,10 +2100,11 @@
         });
 
         root.addEventListener('change', function (e) {
-            if (e.target.id === 'apKulFiltre') renderKullanicilar();
-            if (e.target.id === 'apIsFiltre') renderIsler();
+            if (e.target.id === 'apKulFiltre' || e.target.id === 'apKulSehir') renderKullanicilar();
+            if (e.target.id === 'apIsFiltre' || e.target.id === 'apIsSehir') renderIsler();
             if (e.target.id === 'apIslemFiltre') yukleIslemler();
-            if (e.target.id === 'apFirmaDurum') renderFirmalarTablo();
+            if (e.target.id === 'apFirmaDurum' || e.target.id === 'apFirmaSehir') renderFirmalarTablo();
+            if (e.target.id === 'apOnaySehir') renderOnaylar();
         });
     }
 

@@ -2432,7 +2432,22 @@
         var ustKul = document.getElementById('apUstKullanici');
         if (ustKul && window.AuthService) {
             var u = AuthService.getCurrentUser();
-            ustKul.textContent = (u && isAdminSession()) ? (u.displayName || u.email || '') : '';
+            if (u && isAdminSession()) {
+                var ad = u.displayName || u.email || '';
+                var roleRaw = String(u.role || '').toLowerCase();
+                var rolEtiket = (roleRaw === 'super_admin' || roleRaw === 'super')
+                    ? 'Süper Yönetici'
+                    : 'Yönetici';
+                ustKul.innerHTML =
+                    '<span class="ap-ust-profil">' +
+                    '<span class="ap-ust-profil__durum" aria-hidden="true"></span>' +
+                    '<span class="ap-ust-profil__metin">' +
+                    '<strong>' + esc(ad) + '</strong>' +
+                    '<em>' + esc(rolEtiket) + '</em>' +
+                    '</span></span>';
+            } else {
+                ustKul.textContent = '';
+            }
         }
     }
 

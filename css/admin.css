@@ -557,6 +557,243 @@
   gap: 1.25rem;
 }
 
+.ap-genel-ikili {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+  gap: 1.25rem;
+  align-items: start;
+}
+
+.ap-hizli__grup {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.ap-hizli__btn {
+  appearance: none;
+  border: 1px solid var(--ap-border);
+  background: var(--ap-surface-2);
+  color: var(--ap-text);
+  padding: 0.45rem 0.85rem;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.ap-hizli__btn:hover {
+  border-color: rgba(212, 175, 55, 0.45);
+  color: var(--ap-gold);
+  background: var(--ap-gold-dim);
+}
+
+.ap-map-alt-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.ap-panel--compact {
+  padding: 0.85rem 1rem;
+  background: var(--ap-surface-2);
+  border: 1px solid var(--ap-border);
+  border-radius: 8px;
+}
+
+.ap-panel--compact .ap-panel__baslik {
+  margin: 0 0 0.35rem;
+  font-size: 0.95rem;
+}
+
+.ap-rank {
+  list-style: none;
+  margin: 0.5rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.ap-rank__item {
+  margin: 0;
+}
+
+.ap-rank__btn {
+  appearance: none;
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1.5rem 1fr auto;
+  align-items: center;
+  gap: 0.5rem;
+  border: 1px solid transparent;
+  background: rgba(255, 255, 255, 0.02);
+  color: var(--ap-text);
+  padding: 0.4rem 0.55rem;
+  border-radius: 6px;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+}
+
+.ap-rank__btn:hover {
+  border-color: var(--ap-border);
+  background: var(--ap-gold-dim);
+}
+
+.ap-rank__no {
+  color: var(--ap-gold);
+  font-weight: 600;
+  font-size: 0.8rem;
+}
+
+.ap-rank__adet {
+  color: var(--ap-muted);
+  font-size: 0.78rem;
+}
+
+.ap-bolge {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  margin-top: 0.5rem;
+}
+
+.ap-bolge__satir {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.ap-bolge__ust {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-size: 0.78rem;
+}
+
+.ap-bolge__ad {
+  color: var(--ap-text);
+}
+
+.ap-bolge__sayi {
+  color: var(--ap-muted);
+  white-space: nowrap;
+}
+
+.ap-bolge__bar {
+  height: 0.35rem;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.ap-bolge__fill {
+  height: 100%;
+  background: linear-gradient(90deg, rgba(212, 175, 55, 0.55), var(--ap-gold));
+  border-radius: inherit;
+  min-width: 2px;
+}
+
+.ap-saglik-ozet__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.55rem;
+}
+
+.ap-saglik-ozet__kart {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.55rem 0.65rem;
+  background: var(--ap-surface-2);
+  border: 1px solid var(--ap-border);
+  border-radius: 6px;
+  font-size: 0.78rem;
+}
+
+.ap-saglik-ozet__ad {
+  color: var(--ap-muted);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.ap-saglik-ozet__detay {
+  color: var(--ap-muted);
+  font-size: 0.72rem;
+}
+
+.ap-aktivite-panel .ap-tablo--compact td,
+.ap-aktivite-panel .ap-tablo--compact th {
+  font-size: 0.78rem;
+  padding: 0.4rem 0.5rem;
+}
+
+.ap-kpi__trend {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  margin-top: 0.35rem;
+  font-size: 0.68rem;
+  line-height: 1.3;
+}
+
+.ap-kpi__trend--up {
+  color: var(--ap-ok);
+}
+
+.ap-kpi__trend--down {
+  color: var(--ap-bad);
+}
+
+.ap-kpi__trend--flat {
+  color: var(--ap-muted);
+}
+
+.ap-filtreler--tek {
+  margin-bottom: 0.75rem;
+}
+
+.ap-filtreler--tek .form-input {
+  max-width: 220px;
+}
+
+.ap-ust-profil {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.ap-ust-profil__durum {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  background: var(--ap-ok);
+  box-shadow: 0 0 0 2px rgba(61, 154, 106, 0.25);
+}
+
+.ap-ust-profil__metin {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.05rem;
+  line-height: 1.2;
+}
+
+.ap-ust-profil__metin strong {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--ap-text);
+}
+
+.ap-ust-profil__metin em {
+  font-style: normal;
+  font-size: 0.72rem;
+  color: var(--ap-gold);
+}
+
 .ap-panel__baslik-satir {
   display: flex;
   flex-wrap: wrap;
@@ -891,6 +1128,11 @@
 
 @media (max-width: 1100px) {
   .ap-map-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .ap-genel-ikili,
+  .ap-map-alt-grid {
     grid-template-columns: 1fr;
   }
 }
