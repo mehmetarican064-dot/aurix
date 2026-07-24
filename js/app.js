@@ -961,10 +961,10 @@
     }
 
     function initMarketService() {
-        var wrap = $('piyasaBandi');
         if (!window.MarketService) {
             piyasaVeriGeldi = true;
-            if (wrap) wrap.innerHTML = piyasaBosMesaj();
+            renderPiyasaBandi();
+            renderHeroTerminal([]);
             return;
         }
         piyasaVeriGeldi = false;
@@ -2704,6 +2704,7 @@
         if (panelKayit) panelKayit.hidden = true;
         if (basari) basari.hidden = true;
         if (bekleyen) bekleyen.hidden = false;
+        girisModalGirisMetinGoster(false);
         if ($('girisEmail') && kayitBekleyenEmail) $('girisEmail').value = kayitBekleyenEmail;
     }
 
@@ -2712,6 +2713,11 @@
         var sekmeler = document.querySelector('.uyelik-sekmeler');
         if (bekleyen) bekleyen.hidden = true;
         if (sekmeler) sekmeler.hidden = false;
+    }
+
+    function girisModalGirisMetinGoster(goster) {
+        var el = $('girisModalGirisMetin');
+        if (el) el.hidden = !goster;
     }
 
     function sifreYenileBasariGoster() {
@@ -2730,6 +2736,7 @@
         if (sifreSifirlaForm) sifreSifirlaForm.hidden = true;
         if (sifreYenileForm) sifreYenileForm.hidden = true;
         if (basari) basari.hidden = false;
+        girisModalGirisMetinGoster(false);
         modalAc('girisModal');
     }
 
@@ -2753,6 +2760,7 @@
         if (sifreSifirlaForm) sifreSifirlaForm.hidden = true;
         if (sifreYenileForm) sifreYenileForm.hidden = true;
         if (basari) basari.hidden = true;
+        girisModalGirisMetinGoster(true);
         var sekmeler = document.querySelector('.uyelik-sekmeler');
         if (sekmeler) sekmeler.hidden = false;
     }
@@ -2773,6 +2781,7 @@
         if (sifreSifirlaForm) sifreSifirlaForm.hidden = true;
         if (sifreYenileForm) sifreYenileForm.hidden = false;
         if (basari) basari.hidden = true;
+        girisModalGirisMetinGoster(false);
         baglaSifreKurallar('sifreYenileYeni', 'sifreYenileKurallar');
         modalAc('girisModal');
     }
@@ -3895,6 +3904,7 @@
                 if (sifreYenileForm) sifreYenileForm.hidden = true;
                 if ($('sifreYenileBasari')) $('sifreYenileBasari').hidden = true;
                 sifreSifirlaForm.hidden = false;
+                girisModalGirisMetinGoster(false);
                 var ge = $('girisEmail');
                 var se = $('sifreSifirlaEmail');
                 if (ge && se && !se.value) se.value = ge.value || '';
@@ -3906,6 +3916,7 @@
                 if (sifreYenileForm) sifreYenileForm.hidden = true;
                 if ($('sifreYenileBasari')) $('sifreYenileBasari').hidden = true;
                 girisForm.hidden = false;
+                girisModalGirisMetinGoster(true);
             });
         }
         if (sifreSifirlaForm) {

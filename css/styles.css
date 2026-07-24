@@ -8765,11 +8765,6 @@ a { color: inherit; text-decoration: none; }
         display: none;
     }
 
-    /* Destek + İletişim metin sütunlarını gizle; sosyal ayrı satırda kalır */
-    .footer--wireframe .footer__kolon:nth-child(3) {
-        display: none;
-    }
-
     .footer--wireframe .footer__kolon:nth-child(6) {
         display: flex;
         flex-direction: row;
@@ -9553,6 +9548,10 @@ html.demo-video [data-sayfa="admin"] .panel-header__alt {
     border: 1px solid rgba(201, 169, 98, 0.18);
 }
 
+.uyelik-sekmeler[hidden] {
+    display: none !important;
+}
+
 .uyelik-sekme {
     flex: 1;
     border: none;
@@ -9579,6 +9578,83 @@ html.demo-video [data-sayfa="admin"] .panel-header__alt {
 
 .uyelik-panel[hidden] {
     display: none !important;
+}
+
+/* —— Şifre kuralları (canlı yeşil/kırmızı) —— */
+.sifre-kurallar {
+    list-style: none;
+    margin: 10px 0 0;
+    padding: 0;
+    display: grid;
+    gap: 6px;
+}
+
+.sifre-kurallar li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12.5px;
+    line-height: 1.35;
+    color: rgba(245, 120, 120, 0.95);
+    transition: color 0.15s ease;
+}
+
+.sifre-kurallar li::before {
+    content: '✗';
+    flex: 0 0 auto;
+    width: 1em;
+    font-weight: 700;
+}
+
+.sifre-kurallar li.sifre-kurallar__ok {
+    color: rgba(110, 200, 140, 0.98);
+}
+
+.sifre-kurallar li.sifre-kurallar__ok::before {
+    content: '✓';
+}
+
+/* —— Auth başarı ekranı —— */
+.auth-basari {
+    text-align: center;
+    padding: 12px 4px 4px;
+}
+
+.auth-basari[hidden] {
+    display: none !important;
+}
+
+.auth-basari__ikon {
+    width: 56px;
+    height: 56px;
+    margin: 0 auto 14px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    font-size: 28px;
+    font-weight: 700;
+    color: #0d1a12;
+    background: linear-gradient(135deg, #7dcea0, #c9a962);
+    box-shadow: 0 0 0 1px rgba(201, 169, 98, 0.35);
+}
+
+.auth-basari__baslik {
+    margin: 0 0 8px;
+    font-size: 17px;
+    font-weight: 700;
+    color: rgba(125, 206, 160, 0.98);
+}
+
+.auth-basari__metin {
+    margin: 0 0 18px;
+    font-size: 13.5px;
+    color: rgba(245, 240, 230, 0.72);
+}
+
+.btn.is-loading,
+.btn[disabled].is-loading {
+    opacity: 0.78;
+    cursor: wait;
 }
 
 /* —— Nav auth (Kayıt Ol / Hesabım) —— */

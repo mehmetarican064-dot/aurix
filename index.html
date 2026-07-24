@@ -41,7 +41,7 @@
     <link rel="preconnect" href="https://svsouqnhtlpcpdvqahmd.supabase.co" crossorigin>
     <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/styles.css?v=21">
+    <link rel="stylesheet" href="css/styles.css?v=26">
     <link rel="stylesheet" href="css/admin.css?v=25">
 </head>
 <body>
@@ -200,7 +200,7 @@
             <div class="kapsayici piyasa-serit__kapsayici">
                 <div class="piyasa-serit__ust">
                     <div class="piyasa-serit__baslik-grup">
-                        <span class="bolum-fuar-badge">Piyasa</span>
+                        <span class="bolum-fuar-badge">Canlı</span>
                         <h2 class="bolum__baslik bolum__baslik--serit">Piyasa</h2>
                     </div>
                     <button type="button" class="btn btn--ghost btn--sm" data-nav="piyasa">Detaylı Gör</button>
@@ -340,7 +340,7 @@
         <section class="bolum bolum--piyasa-sayfa">
             <div class="kapsayici piyasa-sayfa__kapsayici">
                 <header class="piyasa-sayfa__hero">
-                    <span class="bolum-fuar-badge">Piyasa</span>
+                    <span class="bolum-fuar-badge">Canlı</span>
                     <h2 class="bolum__baslik">Piyasa</h2>
                     <p class="bolum__alt bolum__alt--fuar">Kuyumcu, döviz ve altın fiyatları — bilgilendirme amaçlı gösterim.</p>
                 </header>
@@ -496,7 +496,7 @@
                 <p class="icerik-sayfa__ozet">En sık sorulan konulara kısa yanıtlar.</p>
                 <div class="icerik-sayfa__govde">
                     <h2>Firma kaydı</h2>
-                    <p>Kayıt formundan atölye veya tedarikçi başvurunuzu iletebilirsiniz. Firma başvuruları, paylaşılan bilgiler incelendikten sonra onaylanır.</p>
+                    <p>Üye olduktan sonra “Firma Hesabı Oluştur” ile atölye veya tedarikçi başvurunuzu iletebilirsiniz. Başvurular incelendikten sonra onaylanır.</p>
                     <h2>İş talebi ve teklif</h2>
                     <p>Açık iş taleplerini inceleyebilir, doğrulanmış firmalar üzerinden teklif süreçlerini AURIX içinde yürütebilirsiniz.</p>
                     <h2>Hesabım</h2>
@@ -801,7 +801,7 @@
                 <button type="button" class="uyelik-sekme" role="tab" id="uyelikSekmeKayit" aria-selected="false" aria-controls="uyelikPanelKayit" data-uyelik-sekme="kayit">Yeni Hesap Oluştur</button>
             </div>
             <div class="uyelik-panel" id="uyelikPanelGiris" role="tabpanel" aria-labelledby="uyelikSekmeGiris">
-                <p class="giris-modal__metin">Hesabınıza giriş yapın.</p>
+                <p class="giris-modal__metin" id="girisModalGirisMetin">Hesabınıza giriş yapın.</p>
                 <form id="girisForm">
                     <div class="form-grup">
                         <label class="form-label" for="girisEmail">E-posta</label>
@@ -1074,13 +1074,13 @@
     <!-- UMD build: GitHub Pages’te window.supabase global’i için zorunlu -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.2/dist/umd/supabase.js" defer></script>
     <script src="js/utils.js?v=21" defer></script>
-    <script src="js/data.js?v=21" defer></script>
+    <script src="js/data.js?v=26" defer></script>
     <script src="js/supabase.js?v=21" defer></script>
     <script src="js/authService.js?v=21" defer></script>
     <script src="js/panels.js?v=21" defer></script>
     <script src="js/market-service.js?v=21" defer></script>
     <script src="js/admin-service.js?v=25" defer></script>
     <script src="js/admin.js?v=25" defer></script>
-    <script src="js/app.js?v=25" defer></script>
+    <script src="js/app.js?v=26" defer></script>
 </body>
 </html>
