@@ -29,7 +29,7 @@
             return 'Bağlantı kurulamadı. İnternetinizi kontrol edin.';
         }
         if (/function.*does not exist|PGRST202/i.test(msg)) {
-            return 'Admin API henüz kurulmadı. Migration 013 uygulanmalı.';
+            return 'Admin API henüz kurulmadı. Migration 013/019 uygulanmalı.';
         }
         return msg.length < 180 ? msg : 'İşlem başarısız. Lütfen tekrar deneyin.';
     }
@@ -55,6 +55,16 @@
 
     function sonKayitlar() {
         return rpc('admin_son_kayitlar');
+    }
+
+    /** Genel Bakış harita: p_aralik = 7g | 30g | tum */
+    function haritaDagilim(aralik) {
+        return rpc('admin_harita_dagilim', { p_aralik: aralik || 'tum' });
+    }
+
+    /** Genel Bakış analitik: p_aralik = 7g | 30g | tum */
+    function analitikOzet(aralik) {
+        return rpc('admin_analitik_ozet', { p_aralik: aralik || '30g' });
     }
 
     function firmaListesi(filtre) {
@@ -196,6 +206,8 @@
     global.AurixAdminService = {
         ozet: ozet,
         sonKayitlar: sonKayitlar,
+        haritaDagilim: haritaDagilim,
+        analitikOzet: analitikOzet,
         firmaListesi: firmaListesi,
         firmaOnayla: firmaOnayla,
         firmaReddet: firmaReddet,

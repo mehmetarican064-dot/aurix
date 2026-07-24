@@ -16,8 +16,240 @@
         isler: [],
         teklifler: [],
         islemler: [],
-        sistem: null
+        sistem: null,
+        harita: null,
+        analitik: null
     };
+
+    var genelUI = {
+        haritaMetrik: 'firma',
+        haritaAralik: 'tum',
+        analitikAralik: '30g',
+        seciliPlaka: null
+    };
+
+    /* 81 il — ad + yaklaşık SVG koordinatları (viewBox 1000×480) */
+    var TR_ILLER = [
+        { p: '01', ad: 'Adana', x: 620, y: 320 },
+        { p: '02', ad: 'Adıyaman', x: 700, y: 290 },
+        { p: '03', ad: 'Afyonkarahisar', x: 420, y: 250 },
+        { p: '04', ad: 'Ağrı', x: 900, y: 180 },
+        { p: '05', ad: 'Amasya', x: 620, y: 140 },
+        { p: '06', ad: 'Ankara', x: 520, y: 200 },
+        { p: '07', ad: 'Antalya', x: 430, y: 340 },
+        { p: '08', ad: 'Artvin', x: 820, y: 100 },
+        { p: '09', ad: 'Aydın', x: 300, y: 300 },
+        { p: '10', ad: 'Balıkesir', x: 280, y: 180 },
+        { p: '11', ad: 'Bilecik', x: 380, y: 170 },
+        { p: '12', ad: 'Bingöl', x: 800, y: 230 },
+        { p: '13', ad: 'Bitlis', x: 860, y: 250 },
+        { p: '14', ad: 'Bolu', x: 440, y: 150 },
+        { p: '15', ad: 'Burdur', x: 400, y: 300 },
+        { p: '16', ad: 'Bursa', x: 340, y: 170 },
+        { p: '17', ad: 'Çanakkale', x: 220, y: 160 },
+        { p: '18', ad: 'Çankırı', x: 560, y: 150 },
+        { p: '19', ad: 'Çorum', x: 580, y: 150 },
+        { p: '20', ad: 'Denizli', x: 360, y: 300 },
+        { p: '21', ad: 'Diyarbakır', x: 780, y: 280 },
+        { p: '22', ad: 'Edirne', x: 180, y: 100 },
+        { p: '23', ad: 'Elazığ', x: 760, y: 250 },
+        { p: '24', ad: 'Erzincan', x: 760, y: 190 },
+        { p: '25', ad: 'Erzurum', x: 840, y: 170 },
+        { p: '26', ad: 'Eskişehir', x: 420, y: 200 },
+        { p: '27', ad: 'Gaziantep', x: 680, y: 320 },
+        { p: '28', ad: 'Giresun', x: 720, y: 120 },
+        { p: '29', ad: 'Gümüşhane', x: 760, y: 140 },
+        { p: '30', ad: 'Hakkari', x: 940, y: 290 },
+        { p: '31', ad: 'Hatay', x: 640, y: 360 },
+        { p: '32', ad: 'Isparta', x: 420, y: 290 },
+        { p: '33', ad: 'Mersin', x: 560, y: 340 },
+        { p: '34', ad: 'İstanbul', x: 300, y: 110 },
+        { p: '35', ad: 'İzmir', x: 260, y: 260 },
+        { p: '36', ad: 'Kars', x: 880, y: 140 },
+        { p: '37', ad: 'Kastamonu', x: 520, y: 100 },
+        { p: '38', ad: 'Kayseri', x: 620, y: 240 },
+        { p: '39', ad: 'Kırklareli', x: 200, y: 90 },
+        { p: '40', ad: 'Kırşehir', x: 560, y: 220 },
+        { p: '41', ad: 'Kocaeli', x: 340, y: 130 },
+        { p: '42', ad: 'Konya', x: 500, y: 280 },
+        { p: '43', ad: 'Kütahya', x: 380, y: 220 },
+        { p: '44', ad: 'Malatya', x: 720, y: 260 },
+        { p: '45', ad: 'Manisa', x: 300, y: 250 },
+        { p: '46', ad: 'Kahramanmaraş', x: 660, y: 290 },
+        { p: '47', ad: 'Mardin', x: 820, y: 310 },
+        { p: '48', ad: 'Muğla', x: 320, y: 340 },
+        { p: '49', ad: 'Muş', x: 840, y: 230 },
+        { p: '50', ad: 'Nevşehir', x: 580, y: 250 },
+        { p: '51', ad: 'Niğde', x: 580, y: 280 },
+        { p: '52', ad: 'Ordu', x: 700, y: 120 },
+        { p: '53', ad: 'Rize', x: 780, y: 100 },
+        { p: '54', ad: 'Sakarya', x: 360, y: 140 },
+        { p: '55', ad: 'Samsun', x: 640, y: 110 },
+        { p: '56', ad: 'Siirt', x: 860, y: 280 },
+        { p: '57', ad: 'Sinop', x: 580, y: 80 },
+        { p: '58', ad: 'Sivas', x: 680, y: 190 },
+        { p: '59', ad: 'Tekirdağ', x: 220, y: 120 },
+        { p: '60', ad: 'Tokat', x: 640, y: 160 },
+        { p: '61', ad: 'Trabzon', x: 760, y: 110 },
+        { p: '62', ad: 'Tunceli', x: 760, y: 220 },
+        { p: '63', ad: 'Şanlıurfa', x: 740, y: 320 },
+        { p: '64', ad: 'Uşak', x: 360, y: 260 },
+        { p: '65', ad: 'Van', x: 920, y: 240 },
+        { p: '66', ad: 'Yozgat', x: 580, y: 190 },
+        { p: '67', ad: 'Zonguldak', x: 440, y: 110 },
+        { p: '68', ad: 'Aksaray', x: 540, y: 260 },
+        { p: '69', ad: 'Bayburt', x: 800, y: 150 },
+        { p: '70', ad: 'Karaman', x: 520, y: 320 },
+        { p: '71', ad: 'Kırıkkale', x: 540, y: 190 },
+        { p: '72', ad: 'Batman', x: 820, y: 290 },
+        { p: '73', ad: 'Şırnak', x: 880, y: 300 },
+        { p: '74', ad: 'Bartın', x: 460, y: 90 },
+        { p: '75', ad: 'Ardahan', x: 880, y: 110 },
+        { p: '76', ad: 'Iğdır', x: 920, y: 160 },
+        { p: '77', ad: 'Yalova', x: 320, y: 140 },
+        { p: '78', ad: 'Karabük', x: 480, y: 120 },
+        { p: '79', ad: 'Kilis', x: 660, y: 340 },
+        { p: '80', ad: 'Osmaniye', x: 640, y: 330 },
+        { p: '81', ad: 'Düzce', x: 400, y: 130 }
+    ];
+
+    var TR_IL_ALIAS = {
+        'afyon': 'Afyonkarahisar',
+        'afyon karahisar': 'Afyonkarahisar',
+        'afyonkarahisar': 'Afyonkarahisar',
+        'agmri': 'Ağrı',
+        'agri': 'Ağrı',
+        'ic el': 'Mersin',
+        'icel': 'Mersin',
+        'içel': 'Mersin',
+        'mersin': 'Mersin',
+        'istanbul': 'İstanbul',
+        'izmir': 'İzmir',
+        'sanliurfa': 'Şanlıurfa',
+        'şanliurfa': 'Şanlıurfa',
+        'urfa': 'Şanlıurfa',
+        'marash': 'Kahramanmaraş',
+        'maras': 'Kahramanmaraş',
+        'maraş': 'Kahramanmaraş',
+        'kahramanmaras': 'Kahramanmaraş',
+        'kahramanmaraş': 'Kahramanmaraş',
+        'k.maras': 'Kahramanmaraş',
+        'k.maraş': 'Kahramanmaraş',
+        'sirnak': 'Şırnak',
+        'şırnak': 'Şırnak',
+        'igdir': 'Iğdır',
+        'ığdır': 'Iğdır',
+        'canakkale': 'Çanakkale',
+        'çanakkale': 'Çanakkale',
+        'ankara': 'Ankara',
+        'gaziantep': 'Gaziantep',
+        'antep': 'Gaziantep',
+        'diyarbakir': 'Diyarbakır',
+        'diyarbakır': 'Diyarbakır',
+        'elazig': 'Elazığ',
+        'elazığ': 'Elazığ',
+        'gumushane': 'Gümüşhane',
+        'gümüşhane': 'Gümüşhane',
+        'nevsehir': 'Nevşehir',
+        'nevşehir': 'Nevşehir',
+        'nigde': 'Niğde',
+        'niğde': 'Niğde',
+        'mugla': 'Muğla',
+        'muğla': 'Muğla',
+        'mus': 'Muş',
+        'muş': 'Muş',
+        'tekirdag': 'Tekirdağ',
+        'tekirdağ': 'Tekirdağ',
+        'kirklareli': 'Kırklareli',
+        'kırklareli': 'Kırklareli',
+        'kirikkale': 'Kırıkkale',
+        'kırıkkale': 'Kırıkkale',
+        'kirsehir': 'Kırşehir',
+        'kırşehir': 'Kırşehir',
+        'usak': 'Uşak',
+        'uşak': 'Uşak',
+        'balikesir': 'Balıkesir',
+        'balıkesir': 'Balıkesir',
+        'canakkale': 'Çanakkale',
+        'cankiri': 'Çankırı',
+        'çankırı': 'Çankırı',
+        'corum': 'Çorum',
+        'çorum': 'Çorum',
+        'eskisehir': 'Eskişehir',
+        'eskişehir': 'Eskişehir',
+        'kutahya': 'Kütahya',
+        'kütahya': 'Kütahya',
+        'hatay': 'Hatay',
+        'antakya': 'Hatay'
+    };
+
+    var TR_IL_BY_NORM = null;
+
+    function sehirNormalize(raw) {
+        var s = String(raw == null ? '' : raw).trim();
+        if (!s) return '';
+        s = s.replace(/\s+/g, ' ');
+        s = s.replace(/\s+(ili|il)$/i, '');
+        try {
+            s = s.toLocaleLowerCase('tr-TR');
+        } catch (e) {
+            s = s.toLowerCase();
+        }
+        /* TR: I→ı, İ→i — ASCII I ile yazılan İstanbul/Istanbul eşleşsin */
+        s = s.replace(/\u0131/g, 'i');
+        return s;
+    }
+
+    function ilIndexKur() {
+        if (TR_IL_BY_NORM) return;
+        TR_IL_BY_NORM = {};
+        TR_ILLER.forEach(function (il) {
+            TR_IL_BY_NORM[sehirNormalize(il.ad)] = il;
+        });
+        Object.keys(TR_IL_ALIAS).forEach(function (k) {
+            var ad = TR_IL_ALIAS[k];
+            var il = TR_ILLER.filter(function (x) { return x.ad === ad; })[0];
+            if (il) TR_IL_BY_NORM[sehirNormalize(k)] = il;
+        });
+    }
+
+    function ilBul(sehirHam) {
+        ilIndexKur();
+        var n = sehirNormalize(sehirHam);
+        if (!n) return null;
+        if (TR_IL_BY_NORM[n]) return TR_IL_BY_NORM[n];
+        /* alias tablosu zaten norm key ile */
+        if (TR_IL_ALIAS[n]) {
+            var ad = TR_IL_ALIAS[n];
+            return TR_ILLER.filter(function (x) { return x.ad === ad; })[0] || null;
+        }
+        return null;
+    }
+
+    function paraTR(n) {
+        var v = Number(n) || 0;
+        try {
+            return v.toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' });
+        } catch (e) {
+            return '₺' + v.toFixed(2).replace('.', ',');
+        }
+    }
+
+    function asArray(v) {
+        if (Array.isArray(v)) return v;
+        if (v && typeof v === 'object') {
+            try {
+                return Object.keys(v).map(function (k) { return v[k]; });
+            } catch (e) { /* ignore */ }
+        }
+        if (typeof v === 'string') {
+            try {
+                var p = JSON.parse(v);
+                return Array.isArray(p) ? p : [];
+            } catch (e2) { return []; }
+        }
+        return [];
+    }
 
     var RED_NEDENLERI = [
         'Eksik firma bilgileri',
@@ -163,31 +395,254 @@
     }
 
     /* ---------- Genel ---------- */
-    function yukleGenel() {
-        var s = svc();
-        if (!s) {
-            $('apIcerik').innerHTML = hataDurum('Admin servisi yüklenemedi.');
-            return;
-        }
-        setBolumLoading('genel', true);
-        Promise.all([s.ozet(), s.sonKayitlar()]).then(function (arr) {
-            setBolumLoading('genel', false);
-            if (aktifBolum !== 'genel') return;
-            var ozet = arr[0];
-            var son = arr[1];
-            if (!ozet.ok) {
-                $('apIcerik').innerHTML = hataDurum(ozet.error);
-                return;
-            }
-            cache.ozet = ozet.data || {};
-            cache.son = (son.ok && son.data) ? son.data : {};
-            renderGenel();
-        });
+    function haritaMetrikKey() {
+        if (genelUI.haritaMetrik === 'kullanici') return 'kullanici';
+        if (genelUI.haritaMetrik === 'is') return 'is';
+        return 'firma';
     }
 
-    function renderGenel() {
-        var o = cache.ozet || {};
-        var son = cache.son || {};
+    function haritaAggrege() {
+        var data = cache.harita || {};
+        var key = haritaMetrikKey();
+        var rows = asArray(data[key]);
+        var byPlaka = {};
+        var eslesmeyen = [];
+        var eslesmeyenAdet = 0;
+
+        rows.forEach(function (r) {
+            var ham = r && r.sehir != null ? r.sehir : '';
+            var adet = Number(r && r.adet) || 0;
+            if (!adet) return;
+            var il = ilBul(ham);
+            if (!il) {
+                eslesmeyen.push({ sehir: String(ham || '—'), adet: adet });
+                eslesmeyenAdet += adet;
+                return;
+            }
+            if (!byPlaka[il.p]) byPlaka[il.p] = { il: il, adet: 0 };
+            byPlaka[il.p].adet += adet;
+        });
+
+        var bos = (data.bos && data.bos[key]) ? Number(data.bos[key]) || 0 : 0;
+        if (bos > 0) {
+            eslesmeyen.push({ sehir: '(şehir boş)', adet: bos });
+            eslesmeyenAdet += bos;
+        }
+
+        var max = 0;
+        Object.keys(byPlaka).forEach(function (p) {
+            if (byPlaka[p].adet > max) max = byPlaka[p].adet;
+        });
+
+        return { byPlaka: byPlaka, eslesmeyen: eslesmeyen, eslesmeyenAdet: eslesmeyenAdet, max: max };
+    }
+
+    function renderHaritaSvg(agg) {
+        var max = agg.max || 0;
+        var dots = TR_ILLER.map(function (il) {
+            var adet = agg.byPlaka[il.p] ? agg.byPlaka[il.p].adet : 0;
+            var t = max > 0 ? adet / max : 0;
+            var r = adet > 0 ? (5 + t * 10) : 3.2;
+            var fill = adet > 0
+                ? ('rgba(201,162,39,' + (0.35 + t * 0.55).toFixed(2) + ')')
+                : 'rgba(255,255,255,0.14)';
+            var aktif = genelUI.seciliPlaka === il.p ? ' ap-map__il--aktif' : '';
+            return '<circle class="ap-map__il' + aktif + '" data-ap-il="' + esc(il.p) + '"' +
+                ' cx="' + il.x + '" cy="' + il.y + '" r="' + r.toFixed(1) + '"' +
+                ' fill="' + fill + '" stroke="rgba(255,255,255,0.35)" stroke-width="1">' +
+                '<title>' + esc(il.ad) + ': ' + adet + '</title></circle>';
+        }).join('');
+
+        return '<svg class="ap-map__svg" viewBox="0 0 1000 480" role="img" aria-label="Türkiye illeri haritası">' +
+            '<rect width="1000" height="480" fill="transparent"/>' +
+            '<path class="ap-map__outline" fill="rgba(255,255,255,0.03)" stroke="rgba(201,162,39,0.35)" stroke-width="2" ' +
+            'd="M170 95 C210 70 280 75 330 95 C390 70 470 65 540 80 C620 60 720 70 800 95 C870 110 930 150 950 200 ' +
+            'C960 250 940 300 900 330 C850 370 780 390 700 380 C640 400 580 410 520 390 C460 400 400 390 350 360 ' +
+            'C300 380 250 360 220 320 C180 280 150 220 155 160 C155 130 160 110 170 95 Z"/>' +
+            dots + '</svg>';
+    }
+
+    function renderHaritaBolum() {
+        var agg = haritaAggrege();
+        var metrik = genelUI.haritaMetrik;
+        var metrikEtiket = metrik === 'kullanici' ? 'Kullanıcılar' : (metrik === 'is' ? 'İş Talepleri' : 'Firmalar');
+        var toplamEslesen = 0;
+        Object.keys(agg.byPlaka).forEach(function (p) { toplamEslesen += agg.byPlaka[p].adet; });
+        var doluIl = Object.keys(agg.byPlaka).length;
+
+        var ozetKartlar =
+            '<div class="ap-map-ozet">' +
+            '<div class="ap-kpi"><span class="ap-kpi__etiket">Eşleşen kayıt</span><span class="ap-kpi__deger">' +
+            esc(String(toplamEslesen)) + '</span></div>' +
+            '<div class="ap-kpi"><span class="ap-kpi__etiket">Veri olan il</span><span class="ap-kpi__deger">' +
+            esc(String(doluIl)) + ' / 81</span></div>' +
+            '<div class="ap-kpi"><span class="ap-kpi__etiket">Eşleşmeyen</span><span class="ap-kpi__deger">' +
+            esc(String(agg.eslesmeyenAdet)) + '</span></div>' +
+            '<div class="ap-kpi"><span class="ap-kpi__etiket">Metrik</span><span class="ap-kpi__deger ap-kpi__deger--sm">' +
+            esc(metrikEtiket) + '</span></div>' +
+            '</div>';
+
+        var detay = '';
+        if (genelUI.seciliPlaka) {
+            var il = TR_ILLER.filter(function (x) { return x.p === genelUI.seciliPlaka; })[0];
+            var adet = agg.byPlaka[genelUI.seciliPlaka] ? agg.byPlaka[genelUI.seciliPlaka].adet : 0;
+            detay = '<div class="ap-map-detay" role="status">' +
+                '<strong>' + esc(il ? il.ad : 'İl') + '</strong>' +
+                '<span>' + esc(metrikEtiket) + ': <b>' + esc(String(adet)) + '</b></span>' +
+                '<button type="button" class="btn btn--ghost btn--xs" data-ap-il-temizle="1">Seçimi kaldır</button>' +
+                '</div>';
+        }
+
+        var eslesmeyenHtml = '';
+        if (agg.eslesmeyen.length) {
+            eslesmeyenHtml = '<div class="ap-map-eslesmeyen"><h4>Eşleşmeyen kayıtlar</h4><ul>' +
+                agg.eslesmeyen.map(function (e) {
+                    return '<li>' + esc(e.sehir) + ' <span>(' + esc(String(e.adet)) + ')</span></li>';
+                }).join('') + '</ul><p class="ap-muted">Bu kayıtlar yanlış bir ile bağlanmadı.</p></div>';
+        }
+
+        var haritaHata = cache.harita && cache.harita.__error
+            ? hataDurum(cache.harita.__error)
+            : '';
+
+        return '<section class="ap-panel ap-panel--map">' +
+            '<div class="ap-panel__baslik-satir">' +
+            '<h3 class="ap-panel__baslik">Türkiye Haritası</h3>' +
+            '<div class="ap-seg" role="group" aria-label="Harita metriği">' +
+            '<button type="button" class="ap-seg__btn' + (metrik === 'kullanici' ? ' ap-seg__btn--aktif' : '') +
+            '" data-ap-harita-metrik="kullanici">Kullanıcılar</button>' +
+            '<button type="button" class="ap-seg__btn' + (metrik === 'firma' ? ' ap-seg__btn--aktif' : '') +
+            '" data-ap-harita-metrik="firma">Firmalar</button>' +
+            '<button type="button" class="ap-seg__btn' + (metrik === 'is' ? ' ap-seg__btn--aktif' : '') +
+            '" data-ap-harita-metrik="is">İş Talepleri</button>' +
+            '</div>' +
+            '<div class="ap-seg" role="group" aria-label="Zaman aralığı">' +
+            '<button type="button" class="ap-seg__btn' + (genelUI.haritaAralik === '7g' ? ' ap-seg__btn--aktif' : '') +
+            '" data-ap-harita-aralik="7g">Son 7 gün</button>' +
+            '<button type="button" class="ap-seg__btn' + (genelUI.haritaAralik === '30g' ? ' ap-seg__btn--aktif' : '') +
+            '" data-ap-harita-aralik="30g">Son 30 gün</button>' +
+            '<button type="button" class="ap-seg__btn' + (genelUI.haritaAralik === 'tum' ? ' ap-seg__btn--aktif' : '') +
+            '" data-ap-harita-aralik="tum">Tüm zamanlar</button>' +
+            '</div></div>' +
+            haritaHata +
+            '<div class="ap-map-wrap">' + renderHaritaSvg(agg) + '</div>' +
+            detay + ozetKartlar + eslesmeyenHtml +
+            '</section>';
+    }
+
+    function renderFinansBolum() {
+        var kalemler = [
+            ['Toplam gelir', 0],
+            ['Bu ayki gelir', 0],
+            ['Bugünkü gelir', 0],
+            ['Bekleyen ödeme', 0],
+            ['Platform komisyonu', 0],
+            ['Premium üyelik geliri', 0],
+            ['Reklam geliri', 0],
+            ['İade edilen tutar', 0]
+        ];
+        var grid = kalemler.map(function (k) {
+            return '<div class="ap-kpi">' +
+                '<span class="ap-kpi__etiket">' + esc(k[0]) + '</span>' +
+                '<span class="ap-kpi__deger">' + esc(paraTR(k[1])) + '</span></div>';
+        }).join('');
+        return '<section class="ap-panel">' +
+            '<h3 class="ap-panel__baslik">Finansal Özet</h3>' +
+            '<div class="ap-kpi-grid ap-kpi-grid--finans">' + grid + '</div>' +
+            '<p class="ap-finans-bos" role="status">Henüz aktif ücretli işlem bulunmuyor.</p>' +
+            '</section>';
+    }
+
+    function svgBarChart(items, valueKey, labelKey) {
+        var rows = asArray(items).filter(function (r) {
+            return (Number(r[valueKey]) || 0) > 0;
+        });
+        if (!rows.length) {
+            return bosDurum('Bu aralıkta grafik için kayıt yok.');
+        }
+        var max = 0;
+        rows.forEach(function (r) {
+            var v = Number(r[valueKey]) || 0;
+            if (v > max) max = v;
+        });
+        var w = 560;
+        var barH = 18;
+        var gap = 8;
+        var h = rows.length * (barH + gap) + 8;
+        var bars = rows.map(function (r, i) {
+            var v = Number(r[valueKey]) || 0;
+            var bw = max > 0 ? Math.max(2, (v / max) * (w - 160)) : 0;
+            var y = 4 + i * (barH + gap);
+            var label = String(r[labelKey] == null ? '—' : r[labelKey]);
+            return '<text x="0" y="' + (y + 13) + '" class="ap-chart__label">' + esc(label) + '</text>' +
+                '<rect x="150" y="' + y + '" width="' + bw.toFixed(1) + '" height="' + barH +
+                '" rx="3" class="ap-chart__bar"/>' +
+                '<text x="' + (156 + bw) + '" y="' + (y + 13) + '" class="ap-chart__val">' + esc(String(v)) + '</text>';
+        }).join('');
+        return '<svg class="ap-chart__svg" viewBox="0 0 ' + w + ' ' + h + '" role="img">' + bars + '</svg>';
+    }
+
+    function svgLineChart(gunluk) {
+        var rows = asArray(gunluk);
+        var has = rows.some(function (r) {
+            return (Number(r.kullanici) || 0) + (Number(r.firma) || 0) + (Number(r.is) || 0) > 0;
+        });
+        if (!has) return bosDurum('Bu aralıkta günlük hareket yok.');
+
+        var w = 640;
+        var h = 180;
+        var pad = { l: 28, r: 12, t: 12, b: 28 };
+        var max = 1;
+        rows.forEach(function (r) {
+            ['kullanici', 'firma', 'is'].forEach(function (k) {
+                var v = Number(r[k]) || 0;
+                if (v > max) max = v;
+            });
+        });
+        function pt(i, val) {
+            var x = pad.l + (rows.length <= 1 ? 0 : (i / (rows.length - 1)) * (w - pad.l - pad.r));
+            var y = pad.t + (1 - (Number(val) || 0) / max) * (h - pad.t - pad.b);
+            return x.toFixed(1) + ',' + y.toFixed(1);
+        }
+        function poly(key) {
+            return rows.map(function (r, i) { return pt(i, r[key]); }).join(' ');
+        }
+        return '<svg class="ap-chart__svg ap-chart__svg--line" viewBox="0 0 ' + w + ' ' + h + '" role="img">' +
+            '<polyline class="ap-chart__line ap-chart__line--a" fill="none" points="' + poly('kullanici') + '"/>' +
+            '<polyline class="ap-chart__line ap-chart__line--b" fill="none" points="' + poly('firma') + '"/>' +
+            '<polyline class="ap-chart__line ap-chart__line--c" fill="none" points="' + poly('is') + '"/>' +
+            '</svg>' +
+            '<div class="ap-chart__legend">' +
+            '<span><i class="ap-dot ap-dot--a"></i>Kullanıcı</span>' +
+            '<span><i class="ap-dot ap-dot--b"></i>Firma</span>' +
+            '<span><i class="ap-dot ap-dot--c"></i>İş</span></div>';
+    }
+
+    function renderAnalitikBolum() {
+        var a = cache.analitik || {};
+        if (a.__error) {
+            return '<section class="ap-panel"><h3 class="ap-panel__baslik">Analitik</h3>' +
+                hataDurum(a.__error) + '</section>';
+        }
+        return '<section class="ap-panel">' +
+            '<div class="ap-panel__baslik-satir">' +
+            '<h3 class="ap-panel__baslik">Analitik Grafikler</h3>' +
+            '<div class="ap-seg" role="group" aria-label="Analitik aralığı">' +
+            '<button type="button" class="ap-seg__btn' + (genelUI.analitikAralik === '7g' ? ' ap-seg__btn--aktif' : '') +
+            '" data-ap-analitik-aralik="7g">7 gün</button>' +
+            '<button type="button" class="ap-seg__btn' + (genelUI.analitikAralik === '30g' ? ' ap-seg__btn--aktif' : '') +
+            '" data-ap-analitik-aralik="30g">30 gün</button>' +
+            '<button type="button" class="ap-seg__btn' + (genelUI.analitikAralik === 'tum' ? ' ap-seg__btn--aktif' : '') +
+            '" data-ap-analitik-aralik="tum">1 yıl</button>' +
+            '</div></div>' +
+            '<div class="ap-chart-grid">' +
+            '<div class="ap-chart"><h4>Günlük kayıt trendi</h4>' + svgLineChart(a.gunluk) + '</div>' +
+            '<div class="ap-chart"><h4>İş kategorileri</h4>' + svgBarChart(a.kategori_is, 'adet', 'kategori') + '</div>' +
+            '<div class="ap-chart"><h4>Firma durum dağılımı</h4>' + svgBarChart(a.firma_durum, 'adet', 'durum') + '</div>' +
+            '</div></section>';
+    }
+
+    function renderPlatformKpi(o) {
         var kartlar = [
             ['Toplam kullanıcı', o.toplam_kullanici],
             ['Toplam firma', o.toplam_firma],
@@ -198,15 +653,157 @@
             ['Son 7 günde kullanıcı', o.kullanici_7g],
             ['Son 7 günde iş', o.is_7g]
         ];
+        return '<section class="ap-panel">' +
+            '<h3 class="ap-panel__baslik">Platform KPI</h3>' +
+            '<div class="ap-kpi-grid">' + kartlar.map(function (k) {
+                return '<div class="ap-kpi">' +
+                    '<span class="ap-kpi__etiket">' + esc(k[0]) + '</span>' +
+                    '<span class="ap-kpi__deger">' + esc(String(k[1] != null ? k[1] : '—')) + '</span></div>';
+            }).join('') + '</div></section>';
+    }
 
-        var kpi = kartlar.map(function (k) {
-            return '<div class="ap-kpi">' +
-                '<span class="ap-kpi__etiket">' + esc(k[0]) + '</span>' +
-                '<span class="ap-kpi__deger">' + esc(String(k[1] != null ? k[1] : '—')) + '</span>' +
-                '</div>';
-        }).join('');
+    function listeBosMesaji(tip, o, satirVar) {
+        if (satirVar) return null;
+        if (tip === 'kullanici') {
+            if ((Number(o.toplam_kullanici) || 0) > 0) {
+                return 'Kullanıcı kayıtları var ancak liste yüklenemedi. Kullanıcılar sekmesini kontrol edin.';
+            }
+            return 'Henüz kullanıcı kaydı yok.';
+        }
+        if (tip === 'bekleyen') {
+            if ((Number(o.bekleyen_firma) || 0) > 0) {
+                return 'Onay bekleyen firma var ancak liste yüklenemedi. Firma Onayları sekmesine gidin.';
+            }
+            return 'Onay bekleyen firma yok.';
+        }
+        if (tip === 'is') {
+            if ((Number(o.acik_is) || 0) > 0 || (Number(o.is_7g) || 0) > 0) {
+                return 'İş talepleri var ancak liste yüklenemedi. İş Talepleri sekmesini kontrol edin.';
+            }
+            return 'Henüz iş talebi yok.';
+        }
+        return 'Kayıt yok.';
+    }
 
-        var kullanicilar = (son.kullanicilar || []).map(function (u) {
+    function normalizeSonData(raw) {
+        var son = raw || {};
+        if (typeof son === 'string') {
+            try { son = JSON.parse(son); } catch (e) { son = {}; }
+        }
+        return {
+            kullanicilar: asArray(son.kullanicilar),
+            bekleyen_firmalar: asArray(son.bekleyen_firmalar),
+            isler: asArray(son.isler)
+        };
+    }
+
+    function yukleGenel() {
+        var s = svc();
+        if (!s) {
+            $('apIcerik').innerHTML = hataDurum('Admin servisi yüklenemedi.');
+            return;
+        }
+        setBolumLoading('genel', true);
+        var pOzet = s.ozet();
+        var pSon = s.sonKayitlar();
+        var pHarita = typeof s.haritaDagilim === 'function'
+            ? s.haritaDagilim(genelUI.haritaAralik)
+            : Promise.resolve({ ok: false, error: 'Harita API yok (019).' });
+        var pAnalitik = typeof s.analitikOzet === 'function'
+            ? s.analitikOzet(genelUI.analitikAralik)
+            : Promise.resolve({ ok: false, error: 'Analitik API yok (019).' });
+
+        Promise.all([pOzet, pSon, pHarita, pAnalitik]).then(function (arr) {
+            var ozet = arr[0];
+            var son = arr[1];
+            var harita = arr[2];
+            var analitik = arr[3];
+
+            function bitir() {
+                setBolumLoading('genel', false);
+                if (aktifBolum !== 'genel') return;
+                if (!ozet.ok) {
+                    $('apIcerik').innerHTML = hataDurum(ozet.error);
+                    return;
+                }
+                cache.ozet = ozet.data || {};
+                renderGenel();
+            }
+
+            cache.harita = harita.ok ? (harita.data || {}) : { __error: harita.error || 'Harita yüklenemedi.' };
+            cache.analitik = analitik.ok ? (analitik.data || {}) : { __error: analitik.error || 'Analitik yüklenemedi.' };
+            cache.son = normalizeSonData(son.ok ? son.data : {});
+
+            var o = ozet.ok ? (ozet.data || {}) : {};
+            var needKul = !cache.son.kullanicilar.length && (Number(o.toplam_kullanici) || 0) > 0;
+            var needBek = !cache.son.bekleyen_firmalar.length && (Number(o.bekleyen_firma) || 0) > 0;
+            var fallbacks = [];
+
+            if (needKul && typeof s.kullaniciListesi === 'function') {
+                fallbacks.push(s.kullaniciListesi().then(function (res) {
+                    if (res.ok) {
+                        cache.son.kullanicilar = asArray(res.data).slice(0, 8).map(function (u) {
+                            return {
+                                id: u.id,
+                                ad_soyad: u.ad_soyad,
+                                email: u.email,
+                                hesap_tipi: u.hesap_tipi,
+                                created_at: u.created_at
+                            };
+                        });
+                    }
+                }));
+            }
+            if (needBek && typeof s.firmaListesi === 'function') {
+                fallbacks.push(s.firmaListesi('beklemede').then(function (res) {
+                    if (res.ok) {
+                        cache.son.bekleyen_firmalar = asArray(res.data).slice(0, 8).map(function (f) {
+                            return {
+                                id: f.id,
+                                firma_adi: f.firma_adi,
+                                sehir: f.sehir,
+                                kategori: f.kategori,
+                                created_at: f.created_at,
+                                yetkili_ad: f.yetkili_ad
+                            };
+                        });
+                    }
+                }));
+            }
+
+            if (fallbacks.length) {
+                Promise.all(fallbacks).then(bitir).catch(bitir);
+            } else {
+                bitir();
+            }
+        });
+    }
+
+    function yukleHaritaSadece() {
+        var s = svc();
+        if (!s || typeof s.haritaDagilim !== 'function') return;
+        s.haritaDagilim(genelUI.haritaAralik).then(function (res) {
+            if (aktifBolum !== 'genel') return;
+            cache.harita = res.ok ? (res.data || {}) : { __error: res.error || 'Harita yüklenemedi.' };
+            renderGenel();
+        });
+    }
+
+    function yukleAnalitikSadece() {
+        var s = svc();
+        if (!s || typeof s.analitikOzet !== 'function') return;
+        s.analitikOzet(genelUI.analitikAralik).then(function (res) {
+            if (aktifBolum !== 'genel') return;
+            cache.analitik = res.ok ? (res.data || {}) : { __error: res.error || 'Analitik yüklenemedi.' };
+            renderGenel();
+        });
+    }
+
+    function renderGenel() {
+        var o = cache.ozet || {};
+        var son = normalizeSonData(cache.son);
+
+        var kullanicilar = son.kullanicilar.map(function (u) {
             return '<tr>' +
                 '<td>' + esc(u.ad_soyad || '—') + '</td>' +
                 '<td>' + esc(u.email || '—') + '</td>' +
@@ -214,7 +811,7 @@
                 '<td>' + esc(tarihKisa(u.created_at)) + '</td></tr>';
         }).join('');
 
-        var bekleyen = (son.bekleyen_firmalar || []).map(function (f) {
+        var bekleyen = son.bekleyen_firmalar.map(function (f) {
             return '<tr>' +
                 '<td>' + esc(f.firma_adi || '—') + '</td>' +
                 '<td>' + esc(f.yetkili_ad || '—') + '</td>' +
@@ -225,7 +822,7 @@
                 esc(f.id) + '">İncele</button></td></tr>';
         }).join('');
 
-        var isler = (son.isler || []).map(function (i) {
+        var isler = son.isler.map(function (i) {
             return '<tr>' +
                 '<td>' + esc(i.baslik || '—') + '</td>' +
                 '<td>' + esc(i.kategori || '—') + '</td>' +
@@ -234,16 +831,35 @@
                 '<td>' + durumRozet(i.durum) + '</td></tr>';
         }).join('');
 
-        $('apIcerik').innerHTML =
-            '<div class="ap-kpi-grid">' + kpi + '</div>' +
-            '<div class="ap-paneller">' +
+        var kulBos = listeBosMesaji('kullanici', o, !!kullanicilar);
+        var bekBos = listeBosMesaji('bekleyen', o, !!bekleyen);
+        var isBos = listeBosMesaji('is', o, !!isler);
+
+        var listeler =
+            '<div class="ap-paneller ap-paneller--alt">' +
+            '<h3 class="ap-alt-baslik">Mevcut Dashboard</h3>' +
+            '<div class="ap-kpi-grid">' +
+            [
+                ['Toplam kullanıcı', o.toplam_kullanici],
+                ['Toplam firma', o.toplam_firma],
+                ['Onay bekleyen firma', o.bekleyen_firma],
+                ['Onaylanan firma', o.onayli_firma],
+                ['Açık iş talebi', o.acik_is],
+                ['Toplam teklif', o.toplam_teklif],
+                ['Son 7 günde kullanıcı', o.kullanici_7g],
+                ['Son 7 günde iş', o.is_7g]
+            ].map(function (k) {
+                return '<div class="ap-kpi">' +
+                    '<span class="ap-kpi__etiket">' + esc(k[0]) + '</span>' +
+                    '<span class="ap-kpi__deger">' + esc(String(k[1] != null ? k[1] : '—')) + '</span></div>';
+            }).join('') + '</div>' +
             '<section class="ap-panel">' +
             '<h3 class="ap-panel__baslik">Son kayıt olan kullanıcılar</h3>' +
             (kullanicilar
                 ? '<div class="ap-tablo-wrap"><table class="ap-tablo"><thead><tr>' +
                 '<th>Ad soyad</th><th>E-posta</th><th>Hesap tipi</th><th>Kayıt</th></tr></thead>' +
                 '<tbody>' + kullanicilar + '</tbody></table></div>'
-                : bosDurum('Henüz kullanıcı kaydı yok.')) +
+                : bosDurum(kulBos)) +
             '</section>' +
             '<section class="ap-panel">' +
             '<h3 class="ap-panel__baslik">Onay bekleyen firmalar</h3>' +
@@ -251,7 +867,7 @@
                 ? '<div class="ap-tablo-wrap"><table class="ap-tablo"><thead><tr>' +
                 '<th>Firma</th><th>Yetkili</th><th>Şehir</th><th>Hizmet</th><th>Başvuru</th><th></th></tr></thead>' +
                 '<tbody>' + bekleyen + '</tbody></table></div>'
-                : bosDurum('Onay bekleyen firma yok.')) +
+                : bosDurum(bekBos)) +
             '</section>' +
             '<section class="ap-panel">' +
             '<h3 class="ap-panel__baslik">Son açılan işler</h3>' +
@@ -259,8 +875,17 @@
                 ? '<div class="ap-tablo-wrap"><table class="ap-tablo"><thead><tr>' +
                 '<th>Başlık</th><th>Kategori</th><th>Oluşturan</th><th>Tarih</th><th>Durum</th></tr></thead>' +
                 '<tbody>' + isler + '</tbody></table></div>'
-                : bosDurum('Henüz iş talebi yok.')) +
+                : bosDurum(isBos)) +
             '</section></div>';
+
+        $('apIcerik').innerHTML =
+            '<div class="ap-genel">' +
+            renderHaritaBolum() +
+            renderPlatformKpi(o) +
+            renderFinansBolum() +
+            renderAnalitikBolum() +
+            listeler +
+            '</div>';
     }
 
     /* ---------- Firma onayları ---------- */
@@ -798,6 +1423,38 @@
             if (e.target.closest('[data-ap-goto-onay]')) {
                 firmaOnaySekme = 'beklemede';
                 bolumGoster('onaylar');
+                return;
+            }
+
+            var haritaMetrikBtn = e.target.closest('[data-ap-harita-metrik]');
+            if (haritaMetrikBtn) {
+                genelUI.haritaMetrik = haritaMetrikBtn.getAttribute('data-ap-harita-metrik') || 'firma';
+                genelUI.seciliPlaka = null;
+                if (aktifBolum === 'genel') renderGenel();
+                return;
+            }
+            var haritaAralikBtn = e.target.closest('[data-ap-harita-aralik]');
+            if (haritaAralikBtn) {
+                genelUI.haritaAralik = haritaAralikBtn.getAttribute('data-ap-harita-aralik') || 'tum';
+                genelUI.seciliPlaka = null;
+                yukleHaritaSadece();
+                return;
+            }
+            var analitikAralikBtn = e.target.closest('[data-ap-analitik-aralik]');
+            if (analitikAralikBtn) {
+                genelUI.analitikAralik = analitikAralikBtn.getAttribute('data-ap-analitik-aralik') || '30g';
+                yukleAnalitikSadece();
+                return;
+            }
+            var ilBtn = e.target.closest('[data-ap-il]');
+            if (ilBtn) {
+                genelUI.seciliPlaka = ilBtn.getAttribute('data-ap-il');
+                if (aktifBolum === 'genel') renderGenel();
+                return;
+            }
+            if (e.target.closest('[data-ap-il-temizle]')) {
+                genelUI.seciliPlaka = null;
+                if (aktifBolum === 'genel') renderGenel();
                 return;
             }
 

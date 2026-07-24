@@ -549,3 +549,247 @@
     padding: 1rem;
   }
 }
+
+/* ---- Genel Bakış: harita / finans / analitik ---- */
+.ap-genel {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.ap-panel__baslik-satir {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.65rem 0.85rem;
+  margin-bottom: 0.85rem;
+}
+
+.ap-panel__baslik-satir .ap-panel__baslik {
+  margin: 0;
+  margin-right: auto;
+}
+
+.ap-seg {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  padding: 0.2rem;
+  border: 1px solid var(--ap-border);
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.15);
+}
+
+.ap-seg__btn {
+  border: 0;
+  background: transparent;
+  color: var(--ap-muted);
+  font-size: 0.75rem;
+  padding: 0.35rem 0.55rem;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.ap-seg__btn--aktif {
+  background: rgba(201, 162, 39, 0.18);
+  color: var(--ap-gold);
+  font-weight: 600;
+}
+
+.ap-map-wrap {
+  width: 100%;
+  overflow: hidden;
+  border: 1px solid var(--ap-border);
+  border-radius: 10px;
+  background: linear-gradient(160deg, rgba(201, 162, 39, 0.06), transparent 55%);
+}
+
+.ap-map__svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 360px;
+}
+
+.ap-map__il {
+  cursor: pointer;
+  transition: r 0.15s ease, stroke 0.15s ease;
+}
+
+.ap-map__il:hover,
+.ap-map__il--aktif {
+  stroke: var(--ap-gold);
+  stroke-width: 2;
+}
+
+.ap-map-ozet {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-top: 0.9rem;
+}
+
+.ap-map-detay {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem 1rem;
+  align-items: center;
+  margin-top: 0.75rem;
+  padding: 0.65rem 0.8rem;
+  border: 1px solid rgba(201, 162, 39, 0.28);
+  border-radius: 8px;
+  background: rgba(201, 162, 39, 0.08);
+  font-size: 0.875rem;
+}
+
+.ap-map-eslesmeyen {
+  margin-top: 0.85rem;
+  font-size: 0.85rem;
+}
+
+.ap-map-eslesmeyen h4 {
+  margin: 0 0 0.4rem;
+  font-size: 0.85rem;
+}
+
+.ap-map-eslesmeyen ul {
+  margin: 0;
+  padding-left: 1.1rem;
+  color: var(--ap-muted);
+}
+
+.ap-kpi__deger--sm {
+  font-size: 1rem;
+}
+
+.ap-kpi-grid--finans {
+  margin-bottom: 0.75rem;
+}
+
+.ap-finans-bos {
+  margin: 0;
+  color: var(--ap-muted);
+  font-size: 0.875rem;
+}
+
+.ap-chart-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 1rem;
+}
+
+.ap-chart {
+  border: 1px solid var(--ap-border);
+  border-radius: 8px;
+  padding: 0.75rem;
+  min-height: 120px;
+}
+
+.ap-chart h4 {
+  margin: 0 0 0.55rem;
+  font-size: 0.8rem;
+  color: var(--ap-muted);
+  font-weight: 600;
+}
+
+.ap-chart:first-child {
+  grid-column: 1 / -1;
+}
+
+.ap-chart__svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.ap-chart__label {
+  fill: var(--ap-muted);
+  font-size: 11px;
+}
+
+.ap-chart__val {
+  fill: var(--ap-text);
+  font-size: 11px;
+}
+
+.ap-chart__bar {
+  fill: rgba(201, 162, 39, 0.75);
+}
+
+.ap-chart__line {
+  stroke-width: 2;
+}
+
+.ap-chart__line--a { stroke: #c9a227; }
+.ap-chart__line--b { stroke: #5b9fd4; }
+.ap-chart__line--c { stroke: #3d9a6a; }
+
+.ap-chart__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 0.45rem;
+  font-size: 0.75rem;
+  color: var(--ap-muted);
+}
+
+.ap-dot {
+  display: inline-block;
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  margin-right: 0.3rem;
+  vertical-align: middle;
+}
+
+.ap-dot--a { background: #c9a227; }
+.ap-dot--b { background: #5b9fd4; }
+.ap-dot--c { background: #3d9a6a; }
+
+.ap-alt-baslik {
+  margin: 0.25rem 0 0;
+  font-size: 1rem;
+  color: var(--ap-text);
+}
+
+.ap-paneller--alt {
+  margin-top: 0.25rem;
+}
+
+.ap-muted {
+  color: var(--ap-muted);
+  font-size: 0.8rem;
+}
+
+@media (max-width: 900px) {
+  .ap-map-ozet,
+  .ap-chart-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .ap-map__svg {
+    max-height: 280px;
+  }
+}
+
+@media (max-width: 520px) {
+  .ap-map-ozet,
+  .ap-chart-grid,
+  .ap-kpi-grid--finans {
+    grid-template-columns: 1fr;
+  }
+
+  .ap-panel__baslik-satir {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .ap-seg {
+    width: 100%;
+  }
+
+  .ap-seg__btn {
+    flex: 1 1 auto;
+    text-align: center;
+  }
+}
