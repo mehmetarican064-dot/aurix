@@ -29,7 +29,7 @@
             return 'Bağlantı kurulamadı. İnternetinizi kontrol edin.';
         }
         if (/function.*does not exist|PGRST202/i.test(msg)) {
-            return 'Admin API henüz kurulmadı. Migration 013/019 uygulanmalı.';
+            return 'Admin API henüz kurulmadı. Migration 013/019/021 uygulanmalı.';
         }
         return msg.length < 180 ? msg : 'İşlem başarısız. Lütfen tekrar deneyin.';
     }
@@ -70,6 +70,11 @@
     /** Genel Bakış harita il detay özeti */
     function haritaIlOzet(aralik) {
         return rpc('admin_harita_il_ozet', { p_aralik: aralik || 'tum' });
+    }
+
+    /** Genel Bakış birleşik aktivite akışı */
+    function aktiviteler(limit) {
+        return rpc('admin_aktiviteler', { p_limit: limit || 40 });
     }
 
     function firmaListesi(filtre) {
@@ -145,9 +150,10 @@
             supabase: { durum: 'kontrol_edilemedi', detay: '' },
             oturum: { durum: 'kontrol_edilemedi', detay: '' },
             storage: { durum: 'kontrol_edilemedi', detay: '' },
+            realtime: { durum: 'kontrol_edilemedi', detay: '' },
             piyasa: { durum: 'kontrol_edilemedi', detay: '' },
             sonGuncelleme: null,
-            surum: '0.3-admin'
+            surum: '0.4-admin'
         };
 
         if (!sb) {
@@ -188,6 +194,32 @@
         });
 
         var p4 = Promise.resolve().then(function () {
+            try {
+                var rt = sb.realtime;
+                if (!rt) {
+                    sonuc.realtime = { durum: 'kontrol_edilemedi', detay: 'Realtime API yok' };
+                    return;
+                }
+                var state = String(
+                    (rt.connection && (rt.connection.state || rt.connection.connectionState)) ||
+                    rt._connectionState ||
+                    ''
+                ).toLowerCase();
+                if (state === 'open' || state === 'connected' || state === '1') {
+                    sonuc.realtime = { durum: 'calisiyor', detay: 'Bağlantı açık' };
+                } else if (state === 'connecting' || state === '0') {
+                    sonuc.realtime = { durum: 'kontrol_edilemedi', detay: 'Bağlanıyor' };
+                } else if (state) {
+                    sonuc.realtime = { durum: 'sorun', detay: 'Durum: ' + state };
+                } else {
+                    sonuc.realtime = { durum: 'kontrol_edilemedi', detay: 'Durum okunamadı' };
+                }
+            } catch (e) {
+                sonuc.realtime = { durum: 'kontrol_edilemedi', detay: 'Realtime kontrol edilemedi' };
+            }
+        });
+
+        var p5 = Promise.resolve().then(function () {
             if (global.Aurix && typeof Aurix.getMarketStatus === 'function') {
                 var st = Aurix.getMarketStatus();
                 if (st && st.ok) {
@@ -203,7 +235,7 @@
             }
         });
 
-        return Promise.all([p1, p2, p3, p4]).then(function () {
+        return Promise.all([p1, p2, p3, p4, p5]).then(function () {
             return { ok: true, data: sonuc };
         });
     }
@@ -214,6 +246,7 @@
         haritaDagilim: haritaDagilim,
         analitikOzet: analitikOzet,
         haritaIlOzet: haritaIlOzet,
+        aktiviteler: aktiviteler,
         firmaListesi: firmaListesi,
         firmaOnayla: firmaOnayla,
         firmaReddet: firmaReddet,
