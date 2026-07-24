@@ -401,9 +401,36 @@
         return 'firma';
     }
 
-    function haritaAggrege() {
+    function haritaAralikEtiket() {
+        if (genelUI.haritaAralik === '7g') return 'Son 7 gün';
+        if (genelUI.haritaAralik === '30g') return 'Son 30 gün';
+        return 'Tüm zamanlar';
+    }
+
+    var turkeySvgCache = null;
+    var turkeySvgPromise = null;
+
+    function loadTurkeySvg() {
+        if (turkeySvgCache) return Promise.resolve(turkeySvgCache);
+        if (turkeySvgPromise) return turkeySvgPromise;
+        turkeySvgPromise = fetch('assets/turkey-provinces.svg')
+            .then(function (res) {
+                if (!res.ok) throw new Error('SVG yüklenemedi');
+                return res.text();
+            })
+            .then(function (txt) {
+                turkeySvgCache = txt;
+                return txt;
+            })
+            .catch(function (err) {
+                turkeySvgPromise = null;
+                throw err;
+            });
+        return turkeySvgPromise;
+    }
+
+    function haritaAggregeMetrik(key) {
         var data = cache.harita || {};
-        var key = haritaMetrikKey();
         var rows = asArray(data[key]);
         var byPlaka = {};
         var eslesmeyen = [];
@@ -419,8 +446,7 @@
                 eslesmeyenAdet += adet;
                 return;
             }
-            if (!byPlaka[il.p]) byPlaka[il.p] = { il: il, adet: 0 };
-            byPlaka[il.p].adet += adet;
+            byPlaka[il.p] = (byPlaka[il.p] || 0) + adet;
         });
 
         var bos = (data.bos && data.bos[key]) ? Number(data.bos[key]) || 0 : 0;
@@ -429,37 +455,144 @@
             eslesmeyenAdet += bos;
         }
 
-        var max = 0;
-        Object.keys(byPlaka).forEach(function (p) {
-            if (byPlaka[p].adet > max) max = byPlaka[p].adet;
-        });
-
-        return { byPlaka: byPlaka, eslesmeyen: eslesmeyen, eslesmeyenAdet: eslesmeyenAdet, max: max };
+        return { byPlaka: byPlaka, eslesmeyen: eslesmeyen, eslesmeyenAdet: eslesmeyenAdet };
     }
 
-    function renderHaritaSvg(agg) {
-        var max = agg.max || 0;
-        var dots = TR_ILLER.map(function (il) {
-            var adet = agg.byPlaka[il.p] ? agg.byPlaka[il.p].adet : 0;
-            var t = max > 0 ? adet / max : 0;
-            var r = adet > 0 ? (5 + t * 10) : 3.2;
-            var fill = adet > 0
-                ? ('rgba(201,162,39,' + (0.35 + t * 0.55).toFixed(2) + ')')
-                : 'rgba(255,255,255,0.14)';
-            var aktif = genelUI.seciliPlaka === il.p ? ' ap-map__il--aktif' : '';
-            return '<circle class="ap-map__il' + aktif + '" data-ap-il="' + esc(il.p) + '"' +
-                ' cx="' + il.x + '" cy="' + il.y + '" r="' + r.toFixed(1) + '"' +
-                ' fill="' + fill + '" stroke="rgba(255,255,255,0.35)" stroke-width="1">' +
-                '<title>' + esc(il.ad) + ': ' + adet + '</title></circle>';
-        }).join('');
+    function haritaAggrege() {
+        var key = haritaMetrikKey();
+        var selected = haritaAggregeMetrik(key);
+        var kul = haritaAggregeMetrik('kullanici').byPlaka;
+        var fir = haritaAggregeMetrik('firma').byPlaka;
+        var ism = haritaAggregeMetrik('is').byPlaka;
+        var byPlaka = {};
+        var max = 0;
 
-        return '<svg class="ap-map__svg" viewBox="0 0 1000 480" role="img" aria-label="Türkiye illeri haritası">' +
-            '<rect width="1000" height="480" fill="transparent"/>' +
-            '<path class="ap-map__outline" fill="rgba(255,255,255,0.03)" stroke="rgba(201,162,39,0.35)" stroke-width="2" ' +
-            'd="M170 95 C210 70 280 75 330 95 C390 70 470 65 540 80 C620 60 720 70 800 95 C870 110 930 150 950 200 ' +
-            'C960 250 940 300 900 330 C850 370 780 390 700 380 C640 400 580 410 520 390 C460 400 400 390 350 360 ' +
-            'C300 380 250 360 220 320 C180 280 150 220 155 160 C155 130 160 110 170 95 Z"/>' +
-            dots + '</svg>';
+        TR_ILLER.forEach(function (il) {
+            var c = {
+                kullanici: kul[il.p] || 0,
+                firma: fir[il.p] || 0,
+                is: ism[il.p] || 0
+            };
+            c.adet = c[key] || 0;
+            byPlaka[il.p] = { il: il, counts: c, adet: c.adet };
+            if (c.adet > max) max = c.adet;
+        });
+
+        return {
+            byPlaka: byPlaka,
+            eslesmeyen: selected.eslesmeyen,
+            eslesmeyenAdet: selected.eslesmeyenAdet,
+            max: max,
+            key: key
+        };
+    }
+
+    function haritaAltinFill(t) {
+        /* t: 0..1 — veri yoğunluğu arttıkça altın koyulaşır/parlaklaşır */
+        var clamped = Math.max(0, Math.min(1, t));
+        var r = Math.round(90 + clamped * (232 - 90));
+        var g = Math.round(72 + clamped * (196 - 72));
+        var b = Math.round(18 + clamped * (72 - 18));
+        return 'rgb(' + r + ',' + g + ',' + b + ')';
+    }
+
+    function haritaIlAdi(plaka) {
+        var il = TR_ILLER.filter(function (x) { return x.p === plaka; })[0];
+        return il ? il.ad : plaka;
+    }
+
+    function applyTurkeyMapColors(svgRoot, agg) {
+        if (!svgRoot || !agg) return 0;
+        var max = agg.max || 0;
+        var groups = svgRoot.querySelectorAll('g[data-plakakodu]');
+        var n = 0;
+        groups.forEach(function (g) {
+            var p = g.getAttribute('data-plakakodu');
+            if (!p || p === '00') return;
+            n += 1;
+            var row = agg.byPlaka[p];
+            var adet = row ? row.adet : 0;
+            var fill = adet > 0 && max > 0
+                ? haritaAltinFill(adet / max)
+                : '#2a2e35';
+            g.setAttribute('data-ap-il', p);
+            g.classList.add('ap-map__il');
+            g.classList.toggle('ap-map__il--aktif', genelUI.seciliPlaka === p);
+            g.querySelectorAll('path').forEach(function (path) {
+                path.setAttribute('fill', fill);
+                path.style.fill = fill;
+                path.setAttribute('stroke', 'rgba(201,162,39,0.45)');
+                path.setAttribute('stroke-width', '0.55');
+                path.style.pointerEvents = 'all';
+            });
+        });
+        return n;
+    }
+
+    function bindTurkeyMapInteractions(wrap, agg) {
+        var tip = $('apMapTooltip');
+        if (!tip) {
+            tip = document.createElement('div');
+            tip.id = 'apMapTooltip';
+            tip.className = 'ap-map-tooltip';
+            tip.hidden = true;
+            document.body.appendChild(tip);
+        }
+
+        function hideTip() {
+            tip.hidden = true;
+        }
+
+        function showTip(plaka, evt) {
+            var row = agg.byPlaka[plaka];
+            var c = row && row.counts ? row.counts : { kullanici: 0, firma: 0, is: 0 };
+            tip.innerHTML =
+                '<strong>' + esc(haritaIlAdi(plaka)) + '</strong>' +
+                '<span>Kullanıcı: <b>' + esc(String(c.kullanici || 0)) + '</b></span>' +
+                '<span>Firma: <b>' + esc(String(c.firma || 0)) + '</b></span>' +
+                '<span>İş talebi: <b>' + esc(String(c.is || 0)) + '</b></span>' +
+                '<em>' + esc(haritaAralikEtiket()) + '</em>';
+            tip.hidden = false;
+            var x = (evt && evt.clientX) || 0;
+            var y = (evt && evt.clientY) || 0;
+            tip.style.left = Math.min(window.innerWidth - 220, Math.max(8, x + 14)) + 'px';
+            tip.style.top = Math.min(window.innerHeight - 120, Math.max(8, y + 14)) + 'px';
+        }
+
+        wrap.addEventListener('mousemove', function (e) {
+            var g = e.target.closest && e.target.closest('g[data-ap-il]');
+            if (!g || !wrap.contains(g)) {
+                hideTip();
+                return;
+            }
+            showTip(g.getAttribute('data-ap-il'), e);
+        });
+        wrap.addEventListener('mouseleave', hideTip);
+    }
+
+    function mountTurkeyMap() {
+        var mount = $('apMapMount');
+        if (!mount) return;
+        var agg = haritaAggrege();
+        mount.innerHTML = '<div class="ap-map-loading">Harita yükleniyor…</div>';
+
+        loadTurkeySvg().then(function (svgText) {
+            if (!$('apMapMount')) return;
+            mount.innerHTML = svgText;
+            var svg = mount.querySelector('svg');
+            if (!svg) {
+                mount.innerHTML = hataDurum('Harita SVG okunamadı.');
+                return;
+            }
+            svg.classList.add('ap-map__svg');
+            var count = applyTurkeyMapColors(svg, agg);
+            mount.setAttribute('data-ap-il-count', String(count));
+            bindTurkeyMapInteractions(mount, agg);
+        }).catch(function () {
+            if ($('apMapMount')) {
+                mount.innerHTML = hataDurum('Türkiye haritası yüklenemedi.');
+            }
+        });
     }
 
     function renderHaritaBolum() {
@@ -467,8 +600,13 @@
         var metrik = genelUI.haritaMetrik;
         var metrikEtiket = metrik === 'kullanici' ? 'Kullanıcılar' : (metrik === 'is' ? 'İş Talepleri' : 'Firmalar');
         var toplamEslesen = 0;
-        Object.keys(agg.byPlaka).forEach(function (p) { toplamEslesen += agg.byPlaka[p].adet; });
-        var doluIl = Object.keys(agg.byPlaka).length;
+        var doluIl = 0;
+        Object.keys(agg.byPlaka).forEach(function (p) {
+            if (agg.byPlaka[p].adet > 0) {
+                toplamEslesen += agg.byPlaka[p].adet;
+                doluIl += 1;
+            }
+        });
 
         var ozetKartlar =
             '<div class="ap-map-ozet">' +
@@ -484,13 +622,22 @@
 
         var detay = '';
         if (genelUI.seciliPlaka) {
-            var il = TR_ILLER.filter(function (x) { return x.p === genelUI.seciliPlaka; })[0];
-            var adet = agg.byPlaka[genelUI.seciliPlaka] ? agg.byPlaka[genelUI.seciliPlaka].adet : 0;
-            detay = '<div class="ap-map-detay" role="status">' +
-                '<strong>' + esc(il ? il.ad : 'İl') + '</strong>' +
-                '<span>' + esc(metrikEtiket) + ': <b>' + esc(String(adet)) + '</b></span>' +
-                '<button type="button" class="btn btn--ghost btn--xs" data-ap-il-temizle="1">Seçimi kaldır</button>' +
-                '</div>';
+            var row = agg.byPlaka[genelUI.seciliPlaka];
+            var c = row && row.counts ? row.counts : { kullanici: 0, firma: 0, is: 0 };
+            detay = '<aside class="ap-map-detay-card" role="status">' +
+                '<div class="ap-map-detay-card__ust">' +
+                '<h4>' + esc(haritaIlAdi(genelUI.seciliPlaka)) + '</h4>' +
+                '<button type="button" class="btn btn--ghost btn--xs" data-ap-il-temizle="1">Kapat</button>' +
+                '</div>' +
+                '<p class="ap-muted">' + esc(haritaAralikEtiket()) + ' · aktif metrik: ' + esc(metrikEtiket) + '</p>' +
+                '<dl class="ap-map-detay-card__dl">' +
+                '<div><dt>Kullanıcı</dt><dd>' + esc(String(c.kullanici || 0)) + '</dd></div>' +
+                '<div><dt>Firma</dt><dd>' + esc(String(c.firma || 0)) + '</dd></div>' +
+                '<div><dt>İş talebi</dt><dd>' + esc(String(c.is || 0)) + '</dd></div>' +
+                '</dl></aside>';
+        } else {
+            detay = '<aside class="ap-map-detay-card ap-map-detay-card--bos" aria-hidden="true">' +
+                '<p class="ap-muted">Detay için bir ile tıklayın.</p></aside>';
         }
 
         var eslesmeyenHtml = '';
@@ -525,8 +672,11 @@
             '" data-ap-harita-aralik="tum">Tüm zamanlar</button>' +
             '</div></div>' +
             haritaHata +
-            '<div class="ap-map-wrap">' + renderHaritaSvg(agg) + '</div>' +
-            detay + ozetKartlar + eslesmeyenHtml +
+            '<div class="ap-map-layout">' +
+            '<div class="ap-map-wrap" id="apMapMount"></div>' +
+            detay +
+            '</div>' +
+            ozetKartlar + eslesmeyenHtml +
             '</section>';
     }
 
@@ -886,6 +1036,7 @@
             renderAnalitikBolum() +
             listeler +
             '</div>';
+        mountTurkeyMap();
     }
 
     /* ---------- Firma onayları ---------- */
