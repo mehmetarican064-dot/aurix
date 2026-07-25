@@ -812,13 +812,15 @@
 
         function selectFallback() {
             return sb.from('is_talepleri')
-                .select('id,baslik,aciklama,kategori,sehir,durum,created_at,aciliyet,teslim_tarihi,adet,malzeme,urun_turu,butce_tipi,yayinlanma_tarihi')
+                .select('id,baslik,aciklama,kategori,sehir,durum,created_at,aciliyet,teslim_tarihi,adet,malzeme,urun_turu,butce_tipi,yayinlanma_tarihi,moderasyon_durumu')
                 .in('durum', ['Acik', 'teklif_bekliyor'])
-                .order('created_at', { ascending: false })
+                .eq('moderasyon_durumu', 'aktif')
+                .not('yayinlanma_tarihi', 'is', null)
+                .order('yayinlanma_tarihi', { ascending: false })
                 .limit(40)
                 .then(function (res) {
                     if (res.error) {
-                        /* Eski şema: yalnızca Acik */
+                        /* Eski şema / kolon eksik: yalnızca Acik */
                         return sb.from('is_talepleri')
                             .select('id,baslik,aciklama,kategori,sehir,durum,created_at')
                             .eq('durum', 'Acik')

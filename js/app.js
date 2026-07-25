@@ -4907,6 +4907,7 @@
         firmaBasvuruModalAc: firmaBasvuruModalAc,
         firmaProfilFormHazirla: firmaProfilFormHazirla,
         isTalepModalAc: isTalepModalAc,
+        yukleAcikIsTalepleri: yukleAcikIsTalepleriSupabase,
         getMarketStatus: getMarketStatus
     };
 

@@ -317,6 +317,19 @@
         var sb = getSb();
         if (!sb) return Promise.resolve(fail('Supabase bağlantısı yok.'));
         var body = normalizePayload(payload && typeof payload === 'object' ? payload : {});
+        /* Yayın / taslak bayraklarını normalize sonrası koru */
+        if (payload && payload.yayinla === true) {
+            body.yayinla = true;
+            body.mod = 'yayinla';
+            body.durum = 'teklif_bekliyor';
+        } else if (payload && (payload.yayinla === false || payload.mod === 'taslak')) {
+            body.yayinla = false;
+            body.mod = 'taslak';
+            body.durum = 'taslak';
+        } else if (body.durum === 'teklif_bekliyor') {
+            body.yayinla = true;
+            body.mod = 'yayinla';
+        }
         return sb.rpc('is_talebi_kaydet', { p_payload: body }).then(function (res) {
             if (res.error) return fail(hataMesaji(res.error));
             var u = unwrapRpcData(res.data);
@@ -325,7 +338,10 @@
             return ok({
                 data: d,
                 id: d.id || d.talep_id || (d.talep && d.talep.id) || null,
-                durum: d.durum || body.durum || null
+                durum: d.durum || body.durum || null,
+                yayinlandi: d.yayinlandi === true,
+                moderasyon_durumu: d.moderasyon_durumu || null,
+                yayinlanma_tarihi: d.yayinlanma_tarihi || null
             });
         }).catch(function (err) {
             return fail(hataMesaji(err));

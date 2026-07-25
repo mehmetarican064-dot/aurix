@@ -1021,7 +1021,9 @@
         state.mode = 'onizleme';
     }
 
-    function payloadFromForm(data, durum) {
+    function payloadFromForm(data, durum, opts) {
+        opts = opts || {};
+        var yayinla = !!opts.yayinla;
         var butceMin = data.butce_min === '' || data.butce_min == null ? null : Number(data.butce_min);
         var butceMax = data.butce_max === '' || data.butce_max == null ? null : Number(data.butce_max);
         if (data.butce_tipi === 'sabit' && (butceMax == null || !isFinite(butceMax))) butceMax = butceMin;
@@ -1030,6 +1032,8 @@
             id: state.talepId || undefined,
             istemci_anahtar: state.istemciAnahtar,
             durum: durum,
+            yayinla: yayinla,
+            mod: yayinla ? 'yayinla' : 'taslak',
             baslik: String(data.baslik || '').trim(),
             kategori: labelFor(IS_KATEGORILERI, data.kategori) || data.kategori,
             kategori_slug: data.kategori || null,
@@ -1080,7 +1084,7 @@
             toast('Taslak yerel olarak kaydedildi.', 'info');
             return Promise.resolve({ ok: true, local: true });
         }
-        var payload = payloadFromForm(data, 'taslak');
+        var payload = payloadFromForm(data, 'taslak', { yayinla: false });
         return s.kaydet(payload).then(function (res) {
             if (res && res.ok) {
                 state.talepId = res.id || state.talepId;
@@ -1145,7 +1149,7 @@
         var btn = document.getElementById('itPublishBtn');
         if (btn) { btn.disabled = true; btn.textContent = 'Yayınlanıyor…'; }
         var s = svc();
-        var payload = payloadFromForm(v.data, 'teklif_bekliyor');
+        var payload = payloadFromForm(v.data, 'teklif_bekliyor', { yayinla: true });
 
         var done = function (res) {
             state.publishing = false;
@@ -1170,6 +1174,14 @@
                 toast((res && res.error) || 'Yayınlama başarısız.', 'error');
                 return done(res || { ok: false });
             }
+            var d = res.data || res;
+            var durum = String(res.durum || d.durum || '');
+            var yayinlandi = d.yayinlandi === true
+                || (durum === 'teklif_bekliyor' && d.yayinlanma_tarihi);
+            if (!yayinlandi && durum !== 'teklif_bekliyor') {
+                toast('Talep kaydedildi ancak henüz yayında görünmüyor. Lütfen tekrar deneyin.', 'error');
+                return done({ ok: false, error: 'not_published', data: d });
+            }
             state.talepId = res.id || state.talepId;
             return uploadPendingFiles(state.talepId).then(function () {
                 state.dirty = false;
@@ -1177,13 +1189,23 @@
                 setMode('basari');
                 toast('İş talebiniz yayınlandı.', 'success');
                 try {
-                    document.dispatchEvent(new CustomEvent('aurix:is-talebi-yayinlandi', { detail: { id: state.talepId } }));
+                    document.dispatchEvent(new CustomEvent('aurix:is-talebi-yayinlandi', {
+                        detail: { id: state.talepId, durum: 'teklif_bekliyor' }
+                    }));
                 } catch (e2) { /* ignore */ }
+                try {
+                    if (global.Aurix && typeof Aurix.yukleAcikIsTalepleri === 'function') {
+                        Aurix.yukleAcikIsTalepleri();
+                    }
+                } catch (e3) { /* ignore */ }
                 return done(res);
             });
         }).catch(function (err) {
-            toast('Yayınlama sırasında hata oluştu.', 'error');
-            return done({ ok: false, error: String(err && err.message || err) });
+            try {
+                if (typeof console !== 'undefined' && console.warn) console.warn('[is-talebi publish]', err);
+            } catch (eLog) { /* ignore */ }
+            toast('İş talebi bilgileri kaydedilirken bir uyumsuzluk oluştu. Lütfen tekrar deneyin.', 'error');
+            return done({ ok: false, error: 'publish_failed' });
         });
     }
 
