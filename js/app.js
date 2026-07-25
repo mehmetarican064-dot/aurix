@@ -38,6 +38,7 @@
         liveIsTalepleri: [],
         isTalepleriHata: null,
         isTalepleriYukleniyor: false,
+        isTalebiFiltre: { kategori: '', sehir: '', aciliyet: '' },
         adminBekleyenFirmalar: [],
         adminBekleyenHata: null,
         adminLokalRedler: {}
@@ -1478,29 +1479,52 @@
     }
 
     function supabaseIsTalebiMap(row) {
-        var aciklama = row.aciklama || '';
-        var created = row.created_at ? new Date(row.created_at) : null;
+        var aciklama = row.aciklama || row.aciklama_ozet || '';
+        var created = row.yayinlanma_tarihi || row.created_at
+            ? new Date(row.yayinlanma_tarihi || row.created_at)
+            : null;
         var acilis = '—';
         if (created && !isNaN(created.getTime())) {
             acilis = created.toLocaleDateString('tr-TR', { day: '2-digit', month: 'short', year: 'numeric' });
         }
+        var butceEtiket = row.butce_etiket || '';
+        if (!butceEtiket && row.butce_tipi === 'teklif_bekliyorum') butceEtiket = 'Teklif bekliyor';
+        if (!butceEtiket) {
+            butceEtiket = aciklamadanAlanCek(aciklama, 'Bütçe') || 'Teklif bekliyor';
+        }
+        var adet = row.adet != null && row.adet !== ''
+            ? String(row.adet)
+            : (aciklamadanAlanCek(aciklama, 'Adet\\s*/\\s*kapsam') || '—');
+        var termin = row.teslim_tarihi
+            ? String(row.teslim_tarihi)
+            : (aciklamadanAlanCek(aciklama, 'Teslim süresi') || '—');
+        var durumHam = String(row.durum || 'Acik');
+        var durumEtiket = (durumHam === 'Acik' || durumHam === 'teklif_bekliyor')
+            ? 'Teklif bekliyor'
+            : durumHam;
         return {
             id: 'sb-it-' + (row.id != null ? row.id : Date.now()),
             supabaseId: row.id,
             kategoriId: kategoriIdBul(row.kategori),
+            kategoriAd: row.kategori || '',
             baslik: row.baslik || '—',
             sehir: row.sehir || '—',
-            adet: aciklamadanAlanCek(aciklama, 'Adet\\s*/\\s*kapsam') || '—',
-            termin: aciklamadanAlanCek(aciklama, 'Teslim süresi') || '—',
-            butce: aciklamadanAlanCek(aciklama, 'Bütçe') || '—',
+            adet: adet,
+            termin: termin,
+            butce: butceEtiket,
+            aciliyet: row.aciliyet || 'standart',
+            urunTuru: row.urun_turu || '',
+            malzeme: row.malzeme || '',
+            dosyaSayisi: row.dosya_sayisi != null ? Number(row.dosya_sayisi) : 0,
+            sahipEtiket: row.sahip_etiket || '',
             teklifSayisi: 0,
             acilisTarihi: acilis,
-            durum: (row.durum === 'Acik' ? 'Açık' : (row.durum || 'Açık')),
+            durum: durumEtiket,
             durumTip: 'bekliyor',
             sonGuncelleme: '—',
             aciklama: aciklama,
             moderasyon: 'onaylandi',
-            kaynak: 'supabase'
+            kaynak: row._kaynak === 'demo' ? 'demo' : 'supabase'
         };
     }
 
@@ -1528,28 +1552,85 @@
     var firmalarYukleInFlight = null;
     var isTalepleriYukleInFlight = null;
 
+    function isTalebiDemoAktifMi() {
+        if (window.AurixIsTalebi && typeof AurixIsTalebi.demoModAktifMi === 'function') {
+            return !!AurixIsTalebi.demoModAktifMi();
+        }
+        try {
+            var q = new URLSearchParams(window.location.search || '');
+            if (q.get('demoIsTalebi') === '1') return true;
+        } catch (e) { /* ignore */ }
+        var host = String(window.location.hostname || '').toLowerCase();
+        return host === 'localhost' || host === '127.0.0.1';
+    }
+
     function yukleAcikIsTalepleriSupabase() {
         var varsayilanHata = 'Açık iş talepleri yüklenemedi. Lütfen daha sonra tekrar deneyin.';
+        var filtre = state.isTalebiFiltre || {};
+
+        function demoFallback() {
+            if (!isTalebiDemoAktifMi() || !window.AurixIsTalebi ||
+                typeof AurixIsTalebi.getDemoTalepler !== 'function') {
+                return [];
+            }
+            return (AurixIsTalebi.getDemoTalepler() || []).map(function (d) {
+                return supabaseIsTalebiMap(Object.assign({}, d, { _kaynak: 'demo' }));
+            });
+        }
 
         if (!window.AurixSupabase || typeof AurixSupabase.getirAcikIsTalepleri !== 'function') {
-            state.isTalepleriHata = 'Bağlantı kurulamadı. Sayfayı yenileyip tekrar deneyin.';
-            state.liveIsTalepleri = [];
+            state.isTalepleriHata = null;
+            state.liveIsTalepleri = demoFallback();
+            if (!state.liveIsTalepleri.length) {
+                state.isTalepleriHata = 'Bağlantı kurulamadı. Sayfayı yenileyip tekrar deneyin.';
+            }
             renderIsTalepleri();
             return Promise.resolve();
         }
         if (!AurixSupabase.baglantiHazirMi()) {
-            state.isTalepleriHata = 'Bağlantı kurulamadı. Sayfayı yenileyip tekrar deneyin.';
-            state.liveIsTalepleri = [];
+            state.isTalepleriHata = null;
+            state.liveIsTalepleri = demoFallback();
+            if (!state.liveIsTalepleri.length) {
+                state.isTalepleriHata = 'Bağlantı kurulamadı. Sayfayı yenileyip tekrar deneyin.';
+            }
             renderIsTalepleri();
             return Promise.resolve();
         }
         if (isTalepleriYukleInFlight) return isTalepleriYukleInFlight;
 
         state.isTalepleriYukleniyor = true;
-        isTalepleriYukleInFlight = AurixSupabase.getirAcikIsTalepleri().then(function (res) {
+        var listePromise;
+        if (window.AurixIsTalebiService && typeof AurixIsTalebiService.listele === 'function') {
+            listePromise = AurixIsTalebiService.listele({
+                kategori: filtre.kategori || null,
+                sehir: filtre.sehir || null,
+                aciliyet: filtre.aciliyet || null,
+                limit: 40,
+                offset: 0
+            }).then(function (res) {
+                if (res && res.ok) {
+                    var items = res.items || res.data || [];
+                    return { ok: true, data: items };
+                }
+                return AurixSupabase.getirAcikIsTalepleri();
+            }).catch(function () {
+                return AurixSupabase.getirAcikIsTalepleri();
+            });
+        } else {
+            listePromise = AurixSupabase.getirAcikIsTalepleri();
+        }
+
+        isTalepleriYukleInFlight = listePromise.then(function (res) {
             state.isTalepleriYukleniyor = false;
             isTalepleriYukleInFlight = null;
             if (!res || !res.ok) {
+                var demo = demoFallback();
+                if (demo.length) {
+                    state.isTalepleriHata = null;
+                    state.liveIsTalepleri = demo;
+                    renderIsTalepleri();
+                    return;
+                }
                 state.isTalepleriHata = (res && res.error) ? String(res.error) : varsayilanHata;
                 state.liveIsTalepleri = [];
                 renderIsTalepleri();
@@ -2018,6 +2099,54 @@
         });
     }
 
+    function initIsTalebiFiltreler() {
+        var wrap = $('isTalebiFiltreler');
+        var katSel = $('isTalepFiltreKategori');
+        var sehirSel = $('isTalepFiltreSehir');
+        var acilSel = $('isTalepFiltreAciliyet');
+        if (!wrap) return;
+        wrap.hidden = false;
+        if (katSel && !katSel.getAttribute('data-filled')) {
+            var kats = (window.AurixIsTalebi && AurixIsTalebi.IS_KATEGORILERI) || [];
+            kats.forEach(function (k) {
+                var opt = document.createElement('option');
+                opt.value = k.ad;
+                opt.textContent = k.ad;
+                katSel.appendChild(opt);
+            });
+            katSel.setAttribute('data-filled', '1');
+        }
+        if (sehirSel && !sehirSel.getAttribute('data-filled')) {
+            (AURIX_DATA.SEHIRLER || []).forEach(function (s) {
+                var opt = document.createElement('option');
+                opt.value = s;
+                opt.textContent = s;
+                sehirSel.appendChild(opt);
+            });
+            sehirSel.setAttribute('data-filled', '1');
+        }
+        function uygula() {
+            state.isTalebiFiltre = {
+                kategori: (katSel && katSel.value) || '',
+                sehir: (sehirSel && sehirSel.value) || '',
+                aciliyet: (acilSel && acilSel.value) || ''
+            };
+            yukleAcikIsTalepleriSupabase();
+        }
+        if (katSel && !katSel.getAttribute('data-bound')) {
+            katSel.addEventListener('change', uygula);
+            katSel.setAttribute('data-bound', '1');
+        }
+        if (sehirSel && !sehirSel.getAttribute('data-bound')) {
+            sehirSel.addEventListener('change', uygula);
+            sehirSel.setAttribute('data-bound', '1');
+        }
+        if (acilSel && !acilSel.getAttribute('data-bound')) {
+            acilSel.addEventListener('change', uygula);
+            acilSel.setAttribute('data-bound', '1');
+        }
+    }
+
     function renderIsTalepleri() {
         var el = $('isTalepleriGrid');
         if (!el) return;
@@ -2036,38 +2165,51 @@
 
         el.innerHTML = liste.map(function (talep) {
             var kat = kategoriBul(talep.kategoriId);
-            var teklifMetin = (talep.teklifSayisi != null ? talep.teklifSayisi : 0) + ' teklif';
+            var katAd = talep.kategoriAd || kat.ad || '—';
             var ozet = String(talep.aciklama || '')
                 .split(/\n+/)
                 .filter(function (s) { return s && !/^(Adet|Teslim|Bütçe)/i.test(s.trim()); })
                 .join(' ')
                 .trim();
-            var butceHtml = (talep.butce && talep.butce !== '—')
-                ? '<li><span>Bütçe</span><strong>' + esc(talep.butce) + '</strong></li>'
+            var aciliyet = String(talep.aciliyet || 'standart');
+            var aciliyetEtiket = aciliyet === 'acil' ? 'Acil' : (aciliyet === 'oncelikli' ? 'Öncelikli' : 'Standart');
+            var dosyaRozet = (talep.dosyaSayisi > 0)
+                ? '<span class="is-talep-kart__rozet">Dosya var</span>'
                 : '';
-            var teklifBtn = '<button type="button" class="btn btn--primary btn--sm is-talep-kart__btn" data-teklif-is="' + esc(talep.id) + '">Teklif Ver</button>';
-            var oturum = window.AuthService ? AuthService.getCurrentUser() : null;
-            if (oturum && !oturum.isFirmaHesabi) {
-                teklifBtn = '<span class="is-talep-kart__not" title="Yalnızca firma hesapları teklif verebilir">Firma hesabı gerekli</span>';
-            }
+            var sahip = talep.sahipEtiket
+                ? '<span class="is-talep-kart__sahip">' + esc(talep.sahipEtiket) + '</span>'
+                : '';
+            var detayId = talep.supabaseId != null ? String(talep.supabaseId) : String(talep.id);
             return '<article class="is-talep-kart is-talep-kart--pro" data-is-id="' + esc(talep.id) + '">' +
                 '<div class="is-talep-kart__ust">' +
                 '<div class="is-talep-kart__baslik-grup">' +
                 '<h3 class="is-talep-kart__baslik">' + esc(talep.baslik || '—') + '</h3>' +
                 '<span class="is-talep-kart__sehir">' + esc(talep.sehir || '—') + '</span></div>' +
-                '<span class="is-talep-kart__kat">' + esc(kat.ad || '—') + '</span></div>' +
+                '<span class="is-talep-kart__kat">' + esc(katAd) + '</span></div>' +
+                '<div class="is-talep-kart__meta-satir">' +
+                '<span class="is-talep-kart__durum">' + esc(talep.durum || 'Teklif bekliyor') + '</span>' +
+                '<span class="is-talep-kart__aciliyet is-talep-kart__aciliyet--' + esc(aciliyet) + '">' + esc(aciliyetEtiket) + '</span>' +
+                dosyaRozet + sahip +
+                '</div>' +
                 (ozet ? '<p class="is-talep-kart__ozet">' + esc(ozet) + '</p>' : '') +
                 '<ul class="is-talep-kart__detaylar is-talep-kart__detaylar--odak">' +
-                '<li class="is-talep-kart__acilis"><span>Açılış</span><strong>' + esc(talep.acilisTarihi || '—') + '</strong></li>' +
-                '<li><span>Teklif</span><strong>' + esc(teklifMetin) + '</strong></li>' +
-                butceHtml +
+                '<li class="is-talep-kart__acilis"><span>Yayın</span><strong>' + esc(talep.acilisTarihi || '—') + '</strong></li>' +
+                '<li><span>Teslim</span><strong>' + esc(talep.termin || '—') + '</strong></li>' +
+                '<li><span>Bütçe</span><strong>' + esc(talep.butce || 'Teklif bekliyor') + '</strong></li>' +
                 '</ul>' +
-                teklifBtn +
+                '<div class="is-talep-kart__aksiyon">' +
+                '<button type="button" class="btn btn--ghost btn--sm" data-is-detay="' + esc(detayId) + '">Detay</button>' +
+                '<button type="button" class="btn btn--primary btn--sm is-talep-kart__btn" data-teklif-is="' + esc(talep.id) + '" disabled title="Teklif sistemi bir sonraki aşamada aktif edilecektir.">Teklif Ver</button>' +
+                '</div>' +
+                '<p class="is-talep-kart__not">Teklif sistemi bir sonraki aşamada aktif edilecektir.</p>' +
                 '</article>';
         }).join('');
-        el.querySelectorAll('[data-teklif-is]').forEach(function (btn) {
+        el.querySelectorAll('[data-is-detay]').forEach(function (btn) {
             btn.addEventListener('click', function () {
-                teklifModalAc(btn.getAttribute('data-teklif-is'));
+                var id = btn.getAttribute('data-is-detay');
+                if (window.AurixIsTalebi && typeof AurixIsTalebi.openDetail === 'function') {
+                    AurixIsTalebi.openDetail(id);
+                }
             });
         });
     }
@@ -3153,9 +3295,14 @@
     }
 
     function isTalepModalAc() {
+        if (window.AurixIsTalebi && typeof AurixIsTalebi.openCreate === 'function') {
+            AurixIsTalebi.openCreate();
+            return;
+        }
         var user = window.AuthService ? AuthService.getCurrentUser() : null;
         if (!user) {
             toast('İş talebi oluşturmak için giriş yapmanız gerekir.', 'info');
+            try { localStorage.setItem('aurix_pending_is_talep', '1'); } catch (e) { /* ignore */ }
             uyelikModalAc('giris');
             return;
         }
@@ -3956,65 +4103,11 @@
     }
 
     function isTalepGonder(e) {
-        e.preventDefault();
-        var baslik = ($('isTalepBaslik') && $('isTalepBaslik').value || '').trim();
-        var kategoriId = $('isTalepKategori') ? $('isTalepKategori').value : '';
-        var sehir = $('isTalepSehir') ? $('isTalepSehir').value : '';
-        var adet = ($('isTalepAdet') && $('isTalepAdet').value || '').trim();
-        var termin = ($('isTalepTermin') && $('isTalepTermin').value || '').trim();
-        var butce = ($('isTalepButce') && $('isTalepButce').value || '').trim();
-        var aciklama = ($('isTalepAciklama') && $('isTalepAciklama').value || '').trim();
-
-        if (baslik.length < 5) {
-            toast('İş başlığı en az 5 karakter olmalı.', 'error');
-            return;
+        if (e && typeof e.preventDefault === 'function') e.preventDefault();
+        /* Eski form kaldırıldı — yayınlama AurixIsTalebi üzerinden */
+        if (window.AurixIsTalebi && typeof AurixIsTalebi.publish === 'function') {
+            AurixIsTalebi.publish();
         }
-        if (!kategoriId || !sehir) {
-            toast('Branş ve şehir seçin.', 'error');
-            return;
-        }
-
-        var submitBtn = e.target && e.target.querySelector
-            ? e.target.querySelector('[type="submit"]')
-            : null;
-        if (submitBtn) submitBtn.disabled = true;
-
-        if (!window.AurixSupabase || typeof AurixSupabase.baglantiHazirMi !== 'function' || !AurixSupabase.baglantiHazirMi()) {
-            if (submitBtn) submitBtn.disabled = false;
-            toast('Bağlantı kurulamadı. Sayfayı yenileyip tekrar deneyin.', 'error');
-            return;
-        }
-
-        var kategoriAd = kategoriId;
-        if (window.AURIX_DATA && AURIX_DATA.KATEGORILER) {
-            var katBul = AURIX_DATA.KATEGORILER.find(function (k) { return k.id === kategoriId; });
-            if (katBul) kategoriAd = katBul.ad;
-        }
-
-        AurixSupabase.kaydetIsTalebi({
-            baslik: baslik,
-            kategori: kategoriAd,
-            sehir: sehir,
-            adet: adet,
-            termin: termin,
-            butce: butce,
-            aciklama: aciklama,
-            durum: 'Acik'
-        }).then(function (res) {
-            if (submitBtn) submitBtn.disabled = false;
-            if (!res.ok) {
-                toast(res.error || 'İş talebi kaydedilemedi.', 'error');
-                return;
-            }
-            if ($('isTalepForm')) $('isTalepForm').reset();
-            modalKapat('isTalepModal');
-            toast('İş talebiniz alındı.', 'success');
-            yukleAcikIsTalepleriSupabase();
-            yukleHeroIstatistiklerSupabase();
-        }).catch(function () {
-            if (submitBtn) submitBtn.disabled = false;
-            toast('Bağlantı hatası. Lütfen tekrar deneyin.', 'error');
-        });
     }
 
     function adminDurumGuncelle(id, durum) {
@@ -4419,6 +4512,14 @@
                     modalKapat('girisModal');
                     toast((result && result.message) || 'Hoş geldiniz.', 'success');
                     pendingFirmaGonder().then(function () {
+                        var pendingIs = false;
+                        try { pendingIs = localStorage.getItem('aurix_pending_is_talep') === '1'; } catch (eP) { pendingIs = false; }
+                        if (pendingIs && window.AurixIsTalebi) {
+                            try {
+                                document.dispatchEvent(new CustomEvent('aurix:login'));
+                            } catch (eL) { /* ignore */ }
+                            return;
+                        }
                         paneleYonlendir();
                     });
                 }).catch(function (err) {
@@ -4667,13 +4768,16 @@
         baglaFirmaTelInput();
 
         var isTalepAcBtn = $('isTalepAcBtn');
-        if (isTalepAcBtn) {
+        if (isTalepAcBtn && !isTalepAcBtn.getAttribute('data-it-bound')) {
             isTalepAcBtn.addEventListener('click', function () {
                 isTalepModalAc();
             });
         }
-        var isTalepForm = $('isTalepForm');
-        if (isTalepForm) isTalepForm.addEventListener('submit', isTalepGonder);
+        initIsTalebiFiltreler();
+        document.addEventListener('aurix:is-talebi-yayinlandi', function () {
+            yukleAcikIsTalepleriSupabase();
+            yukleHeroIstatistiklerSupabase();
+        });
         var teklifForm = $('teklifForm');
         if (teklifForm) teklifForm.addEventListener('submit', teklifGonder);
 

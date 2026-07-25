@@ -573,18 +573,41 @@
                 error: 'Bağlantı kurulamadı. Sayfayı yenileyip tekrar deneyin.'
             });
         }
-        /* Prod şemasında is_talepleri.owner_id / user_id yok — yalnız mevcut kolonlar */
-        var satir = {
-            baslik: veri.baslik,
-            aciklama: isTalebiAciklamaBirleştir(veri),
-            kategori: veri.kategori || veri.kategoriId || null,
-            sehir: veri.sehir,
-            durum: veri.durum || 'Acik'
-        };
+        veri = veri || {};
+        var durum = veri.durum || 'teklif_bekliyor';
+        if (durum === 'Acik') durum = 'teklif_bekliyor';
 
-        return sb.from('is_talepleri').insert([satir]).select('id').then(function (res) {
-            if (res.error) return { ok: false, error: hataMesaji(res.error) };
-            return { ok: true, id: res.data && res.data[0] ? res.data[0].id : null };
+        /* 028 RPC — zengin alanlar + sahip doğrulama */
+        return sb.rpc('is_talebi_kaydet', {
+            p_payload: Object.assign({}, veri, {
+                durum: durum,
+                kategori: veri.kategori || veri.kategoriId || null,
+                aciklama: veri.aciklama || isTalebiAciklamaBirleştir(veri)
+            })
+        }).then(function (res) {
+            if (!res.error) {
+                var d = res.data || {};
+                if (d && d.ok === false) {
+                    return { ok: false, error: d.error || 'İş talebi kaydedilemedi.' };
+                }
+                return {
+                    ok: true,
+                    id: d.id || (d.data && d.data.id) || null,
+                    data: d
+                };
+            }
+            /* RPC yoksa eski minimal insert (geriye uyum) */
+            var satir = {
+                baslik: veri.baslik,
+                aciklama: isTalebiAciklamaBirleştir(veri),
+                kategori: veri.kategori || veri.kategoriId || null,
+                sehir: veri.sehir,
+                durum: 'Acik'
+            };
+            return sb.from('is_talepleri').insert([satir]).select('id').then(function (ins) {
+                if (ins.error) return { ok: false, error: hataMesaji(ins.error) };
+                return { ok: true, id: ins.data && ins.data[0] ? ins.data[0].id : null };
+            });
         }).catch(function (err) {
             return { ok: false, error: hataMesaji(err) };
         });
@@ -786,32 +809,60 @@
                 error: 'Bağlantı kurulamadı. Sayfayı yenileyip tekrar deneyin.'
             });
         }
-        return sb.from('is_talepleri')
-            .select('id,baslik,aciklama,kategori,sehir,durum,created_at')
-            .eq('durum', 'Acik')
-            .order('created_at', { ascending: false })
-            .then(function (res) {
-                if (res.error) {
-                    return {
-                        ok: false,
-                        data: [],
-                        error: hataMesaji(res.error) ||
-                            'Açık iş talepleri yüklenemedi. Lütfen daha sonra tekrar deneyin.'
-                    };
-                }
-                var satirlar = (res.data || []).filter(function (row) {
-                    return row && String(row.durum || '') === 'Acik';
+
+        function selectFallback() {
+            return sb.from('is_talepleri')
+                .select('id,baslik,aciklama,kategori,sehir,durum,created_at,aciliyet,teslim_tarihi,adet,malzeme,urun_turu,butce_tipi,yayinlanma_tarihi')
+                .in('durum', ['Acik', 'teklif_bekliyor'])
+                .order('created_at', { ascending: false })
+                .limit(40)
+                .then(function (res) {
+                    if (res.error) {
+                        /* Eski şema: yalnızca Acik */
+                        return sb.from('is_talepleri')
+                            .select('id,baslik,aciklama,kategori,sehir,durum,created_at')
+                            .eq('durum', 'Acik')
+                            .order('created_at', { ascending: false })
+                            .then(function (res2) {
+                                if (res2.error) {
+                                    return {
+                                        ok: false,
+                                        data: [],
+                                        error: hataMesaji(res2.error) ||
+                                            'Açık iş talepleri yüklenemedi. Lütfen daha sonra tekrar deneyin.'
+                                    };
+                                }
+                                return { ok: true, data: res2.data || [] };
+                            });
+                    }
+                    return { ok: true, data: res.data || [] };
                 });
-                return { ok: true, data: satirlar };
-            })
-            .catch(function (err) {
-                return {
-                    ok: false,
-                    data: [],
-                    error: hataMesaji(err) ||
-                        'Açık iş talepleri yüklenemedi. Lütfen daha sonra tekrar deneyin.'
-                };
-            });
+        }
+
+        return sb.rpc('is_talepleri_listele', {
+            p_kategori: null,
+            p_sehir: null,
+            p_aciliyet: null,
+            p_limit: 40,
+            p_offset: 0
+        }).then(function (res) {
+            if (res.error) return selectFallback();
+            var d = res.data;
+            var items = [];
+            if (Array.isArray(d)) items = d;
+            else if (d && Array.isArray(d.items)) items = d.items;
+            else if (d && d.ok && Array.isArray(d.items)) items = d.items;
+            return { ok: true, data: items };
+        }).catch(function () {
+            return selectFallback();
+        }).catch(function (err) {
+            return {
+                ok: false,
+                data: [],
+                error: hataMesaji(err) ||
+                    'Açık iş talepleri yüklenemedi. Lütfen daha sonra tekrar deneyin.'
+            };
+        });
     }
 
     /** Public özet view — fiyat/mesaj dönmez */

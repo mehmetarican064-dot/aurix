@@ -42,7 +42,8 @@
     <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/styles.css?v=35">
-    <link rel="stylesheet" href="css/admin.css?v=25">
+    <link rel="stylesheet" href="css/is-talebi.css?v=36">
+    <link rel="stylesheet" href="css/admin.css?v=26">
 </head>
 <body>
 
@@ -119,6 +120,30 @@
                         <h2 class="bolum__baslik">Açık İş Talepleri</h2>
                         <p class="bolum__alt bolum__alt--fuar">Yeni işler, teklif bekleyen üretim talepleri ve aktif ticaret fırsatları.</p>
                     </div>
+                </div>
+                <div class="it-filtreler" id="isTalebiFiltreler" hidden>
+                    <label class="it-filtre">
+                        <span class="sr-only">Kategori</span>
+                        <select class="form-select" id="isTalepFiltreKategori" aria-label="Kategori filtresi">
+                            <option value="">Tüm kategoriler</option>
+                        </select>
+                    </label>
+                    <label class="it-filtre">
+                        <span class="sr-only">Şehir</span>
+                        <select class="form-select" id="isTalepFiltreSehir" aria-label="Şehir filtresi">
+                            <option value="">Tüm şehirler</option>
+                            <option value="FARK ETMEZ">Fark etmez / Türkiye geneli</option>
+                        </select>
+                    </label>
+                    <label class="it-filtre">
+                        <span class="sr-only">Aciliyet</span>
+                        <select class="form-select" id="isTalepFiltreAciliyet" aria-label="Aciliyet filtresi">
+                            <option value="">Tüm aciliyetler</option>
+                            <option value="standart">Standart</option>
+                            <option value="oncelikli">Öncelikli</option>
+                            <option value="acil">Acil</option>
+                        </select>
+                    </label>
                 </div>
                 <div class="is-talepleri-grid" id="isTalepleriGrid" aria-live="polite"></div>
             </div>
@@ -1041,43 +1066,24 @@
         </div>
     </div>
 
-    <div class="modal" id="isTalepModal">
-        <div class="modal__kutu modal__kutu--genis">
+    <!-- İş Talebi sihirbazı — içerik AurixIsTalebi tarafından doldurulur -->
+    <div class="modal" id="isTalepModal" aria-hidden="true">
+        <div class="modal__kutu modal__kutu--it" role="dialog" aria-modal="true" aria-labelledby="isTalepModalBaslik">
             <div class="modal__baslik">
-                <h3>İş Talebi Oluştur</h3>
-                <button class="modal__kapat" data-modal-kapat="isTalepModal" aria-label="Kapat">×</button>
+                <h3 id="isTalepModalBaslik">İş Talebi Oluştur</h3>
+                <button type="button" class="modal__kapat" data-modal-kapat="isTalepModal" aria-label="Kapat">×</button>
             </div>
-            <form id="isTalepForm">
-                <div class="form-grup">
-                    <label class="form-label" for="isTalepBaslik">İş başlığı</label>
-                    <input class="form-input" type="text" id="isTalepBaslik" required maxlength="200" placeholder="Örn. 925 gümüş erkek yüzük dökümü">
-                </div>
-                <div class="form-grup">
-                    <label class="form-label" for="isTalepKategori">Branş</label>
-                    <select class="form-select" id="isTalepKategori" required></select>
-                </div>
-                <div class="form-grup">
-                    <label class="form-label" for="isTalepSehir">Şehir</label>
-                    <select class="form-select" id="isTalepSehir" required></select>
-                </div>
-                <div class="form-grup">
-                    <label class="form-label" for="isTalepAdet">Adet / kapsam</label>
-                    <input class="form-input" type="text" id="isTalepAdet" maxlength="80" placeholder="Örn. 450 adet">
-                </div>
-                <div class="form-grup">
-                    <label class="form-label" for="isTalepTermin">Teslim süresi</label>
-                    <input class="form-input" type="text" id="isTalepTermin" maxlength="40" placeholder="Örn. 12 gün">
-                </div>
-                <div class="form-grup">
-                    <label class="form-label" for="isTalepButce">Yaklaşık bütçe</label>
-                    <input class="form-input" type="text" id="isTalepButce" maxlength="80" placeholder="Örn. ₺50.000 – ₺70.000">
-                </div>
-                <div class="form-grup">
-                    <label class="form-label" for="isTalepAciklama">Açıklama</label>
-                    <textarea class="form-textarea" id="isTalepAciklama" rows="3" maxlength="1000" placeholder="Teknik detay, malzeme, teslim beklentisi..."></textarea>
-                </div>
-                <button type="submit" class="btn btn--primary" style="width:100%">Talebi Gönder</button>
-            </form>
+            <div id="isTalepModalGovde"></div>
+        </div>
+    </div>
+
+    <div class="modal" id="isTalepDetayModal" aria-hidden="true">
+        <div class="modal__kutu modal__kutu--it" role="dialog" aria-modal="true" aria-labelledby="isTalepDetayBaslik">
+            <div class="modal__baslik">
+                <h3 id="isTalepDetayBaslik">İş Talebi Detayı</h3>
+                <button type="button" class="modal__kapat" data-modal-kapat="isTalepDetayModal" aria-label="Kapat">×</button>
+            </div>
+            <div class="it-detay" id="isTalepDetayGovde"></div>
         </div>
     </div>
 
@@ -1125,12 +1131,14 @@
     <script src="js/firma-profil.js?v=29" defer></script>
     <script src="js/firma-dogrulama.js?v=32" defer></script>
     <script src="js/firma-degerlendirme.js?v=34" defer></script>
-    <script src="js/supabase.js?v=33" defer></script>
+    <script src="js/supabase.js?v=36" defer></script>
+    <script src="js/is-talebi-service.js?v=36" defer></script>
+    <script src="js/is-talebi.js?v=36" defer></script>
     <script src="js/authService.js?v=21" defer></script>
     <script src="js/panels.js?v=32" defer></script>
     <script src="js/market-service.js?v=21" defer></script>
-    <script src="js/admin-service.js?v=32" defer></script>
-    <script src="js/admin.js?v=32" defer></script>
-    <script src="js/app.js?v=35" defer></script>
+    <script src="js/admin-service.js?v=33" defer></script>
+    <script src="js/admin.js?v=33" defer></script>
+    <script src="js/app.js?v=36" defer></script>
 </body>
 </html>

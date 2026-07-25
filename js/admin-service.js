@@ -161,10 +161,27 @@
     }
 
     function isModerasyon(id, durum, notu) {
-        return rpc('admin_is_moderasyon', {
-            p_is_id: id,
-            p_durum: durum,
+        /* 028: admin_is_talebi_moderasyon; yoksa eski admin_is_moderasyon */
+        var islem = durum;
+        if (durum === 'kaldirildi') islem = 'yayindan_kaldir';
+        if (durum === 'aktif') islem = 'tekrar_yayin';
+        return rpc('admin_is_talebi_moderasyon', {
+            p_id: id,
+            p_islem: islem,
             p_not: notu || null
+        }).then(function (res) {
+            if (res && res.ok) return res;
+            return rpc('admin_is_moderasyon', {
+                p_is_id: id,
+                p_durum: durum,
+                p_not: notu || null
+            });
+        }).catch(function () {
+            return rpc('admin_is_moderasyon', {
+                p_is_id: id,
+                p_durum: durum,
+                p_not: notu || null
+            });
         });
     }
 

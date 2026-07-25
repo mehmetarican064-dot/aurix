@@ -1821,9 +1821,10 @@
             if (!sehirEslesir(i.sehir, sehirSec)) return false;
             var mod = String(i.moderasyon_durumu || 'aktif');
             var d = String(i.durum || '');
-            if (filtre === 'acik' && d !== 'Acik') return false;
-            if (filtre === 'tamamlandi' && d !== 'Tamamlandi' && d !== 'Tamamlandı') return false;
-            if (filtre === 'iptal' && d !== 'Iptal' && d !== 'İptal') return false;
+            if (filtre === 'acik' && d !== 'Acik' && d !== 'teklif_bekliyor') return false;
+            if (filtre === 'taslak' && d !== 'taslak') return false;
+            if (filtre === 'tamamlandi' && d !== 'Tamamlandi' && d !== 'Tamamlandı' && d !== 'tamamlandi') return false;
+            if (filtre === 'iptal' && d !== 'Iptal' && d !== 'İptal' && d !== 'iptal_edildi') return false;
             if (filtre === 'incelemede' && mod !== 'incelemede') return false;
             if (filtre === 'kaldirildi' && mod !== 'kaldirildi') return false;
             return true;
@@ -1849,7 +1850,8 @@
             '<div class="ap-filtreler">' +
             '<select class="form-input" id="apIsFiltre">' +
             '<option value="hepsi">Tümü</option>' +
-            '<option value="acik"' + (filtre === 'acik' ? ' selected' : '') + '>Açık</option>' +
+            '<option value="acik"' + (filtre === 'acik' ? ' selected' : '') + '>Açık / Teklif bekliyor</option>' +
+            '<option value="taslak"' + (filtre === 'taslak' ? ' selected' : '') + '>Taslak</option>' +
             '<option value="tamamlandi"' + (filtre === 'tamamlandi' ? ' selected' : '') + '>Tamamlandı</option>' +
             '<option value="iptal"' + (filtre === 'iptal' ? ' selected' : '') + '>İptal</option>' +
             '<option value="incelemede"' + (filtre === 'incelemede' ? ' selected' : '') + '>İncelemede</option>' +
@@ -1857,6 +1859,7 @@
             '</select>' +
             sehirSelectHtml('apIsSehir', sehirSec) +
             '</div>' +
+            '<p class="ap-yardim">Moderasyon işlemleri ayrı loglanır. Teklif / iş emri akışı sonraki aşamada bağlanacaktır.</p>' +
             (liste.length
                 ? '<div class="ap-tablo-wrap"><table class="ap-tablo"><thead><tr>' +
                 '<th>Başlık</th><th>Kategori</th><th>Oluşturan</th><th>Şehir</th><th>Teklif</th><th>Tarih</th><th>Durum</th><th>İşlem</th>' +
