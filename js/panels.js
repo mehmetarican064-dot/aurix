@@ -282,32 +282,49 @@
                 '<button type="button" class="btn btn--gold btn--sm" data-panel-aksiyon="firma-hesabi">Firma Hesabı Oluştur</button>' +
                 '</div>';
         }
+
+        var FP = global.AurixFirmaProfil || {};
+        var tamamlamaHtml = typeof FP.tamamlamaBarHtml === 'function' ? FP.tamamlamaBarHtml(f) : '';
         var durumEtiket = f.durum || (f.dogrulanmis ? 'onaylandi' : 'beklemede');
+        var yayinEtiket = typeof FP.yayinDurumuEtiket === 'function'
+            ? FP.yayinDurumuEtiket(f.yayin_durumu)
+            : (f.yayin_durumu || '—');
         var durumInsan = {
             beklemede: 'İncelemede',
             onaylandi: 'Onaylandı',
             reddedildi: 'Reddedildi'
         };
         if (f.askiya_alindi) durumInsan[durumEtiket] = 'Askıda';
+
         var logoHtml = f.logo_url
-            ? '<img class="fp-profil-logo" src="' + esc(f.logo_url) + '" alt="" width="72" height="72">'
-            : '';
+            ? '<img class="fp-profil-logo" id="firmaProfilLogoOnizleme" src="' + esc(f.logo_url) + '" alt="" width="72" height="72">'
+            : '<div class="fp-logo-placeholder" id="firmaProfilLogoOnizleme" aria-hidden="true"><img src="assets/logo-mark.png" alt="" width="36" height="36"></div>';
         var kapakHtml = f.kapak_url
-            ? '<div class="fp-profil-kapak"><img src="' + esc(f.kapak_url) + '" alt="" loading="lazy"></div>'
+            ? '<div class="fp-profil-kapak"><img id="firmaProfilKapakOnizleme" src="' + esc(f.kapak_url) + '" alt="" loading="lazy"></div>'
+            : '<div class="fp-profil-kapak fp-profil-kapak--bos" id="firmaProfilKapakWrap"><div class="fp-logo-placeholder fp-logo-placeholder--kapak" id="firmaProfilKapakOnizleme"><img src="assets/logo-mark.png" alt="" width="48" height="48"></div></div>';
+
+        var hizmetler = typeof FP.hizmetKategorileriDizi === 'function'
+            ? FP.hizmetKategorileriDizi(f)
+            : (f.kategori ? [f.kategori] : []);
+        var katChipHtml = typeof FP.katChipGrupHtml === 'function' ? FP.katChipGrupHtml(hizmetler) : '';
+        var galeri = typeof FP.parseGaleri === 'function' ? FP.parseGaleri(f) : [];
+        var galeriHtml = typeof FP.galeriOnizlemeHtml === 'function'
+            ? FP.galeriOnizlemeHtml(galeri, !f.askiya_alindi)
             : '';
+
         var incelemeNotu = '';
         if (f.askiya_alindi) {
             incelemeNotu = '<div class="fp-basvuru-durum fp-basvuru-durum--red" style="margin-top:12px" role="status">' +
                 '<strong>Firma hesabınız geçici olarak askıya alındı.</strong>' +
                 '<p>' + esc(f.askiya_alma_nedeni || '') + '</p></div>';
-        } else if (durumEtiket === 'beklemede') {
+        } else if (durumEtiket === 'beklemede' || f.yayin_durumu === 'incelemede') {
             incelemeNotu = '<p class="fp-basvuru-durum fp-basvuru-durum--beklemede" style="margin-top:12px">' +
-                'Firma hesabınız inceleniyor. Onaylandığında işlere teklif verebilir ve firma listenizde görünür olabilirsiniz.</p>';
+                'Profiliniz inceleniyor. Onaylandığında firma listenizde görünür olacaktır.</p>';
         } else if (durumEtiket === 'reddedildi') {
             incelemeNotu = '<div class="fp-basvuru-durum fp-basvuru-durum--red" style="margin-top:12px" role="status">' +
                 '<strong>Firma başvurunuz onaylanmadı.</strong>' +
                 '<p>' + esc(f.red_nedeni || '') + '</p>' +
-                '<p class="panel-not">Bilgileri güncelleyip kaydedince başvuru yeniden incelemeye alınır.</p>' +
+                '<p class="panel-not">Bilgileri güncelleyip yayına gönderince başvuru yeniden incelenir.</p>' +
                 '</div>';
         } else if (durumEtiket === 'onaylandi' && f.dogrulanmis) {
             incelemeNotu = '<p class="fp-basvuru-durum fp-basvuru-durum--onay" style="margin-top:12px">' +
@@ -321,64 +338,169 @@
                 telGoster = telGoster.slice(0, 3) + ' ' + telGoster.slice(3, 6) + ' ' +
                     telGoster.slice(6, 8) + ' ' + telGoster.slice(8);
             }
+            var firmaTurOpts = (FP.FIRMA_TURLERI || []).map(function (t) {
+                var sel = (f.firma_turu === t.id || f.firma_turu === t.ad) ? ' selected' : '';
+                return '<option value="' + esc(t.id) + '"' + sel + '>' + esc(t.ad) + '</option>';
+            }).join('');
+            var yayinBtnMetin = durumEtiket === 'onaylandi'
+                ? 'Güncelle'
+                : (durumEtiket === 'reddedildi' ? 'Yeniden Gönder' : 'Yayına Gönder');
+
             duzenleForm =
                 '<article class="fp-profil-kart" style="margin-top:16px">' +
                 '<h4 class="fp-profil-kart__alt-baslik">Profili Düzenle</h4>' +
-                '<form id="firmaProfilDuzenleForm" class="fp-profil-form">' +
+                tamamlamaHtml +
+                '<form id="firmaProfilDuzenleForm" class="fp-profil-form" novalidate>' +
                 '<input type="hidden" id="firmaProfilYeniden" value="' +
                 (durumEtiket === 'reddedildi' ? '1' : '0') + '">' +
+                '<input type="hidden" id="firmaProfilDurum" value="' + esc(durumEtiket) + '">' +
+                '<input type="hidden" id="firmaProfilLogoUrl" value="' + esc(f.logo_url || '') + '">' +
+                '<input type="hidden" id="firmaProfilKapakUrl" value="' + esc(f.kapak_url || '') + '">' +
+
                 '<div class="form-grup">' +
-                '<label class="form-label" for="firmaProfilAd">Firma Adı</label>' +
+                '<label class="form-label" for="firmaProfilAd">Firma Adı <span class="form-zorunlu">*</span></label>' +
                 '<input class="form-input" type="text" id="firmaProfilAd" required maxlength="200" value="' +
                 esc(f.firma_adi || '') + '">' +
                 '</div>' +
+
                 '<div class="form-grup">' +
-                '<label class="form-label" for="firmaProfilSehir">Şehir</label>' +
+                '<label class="form-label" for="firmaProfilTuru">Firma Türü <span class="form-zorunlu">*</span></label>' +
+                '<select class="form-select" id="firmaProfilTuru" required>' +
+                '<option value="">Seçin</option>' + firmaTurOpts + '</select>' +
+                '</div>' +
+
+                '<div class="form-grup">' +
+                '<label class="form-label" for="firmaProfilSehir">Şehir <span class="form-zorunlu">*</span></label>' +
                 '<select class="form-select" id="firmaProfilSehir" required></select>' +
                 '</div>' +
+
                 '<div class="form-grup">' +
-                '<label class="form-label" for="firmaProfilKategori">Hizmet Kategorisi</label>' +
-                '<select class="form-select" id="firmaProfilKategori" required></select>' +
+                '<label class="form-label" for="firmaProfilIlce">İlçe <span class="form-zorunlu">*</span></label>' +
+                '<select class="form-select" id="firmaProfilIlce" required disabled>' +
+                '<option value="">Önce şehir seçin</option></select>' +
                 '</div>' +
+
                 '<div class="form-grup">' +
-                '<label class="form-label" for="firmaProfilTel">Telefon</label>' +
+                '<label class="form-label" for="firmaProfilKatAra">Hizmet Kategorileri <span class="form-zorunlu">*</span></label>' +
+                '<input class="form-input fp-kat-ara" type="search" id="firmaProfilKatAra" placeholder="Kategori ara..." autocomplete="off">' +
+                '<div class="fp-kat-chips" id="firmaProfilKatChips" role="group" aria-label="Hizmet kategorileri">' +
+                katChipHtml + '</div>' +
+                '<p class="form-yardim">Birden fazla kategori seçebilirsiniz.</p>' +
+                '</div>' +
+
+                '<div class="form-grup">' +
+                '<label class="form-label" for="firmaProfilAciklama">Firma Açıklaması <span class="form-zorunlu">*</span></label>' +
+                '<textarea class="form-textarea" id="firmaProfilAciklama" rows="4" required maxlength="2000">' +
+                esc(f.aciklama || '') + '</textarea>' +
+                '</div>' +
+
+                '<div class="form-grup">' +
+                '<label class="form-label" for="firmaProfilYetkili">Yetkili Adı <span class="form-zorunlu">*</span></label>' +
+                '<input class="form-input" type="text" id="firmaProfilYetkili" required maxlength="120" value="' +
+                esc(f.yetkili_ad || '') + '">' +
+                '<p class="form-yardim">Halka açık profilde yalnızca ad gösterilir.</p>' +
+                '</div>' +
+
+                '<div class="form-grup">' +
+                '<label class="form-label" for="firmaProfilKurulus">Kuruluş Yılı <span class="form-zorunlu">*</span></label>' +
+                '<input class="form-input" type="number" id="firmaProfilKurulus" required min="1900" max="2099" value="' +
+                esc(f.kurulus_yili != null ? String(f.kurulus_yili) : '') + '">' +
+                '</div>' +
+
+                '<div class="form-grup fp-medya-grup">' +
+                '<label class="form-label">Logo</label>' +
+                '<div class="fp-medya-onizleme">' + logoHtml + '</div>' +
+                '<input class="form-input" type="file" id="firmaProfilLogo" accept="image/jpeg,image/png,image/webp">' +
+                '<p class="form-yardim">JPEG, PNG veya WebP — en fazla 5 MB.</p>' +
+                '</div>' +
+
+                '<div class="form-grup fp-medya-grup">' +
+                '<label class="form-label">Kapak Görseli</label>' +
+                kapakHtml +
+                '<input class="form-input" type="file" id="firmaProfilKapak" accept="image/jpeg,image/png,image/webp">' +
+                '</div>' +
+
+                '<div class="form-grup">' +
+                '<label class="form-label">Çalışma Galerisi</label>' +
+                galeriHtml +
+                '<p class="form-yardim">En fazla 12 görsel. Yayına göndermek için en az 3 önerilir.</p>' +
+                '</div>' +
+
+                '<div class="form-grup">' +
+                '<label class="form-label" for="firmaProfilTel">Telefon <span class="fp-ozel-etiket">(gizli)</span></label>' +
                 '<div class="tel-input" role="group">' +
                 '<span class="tel-input__kod" aria-hidden="true">+90</span>' +
                 '<input class="form-input tel-input__alan" type="tel" id="firmaProfilTel" ' +
                 'inputmode="tel" maxlength="13" value="' + esc(telGoster) + '">' +
-                '</div></div>' +
+                '</div><p class="form-yardim">Halka açık profilde gösterilmez.</p></div>' +
+
                 '<div class="form-grup">' +
-                '<label class="form-label" for="firmaProfilAciklama">Kısa Açıklama</label>' +
-                '<textarea class="form-textarea" id="firmaProfilAciklama" rows="3" required maxlength="500">' +
-                esc(f.aciklama || '') + '</textarea>' +
-                '</div>' +
+                '<label class="form-label" for="firmaProfilAdres">Adres <span class="fp-ozel-etiket">(gizli)</span></label>' +
+                '<textarea class="form-textarea" id="firmaProfilAdres" rows="2" maxlength="500">' +
+                esc(f.adres || '') + '</textarea></div>' +
+
                 '<div class="form-grup">' +
-                '<label class="form-label" for="firmaProfilLogo">Yeni Logo</label>' +
-                '<input class="form-input" type="file" id="firmaProfilLogo" accept="image/jpeg,image/png,image/webp,image/gif">' +
-                '<p class="form-yardim">Boş bırakırsanız mevcut logo korunur.</p>' +
-                '</div>' +
+                '<label class="form-label" for="firmaProfilWebsite">Web Sitesi</label>' +
+                '<input class="form-input" type="url" id="firmaProfilWebsite" placeholder="https://" value="' +
+                esc(f.website || '') + '"></div>' +
+
                 '<div class="form-grup">' +
-                '<label class="form-label" for="firmaProfilKapak">Yeni Kapak</label>' +
-                '<input class="form-input" type="file" id="firmaProfilKapak" accept="image/jpeg,image/png,image/webp,image/gif">' +
-                '</div>' +
-                '<p class="fp-aksiyon-satir">' +
-                '<button type="submit" class="btn btn--gold btn--sm" id="firmaProfilKaydetBtn">' +
-                (durumEtiket === 'reddedildi' ? 'Güncelle ve Yeniden Gönder' : 'Kaydet') +
-                '</button></p>' +
+                '<label class="form-label" for="firmaProfilCalisan">Çalışan Sayısı</label>' +
+                '<input class="form-input" type="text" id="firmaProfilCalisan" maxlength="80" value="' +
+                esc(f.calisan_sayisi || '') + '"></div>' +
+
+                '<div class="form-grup">' +
+                '<label class="form-label" for="firmaProfilSaatler">Çalışma Saatleri</label>' +
+                '<input class="form-input" type="text" id="firmaProfilSaatler" maxlength="200" placeholder="Pzt–Cum 09:00–18:00" value="' +
+                esc(f.calisma_saatleri || '') + '"></div>' +
+
+                '<div class="form-grup">' +
+                '<label class="form-label" for="firmaProfilKapasite">Kapasite / Üretim Bilgisi</label>' +
+                '<input class="form-input" type="text" id="firmaProfilKapasite" maxlength="200" value="' +
+                esc(f.kapasite || '') + '"></div>' +
+
+                '<div class="form-grup">' +
+                '<label class="form-label" for="firmaProfilInstagram">Instagram</label>' +
+                '<input class="form-input" type="text" id="firmaProfilInstagram" placeholder="@kullaniciadi" value="' +
+                esc(f.instagram || '') + '"></div>' +
+
+                '<div class="form-grup fp-ozel-alan">' +
+                '<label class="form-label" for="firmaProfilVergiDairesi">Vergi Dairesi <span class="fp-ozel-etiket">(gizli)</span></label>' +
+                '<input class="form-input" type="text" id="firmaProfilVergiDairesi" maxlength="120" value="' +
+                esc(f.vergi_dairesi || '') + '"></div>' +
+
+                '<div class="form-grup fp-ozel-alan">' +
+                '<label class="form-label" for="firmaProfilVergiNo">Vergi No <span class="fp-ozel-etiket">(gizli)</span></label>' +
+                '<input class="form-input" type="text" id="firmaProfilVergiNo" maxlength="20" value="' +
+                esc(f.vergi_no || '') + '"></div>' +
+
+                '<p class="fp-aksiyon-satir fp-aksiyon-satir--cift">' +
+                '<button type="button" class="btn btn--ghost btn--sm" id="firmaProfilTaslakBtn" data-fp-kayit="taslak">Taslak Kaydet</button>' +
+                '<button type="button" class="btn btn--gold btn--sm" id="firmaProfilYayinBtn" data-fp-kayit="yayin">' +
+                esc(yayinBtnMetin) + '</button></p>' +
                 '</form></article>';
         }
+
+        var turAd = typeof FP.firmaTuruAd === 'function' ? FP.firmaTuruAd(f.firma_turu) : (f.firma_turu || '—');
+        var hizmetGoster = hizmetler.length
+            ? hizmetler.map(function (k) { return esc(typeof FP.kategoriAdBul === 'function' ? FP.kategoriAdBul(k) : k); }).join(', ')
+            : esc(f.kategori || '—');
 
         return '<div class="fp-profil-grid">' +
             '<article class="fp-profil-kart fp-profil-kart--ana">' +
             kapakHtml +
             '<div class="fp-profil-kart__ust">' +
             logoHtml +
+            '<div class="fp-profil-kart__kimlik">' +
             '<h3 class="fp-profil-kart__firma">' + esc(f.firma_adi || '—') + '</h3>' +
+            '<div class="fp-profil-kart__rozetler">' +
             fpDurumBadge(durumInsan[durumEtiket] || durumEtiket) +
-            '</div>' +
+            '<span class="fp-durum-badge fp-durum-badge--yayin">' + esc(yayinEtiket) + '</span>' +
+            '</div></div></div>' +
             '<dl class="fp-profil-dl">' +
-            '<div><dt>Hizmet kategorisi</dt><dd>' + esc(f.kategori || '—') + '</dd></div>' +
-            '<div><dt>Şehir</dt><dd>' + esc(f.sehir || '—') + '</dd></div>' +
+            '<div><dt>Firma türü</dt><dd>' + esc(turAd) + '</dd></div>' +
+            '<div><dt>Hizmet kategorileri</dt><dd>' + hizmetGoster + '</dd></div>' +
+            '<div><dt>Konum</dt><dd>' + esc([f.ilce, f.sehir].filter(Boolean).join(', ') || f.sehir || '—') + '</dd></div>' +
             '<div><dt>Açıklama</dt><dd>' + esc(f.aciklama || '—') + '</dd></div>' +
             '</dl>' +
             incelemeNotu +

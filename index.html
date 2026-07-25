@@ -41,7 +41,7 @@
     <link rel="preconnect" href="https://svsouqnhtlpcpdvqahmd.supabase.co" crossorigin>
     <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/styles.css?v=26">
+    <link rel="stylesheet" href="css/styles.css?v=27">
     <link rel="stylesheet" href="css/admin.css?v=25">
 </head>
 <body>
@@ -762,6 +762,21 @@
 
             <div class="detay-guven" id="detayGuven" aria-label="Firma güven bilgileri"></div>
 
+            <section class="detay-bolum detay-bolum--meta" aria-labelledby="detayFirmaTuruBaslik" hidden>
+                <h4 class="detay-bolum__baslik" id="detayFirmaTuruBaslik">Firma Türü</h4>
+                <p class="detay-meta-deger" id="detayFirmaTuru"></p>
+            </section>
+
+            <section class="detay-bolum detay-bolum--meta" aria-labelledby="detayKurulusBaslik" hidden>
+                <h4 class="detay-bolum__baslik" id="detayKurulusBaslik">Kuruluş Yılı</h4>
+                <p class="detay-meta-deger" id="detayKurulus"></p>
+            </section>
+
+            <section class="detay-bolum detay-bolum--extra" aria-labelledby="detayExtraBaslik" hidden>
+                <h4 class="detay-bolum__baslik" id="detayExtraBaslik">İletişim & Bilgiler</h4>
+                <div class="detay-extra-meta" id="detayExtraMeta"></div>
+            </section>
+
             <section class="detay-bolum" aria-labelledby="detayHizmetBaslik">
                 <h4 class="detay-bolum__baslik" id="detayHizmetBaslik">Hizmet Alanları</h4>
                 <div class="detay-hizmetler" id="detayHizmetler"></div>
@@ -784,9 +799,16 @@
 
             <div class="detay-aksiyon">
                 <button type="button" class="btn btn--gold" id="detayTeklifBtn" style="width:100%">Teklif Gönder</button>
-                <p class="detay-mesaj-not" id="detayMesajNot" role="note">Mesajlaşma yakında kullanıma açılacaktır.</p>
+                <button type="button" class="btn btn--ghost" id="detaySohbetBtn" style="width:100%;margin-top:8px">Sohbet Başlat</button>
+                <p class="detay-mesaj-not" id="detayMesajNot" role="note" hidden>Mesajlaşma yakında kullanıma açılacaktır.</p>
             </div>
         </div>
+    </div>
+
+    <!-- Galeri lightbox -->
+    <div class="galeri-lightbox" id="galeriLightbox" role="dialog" aria-modal="true" aria-label="Galeri görseli">
+        <button type="button" class="galeri-lightbox__kapat" id="galeriLightboxKapat" aria-label="Kapat">×</button>
+        <img class="galeri-lightbox__img" src="" alt="">
     </div>
 
     <!-- ÜYELİK MODAL (Giriş / Yeni Hesap) -->
@@ -1074,13 +1096,15 @@
     <!-- UMD build: GitHub Pages’te window.supabase global’i için zorunlu -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.2/dist/umd/supabase.js" defer></script>
     <script src="js/utils.js?v=21" defer></script>
-    <script src="js/data.js?v=26" defer></script>
-    <script src="js/supabase.js?v=21" defer></script>
+    <script src="js/data.js?v=27" defer></script>
+    <script src="js/tr-ilceler.js?v=27" defer></script>
+    <script src="js/firma-profil.js?v=27" defer></script>
+    <script src="js/supabase.js?v=27" defer></script>
     <script src="js/authService.js?v=21" defer></script>
-    <script src="js/panels.js?v=21" defer></script>
+    <script src="js/panels.js?v=27" defer></script>
     <script src="js/market-service.js?v=21" defer></script>
     <script src="js/admin-service.js?v=25" defer></script>
-    <script src="js/admin.js?v=25" defer></script>
-    <script src="js/app.js?v=26" defer></script>
+    <script src="js/admin.js?v=27" defer></script>
+    <script src="js/app.js?v=27" defer></script>
 </body>
 </html>

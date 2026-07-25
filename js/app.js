@@ -646,15 +646,27 @@
     }
 
     function detayGuvenPanelHtml(firma) {
-        var dogrulandi = firma.durum === 'onaylandi';
-        if (!dogrulandi) return '';
-        return '<div class="detay-guven__rozetler">' +
-            '<span class="firma-dogrulama__rozet firma-dogrulama__rozet--aktif">✓ Doğrulanmış firma</span>' +
+        if (firma.dogrulanmis && firma.durum === 'onaylandi') {
+            return '<div class="detay-guven__rozetler">' +
+                '<span class="firma-dogrulama__rozet firma-dogrulama__rozet--aktif">✓ Doğrulanmış firma</span>' +
+                '<p class="detay-guven__metin">Bu firma AURIX tarafından doğrulanmıştır.</p>' +
+                '</div>';
+        }
+        return '<div class="detay-guven__rozetler detay-guven__rozetler--beklemede">' +
+            '<p class="detay-guven__metin">Bu firma henüz AURIX tarafından doğrulanmamıştır.</p>' +
             '</div>';
     }
 
     /* Firma profil modalı — sahte hizmet / iş listesi yok */
     function firmaProfilHizmetler(firma) {
+        var FP = window.AurixFirmaProfil || {};
+        var ids = firma.hizmetKategorileri || [];
+        if (ids.length) {
+            return ids.map(function (id) {
+                var kat = kategoriBul(id);
+                return kat && kat.ad ? kat.ad : (typeof FP.kategoriAdBul === 'function' ? FP.kategoriAdBul(id) : id);
+            }).filter(Boolean);
+        }
         var kat = kategoriBul(firma.kategoriId);
         return kat && kat.ad ? [kat.ad] : [];
     }
@@ -664,8 +676,28 @@
     }
 
     function firmaProfilGaleri(firma) {
+        if (firma.galeri && firma.galeri.length) return firma.galeri;
+        var FP = window.AurixFirmaProfil || {};
+        if (typeof FP.parseGaleri === 'function' && firma.calismaGorselleri) {
+            return FP.parseGaleri({ calisma_gorselleri: firma.calismaGorselleri }).map(function (g) { return g.url; });
+        }
         var birincil = firmaKapakGorsel(firma);
         return birincil ? [birincil] : [];
+    }
+
+    function galeriLightboxAc(src, tumGorseller) {
+        var lb = $('galeriLightbox');
+        if (!lb) return;
+        var img = lb.querySelector('.galeri-lightbox__img');
+        if (img) img.src = src;
+        lb.classList.add('galeri-lightbox--acik');
+        lb.dataset.galeriListe = JSON.stringify(tumGorseller || [src]);
+        lb.dataset.galeriIndex = String((tumGorseller || []).indexOf(src));
+    }
+
+    function galeriLightboxKapat() {
+        var lb = $('galeriLightbox');
+        if (lb) lb.classList.remove('galeri-lightbox--acik');
     }
 
     function detayLogoGuncelle(firma) {
@@ -707,13 +739,18 @@
         }
         if (bolum) bolum.hidden = false;
         var tema = firmaSektorTema(firma.kategoriId);
-        el.innerHTML = gorseller.map(function (src) {
-            return '<div class="detay-galeri__oge firma-gorsel-alan firma-gorsel-alan--' + safeCss(tema, 'genel') + '">' +
+        el.innerHTML = gorseller.map(function (src, idx) {
+            return '<button type="button" class="detay-galeri__oge firma-gorsel-alan firma-gorsel-alan--' + safeCss(tema, 'genel') + '" data-galeri-src="' + esc(src) + '" data-galeri-index="' + idx + '">' +
                 '<img class="detay-galeri__img aurix-img-fallback" src="' + esc(src) + '" alt="" width="160" height="120" loading="lazy" decoding="async"' +
                 ' data-fallback-final="' + esc(AurixUtils.PH_MARKER) + '">' +
                 firmaSektorPlaceholderHtml() +
-                '</div>';
+                '</button>';
         }).join('');
+        el.querySelectorAll('[data-galeri-src]').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                galeriLightboxAc(btn.getAttribute('data-galeri-src'), gorseller);
+            });
+        });
         AurixUtils.refreshFirmaGorselleri(el);
     }
 
@@ -1229,28 +1266,49 @@
 
     function supabaseFirmaMap(row) {
         var kategoriHam = row.kategori || '';
+        var FP = window.AurixFirmaProfil || {};
+        var hizmetHam = row.hizmet_kategorileri;
+        var hizmetIds = [];
+        if (Array.isArray(hizmetHam) && hizmetHam.length) {
+            hizmetIds = hizmetHam.map(function (k) { return kategoriIdBul(String(k)); });
+        }
+        var birincilKat = hizmetIds.length ? hizmetIds[0] : kategoriIdBul(kategoriHam);
+        var galeri = typeof FP.parseGaleri === 'function' ? FP.parseGaleri(row) : [];
         return {
             id: 'sb-f-' + (row.id != null ? row.id : Date.now()),
             supabaseId: row.id,
             ad: row.firma_adi || row.ad || '—',
-            kategoriId: kategoriIdBul(kategoriHam),
+            kategoriId: birincilKat,
+            hizmetKategorileri: hizmetIds.length ? hizmetIds : (kategoriHam ? [kategoriIdBul(kategoriHam)] : []),
             sehir: row.sehir || '—',
-            /* telefon/email public API’de yok — ziyaretçiye açık gösterilmez */
+            ilce: row.ilce || '',
+            firmaTuru: row.firma_turu || '',
+            yetkiliAd: row.yetkili_ad || '',
+            kurulusYili: row.kurulus_yili || null,
+            website: row.website || '',
+            calisanSayisi: row.calisan_sayisi || '',
+            calismaSaatleri: row.calisma_saatleri || '',
+            kapasite: row.kapasite || '',
+            instagram: row.instagram || '',
+            yayinDurumu: row.yayin_durumu || '',
+            /* telefon/email/adres public API'de yok */
             tel: '',
             email: '',
             aciklama: row.aciklama || '',
             logo: row.logo_url || '',
             gorsel: row.kapak_url || row.logo_url || '',
+            galeri: galeri.map(function (g) { return g.url; }),
+            calismaGorselleri: galeri,
             premium: false,
             sponsor: false,
-            durum: row.durum === 'onaylandi' || row.dogrulanmis === true ? 'onaylandi' : (row.durum || 'onaylandi'),
+            durum: row.durum === 'onaylandi' || row.dogrulanmis === true ? 'onaylandi' : (row.durum || 'beklemede'),
             puan: 0,
             tamamlananIs: 0,
             cevapSuresi: '—',
             sonAktif: '—',
             eklenmeTarihi: row.created_at || new Date().toISOString(),
             kaynak: 'supabase',
-            dogrulanmis: true,
+            dogrulanmis: row.dogrulanmis === true,
             gizliIletisim: true
         };
     }
@@ -2550,83 +2608,269 @@
         });
     }
 
-    function firmaProfilFormHazirla(firma) {
-        if (!firma || !firma.id) return;
-        renderKategoriSelectler();
-        var sehirEl = $('firmaProfilSehir');
-        var katEl = $('firmaProfilKategori');
-        if (sehirEl && firma.sehir) {
-            sehirEl.value = firma.sehir;
-            if (sehirEl.value !== firma.sehir) {
+    var fpGaleriState = [];
+    var fpProfilKayitDevam = false;
+
+    function fpIlceSelectDoldur(sehir, seciliIlce) {
+        var ilceEl = $('firmaProfilIlce');
+        if (!ilceEl) return;
+        var ilceler = typeof window.AURIX_ilcelerFor === 'function'
+            ? window.AURIX_ilcelerFor(sehir)
+            : [];
+        if (!sehir || !ilceler.length) {
+            ilceEl.innerHTML = '<option value="">' + (sehir ? 'İlçe seçin' : 'Önce şehir seçin') + '</option>';
+            ilceEl.disabled = true;
+            return;
+        }
+        ilceEl.disabled = false;
+        ilceEl.innerHTML = '<option value="">İlçe seçin</option>' +
+            ilceler.map(function (i) {
+                return '<option value="' + esc(i) + '">' + esc(i) + '</option>';
+            }).join('');
+        if (seciliIlce) {
+            ilceEl.value = seciliIlce;
+            if (ilceEl.value !== seciliIlce) {
                 var opt = document.createElement('option');
-                opt.value = firma.sehir;
-                opt.textContent = firma.sehir;
-                sehirEl.appendChild(opt);
-                sehirEl.value = firma.sehir;
+                opt.value = seciliIlce;
+                opt.textContent = seciliIlce;
+                ilceEl.appendChild(opt);
+                ilceEl.value = seciliIlce;
             }
-        }
-        if (katEl && firma.kategori) {
-            var hedef = firma.kategori;
-            var found = false;
-            Array.prototype.forEach.call(katEl.options, function (o) {
-                if (o.value === hedef || o.textContent === hedef) {
-                    katEl.value = o.value;
-                    found = true;
-                }
-            });
-            if (!found) {
-                var opt2 = document.createElement('option');
-                opt2.value = hedef;
-                opt2.textContent = hedef;
-                katEl.appendChild(opt2);
-                katEl.value = hedef;
-            }
-        }
-        baglaTelInput('firmaProfilTel');
-        var form = $('firmaProfilDuzenleForm');
-        if (form && !form.getAttribute('data-bound')) {
-            form.setAttribute('data-bound', '1');
-            form.addEventListener('submit', firmaProfilGonder);
         }
     }
 
-    function firmaProfilGonder(e) {
-        e.preventDefault();
+    function fpSeciliKategoriler() {
+        var chips = document.querySelectorAll('#firmaProfilKatChips .fp-kat-chip--secili');
+        var ids = [];
+        chips.forEach(function (c) {
+            var id = c.getAttribute('data-fp-kat');
+            if (id) ids.push(id);
+        });
+        return ids;
+    }
+
+    function fpGaleriOnizlemeYenile() {
+        var FP = window.AurixFirmaProfil || {};
+        var wrap = $('firmaProfilGaleriOnizleme');
+        if (!wrap || typeof FP.galeriOnizlemeHtml !== 'function') return;
+        var parent = wrap.parentNode;
+        var yeni = document.createElement('div');
+        yeni.innerHTML = FP.galeriOnizlemeHtml(fpGaleriState, true);
+        var yeniWrap = yeni.firstChild;
+        if (yeniWrap && parent) {
+            parent.replaceChild(yeniWrap, wrap);
+            fpGaleriBagla();
+        }
+    }
+
+    function fpGaleriBagla() {
+        var input = $('firmaProfilGaleriInput');
+        if (input && !input.getAttribute('data-bound')) {
+            input.setAttribute('data-bound', '1');
+            input.addEventListener('change', function () {
+                var FP = window.AurixFirmaProfil || {};
+                var files = Array.prototype.slice.call(input.files || []);
+                input.value = '';
+                if (fpGaleriState.length + files.length > 12) {
+                    toast('Galeriye en fazla 12 görsel ekleyebilirsiniz.', 'error');
+                    files = files.slice(0, 12 - fpGaleriState.length);
+                }
+                files.forEach(function (file) {
+                    var v = typeof FP.validateImageFile === 'function'
+                        ? FP.validateImageFile(file)
+                        : { ok: true };
+                    if (!v.ok) {
+                        toast(v.error || 'Geçersiz dosya.', 'error');
+                        return;
+                    }
+                    var url = URL.createObjectURL(file);
+                    fpGaleriState.push({ url: url, path: null, file: file, yeni: true });
+                });
+                fpGaleriOnizlemeYenile();
+            });
+        }
+        document.querySelectorAll('[data-fp-galeri-sil]').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var idx = parseInt(btn.getAttribute('data-fp-galeri-sil'), 10);
+                if (isNaN(idx) || idx < 0 || idx >= fpGaleriState.length) return;
+                var silinen = fpGaleriState.splice(idx, 1)[0];
+                if (silinen && silinen.yeni && silinen.url && silinen.url.indexOf('blob:') === 0) {
+                    try { URL.revokeObjectURL(silinen.url); } catch (e) { /* ignore */ }
+                }
+                fpGaleriOnizlemeYenile();
+            });
+        });
+    }
+
+    function fpMedyaOnizleme(inputId, onizlemeId, tip) {
+        var input = $(inputId);
+        if (!input) return;
+        input.addEventListener('change', function () {
+            var FP = window.AurixFirmaProfil || {};
+            var file = input.files && input.files[0];
+            if (!file) return;
+            var v = typeof FP.validateImageFile === 'function'
+                ? FP.validateImageFile(file)
+                : { ok: true };
+            if (!v.ok) {
+                toast(v.error || 'Geçersiz dosya.', 'error');
+                input.value = '';
+                return;
+            }
+            var url = URL.createObjectURL(file);
+            var el = $(onizlemeId);
+            if (!el) return;
+            if (tip === 'logo') {
+                el.outerHTML = '<img class="fp-profil-logo" id="firmaProfilLogoOnizleme" src="' + esc(url) + '" alt="" width="72" height="72">';
+            } else {
+                var wrap = $('firmaProfilKapakWrap') || el.parentNode;
+                if (wrap) {
+                    wrap.innerHTML = '<img id="firmaProfilKapakOnizleme" src="' + esc(url) + '" alt="" loading="lazy">';
+                    wrap.classList.remove('fp-profil-kapak--bos');
+                }
+            }
+        });
+    }
+
+    function firmaProfilFormHazirla(firma) {
+        if (!firma || !firma.id) return;
+        var FP = window.AurixFirmaProfil || {};
+
+        var sehirOpts = (AURIX_DATA.SEHIRLER || []).map(function (s) {
+            return '<option value="' + s + '">' + s + '</option>';
+        }).join('');
+        var sehirEl = $('firmaProfilSehir');
+        if (sehirEl) {
+            sehirEl.innerHTML = '<option value="">Şehir seçin</option>' + sehirOpts;
+            if (firma.sehir) {
+                sehirEl.value = firma.sehir;
+                if (sehirEl.value !== firma.sehir) {
+                    var opt = document.createElement('option');
+                    opt.value = firma.sehir;
+                    opt.textContent = firma.sehir;
+                    sehirEl.appendChild(opt);
+                    sehirEl.value = firma.sehir;
+                }
+            }
+            if (!sehirEl.getAttribute('data-bound')) {
+                sehirEl.setAttribute('data-bound', '1');
+                sehirEl.addEventListener('change', function () {
+                    fpIlceSelectDoldur(sehirEl.value, '');
+                });
+            }
+        }
+        fpIlceSelectDoldur(firma.sehir, firma.ilce);
+
+        fpGaleriState = typeof FP.parseGaleri === 'function'
+            ? FP.parseGaleri(firma).map(function (g) {
+                return { url: g.url, path: g.path, file: null, yeni: false };
+            })
+            : [];
+
+        var katAra = $('firmaProfilKatAra');
+        if (katAra && !katAra.getAttribute('data-bound')) {
+            katAra.setAttribute('data-bound', '1');
+            katAra.addEventListener('input', function () {
+                var q = katAra.value.toLowerCase().trim();
+                document.querySelectorAll('#firmaProfilKatChips .fp-kat-chip').forEach(function (chip) {
+                    var metin = chip.textContent.toLowerCase();
+                    chip.hidden = !!(q && metin.indexOf(q) === -1);
+                });
+            });
+        }
+
+        var chipsWrap = $('firmaProfilKatChips');
+        if (chipsWrap && !chipsWrap.getAttribute('data-bound')) {
+            chipsWrap.setAttribute('data-bound', '1');
+            chipsWrap.addEventListener('click', function (e) {
+                var chip = e.target.closest('[data-fp-kat]');
+                if (!chip) return;
+                chip.classList.toggle('fp-kat-chip--secili');
+                chip.setAttribute('aria-pressed', chip.classList.contains('fp-kat-chip--secili') ? 'true' : 'false');
+            });
+        }
+
+        fpGaleriBagla();
+        fpMedyaOnizleme('firmaProfilLogo', 'firmaProfilLogoOnizleme', 'logo');
+        fpMedyaOnizleme('firmaProfilKapak', 'firmaProfilKapakOnizleme', 'kapak');
+        baglaTelInput('firmaProfilTel');
+
+        var taslakBtn = $('firmaProfilTaslakBtn');
+        var yayinBtn = $('firmaProfilYayinBtn');
+        if (taslakBtn && !taslakBtn.getAttribute('data-bound')) {
+            taslakBtn.setAttribute('data-bound', '1');
+            taslakBtn.addEventListener('click', function () {
+                firmaProfilKaydet('taslak');
+            });
+        }
+        if (yayinBtn && !yayinBtn.getAttribute('data-bound')) {
+            yayinBtn.setAttribute('data-bound', '1');
+            yayinBtn.addEventListener('click', function () {
+                firmaProfilKaydet('yayin');
+            });
+        }
+    }
+
+    function firmaProfilKaydet(mod) {
+        if (fpProfilKayitDevam) return;
+        var FP = window.AurixFirmaProfil || {};
         var ad = ($('firmaProfilAd') && $('firmaProfilAd').value || '').trim();
         var aciklama = ($('firmaProfilAciklama') && $('firmaProfilAciklama').value || '').trim();
-        var kategoriId = $('firmaProfilKategori') ? $('firmaProfilKategori').value : '';
         var sehir = $('firmaProfilSehir') ? $('firmaProfilSehir').value : '';
+        var ilce = $('firmaProfilIlce') ? $('firmaProfilIlce').value : '';
+        var firmaTuru = $('firmaProfilTuru') ? $('firmaProfilTuru').value : '';
+        var yetkili = ($('firmaProfilYetkili') && $('firmaProfilYetkili').value || '').trim();
+        var kurulus = $('firmaProfilKurulus') ? $('firmaProfilKurulus').value : '';
         var telDigits = normalizeTrCepDigits(($('firmaProfilTel') && $('firmaProfilTel').value) || '');
         var yeniden = ($('firmaProfilYeniden') && $('firmaProfilYeniden').value) === '1';
+        var durum = ($('firmaProfilDurum') && $('firmaProfilDurum').value) || '';
         var logoInput = $('firmaProfilLogo');
         var kapakInput = $('firmaProfilKapak');
+        var katIds = fpSeciliKategoriler();
+        var hizmetKategorileri = katIds.map(function (id) {
+            var kat = kategoriBul(id);
+            return kat && kat.ad ? kat.ad : id;
+        });
 
         if ($('firmaProfilTel')) {
             $('firmaProfilTel').value = formatTrCepDisplay(telDigits);
         }
 
-        var hata = firmaBasvuruDogrula(ad, aciklama, telDigits);
-        if (hata) { toast(hata, 'error'); return; }
-        if (!kategoriId || !sehir) {
-            toast('Şehir ve hizmet kategorisi seçin.', 'error');
-            return;
-        }
-        if (!window.AurixSupabase || typeof AurixSupabase.guncelleFirma !== 'function') {
-            toast('Profil güncelleme şu anda kullanılamıyor.', 'error');
+        if (mod === 'yayin') {
+            if (ad.length < 2) { toast('Firma adı en az 2 karakter olmalı.', 'error'); return; }
+            if (!firmaTuru) { toast('Firma türü seçin.', 'error'); return; }
+            if (!sehir) { toast('Şehir seçin.', 'error'); return; }
+            if (!ilce) { toast('İlçe seçin.', 'error'); return; }
+            if (!hizmetKategorileri.length) { toast('En az bir hizmet kategorisi seçin.', 'error'); return; }
+            if (aciklama.length < 10) { toast('Açıklama en az 10 karakter olmalı.', 'error'); return; }
+            if (!yetkili) { toast('Yetkili adı girin.', 'error'); return; }
+            var yil = parseInt(kurulus, 10);
+            var buYil = new Date().getFullYear();
+            if (!yil || yil < 1900 || yil > buYil) {
+                toast('Geçerli bir kuruluş yılı girin.', 'error');
+                return;
+            }
+        } else if (ad && ad.length < 2) {
+            toast('Firma adı en az 2 karakter olmalı.', 'error');
             return;
         }
 
-        var submitBtn = $('firmaProfilKaydetBtn');
-        if (submitBtn) submitBtn.disabled = true;
-
-        var kategoriAd = kategoriId;
-        if (window.AURIX_DATA && AURIX_DATA.KATEGORILER) {
-            var katBul = AURIX_DATA.KATEGORILER.find(function (k) { return k.id === kategoriId; });
-            if (katBul) kategoriAd = katBul.ad;
+        if (!window.AurixSupabase || typeof AurixSupabase.kaydetFirmaProfil !== 'function') {
+            toast('Profil kaydetme henüz kullanılamıyor. Veritabanı güncellemesi gerekebilir.', 'error');
+            return;
         }
+
+        var taslakBtn = $('firmaProfilTaslakBtn');
+        var yayinBtn = $('firmaProfilYayinBtn');
+        fpProfilKayitDevam = true;
+        if (taslakBtn) { taslakBtn.disabled = true; taslakBtn.textContent = 'Kaydediliyor…'; }
+        if (yayinBtn) { yayinBtn.disabled = true; yayinBtn.textContent = 'Kaydediliyor…'; }
 
         var logoFile = logoInput && logoInput.files && logoInput.files[0] ? logoInput.files[0] : null;
         var kapakFile = kapakInput && kapakInput.files && kapakInput.files[0] ? kapakInput.files[0] : null;
+        var mevcutLogoUrl = ($('firmaProfilLogoUrl') && $('firmaProfilLogoUrl').value) || '';
+        var mevcutKapakUrl = ($('firmaProfilKapakUrl') && $('firmaProfilKapakUrl').value) || '';
+
         var logoPromise = logoFile
             ? AurixSupabase.yukleFirmaMedya(logoFile, 'logo')
             : Promise.resolve({ ok: true, url: undefined });
@@ -2634,44 +2878,102 @@
             ? AurixSupabase.yukleFirmaMedya(kapakFile, 'kapak')
             : Promise.resolve({ ok: true, url: undefined });
 
-        Promise.all([logoPromise, kapakPromise]).then(function (sonuclar) {
+        var yeniGaleriDosyalar = fpGaleriState.filter(function (g) { return g.yeni && g.file; });
+        var galeriUploadPromise = Promise.all(yeniGaleriDosyalar.map(function (g) {
+            return AurixSupabase.yukleFirmaMedya(g.file, 'galeri').then(function (res) {
+                return { eski: g, sonuc: res };
+            });
+        }));
+
+        Promise.all([logoPromise, kapakPromise, galeriUploadPromise]).then(function (sonuclar) {
+            var logoRes = sonuclar[0];
+            var kapakRes = sonuclar[1];
+            var galeriSonuclar = sonuclar[2] || [];
+
+            if (logoFile && (!logoRes || !logoRes.ok)) {
+                toast((logoRes && logoRes.error) || 'Logo yüklenemedi.', 'error');
+            }
+            if (kapakFile && (!kapakRes || !kapakRes.ok)) {
+                toast((kapakRes && kapakRes.error) || 'Kapak yüklenemedi.', 'error');
+            }
+
+            galeriSonuclar.forEach(function (item) {
+                if (item.sonuc && item.sonuc.ok) {
+                    item.eski.url = item.sonuc.url;
+                    item.eski.path = item.sonuc.path;
+                    item.eski.yeni = false;
+                    item.eski.file = null;
+                }
+            });
+
+            var calismaGorselleri = fpGaleriState
+                .filter(function (g) { return g.url && !g.yeni; })
+                .map(function (g) {
+                    var o = { url: g.url };
+                    if (g.path) o.path = g.path;
+                    return o;
+                });
+
+            var kayitModu = mod === 'taslak'
+                ? 'taslak'
+                : (yeniden ? 'yeniden_basvur' : 'yayina_gonder');
+
             var payload = {
+                kayit_modu: kayitModu,
                 firma_adi: ad,
-                kategori: kategoriAd,
                 sehir: sehir,
+                ilce: ilce || null,
+                firma_turu: firmaTuru || null,
+                hizmet_kategorileri: hizmetKategorileri,
                 aciklama: aciklama,
-                telefon: toE164TrCep(telDigits),
-                yenidenBasvur: yeniden
+                yetkili_ad: yetkili || null,
+                kurulus_yili: kurulus ? parseInt(kurulus, 10) : null,
+                adres: ($('firmaProfilAdres') && $('firmaProfilAdres').value || '').trim() || null,
+                website: ($('firmaProfilWebsite') && $('firmaProfilWebsite').value || '').trim() || null,
+                calisan_sayisi: ($('firmaProfilCalisan') && $('firmaProfilCalisan').value || '').trim() || null,
+                calisma_saatleri: ($('firmaProfilSaatler') && $('firmaProfilSaatler').value || '').trim() || null,
+                kapasite: ($('firmaProfilKapasite') && $('firmaProfilKapasite').value || '').trim() || null,
+                instagram: ($('firmaProfilInstagram') && $('firmaProfilInstagram').value || '').trim() || null,
+                vergi_dairesi: ($('firmaProfilVergiDairesi') && $('firmaProfilVergiDairesi').value || '').trim() || null,
+                vergi_no: ($('firmaProfilVergiNo') && $('firmaProfilVergiNo').value || '').trim() || null,
+                telefon: toE164TrCep(telDigits) || null,
+                calisma_gorselleri: calismaGorselleri
             };
-            if (logoFile) {
-                payload.logo_url = (sonuclar[0] && sonuclar[0].ok && sonuclar[0].url) || undefined;
-                if (logoFile && !payload.logo_url) {
-                    toast('Logo yüklenemedi. Diğer bilgiler kaydedilecek.', 'info');
-                    delete payload.logo_url;
-                }
+
+            if (logoFile && logoRes && logoRes.ok && logoRes.url) {
+                payload.logo_url = logoRes.url;
             }
-            if (kapakFile) {
-                payload.kapak_url = (sonuclar[1] && sonuclar[1].ok && sonuclar[1].url) || undefined;
-                if (kapakFile && !payload.kapak_url) {
-                    toast('Kapak yüklenemedi. Diğer bilgiler kaydedilecek.', 'info');
-                    delete payload.kapak_url;
-                }
+            if (kapakFile && kapakRes && kapakRes.ok && kapakRes.url) {
+                payload.kapak_url = kapakRes.url;
             }
-            return AurixSupabase.guncelleFirma(payload);
+
+            return AurixSupabase.kaydetFirmaProfil(payload);
         }).then(function (res) {
-            if (submitBtn) submitBtn.disabled = false;
+            fpProfilKayitDevam = false;
+            var yayinBtnMetin = durum === 'onaylandi' ? 'Güncelle' : (yeniden ? 'Yeniden Gönder' : 'Yayına Gönder');
+            if (taslakBtn) { taslakBtn.disabled = false; taslakBtn.textContent = 'Taslak Kaydet'; }
+            if (yayinBtn) { yayinBtn.disabled = false; yayinBtn.textContent = yayinBtnMetin; }
+
             if (!res || !res.ok) {
-                toast((res && res.error) || 'Profil güncellenemedi.', 'error');
+                toast((res && res.error) || 'Profil kaydedilemedi.', 'error');
                 return;
             }
-            toast(yeniden
-                ? 'Bilgileriniz güncellendi ve başvuru yeniden incelemeye alındı.'
-                : 'Firma profiliniz güncellendi.', 'success');
+            var mesaj = mod === 'taslak'
+                ? 'Taslak kaydedildi.'
+                : (yeniden
+                    ? 'Profil güncellendi ve yeniden incelemeye alındı.'
+                    : (durum === 'onaylandi' ? 'Profil güncellendi.' : 'Profiliniz incelemeye gönderildi.'));
+            toast(mesaj, 'success');
             if (window.PanelUI && typeof PanelUI.renderUserPanel === 'function') {
                 PanelUI.renderUserPanel();
             }
+            if (typeof yukleFirmalarSupabase === 'function') {
+                yukleFirmalarSupabase();
+            }
         }).catch(function () {
-            if (submitBtn) submitBtn.disabled = false;
+            fpProfilKayitDevam = false;
+            if (taslakBtn) { taslakBtn.disabled = false; taslakBtn.textContent = 'Taslak Kaydet'; }
+            if (yayinBtn) { yayinBtn.disabled = false; yayinBtn.textContent = 'Yayına Gönder'; }
             toast('Bağlantı hatası. Lütfen tekrar deneyin.', 'error');
         });
     }
@@ -2842,6 +3144,33 @@
         AurixUtils.refreshFirmaGorselleri(container);
     }
 
+    function detayExtraMetaHtml(firma) {
+        var FP = window.AurixFirmaProfil || {};
+        var parcalar = [];
+        if (firma.yetkiliAd) {
+            var ad = typeof FP.yetkiliPublicAd === 'function' ? FP.yetkiliPublicAd(firma.yetkiliAd) : firma.yetkiliAd;
+            if (ad) parcalar.push('<span class="detay-extra__oge"><strong>Yetkili:</strong> ' + esc(ad) + '</span>');
+        }
+        if (firma.website) {
+            var web = firma.website.indexOf('http') === 0 ? firma.website : 'https://' + firma.website;
+            parcalar.push('<span class="detay-extra__oge"><a href="' + esc(web) + '" target="_blank" rel="noopener noreferrer">Web sitesi</a></span>');
+        }
+        if (firma.instagram) {
+            var ig = firma.instagram.indexOf('http') === 0 ? firma.instagram : 'https://instagram.com/' + firma.instagram.replace(/^@/, '');
+            parcalar.push('<span class="detay-extra__oge"><a href="' + esc(ig) + '" target="_blank" rel="noopener noreferrer">Instagram</a></span>');
+        }
+        if (firma.calisanSayisi) {
+            parcalar.push('<span class="detay-extra__oge"><strong>Çalışan:</strong> ' + esc(firma.calisanSayisi) + '</span>');
+        }
+        if (firma.calismaSaatleri) {
+            parcalar.push('<span class="detay-extra__oge"><strong>Saatler:</strong> ' + esc(firma.calismaSaatleri) + '</span>');
+        }
+        if (firma.kapasite) {
+            parcalar.push('<span class="detay-extra__oge"><strong>Kapasite:</strong> ' + esc(firma.kapasite) + '</span>');
+        }
+        return parcalar.join('');
+    }
+
     function detayModalAc(id) {
         var firma = onayliFirmalar().find(function (f) { return String(f.id) === String(id); });
         if (!firma && isAdminSession()) {
@@ -2849,14 +3178,41 @@
         }
         if (!firma) return;
         var kat = kategoriBul(firma.kategoriId);
+        var FP = window.AurixFirmaProfil || {};
         /* Public kart/profil: telefon ve e-posta gösterilmez */
         $('detayAd').textContent = firma.ad;
         $('detayKat').textContent = kat.ikon + ' ' + kat.ad;
-        $('detaySehir').textContent = firma.sehir;
+        var sehirMetin = [firma.ilce, firma.sehir].filter(Boolean).join(', ') || firma.sehir;
+        $('detaySehir').textContent = sehirMetin;
         $('detayAciklama').textContent = firma.aciklama || '—';
         $('detayPuan').textContent = firma.puan ? yildizGoster(firma.puan) : '';
         var detayPuanEl = $('detayPuan');
         if (detayPuanEl) detayPuanEl.hidden = !firma.puan;
+
+        var detayFirmaTuru = $('detayFirmaTuru');
+        if (detayFirmaTuru) {
+            var turAd = typeof FP.firmaTuruAd === 'function' ? FP.firmaTuruAd(firma.firmaTuru) : (firma.firmaTuru || '');
+            detayFirmaTuru.textContent = turAd || '';
+            detayFirmaTuru.hidden = !turAd;
+            var turBolum = detayFirmaTuru.closest('.detay-bolum');
+            if (turBolum) turBolum.hidden = !turAd;
+        }
+        var detayKurulus = $('detayKurulus');
+        if (detayKurulus) {
+            detayKurulus.textContent = firma.kurulusYili ? String(firma.kurulusYili) : '';
+            detayKurulus.hidden = !firma.kurulusYili;
+            var kurBolum = detayKurulus.closest('.detay-bolum');
+            if (kurBolum) kurBolum.hidden = !firma.kurulusYili;
+        }
+        var detayExtraMeta = $('detayExtraMeta');
+        if (detayExtraMeta) {
+            var extraHtml = detayExtraMetaHtml(firma);
+            detayExtraMeta.innerHTML = extraHtml;
+            detayExtraMeta.hidden = !extraHtml;
+            var extraBolum = detayExtraMeta.closest('.detay-bolum');
+            if (extraBolum) extraBolum.hidden = !extraHtml;
+        }
+
         detayGorselGuncelle(firma);
         detayLogoGuncelle(firma);
         detayHizmetlerGuncelle(firma);
@@ -2864,7 +3220,7 @@
         detayIslerGuncelle(firma);
 
         var detayMesajNot = $('detayMesajNot');
-        if (detayMesajNot) detayMesajNot.hidden = false;
+        if (detayMesajNot) detayMesajNot.hidden = true;
 
         var rozetler = $('detayRozetler');
         if (rozetler) {
@@ -2882,6 +3238,13 @@
         if (teklifBtn) {
             teklifBtn.onclick = function () {
                 toast(firma.ad + ' firmasına teklif talebiniz alındı. En kısa sürede dönüş yapılacak.', 'success');
+            };
+        }
+
+        var sohbetBtn = $('detaySohbetBtn');
+        if (sohbetBtn) {
+            sohbetBtn.onclick = function () {
+                toast('Mesajlaşma yakında aktif olacak.', 'info');
             };
         }
 
@@ -4139,6 +4502,16 @@
             });
         }
 
+        // Galeri lightbox
+        var lbKapat = $('galeriLightboxKapat');
+        if (lbKapat) lbKapat.addEventListener('click', galeriLightboxKapat);
+        var lb = $('galeriLightbox');
+        if (lb) {
+            lb.addEventListener('click', function (e) {
+                if (e.target === lb) galeriLightboxKapat();
+            });
+        }
+
         // Modal kapat
         document.querySelectorAll('[data-modal-kapat]').forEach(function (btn) {
             btn.addEventListener('click', function () { modalKapat(btn.getAttribute('data-modal-kapat')); });
@@ -4148,6 +4521,11 @@
         });
         document.addEventListener('keydown', function (e) {
             if (e.key !== 'Escape') return;
+            var lbAcik = $('galeriLightbox');
+            if (lbAcik && lbAcik.classList.contains('galeri-lightbox--acik')) {
+                galeriLightboxKapat();
+                return;
+            }
             var acikModallar = document.querySelectorAll('.modal--acik');
             if (acikModallar.length) {
                 acikModallar.forEach(function (m) { modalKapat(m.id); });

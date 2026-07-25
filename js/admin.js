@@ -1421,6 +1421,9 @@
     }
 
     function profilTamamlanma(f) {
+        if (typeof AurixFirmaProfil !== 'undefined' && AurixFirmaProfil.hesaplaTamamlama) {
+            return AurixFirmaProfil.hesaplaTamamlama(f).yuzde;
+        }
         var alanlar = [f.firma_adi, f.sehir, f.kategori, f.aciklama, f.telefon, f.email, f.logo_url];
         var dolu = alanlar.filter(function (x) { return x && String(x).trim(); }).length;
         return Math.round((dolu / alanlar.length) * 100);
@@ -1440,6 +1443,9 @@
             '<div><dt>E-posta</dt><dd>' + esc(f.email || '—') + '</dd></div>' +
             '<div><dt>Telefon</dt><dd>' + esc(f.telefon || '—') + '</dd></div>' +
             '<div><dt>Şehir</dt><dd>' + esc(f.sehir || '—') + '</dd></div>' +
+            (f.ilce ? '<div><dt>İlçe</dt><dd>' + esc(f.ilce) + '</dd></div>' : '') +
+            (f.firma_turu ? '<div><dt>Firma türü</dt><dd>' + esc(f.firma_turu) + '</dd></div>' : '') +
+            (f.yayin_durumu ? '<div><dt>Yayın</dt><dd>' + esc(f.yayin_durumu) + '</dd></div>' : '') +
             '<div><dt>Hizmet</dt><dd>' + esc(f.kategori || '—') + '</dd></div>' +
             '<div><dt>Başvuru</dt><dd>' + esc(tarihTR(f.created_at)) + '</dd></div>' +
             '<div><dt>Profil</dt><dd>%' + esc(String(profilTamamlanma(f))) + '</dd></div>' +
