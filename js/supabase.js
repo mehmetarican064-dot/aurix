@@ -1419,6 +1419,27 @@
         });
     }
 
+    function firmaDegerlendirmeOzet(firmaId) {
+        var sb = getClient();
+        if (!sb || firmaId == null || firmaId === '') {
+            return Promise.resolve({ ok: false, error: 'Firma yok.' });
+        }
+        return sb.rpc('firma_degerlendirme_ozet', { p_firma_id: String(firmaId) }).then(function (res) {
+            if (res.error) {
+                /* RPC yoksa sessiz düş — UI demo/boş duruma geçer */
+                return { ok: false, error: hataMesaji(res.error) };
+            }
+            var d = res.data || {};
+            return {
+                ok: true,
+                ozet: d.ozet || null,
+                yorumlar: Array.isArray(d.yorumlar) ? d.yorumlar : []
+            };
+        }).catch(function (err) {
+            return { ok: false, error: hataMesaji(err) };
+        });
+    }
+
     global.AurixSupabase = {
         url: SUPABASE_URL,
         getClient: getClient,
@@ -1437,6 +1458,7 @@
         firmaDogrulamaKimlikKaydet: firmaDogrulamaKimlikKaydet,
         yukleFirmaDogrulamaBelgesi: yukleFirmaDogrulamaBelgesi,
         firmaDogrulamaBelgeImzaliUrl: firmaDogrulamaBelgeImzaliUrl,
+        firmaDegerlendirmeOzet: firmaDegerlendirmeOzet,
         getirIstatistikler: getirIstatistikler,
         getirFirmaPanelOzeti: getirFirmaPanelOzeti,
         getirDogrulanmisFirmalar: getirDogrulanmisFirmalar,

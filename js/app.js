@@ -3247,6 +3247,20 @@
         var detayGuven = $('detayGuven');
         if (detayGuven) detayGuven.innerHTML = detayGuvenPanelHtml(firma);
 
+        var detayPerformans = $('detayPerformans');
+        var detayDegerlendirmeler = $('detayDegerlendirmeler');
+        if (window.AurixFirmaDegerlendirme &&
+            typeof AurixFirmaDegerlendirme.renderProfilDegerlendirme === 'function') {
+            AurixFirmaDegerlendirme.renderProfilDegerlendirme(
+                detayPerformans,
+                detayDegerlendirmeler,
+                firma
+            );
+        } else {
+            if (detayPerformans) detayPerformans.innerHTML = '';
+            if (detayDegerlendirmeler) detayDegerlendirmeler.innerHTML = '';
+        }
+
         var teklifBtn = $('detayTeklifBtn');
         if (teklifBtn) {
             teklifBtn.onclick = function () {
