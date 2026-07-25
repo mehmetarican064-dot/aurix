@@ -9,8 +9,11 @@
     var SUPABASE_URL = 'https://svsouqnhtlpcpdvqahmd.supabase.co';
     var SUPABASE_ANON_KEY = 'sb_publishable_c2mZqJ7T3rcM0Jlcm_405Q_UqRv7peK';
 
-    /** Public liste — telefon/email çekilmez */
-    var FIRMA_PUBLIC_SELECT = 'id,firma_adi,sehir,kategori,aciklama,dogrulanmis,durum,created_at,logo_url,kapak_url';
+    /** Public liste — telefon/email/adres/vergi çekilmez */
+    var FIRMA_PUBLIC_SELECT = 'id,firma_adi,sehir,ilce,firma_turu,yetkili_ad,kurulus_yili,website,calisan_sayisi,calisma_saatleri,kapasite,instagram,hizmet_kategorileri,yayin_durumu,calisma_gorselleri,kategori,aciklama,dogrulanmis,durum,created_at,logo_url,kapak_url';
+
+    /** Panel sahibi — tüm profil alanları (özel alanlar dahil) */
+    var FIRMA_PANEL_SELECT = 'id,firma_adi,sehir,ilce,firma_turu,kategori,hizmet_kategorileri,aciklama,yetkili_ad,kurulus_yili,adres,website,calisan_sayisi,calisma_saatleri,kapasite,instagram,vergi_dairesi,vergi_no,telefon,durum,dogrulanmis,yayin_durumu,created_at,updated_at,user_id,logo_url,kapak_url,calisma_gorselleri,red_nedeni,askiya_alindi,askiya_alma_nedeni';
 
     var ADMIN_TOKEN_KEY = 'aurix_supabase_admin_token';
     var client = null;
@@ -31,7 +34,7 @@
 
     function sutunEksikMi(err) {
         var msg = String((err && err.message) || err || '');
-        return /is_seed|owner_id|user_id|kapak_url|logo_url|calisma_gorselleri|column.*does not exist|PGRST204/i.test(msg);
+        return /is_seed|owner_id|user_id|kapak_url|logo_url|calisma_gorselleri|ilce|firma_turu|hizmet_kategorileri|yayin_durumu|yetkili_ad|kurulus_yili|column.*does not exist|PGRST204/i.test(msg);
     }
 
     function logSupabaseHata(baglam, err) {
@@ -492,25 +495,30 @@
                     .maybeSingle();
             }
 
-            return firmaSorgula(
-                'id,firma_adi,sehir,kategori,aciklama,telefon,durum,dogrulanmis,created_at,user_id,logo_url,kapak_url,calisma_gorselleri,red_nedeni,askiya_alindi,askiya_alma_nedeni'
-            ).then(function (res) {
-                if (res.error && /red_nedeni|askiya_alindi|askiya_alma_nedeni|kapak_url|logo_url|calisma_gorselleri|telefon|column|PGRST/i.test(String(res.error.message || ''))) {
+            return firmaSorgula(FIRMA_PANEL_SELECT).then(function (res) {
+                if (res.error && sutunEksikMi(res.error)) {
+                    return firmaSorgula(
+                        'id,firma_adi,sehir,kategori,aciklama,telefon,durum,dogrulanmis,created_at,user_id,logo_url,kapak_url,calisma_gorselleri,red_nedeni,askiya_alindi,askiya_alma_nedeni'
+                    );
+                }
+                return res;
+            }).then(function (res) {
+                if (res.error && sutunEksikMi(res.error)) {
                     return firmaSorgula('id,firma_adi,sehir,kategori,aciklama,telefon,durum,dogrulanmis,created_at,user_id,logo_url,kapak_url,calisma_gorselleri');
                 }
                 return res;
             }).then(function (res) {
-                if (res.error && /kapak_url|logo_url|calisma_gorselleri|telefon|column|PGRST/i.test(String(res.error.message || ''))) {
+                if (res.error && sutunEksikMi(res.error)) {
                     return firmaSorgula('id,firma_adi,sehir,kategori,aciklama,durum,dogrulanmis,created_at,user_id,logo_url');
                 }
                 return res;
             }).then(function (res) {
-                if (res.error && /user_id|logo_url|column|PGRST/i.test(String(res.error.message || ''))) {
+                if (res.error && sutunEksikMi(res.error)) {
                     return firmaSorgula('id,firma_adi,sehir,kategori,aciklama,durum,dogrulanmis,created_at,user_id');
                 }
                 return res;
             }).then(function (res) {
-                if (res.error && /user_id|column|PGRST/i.test(String(res.error.message || ''))) {
+                if (res.error && sutunEksikMi(res.error)) {
                     return firmaSorgula('id,firma_adi,sehir,kategori,aciklama,durum,dogrulanmis,created_at');
                 }
                 return res;
@@ -608,7 +616,15 @@
         var selectYedek = 'id,firma_adi,sehir,kategori,aciklama,dogrulanmis,durum,created_at';
 
         return sorgu().then(function (res) {
+            if (res.error && sutunEksikMi(res.error)) {
+                return sorgu(selectYedek + ',logo_url,kapak_url');
+            }
             if (res.error && /logo_url|kapak_url/i.test(String(res.error.message || ''))) {
+                return sorgu(selectYedek);
+            }
+            return res;
+        }).then(function (res) {
+            if (res.error && sutunEksikMi(res.error)) {
                 return sorgu(selectYedek);
             }
             return res;
@@ -624,6 +640,8 @@
             var satirlar = (res.data || []).filter(function (row) {
                 if (!row || row.dogrulanmis !== true) return false;
                 if (row.askiya_alindi === true) return false;
+                /* 022 sonrası: yalnızca yayında olanlar (eski kayıtlarda alan yoksa geç) */
+                if (row.yayin_durumu && row.yayin_durumu !== 'yayinda') return false;
                 return true;
             });
             return { ok: true, data: satirlar };
@@ -935,18 +953,37 @@
         });
     }
 
+    function medyaDosyaDogrula(file) {
+        if (!file) return { ok: false, error: 'Dosya seçilmedi.' };
+        if (file.size > 5 * 1024 * 1024) {
+            return { ok: false, error: 'Dosya boyutu en fazla 5 MB olabilir.' };
+        }
+        var tip = String(file.type || '').toLowerCase();
+        var ad = String(file.name || '');
+        var izinli = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+        if (izinli.indexOf(tip) !== -1 || /\.(jpe?g|png|webp)$/i.test(ad)) {
+            return { ok: true, error: null };
+        }
+        return { ok: false, error: 'Yalnızca JPEG, PNG veya WebP yükleyebilirsiniz.' };
+    }
+
     /**
-     * Firma logo / çalışma görselleri yükleme (storage bucket: firma-medya).
-     * Başarısız olursa null döner; firma kaydı yine de devam edebilir.
+     * Firma logo / kapak / galeri yükleme (storage bucket: firma-medya).
+     * opts.eskiPath verilirse yeni yükleme sonrası eski dosya silinir.
      */
-    function yukleFirmaMedya(file, klasor) {
+    function yukleFirmaMedya(file, klasor, opts) {
+        opts = opts || {};
         var sb = getClient();
         if (!sb || !file) {
-            return Promise.resolve({ ok: false, url: null, error: 'Dosya yok.' });
+            return Promise.resolve({ ok: false, url: null, path: null, error: 'Dosya yok.' });
+        }
+        var dogrulama = medyaDosyaDogrula(file);
+        if (!dogrulama.ok) {
+            return Promise.resolve({ ok: false, url: null, path: null, error: dogrulama.error });
         }
         return oturumKullaniciId(sb).then(function (uid) {
             if (!uid) {
-                return { ok: false, url: null, error: 'Oturum gerekli.', needsAuth: true };
+                return { ok: false, url: null, path: null, error: 'Oturum gerekli.', needsAuth: true };
             }
             var uzanti = '';
             var ad = String(file.name || 'dosya');
@@ -955,7 +992,6 @@
             if (!uzanti) {
                 if (/png/i.test(file.type)) uzanti = '.png';
                 else if (/webp/i.test(file.type)) uzanti = '.webp';
-                else if (/gif/i.test(file.type)) uzanti = '.gif';
                 else uzanti = '.jpg';
             }
             var yol = uid + '/' + (klasor || 'gorsel') + '/' + Date.now() + '-' +
@@ -968,15 +1004,117 @@
             }).then(function (res) {
                 if (res.error) {
                     logSupabaseHata('firma-medya upload', res.error);
-                    return { ok: false, url: null, error: hataMesaji(res.error) };
+                    return { ok: false, url: null, path: null, error: hataMesaji(res.error) };
                 }
                 var pub = sb.storage.from('firma-medya').getPublicUrl(yol);
                 var url = pub && pub.data ? pub.data.publicUrl : null;
-                return { ok: !!url, url: url };
+                if (!url) {
+                    return { ok: false, url: null, path: yol, error: 'Görsel URL alınamadı.' };
+                }
+                var eskiPath = opts.eskiPath ? String(opts.eskiPath).trim() : '';
+                if (!eskiPath) {
+                    return { ok: true, url: url, path: yol };
+                }
+                return sb.storage.from('firma-medya').remove([eskiPath]).then(function () {
+                    return { ok: true, url: url, path: yol };
+                }).catch(function () {
+                    return { ok: true, url: url, path: yol };
+                });
             });
         }).catch(function (err) {
             logSupabaseHata('firma-medya upload', err);
-            return { ok: false, url: null, error: hataMesaji(err) };
+            return { ok: false, url: null, path: null, error: hataMesaji(err) };
+        });
+    }
+
+    function silFirmaMedya(path) {
+        var sb = getClient();
+        if (!sb || !path) {
+            return Promise.resolve({ ok: false, error: 'Dosya yolu yok.' });
+        }
+        return sb.storage.from('firma-medya').remove([String(path)]).then(function (res) {
+            if (res.error) {
+                logSupabaseHata('firma-medya sil', res.error);
+                return { ok: false, error: hataMesaji(res.error) };
+            }
+            return { ok: true };
+        }).catch(function (err) {
+            return { ok: false, error: hataMesaji(err) };
+        });
+    }
+
+    /**
+     * Firma profil kaydet (RPC: firma_profil_kaydet) — taslak / yayına gönder.
+     */
+    function kaydetFirmaProfil(payload) {
+        var sb = getClient();
+        if (!sb) {
+            return Promise.resolve({
+                ok: false,
+                error: 'Bağlantı kurulamadı. Sayfayı yenileyip tekrar deneyin.'
+            });
+        }
+        payload = payload || {};
+        return oturumKullaniciId(sb).then(function (uid) {
+            if (!uid) {
+                return { ok: false, needsAuth: true, error: 'Giriş yapmış olmalısınız.' };
+            }
+            return sb.rpc('firma_profil_kaydet', { p_payload: payload }).then(function (res) {
+                if (res.error) {
+                    var msg = String(res.error.message || '');
+                    if (/Could not find the function|PGRST202|schema cache/i.test(msg)) {
+                        return {
+                            ok: false,
+                            error: 'Profil kaydetme henüz etkin değil. Veritabanı güncellemesi (022) uygulanmış olmalıdır.'
+                        };
+                    }
+                    if (/firma_yok|P0002/i.test(msg)) {
+                        return { ok: false, error: 'Firma kaydı bulunamadı.' };
+                    }
+                    if (/aski_guncelleme|42501/i.test(msg)) {
+                        return { ok: false, error: 'Askıdaki firma profili güncellenemez.' };
+                    }
+                    if (/firma_adi_gecersiz/i.test(msg)) {
+                        return { ok: false, error: 'Firma adı en az 2 karakter olmalı.' };
+                    }
+                    if (/firma_turu_zorunlu/i.test(msg)) {
+                        return { ok: false, error: 'Firma türü seçin.' };
+                    }
+                    if (/sehir_zorunlu/i.test(msg)) {
+                        return { ok: false, error: 'Şehir seçin.' };
+                    }
+                    if (/ilce_zorunlu/i.test(msg)) {
+                        return { ok: false, error: 'İlçe seçin.' };
+                    }
+                    if (/kategori_zorunlu/i.test(msg)) {
+                        return { ok: false, error: 'En az bir hizmet kategorisi seçin.' };
+                    }
+                    if (/aciklama_kisa/i.test(msg)) {
+                        return { ok: false, error: 'Açıklama en az 10 karakter olmalı.' };
+                    }
+                    if (/yetkili_ad_zorunlu/i.test(msg)) {
+                        return { ok: false, error: 'Yetkili adı girin.' };
+                    }
+                    if (/kurulus_yili_gecersiz/i.test(msg)) {
+                        return { ok: false, error: 'Geçerli bir kuruluş yılı girin.' };
+                    }
+                    return { ok: false, error: hataMesaji(res.error) };
+                }
+                var data = res.data;
+                if (data && data.ok === false) {
+                    return { ok: false, error: data.error || 'Kayıt başarısız.' };
+                }
+                return {
+                    ok: true,
+                    id: data && data.id,
+                    durum: data && data.durum,
+                    yayin_durumu: data && data.yayin_durumu,
+                    dogrulanmis: data && data.dogrulanmis,
+                    firma: data
+                };
+            });
+        }).catch(function (err) {
+            return { ok: false, error: hataMesaji(err) };
         });
     }
 
@@ -1015,9 +1153,11 @@
         kaydetFirma: kaydetFirma,
         getirKullaniciFirma: getirKullaniciFirma,
         guncelleFirma: guncelleFirma,
+        kaydetFirmaProfil: kaydetFirmaProfil,
         kaydetIsTalebi: kaydetIsTalebi,
         kaydetTeklif: kaydetTeklif,
         yukleFirmaMedya: yukleFirmaMedya,
+        silFirmaMedya: silFirmaMedya,
         getirIstatistikler: getirIstatistikler,
         getirFirmaPanelOzeti: getirFirmaPanelOzeti,
         getirDogrulanmisFirmalar: getirDogrulanmisFirmalar,
@@ -1030,6 +1170,7 @@
         getAdminDemoToken: getAdminDemoToken,
         setAdminDemoToken: setAdminDemoToken,
         keyHazirMi: keyHazirMi,
-        FIRMA_PUBLIC_SELECT: FIRMA_PUBLIC_SELECT
+        FIRMA_PUBLIC_SELECT: FIRMA_PUBLIC_SELECT,
+        FIRMA_PANEL_SELECT: FIRMA_PANEL_SELECT
     };
 })(typeof window !== 'undefined' ? window : this);

@@ -270,6 +270,8 @@ window.AURIX_DATA = {
         tamir: 'assets/images/malzeme.jpg'
     },
 
+    /* Firma türleri — AurixFirmaProfil modülünde tanımlı (AURIX_DATA.FIRMA_TURLERI) */
+
     /* Firmalar sayfası yalnızca Supabase; örnek firma listesi yok */
     ORNEK_FIRMALAR: [],
 
