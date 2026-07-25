@@ -39,11 +39,19 @@
     function hataMesaji(err, fallback) {
         if (!err) return fallback || 'İşlem başarısız.';
         var msg = String(err.message || err.error_description || err || '');
+        try {
+            if (typeof console !== 'undefined' && console.warn) {
+                console.warn('[AurixIsTalebi]', msg, err);
+            }
+        } catch (eLog) { /* ignore */ }
         if (rpcMissing(err)) {
-            return 'İş talebi API henüz hazır değil. Migration 028 uygulanmalı.';
+            return 'İş talebi API henüz hazır değil. Migration 028/029 uygulanmalı.';
         }
         if (bucketMissing(err)) {
             return 'Dosya deposu (is-talebi-dosyalari) henüz yapılandırılmamış.';
+        }
+        if (/check constraint|violates check|malzeme_saglayici|tas_durumu|teslim_sekli|butce_tipi|gorunurluk|aciliyet|23514/i.test(msg)) {
+            return 'İş talebi bilgileri kaydedilirken bir uyumsuzluk oluştu. Lütfen tekrar deneyin.';
         }
         if (/JWT|not authenticated|oturum|session|401/i.test(msg)) {
             return 'Bu işlem için giriş yapmanız gerekir.';
@@ -57,7 +65,162 @@
         if (/permission|42501|RLS|row-level/i.test(msg)) {
             return 'Bu işlem için yetkiniz bulunmuyor.';
         }
-        return msg.length < 200 ? msg : (fallback || 'İşlem başarısız. Lütfen tekrar deneyin.');
+        if (/baslik_uzunluk|aciklama_uzunluk|butce_|adet_gecersiz|aciliyet_gecersiz|butce_tipi_gecersiz/i.test(msg)) {
+            return 'İş talebi bilgileri kaydedilirken bir uyumsuzluk oluştu. Lütfen tekrar deneyin.';
+        }
+        return fallback || 'İşlem başarısız. Lütfen tekrar deneyin.';
+    }
+
+    function foldTr(s) {
+        return String(s == null ? '' : s)
+            .trim()
+            .toLocaleLowerCase('tr-TR')
+            .replace(/ğ/g, 'g').replace(/ü/g, 'u').replace(/ş/g, 's')
+            .replace(/ı/g, 'i').replace(/ö/g, 'o').replace(/ç/g, 'c')
+            .replace(/\s+/g, '_');
+    }
+
+    function mapEnum(raw, map, allowed) {
+        if (raw == null || raw === '') return null;
+        var key = foldTr(raw);
+        if (map[key]) return map[key];
+        if (allowed[key]) return key;
+        /* Bilinmeyen değer: NULL (constraint kırılmasın) */
+        return null;
+    }
+
+    var ENUM_MAPS = {
+        malzeme_saglayici: {
+            map: {
+                is_veren: 'is_veren',
+                isveren: 'is_veren',
+                is_veren_saglayacak: 'is_veren',
+                musteri: 'is_veren',
+                is_veren_saglayacak_: 'is_veren',
+                'is_veren_saglayacak': 'is_veren',
+                hizmet_veren: 'hizmet_veren',
+                firma: 'hizmet_veren',
+                hizmeti_veren_firma: 'hizmet_veren',
+                hizmeti_veren: 'hizmet_veren',
+                karisik: 'gorusulecek',
+                gorusulecek: 'gorusulecek',
+                goruselecek: 'gorusulecek',
+                gorusulecek_: 'gorusulecek'
+            },
+            allowed: { is_veren: 1, hizmet_veren: 1, gorusulecek: 1 }
+        },
+        tas_durumu: {
+            map: {
+                yok: 'yok',
+                tas_yok: 'yok',
+                var: 'is_veren',
+                is_veren: 'is_veren',
+                hizmet_veren: 'hizmet_veren',
+                firma: 'hizmet_veren',
+                kismen: 'gorusulecek',
+                belirtilmedi: 'gorusulecek',
+                gorusulecek: 'gorusulecek',
+                goruselecek: 'gorusulecek'
+            },
+            allowed: { yok: 1, is_veren: 1, hizmet_veren: 1, gorusulecek: 1 }
+        },
+        teslim_sekli: {
+            map: {
+                elden: 'elden',
+                kargo: 'kargo',
+                kurye: 'kurye',
+                anlasmali: 'gorusulecek',
+                belirtilmedi: 'gorusulecek',
+                gorusulecek: 'gorusulecek',
+                goruselecek: 'gorusulecek'
+            },
+            allowed: { elden: 1, kargo: 1, kurye: 1, gorusulecek: 1 }
+        },
+        aciliyet: {
+            map: {
+                standart: 'standart',
+                oncelikli: 'oncelikli',
+                acil: 'acil'
+            },
+            allowed: { standart: 1, oncelikli: 1, acil: 1 }
+        },
+        butce_tipi: {
+            map: {
+                teklif_bekliyorum: 'teklif_bekliyorum',
+                tahmini: 'tahmini',
+                sabit: 'sabit',
+                aralik: 'tahmini'
+            },
+            allowed: { teklif_bekliyorum: 1, tahmini: 1, sabit: 1 }
+        },
+        butce_gorunurlugu: {
+            map: {
+                herkese: 'herkese',
+                herkese_acik: 'herkese',
+                dogrulanmis_firmalar: 'dogrulanmis_firmalar',
+                gizli: 'dogrulanmis_firmalar',
+                teklif_sonrasi: 'dogrulanmis_firmalar'
+            },
+            allowed: { herkese: 1, dogrulanmis_firmalar: 1 }
+        },
+        gorunurluk: {
+            map: {
+                tum_dogrulanmis_firmalar: 'tum_dogrulanmis_firmalar',
+                secilen_sehir: 'secilen_sehir',
+                secili_kategoriler: 'tum_dogrulanmis_firmalar',
+                ozel: 'davet_edilen',
+                davet_edilen: 'davet_edilen'
+            },
+            allowed: { tum_dogrulanmis_firmalar: 1, secilen_sehir: 1, davet_edilen: 1 }
+        },
+        dosya_gorunurlugu: {
+            map: {
+                talebi_gorenler: 'talebi_gorenler',
+                teklif_sonrasi: 'teklif_sonrasi',
+                teklif_verenler: 'teklif_sonrasi',
+                sadece_sahip: 'talebi_gorenler'
+            },
+            allowed: { talebi_gorenler: 1, teklif_sonrasi: 1 }
+        },
+        durum: {
+            map: {
+                taslak: 'taslak',
+                teklif_bekliyor: 'teklif_bekliyor',
+                acik: 'teklif_bekliyor',
+                teklif_secildi: 'teklif_secildi',
+                is_emri_olusturuldu: 'is_emri_olusturuldu',
+                uretimde: 'uretimde',
+                tamamlandi: 'tamamlandi',
+                iptal_edildi: 'iptal_edildi',
+                arsivlendi: 'arsivlendi'
+            },
+            allowed: {
+                taslak: 1, teklif_bekliyor: 1, teklif_secildi: 1,
+                is_emri_olusturuldu: 1, uretimde: 1, tamamlandi: 1,
+                iptal_edildi: 1, arsivlendi: 1, Acik: 1
+            }
+        }
+    };
+
+    /** Türkçe etiket / eski slug → DB enum. Bilinmeyen → null. */
+    function normalizePayload(payload) {
+        var p = Object.assign({}, payload || {});
+        Object.keys(ENUM_MAPS).forEach(function (field) {
+            if (!(field in p)) return;
+            var cfg = ENUM_MAPS[field];
+            var mapped = mapEnum(p[field], cfg.map, cfg.allowed);
+            if (field === 'durum' && String(p[field]) === 'Acik') {
+                mapped = 'teklif_bekliyor';
+            }
+            p[field] = mapped;
+        });
+        if (p.aciliyet == null) p.aciliyet = 'standart';
+        if (p.butce_tipi == null) p.butce_tipi = 'teklif_bekliyorum';
+        if (p.butce_gorunurlugu == null) p.butce_gorunurlugu = 'dogrulanmis_firmalar';
+        if (p.gorunurluk == null) p.gorunurluk = 'tum_dogrulanmis_firmalar';
+        if (p.dosya_gorunurlugu == null) p.dosya_gorunurlugu = 'talebi_gorenler';
+        if (p.para_birimi == null || p.para_birimi === '') p.para_birimi = 'TRY';
+        return p;
     }
 
     function fail(error, extra) {
@@ -153,7 +316,7 @@
     function kaydet(payload) {
         var sb = getSb();
         if (!sb) return Promise.resolve(fail('Supabase bağlantısı yok.'));
-        var body = payload && typeof payload === 'object' ? payload : {};
+        var body = normalizePayload(payload && typeof payload === 'object' ? payload : {});
         return sb.rpc('is_talebi_kaydet', { p_payload: body }).then(function (res) {
             if (res.error) return fail(hataMesaji(res.error));
             var u = unwrapRpcData(res.data);
@@ -349,6 +512,7 @@
         dosyaImzaliUrl: dosyaImzaliUrl,
         dosyaSil: dosyaSil,
         validateFile: validateFile,
-        sanitizeFileName: sanitizeFileName
+        sanitizeFileName: sanitizeFileName,
+        normalizePayload: normalizePayload
     };
 })(typeof window !== 'undefined' ? window : this);

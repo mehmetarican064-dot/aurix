@@ -74,22 +74,22 @@
 
     var MALZEME_SAGLAYICI = [
         { slug: 'is_veren', ad: 'İş veren sağlayacak' },
-        { slug: 'firma', ad: 'Hizmeti veren firma sağlayacak' },
-        { slug: 'goruselecek', ad: 'Görüşülecek' }
+        { slug: 'hizmet_veren', ad: 'Hizmeti veren firma sağlayacak' },
+        { slug: 'gorusulecek', ad: 'Görüşülecek' }
     ];
 
     var TAS_DURUMU = [
         { slug: 'yok', ad: 'Taş yok' },
         { slug: 'is_veren', ad: 'Taşlar iş veren tarafından sağlanacak' },
-        { slug: 'firma', ad: 'Taşlar firmadan talep edilecek' },
-        { slug: 'goruselecek', ad: 'Görüşülecek' }
+        { slug: 'hizmet_veren', ad: 'Taşlar firmadan talep edilecek' },
+        { slug: 'gorusulecek', ad: 'Görüşülecek' }
     ];
 
     var TESLIM_SEKLI = [
         { slug: 'elden', ad: 'Elden teslim' },
         { slug: 'kargo', ad: 'Kargo' },
         { slug: 'kurye', ad: 'Kurye' },
-        { slug: 'goruselecek', ad: 'Görüşülecek' }
+        { slug: 'gorusulecek', ad: 'Görüşülecek' }
     ];
 
     var BUTCE_TIPI = [
@@ -373,7 +373,7 @@
             aciklama: '',
             teknik_bilgiler: '',
             malzeme: '',
-            malzeme_saglayici: 'goruselecek',
+            malzeme_saglayici: 'gorusulecek',
             tahmini_gram: '',
             gram_gorunur: false,
             tas_durumu: 'yok',
@@ -381,7 +381,7 @@
             ilce: '',
             teslim_tarihi: '',
             aciliyet: 'standart',
-            teslim_sekli: 'goruselecek',
+            teslim_sekli: 'gorusulecek',
             butce_tipi: 'teklif_bekliyorum',
             butce_min: '',
             butce_max: '',
@@ -496,7 +496,7 @@
         h += '<div class="it-alan it-alan--iki">';
         h += '<div><label class="form-label" for="itMalzeme">Malzeme</label>';
         h += '<select class="form-select" id="itMalzeme" data-it-field="malzeme">' + optionsHtml(MALZEMELER, '', true) + '</select></div>';
-        h += '<div><label class="form-label">Malzeme sağlayıcı</label>' + radioGroupHtml('malzeme_saglayici', MALZEME_SAGLAYICI, 'goruselecek') + '</div></div>';
+        h += '<div><label class="form-label">Malzeme sağlayıcı</label>' + radioGroupHtml('malzeme_saglayici', MALZEME_SAGLAYICI, 'gorusulecek') + '</div></div>';
         h += '<div class="it-alan it-alan--iki">';
         h += '<div><label class="form-label" for="itGram">Tahmini gram</label>';
         h += '<input class="form-input" type="number" id="itGram" data-it-field="tahmini_gram" min="0" step="0.001" inputmode="decimal" placeholder="örn. 12.5">';
@@ -535,7 +535,7 @@
         h += '<input class="form-input" type="date" id="itTermin" data-it-field="teslim_tarihi" min="' + minDate + '">';
         h += '<div class="it-hata" data-it-error="teslim_tarihi" hidden></div>';
         h += '<div class="it-uyari" id="itTerminUyari" hidden>Bu teslim süresi firmalar için yetersiz olabilir.</div></div>';
-        h += '<div><label class="form-label">Teslim şekli</label>' + radioGroupHtml('teslim_sekli', TESLIM_SEKLI, 'goruselecek') + '</div></div>';
+        h += '<div><label class="form-label">Teslim şekli</label>' + radioGroupHtml('teslim_sekli', TESLIM_SEKLI, 'gorusulecek') + '</div></div>';
         h += '<div class="it-alan"><label class="form-label">Bütçe tipi *</label>' + radioGroupHtml('butce_tipi', BUTCE_TIPI, 'teklif_bekliyorum') + '</div>';
         h += '<div class="it-butce-alanlari" id="itButceAlanlari" hidden>';
         h += '<div class="it-alan it-alan--iki">';
@@ -783,7 +783,27 @@
 
     function applyForm(data) {
         data = data || emptyForm();
-        state.formData = Object.assign(emptyForm(), data);
+        var merged = Object.assign(emptyForm(), data);
+        var svc = global.AurixIsTalebiService;
+        if (svc && typeof svc.normalizePayload === 'function') {
+            var n = svc.normalizePayload({
+                malzeme_saglayici: merged.malzeme_saglayici,
+                tas_durumu: merged.tas_durumu,
+                teslim_sekli: merged.teslim_sekli,
+                aciliyet: merged.aciliyet,
+                butce_tipi: merged.butce_tipi,
+                butce_gorunurlugu: merged.butce_gorunurlugu,
+                gorunurluk: merged.gorunurluk,
+                dosya_gorunurlugu: merged.dosya_gorunurlugu
+            });
+            Object.keys(n).forEach(function (k) {
+                if (k in merged && n[k] != null) merged[k] = n[k];
+            });
+            if (!merged.malzeme_saglayici) merged.malzeme_saglayici = 'gorusulecek';
+            if (!merged.tas_durumu) merged.tas_durumu = 'yok';
+            if (!merged.teslim_sekli) merged.teslim_sekli = 'gorusulecek';
+        }
+        state.formData = merged;
         Object.keys(state.formData).forEach(function (k) {
             writeField(k, state.formData[k]);
         });
@@ -1006,7 +1026,7 @@
         var butceMax = data.butce_max === '' || data.butce_max == null ? null : Number(data.butce_max);
         if (data.butce_tipi === 'sabit' && (butceMax == null || !isFinite(butceMax))) butceMax = butceMin;
         if (data.butce_tipi === 'teklif_bekliyorum') { butceMin = null; butceMax = null; }
-        return {
+        var raw = {
             id: state.talepId || undefined,
             istemci_anahtar: state.istemciAnahtar,
             durum: durum,
@@ -1036,6 +1056,11 @@
             dosya_gorunurlugu: data.dosya_gorunurlugu,
             sahip_gizli: !!data.sahip_gizli
         };
+        var svc = global.AurixIsTalebiService;
+        if (svc && typeof svc.normalizePayload === 'function') {
+            return svc.normalizePayload(raw);
+        }
+        return raw;
     }
 
     function saveDraft() {

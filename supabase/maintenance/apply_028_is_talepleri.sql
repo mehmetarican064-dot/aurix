@@ -315,7 +315,7 @@ BEGIN
             ADD CONSTRAINT is_talepleri_butce_tipi_check
             CHECK (
                 butce_tipi IS NULL
-                OR butce_tipi IN ('teklif_bekliyorum', 'sabit', 'aralik')
+                OR butce_tipi IN ('teklif_bekliyorum', 'tahmini', 'sabit')
             );
     END IF;
 
@@ -328,9 +328,7 @@ BEGIN
             ADD CONSTRAINT is_talepleri_butce_gorunurlugu_check
             CHECK (
                 butce_gorunurlugu IS NULL
-                OR butce_gorunurlugu IN (
-                    'herkese', 'dogrulanmis_firmalar', 'gizli', 'teklif_sonrasi'
-                )
+                OR butce_gorunurlugu IN ('herkese', 'dogrulanmis_firmalar')
             );
     END IF;
 
@@ -344,7 +342,7 @@ BEGIN
             CHECK (
                 gorunurluk IS NULL
                 OR gorunurluk IN (
-                    'tum_dogrulanmis_firmalar', 'secili_kategoriler', 'ozel'
+                    'tum_dogrulanmis_firmalar', 'secilen_sehir', 'davet_edilen'
                 )
             );
     END IF;
@@ -358,9 +356,7 @@ BEGIN
             ADD CONSTRAINT is_talepleri_dosya_gorunurlugu_check
             CHECK (
                 dosya_gorunurlugu IS NULL
-                OR dosya_gorunurlugu IN (
-                    'talebi_gorenler', 'sadece_sahip', 'teklif_verenler'
-                )
+                OR dosya_gorunurlugu IN ('talebi_gorenler', 'teklif_sonrasi')
             );
     END IF;
 
@@ -373,7 +369,7 @@ BEGIN
             ADD CONSTRAINT is_talepleri_malzeme_saglayici_check
             CHECK (
                 malzeme_saglayici IS NULL
-                OR malzeme_saglayici IN ('musteri', 'firma', 'karisik')
+                OR malzeme_saglayici IN ('is_veren', 'hizmet_veren', 'gorusulecek')
             );
     END IF;
 
@@ -386,7 +382,7 @@ BEGIN
             ADD CONSTRAINT is_talepleri_tas_durumu_check
             CHECK (
                 tas_durumu IS NULL
-                OR tas_durumu IN ('var', 'yok', 'kismen', 'belirtilmedi')
+                OR tas_durumu IN ('yok', 'is_veren', 'hizmet_veren', 'gorusulecek')
             );
     END IF;
 
@@ -399,7 +395,7 @@ BEGIN
             ADD CONSTRAINT is_talepleri_teslim_sekli_check
             CHECK (
                 teslim_sekli IS NULL
-                OR teslim_sekli IN ('elden', 'kargo', 'anlasmali', 'belirtilmedi')
+                OR teslim_sekli IN ('elden', 'kargo', 'kurye', 'gorusulecek')
             );
     END IF;
 END $$;
@@ -937,7 +933,7 @@ BEGIN
     END IF;
 
     bt := COALESCE(NULLIF(btrim(p_payload->>'butce_tipi'), ''), 'teklif_bekliyorum');
-    IF bt NOT IN ('teklif_bekliyorum', 'sabit', 'aralik') THEN
+    IF bt NOT IN ('teklif_bekliyorum', 'tahmini', 'sabit') THEN
         RAISE EXCEPTION 'butce_tipi_gecersiz' USING ERRCODE = '22023';
     END IF;
 
