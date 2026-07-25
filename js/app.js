@@ -342,20 +342,8 @@
             if (!res || !res.ok) {
                 if (res && res.alreadyExists) {
                     pendingFirmaSil();
-                    toast(res.error || 'Bu hesapla zaten bir firma başvurusu bulunuyor.', 'info');
-                    if (window.AuthService && typeof AuthService.refreshProfile === 'function') {
-                        AuthService.refreshProfile().then(function () {
-                            if (window.PanelUI && typeof PanelUI.renderUserPanel === 'function') {
-                                PanelUI.renderUserPanel();
-                            }
-                        }).catch(function () {
-                            if (window.PanelUI && typeof PanelUI.renderUserPanel === 'function') {
-                                PanelUI.renderUserPanel();
-                            }
-                        });
-                    } else if (window.PanelUI && typeof PanelUI.renderUserPanel === 'function') {
-                        PanelUI.renderUserPanel();
-                    }
+                    /* Normal akışta toast yok — mevcut profil açılır */
+                    mevcutFirmaPanelProfilAc();
                     return res;
                 }
                 if (res && !res.needsAuth) {
@@ -2569,6 +2557,26 @@
         }
     }
 
+    function mevcutFirmaPanelProfilAc() {
+        sayfaGoster('panel');
+        if (window.PanelUI && typeof PanelUI.renderUserPanel === 'function') {
+            PanelUI.renderUserPanel();
+        }
+        var deneme = 0;
+        var zaman = setInterval(function () {
+            deneme += 1;
+            var hazir = window.PanelUI && typeof PanelUI.getFirma === 'function' && PanelUI.getFirma();
+            if (hazir || deneme >= 25) {
+                clearInterval(zaman);
+                if (window.PanelUI && typeof PanelUI.openFirmaProfil === 'function') {
+                    PanelUI.openFirmaProfil();
+                } else if (window.PanelUI && typeof PanelUI.panelTabSec === 'function') {
+                    PanelUI.panelTabSec('profil');
+                }
+            }
+        }, 80);
+    }
+
     function firmaBasvuruModalAc() {
         var user = window.AuthService ? AuthService.getCurrentUser() : null;
         if (!user || !user.id) {
@@ -2576,14 +2584,17 @@
             uyelikModalAc('giris');
             return;
         }
-        if (user.isFirmaHesabi || (window.PanelUI && PanelUI.hasFirmaHesabi && PanelUI.hasFirmaHesabi())) {
-            toast('Bu hesapla zaten bir firma başvurusu bulunuyor.', 'info');
-            sayfaGoster('panel');
-            return;
-        }
         if (!window.AurixSupabase || typeof AurixSupabase.getirKullaniciFirma !== 'function') {
             toast('Bağlantı kurulamadı. Sayfayı yenileyip tekrar deneyin.', 'error');
             return;
+        }
+        /* Panel önbelleğinde kayıt varsa doğrudan profil — toast yok */
+        if (window.PanelUI && typeof PanelUI.getFirma === 'function') {
+            var cached = PanelUI.getFirma();
+            if (cached && cached.id) {
+                mevcutFirmaPanelProfilAc();
+                return;
+            }
         }
         AurixSupabase.getirKullaniciFirma().then(function (res) {
             if (res && res.needsAuth) {
@@ -2591,13 +2602,13 @@
                 uyelikModalAc('giris');
                 return;
             }
+            if (res && res.ok === false && res.error) {
+                toast(res.error, 'error');
+                return;
+            }
             if (res && res.firma && res.firma.id) {
-                toast('Bu hesapla zaten bir firma başvurusu bulunuyor.', 'info');
-                if (window.AuthService && typeof AuthService.refreshProfile === 'function') {
-                    AuthService.refreshProfile().then(paneleYonlendir).catch(paneleYonlendir);
-                } else {
-                    paneleYonlendir();
-                }
+                /* Mevcut kayıt: oluşturma değil, profil düzenleme */
+                mevcutFirmaPanelProfilAc();
                 return;
             }
             baglaTelInput('firmaBasvuruTel');
@@ -3682,13 +3693,9 @@
                     return;
                 }
                 if (res && res.alreadyExists) {
-                    toast(res.error || 'Bu hesapla zaten bir firma başvurusu bulunuyor.', 'info');
                     modalKapat('firmaBasvuruModal');
-                    if (window.AuthService && typeof AuthService.refreshProfile === 'function') {
-                        AuthService.refreshProfile().then(paneleYonlendir).catch(paneleYonlendir);
-                    } else {
-                        paneleYonlendir();
-                    }
+                    /* Yanlışlıkla ikinci INSERT — mevcut kaydı aç; uyarı toast’ı gösterme */
+                    mevcutFirmaPanelProfilAc();
                     return;
                 }
                 toast((res && res.error) || 'Firma başvurusu kaydedilemedi.', 'error');

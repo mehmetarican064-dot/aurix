@@ -248,6 +248,71 @@
     }
 
     /**
+     * Oturum sahibinin firma satırı.
+     * auth.uid() → firmalar.user_id; yoksa (kolon varsa) firmalar.owner_id.
+     * firmalar.id asla kullanıcı kimliği sanılmaz.
+     */
+    function sahipFirmaSorgula(sb, uid, selectCols) {
+        function tek(kolon, cols) {
+            return sb.from('firmalar')
+                .select(cols)
+                .eq(kolon, uid)
+                .order('created_at', { ascending: false })
+                .limit(1)
+                .maybeSingle();
+        }
+
+        return tek('user_id', selectCols).then(function (res) {
+            if (res.error && /user_id|column|PGRST204/i.test(String(res.error.message || ''))) {
+                return tek('owner_id', selectCols).then(function (r2) {
+                    if (r2.error && /owner_id|column|PGRST204/i.test(String(r2.error.message || ''))) {
+                        return res;
+                    }
+                    return r2;
+                });
+            }
+            if (!res.error && res.data && res.data.id) {
+                return res;
+            }
+            /* user_id ile satır yok — owner_id dene (şemada varsa) */
+            return tek('owner_id', selectCols).then(function (r2) {
+                if (r2.error && /owner_id|column|does not exist|PGRST204/i.test(String(r2.error.message || ''))) {
+                    return res;
+                }
+                return r2;
+            });
+        });
+    }
+
+    function sahipFirmaSelectDene(sb, uid, colsList) {
+        var i = 0;
+        function sonraki() {
+            if (i >= colsList.length) {
+                return Promise.resolve({ data: null, error: { message: 'Firma kolonları okunamadı.' } });
+            }
+            var cols = colsList[i++];
+            return sahipFirmaSorgula(sb, uid, cols).then(function (res) {
+                if (res.error && sutunEksikMi(res.error) && i < colsList.length) {
+                    return sonraki();
+                }
+                return res;
+            });
+        }
+        return sonraki();
+    }
+
+    var FIRMA_SAHIP_SELECT_YEDEK = [
+        FIRMA_PANEL_SELECT,
+        'id,firma_adi,sehir,ilce,firma_turu,kategori,hizmet_kategorileri,aciklama,yetkili_ad,kurulus_yili,adres,website,telefon,durum,dogrulanmis,yayin_durumu,created_at,updated_at,user_id,logo_url,kapak_url,calisma_gorselleri,red_nedeni,askiya_alindi,askiya_alma_nedeni',
+        'id,firma_adi,sehir,kategori,aciklama,telefon,durum,dogrulanmis,yayin_durumu,created_at,user_id,logo_url,kapak_url,calisma_gorselleri,red_nedeni,askiya_alindi,askiya_alma_nedeni',
+        'id,firma_adi,sehir,kategori,aciklama,telefon,durum,dogrulanmis,created_at,user_id,logo_url,kapak_url,calisma_gorselleri,red_nedeni,askiya_alindi,askiya_alma_nedeni',
+        'id,firma_adi,sehir,kategori,aciklama,telefon,durum,dogrulanmis,created_at,user_id,logo_url,kapak_url,calisma_gorselleri',
+        'id,firma_adi,sehir,kategori,aciklama,durum,dogrulanmis,created_at,user_id,logo_url',
+        'id,firma_adi,sehir,kategori,aciklama,durum,dogrulanmis,created_at,user_id',
+        'id,firma_adi,sehir,kategori,aciklama,durum,dogrulanmis,created_at'
+    ];
+
+    /**
      * Oturum sahibinin firma kaydı (beklemede / onaylandi / reddedildi fark etmez).
      */
     function getirKullaniciFirma() {
@@ -263,36 +328,21 @@
             if (!uid) {
                 return { ok: false, needsAuth: true, firma: null, error: 'Giriş yapmış olmalısınız.' };
             }
-            function dene(cols) {
-                return sb.from('firmalar')
-                    .select(cols)
-                    .eq('user_id', uid)
-                    .order('created_at', { ascending: false })
-                    .limit(1)
-                    .maybeSingle();
-            }
-            return dene('id,durum,dogrulanmis,firma_adi,user_id,created_at')
-                .then(function (res) {
-                    if (res.error && /column|PGRST/i.test(String(res.error.message || ''))) {
-                        return dene('id,durum,dogrulanmis,firma_adi,user_id');
-                    }
-                    return res;
-                })
-                .then(function (res) {
-                    if (res.error) {
-                        logSupabaseHata('firmalar kullanici kaydi', res.error);
-                        return {
-                            ok: false,
-                            firma: null,
-                            error: hataMesaji(res.error),
-                            supabase: {
-                                code: res.error.code || null,
-                                message: res.error.message || null
-                            }
-                        };
-                    }
-                    return { ok: true, firma: res.data || null };
-                });
+            return sahipFirmaSelectDene(sb, uid, FIRMA_SAHIP_SELECT_YEDEK).then(function (res) {
+                if (res.error) {
+                    logSupabaseHata('firmalar kullanici kaydi', res.error);
+                    return {
+                        ok: false,
+                        firma: null,
+                        error: hataMesaji(res.error),
+                        supabase: {
+                            code: res.error.code || null,
+                            message: res.error.message || null
+                        }
+                    };
+                }
+                return { ok: true, firma: res.data || null };
+            });
         }).catch(function (err) {
             return { ok: false, firma: null, error: hataMesaji(err) };
         });
@@ -486,46 +536,17 @@
                 return Object.assign({}, bos, { ok: false, needsAuth: true });
             }
 
-            function firmaSorgula(selectCols) {
-                return sb.from('firmalar')
-                    .select(selectCols)
-                    .eq('user_id', uid)
-                    .order('created_at', { ascending: false })
-                    .limit(1)
-                    .maybeSingle();
-            }
-
-            return firmaSorgula(FIRMA_PANEL_SELECT).then(function (res) {
-                if (res.error && sutunEksikMi(res.error)) {
-                    return firmaSorgula(
-                        'id,firma_adi,sehir,kategori,aciklama,telefon,durum,dogrulanmis,created_at,user_id,logo_url,kapak_url,calisma_gorselleri,red_nedeni,askiya_alindi,askiya_alma_nedeni'
-                    );
-                }
-                return res;
-            }).then(function (res) {
-                if (res.error && sutunEksikMi(res.error)) {
-                    return firmaSorgula('id,firma_adi,sehir,kategori,aciklama,telefon,durum,dogrulanmis,created_at,user_id,logo_url,kapak_url,calisma_gorselleri');
-                }
-                return res;
-            }).then(function (res) {
-                if (res.error && sutunEksikMi(res.error)) {
-                    return firmaSorgula('id,firma_adi,sehir,kategori,aciklama,durum,dogrulanmis,created_at,user_id,logo_url');
-                }
-                return res;
-            }).then(function (res) {
-                if (res.error && sutunEksikMi(res.error)) {
-                    return firmaSorgula('id,firma_adi,sehir,kategori,aciklama,durum,dogrulanmis,created_at,user_id');
-                }
-                return res;
-            }).then(function (res) {
-                if (res.error && sutunEksikMi(res.error)) {
-                    return firmaSorgula('id,firma_adi,sehir,kategori,aciklama,durum,dogrulanmis,created_at');
-                }
-                return res;
-            }).then(function (firmaRes) {
+            return sahipFirmaSelectDene(sb, uid, FIRMA_SAHIP_SELECT_YEDEK).then(function (firmaRes) {
                 if (firmaRes.error) {
                     logSupabaseHata('firma panel firma', firmaRes.error);
-                    return Object.assign({}, bos, { ok: true });
+                    /* Sahte “kayıt yok” gösterme — sorgu başarısız */
+                    return Object.assign({}, bos, {
+                        ok: false,
+                        hasFirma: false,
+                        firma: null,
+                        error: hataMesaji(firmaRes.error),
+                        firmaError: hataMesaji(firmaRes.error)
+                    });
                 }
                 var firma = firmaRes.data || null;
                 if (!firma || !firma.id) {
@@ -561,7 +582,11 @@
             });
         }).catch(function (err) {
             logSupabaseHata('firma panel', err);
-            return Object.assign({}, bos, { ok: false });
+            return Object.assign({}, bos, {
+                ok: false,
+                error: hataMesaji(err),
+                firmaError: hataMesaji(err)
+            });
         });
     }
 

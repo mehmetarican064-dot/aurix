@@ -251,6 +251,65 @@
         return map[durum] || durum || '—';
     }
 
+    /**
+     * Panel kartı / sekme metni — mevcut firma durumuna göre.
+     * mode: olustur | duzenle | goruntule
+     */
+    function firmaHesapKartMeta(firma) {
+        if (!firma || !firma.id) {
+            return {
+                baslik: 'Firma Hesabı Oluştur',
+                metin: 'İş almak istiyorsanız firma hesabınızı oluşturun.',
+                mode: 'olustur'
+            };
+        }
+        if (firma.askiya_alindi) {
+            return {
+                baslik: 'Firma Profilini Görüntüle',
+                metin: 'Firma hesabınız askıya alınmış. Detayları görüntüleyin.',
+                mode: 'goruntule'
+            };
+        }
+        var durum = String(firma.durum || (firma.dogrulanmis ? 'onaylandi' : 'beklemede')).toLowerCase();
+        var yayin = String(firma.yayin_durumu || '').toLowerCase();
+
+        if (durum === 'reddedildi') {
+            return {
+                baslik: 'Başvuruyu Düzenle',
+                metin: firma.red_nedeni
+                    ? ('Red nedeni: ' + String(firma.red_nedeni))
+                    : 'Başvurunuzu düzenleyip yeniden gönderebilirsiniz.',
+                mode: 'duzenle'
+            };
+        }
+        if (durum === 'onaylandi' || yayin === 'yayinda' || firma.dogrulanmis === true) {
+            return {
+                baslik: 'Firma Profilini Düzenle',
+                metin: 'Onaylı firma profilinizi güncelleyin.',
+                mode: 'duzenle'
+            };
+        }
+        if (yayin === 'taslak') {
+            return {
+                baslik: 'Firma Profilini Tamamla',
+                metin: 'Eksik bilgileri tamamlayıp yayına gönderebilirsiniz.',
+                mode: 'duzenle'
+            };
+        }
+        if (durum === 'beklemede' || yayin === 'incelemede') {
+            return {
+                baslik: 'Başvuruyu Görüntüle',
+                metin: 'Başvurunuz inceleniyor. Bilgilerinizi görüntüleyip güncelleyebilirsiniz.',
+                mode: 'duzenle'
+            };
+        }
+        return {
+            baslik: 'Firma Profilini Düzenle',
+            metin: 'Firma profilinizi yönetin.',
+            mode: 'duzenle'
+        };
+    }
+
     global.AurixFirmaProfil = {
         FIRMA_TURLERI: FIRMA_TURLERI,
         hesaplaTamamlama: hesaplaTamamlama,
@@ -264,6 +323,7 @@
         tamamlamaBarHtml: tamamlamaBarHtml,
         galeriOnizlemeHtml: galeriOnizlemeHtml,
         yayinDurumuEtiket: yayinDurumuEtiket,
-        kategoriAdBul: kategoriAdBul
+        kategoriAdBul: kategoriAdBul,
+        firmaHesapKartMeta: firmaHesapKartMeta
     };
 })(typeof window !== 'undefined' ? window : this);

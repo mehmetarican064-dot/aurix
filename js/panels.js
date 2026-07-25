@@ -14,30 +14,59 @@
     var adminTab = 'firmalar';
     var panelBound = false;
     var lastHasFirma = false;
+    var lastFirma = null;
+    var lastFirmaError = null;
 
-    var NORMAL_TABS = [
-        { id: 'dashboard', label: 'Ana Sayfa' },
-        { id: 'islerim', label: 'İş Taleplerim' },
-        { id: 'mesajlar', label: 'Mesajlar' },
-        { id: 'firma-olustur', label: 'Firma Hesabı Oluştur', action: true }
-    ];
+    function firmaKartMeta(firma) {
+        var FP = global.AurixFirmaProfil || {};
+        if (typeof FP.firmaHesapKartMeta === 'function') {
+            return FP.firmaHesapKartMeta(firma);
+        }
+        if (firma && firma.id) {
+            return {
+                baslik: 'Firma Profilini Düzenle',
+                metin: 'Firma profilinizi yönetin.',
+                mode: 'duzenle'
+            };
+        }
+        return {
+            baslik: 'Firma Hesabı Oluştur',
+            metin: 'İş almak istiyorsanız firma hesabınızı oluşturun.',
+            mode: 'olustur'
+        };
+    }
 
-    var FIRMA_TABS = [
-        { id: 'dashboard', label: 'Ana Sayfa' },
-        { id: 'islerim', label: 'İş Taleplerim' },
-        { id: 'gelen', label: 'Gelen İşler' },
-        { id: 'teklifler', label: 'Verdiğim Teklifler' },
-        { id: 'profil', label: 'Firma Profilim' },
-        { id: 'mesajlar', label: 'Mesajlar' },
-        { id: 'ayarlar', label: 'Firma Ayarları' }
-    ];
+    function normalTabs() {
+        var meta = firmaKartMeta(lastFirma);
+        return [
+            { id: 'dashboard', label: 'Ana Sayfa' },
+            { id: 'islerim', label: 'İş Taleplerim' },
+            { id: 'mesajlar', label: 'Mesajlar' },
+            { id: 'firma-olustur', label: meta.baslik, action: true }
+        ];
+    }
+
+    function firmaTabs() {
+        var meta = firmaKartMeta(lastFirma);
+        return [
+            { id: 'dashboard', label: 'Ana Sayfa' },
+            { id: 'islerim', label: 'İş Taleplerim' },
+            { id: 'gelen', label: 'Gelen İşler' },
+            { id: 'teklifler', label: 'Verdiğim Teklifler' },
+            { id: 'profil', label: meta.baslik || 'Firma Profilim' },
+            { id: 'mesajlar', label: 'Mesajlar' },
+            { id: 'ayarlar', label: 'Firma Ayarları' }
+        ];
+    }
+
+    function mevcutFirmaProfilineGit() {
+        panelTabSec('profil');
+    }
 
     function panelTabSec(tab) {
         if (!tab) return;
         if (tab === 'firma-olustur') {
-            if (global.Aurix && typeof Aurix.firmaBasvuruModalAc === 'function') {
-                Aurix.firmaBasvuruModalAc();
-            }
+            panelAksiyon('firma-hesabi');
             return;
         }
         userTab = tab;
@@ -95,7 +124,7 @@
     function guncellePanelTabs(hasFirma) {
         var nav = $('panelTabs');
         if (!nav) return;
-        var tabs = hasFirma ? FIRMA_TABS : NORMAL_TABS;
+        var tabs = hasFirma ? firmaTabs() : normalTabs();
         var mevcut = userTab;
         var gecerli = tabs.some(function (t) { return t.id === mevcut && !t.action; });
         if (!gecerli) mevcut = 'dashboard';
@@ -137,8 +166,17 @@
         }
     }
 
+    function renderFirmaYuklemeHatasi(mesaj) {
+        return '<div class="fp-bos-kutu" role="alert">' +
+            '<p class="fp-bos-metin"><strong>Firma kaydı yüklenemedi.</strong></p>' +
+            '<p class="fp-bos-metin">' + esc(mesaj || 'Lütfen sayfayı yenileyip tekrar deneyin.') + '</p>' +
+            '<button type="button" class="btn btn--primary btn--sm" data-panel-aksiyon="firma-yenile">Tekrar Dene</button>' +
+            '</div>';
+    }
+
     /** Normal kullanıcı — demo KPI yok; sade karşılama */
-    function renderKarsilama() {
+    function renderKarsilama(veri) {
+        var meta = firmaKartMeta(veri && veri.firma ? veri.firma : null);
         return '<div class="fp-karsilama">' +
             '<h2 class="fp-karsilama__baslik">Hoş Geldiniz</h2>' +
             '<p class="fp-karsilama__aciklama">' +
@@ -155,8 +193,8 @@
             '<span class="fp-karsilama-kart__metin">İş yaptırmak için talep oluşturun, teklifleri alın.</span>' +
             '</button>' +
             '<button type="button" class="fp-karsilama-kart fp-karsilama-kart--vurgu" data-panel-aksiyon="firma-hesabi">' +
-            '<span class="fp-karsilama-kart__baslik">Firma Hesabı Oluştur</span>' +
-            '<span class="fp-karsilama-kart__metin">İş almak istiyorsanız firma hesabınızı oluşturun.</span>' +
+            '<span class="fp-karsilama-kart__baslik">' + esc(meta.baslik) + '</span>' +
+            '<span class="fp-karsilama-kart__metin">' + esc(meta.metin) + '</span>' +
             '</button>' +
             '</div></div>';
     }
@@ -213,16 +251,22 @@
             '<span class="fp-karsilama-kart__baslik">Verdiğim Teklifler</span>' +
             '<span class="fp-karsilama-kart__metin">' + esc(String(teklifler.length)) + ' teklif kaydı</span>' +
             '</button>' +
-            '<button type="button" class="fp-karsilama-kart" data-panel-aksiyon="profil">' +
-            '<span class="fp-karsilama-kart__baslik">Firma Profilim</span>' +
-            '<span class="fp-karsilama-kart__metin">Profil ve ayarlarınızı yönetin.</span>' +
-            '</button>' +
+            (function () {
+                var meta = firmaKartMeta(f);
+                return '<button type="button" class="fp-karsilama-kart" data-panel-aksiyon="profil">' +
+                    '<span class="fp-karsilama-kart__baslik">' + esc(meta.baslik) + '</span>' +
+                    '<span class="fp-karsilama-kart__metin">' + esc(meta.metin) + '</span>' +
+                    '</button>';
+            })() +
             '</div></div>';
     }
 
     function renderDashboard(veri) {
+        if (veri && veri.firmaError) {
+            return renderFirmaYuklemeHatasi(veri.firmaError);
+        }
         if (veri && veri.hasFirma) return renderFirmaDashboard(veri);
-        return renderKarsilama();
+        return renderKarsilama(veri);
     }
 
     function renderIslerim(veri) {
@@ -276,10 +320,15 @@
 
     function renderProfil(veri, user) {
         var f = (veri && veri.firma) || null;
+        if (veri && veri.firmaError) {
+            return renderFirmaYuklemeHatasi(veri.firmaError);
+        }
         if (!f) {
+            var bosMeta = firmaKartMeta(null);
             return '<div class="fp-bos-kutu">' +
                 '<p class="fp-bos-metin">Firma profiliniz henüz oluşturulmadı.</p>' +
-                '<button type="button" class="btn btn--gold btn--sm" data-panel-aksiyon="firma-hesabi">Firma Hesabı Oluştur</button>' +
+                '<button type="button" class="btn btn--gold btn--sm" data-panel-aksiyon="firma-hesabi">' +
+                esc(bosMeta.baslik) + '</button>' +
                 '</div>';
         }
 
@@ -562,7 +611,22 @@
             }
             return;
         }
+        if (aksiyon === 'firma-yenile') {
+            renderUserPanel();
+            return;
+        }
         if (aksiyon === 'firma-hesabi') {
+            /* Mevcut kayıt varsa oluşturma değil profil; yoksa başvuru formu */
+            if (lastFirma && lastFirma.id) {
+                mevcutFirmaProfilineGit();
+                return;
+            }
+            if (lastFirmaError) {
+                if (global.Aurix && Aurix.toast) {
+                    Aurix.toast(lastFirmaError, 'error');
+                }
+                return;
+            }
             if (global.Aurix && typeof Aurix.firmaBasvuruModalAc === 'function') {
                 Aurix.firmaBasvuruModalAc();
             }
@@ -630,8 +694,10 @@
 
     function panelIcerikYukle(veri) {
         var user = global.AuthService ? AuthService.getCurrentUser() : null;
-        var hasFirma = !!(veri && veri.hasFirma);
+        var hasFirma = !!(veri && veri.hasFirma && veri.firma && veri.firma.id);
         lastHasFirma = hasFirma;
+        lastFirma = (veri && veri.firma && veri.firma.id) ? veri.firma : null;
+        lastFirmaError = (veri && veri.firmaError) ? String(veri.firmaError) : null;
 
         var greeting = $('panelUserGreeting');
         if (greeting) {
@@ -698,15 +764,28 @@
         Promise.all([panelPromise, islerPromise]).then(function (sonuclar) {
             var res = sonuclar[0] || {};
             var isRes = sonuclar[1] || {};
+            var firma = res.firma || null;
+            var hasFirma = !!(res.hasFirma && firma && firma.id);
+            var firmaError = null;
+            if (res.ok === false && (res.firmaError || res.error)) {
+                firmaError = res.firmaError || res.error;
+            }
             panelIcerikYukle({
-                hasFirma: !!res.hasFirma,
-                firma: res.firma || null,
+                hasFirma: hasFirma,
+                firma: firma,
+                firmaError: firmaError,
                 teklifler: res.teklifler || [],
                 kullaniciIsleri: (isRes.ok && isRes.data) ? isRes.data : []
             });
             /* refreshProfile kaldırıldı — ensure_own_profile / auth notify döngüsü yaratıyordu */
         }).catch(function () {
-            panelIcerikYukle(sifir);
+            panelIcerikYukle({
+                hasFirma: false,
+                firma: null,
+                firmaError: 'Firma paneli yüklenemedi. Lütfen tekrar deneyin.',
+                teklifler: [],
+                kullaniciIsleri: []
+            });
         });
     }
 
@@ -755,6 +834,8 @@
         panelTabSec: panelTabSec,
         adminPanelTabSec: adminPanelTabSec,
         bindTabs: bindTabs,
-        hasFirmaHesabi: function () { return lastHasFirma; }
+        hasFirmaHesabi: function () { return lastHasFirma; },
+        getFirma: function () { return lastFirma; },
+        openFirmaProfil: mevcutFirmaProfilineGit
     };
 })(typeof window !== 'undefined' ? window : this);
