@@ -2615,47 +2615,67 @@ a { color: inherit; text-decoration: none; }
 
 .modal__kutu--profil {
     max-width: 680px;
-    padding: 0 0 24px;
+    padding: 0 0 28px;
     overflow-x: hidden;
+    overflow-y: auto;
+    scroll-padding-top: 64px;
+    -webkit-overflow-scrolling: touch;
 }
 
 .modal__kutu--profil .detay-profil__ust {
-    padding: 20px 24px 12px;
+    padding: 14px 20px;
     margin-bottom: 0;
     position: sticky;
     top: 0;
-    z-index: 5;
-    background: linear-gradient(180deg, rgba(18, 16, 12, 0.96) 0%, rgba(18, 16, 12, 0.88) 100%);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    z-index: 6;
+    background: rgba(14, 12, 10, 0.97);
+    border-bottom: 1px solid rgba(201, 169, 98, 0.12);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
 }
 
+.modal__kutu--profil .detay-profil__ust-baslik,
 .modal__kutu--profil .detay-profil__ust h3 {
-    font-size: 18px;
-    letter-spacing: 0.01em;
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--aurix-muted);
+}
+
+.detay-profil__govde {
+    padding: 0 0 8px;
+    min-width: 0;
 }
 
 .detay-kapak-alan {
     position: relative;
-    margin: 0 0 8px;
+    margin: 0;
+    /* Sticky header altında kapak tam görünür; logo artık kapak dışındadır */
+    overflow: hidden;
 }
 
 .detay-gorsel-wrap {
     width: 100%;
-    height: 220px;
+    height: 180px;
     border-radius: var(--aurix-radius);
-    margin-bottom: 16px;
+    margin-bottom: 0;
     border: 1px solid var(--aurix-border);
     overflow: hidden;
 }
 
-.modal__kutu--profil .detay-gorsel-wrap {
-    height: 260px;
+.modal__kutu--profil .detay-gorsel-wrap,
+.modal__kutu--profil .detay-gorsel-wrap.firma-gorsel-alan {
+    height: 168px;
+    min-height: 168px;
+    max-height: none;
     border-radius: 0;
     border-left: none;
     border-right: none;
+    border-top: none;
     margin-bottom: 0;
-    border-color: rgba(201, 169, 98, 0.16);
+    border-color: rgba(201, 169, 98, 0.14);
 }
 
 .detay-gorsel {
@@ -2663,88 +2683,194 @@ a { color: inherit; text-decoration: none; }
     height: 100%;
     object-fit: cover;
     background: transparent;
+    display: block;
 }
 
-.detay-logo {
-    position: absolute;
-    left: 24px;
-    bottom: -28px;
-    width: 72px;
-    height: 72px;
-    border-radius: 16px;
+/* Hero — LinkedIn tarzı kimlik kartı; logo akışta, kesilmez */
+.detay-hero {
+    margin: 16px 20px 0;
+    padding: 24px 20px 20px;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(201, 169, 98, 0.14);
+    border-radius: 14px;
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.22);
+}
+
+.detay-hero .detay-logo {
+    position: relative;
+    left: auto;
+    bottom: auto;
+    width: 88px;
+    height: 88px;
+    margin: 0 auto 16px;
+    border-radius: 20px;
     background: linear-gradient(160deg, #1a160f 0%, #0c0c0e 100%);
-    border: 2px solid rgba(201, 169, 98, 0.45);
-    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(201, 169, 98, 0.12);
+    border: 2px solid rgba(201, 169, 98, 0.4);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
     display: flex;
     align-items: center;
     justify-content: center;
     overflow: hidden;
-    z-index: 4;
+    flex-shrink: 0;
+    z-index: 1;
 }
 
 .detay-logo__img {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    display: block;
 }
 
 .detay-logo__harf {
-    font-size: 22px;
+    font-size: 26px;
     font-weight: 700;
     letter-spacing: 0.04em;
     color: var(--aurix-gold-light);
+    line-height: 1;
 }
 
-.detay-kimlik {
-    padding: 36px 24px 0;
+.detay-hero__ad {
+    margin: 0 0 10px;
+    padding: 0 4px;
+    font-size: clamp(1.25rem, 3.2vw, 1.55rem);
+    font-weight: 700;
+    line-height: 1.25;
+    letter-spacing: -0.02em;
+    color: var(--aurix-white);
+    word-break: break-word;
 }
 
-.detay-kimlik__rozetler {
+.detay-hero__rozet {
     display: flex;
+    justify-content: center;
     flex-wrap: wrap;
+    gap: 8px;
+    margin: 0 0 14px;
+    min-height: 0;
+}
+
+.detay-hero__badge {
+    display: inline-flex;
+    align-items: center;
     gap: 6px;
-    margin-bottom: 10px;
-    min-height: 22px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    color: var(--aurix-gold-light);
+    background: rgba(201, 169, 98, 0.1);
+    border: 1px solid rgba(201, 169, 98, 0.32);
+    white-space: normal;
+    text-align: center;
+    max-width: 100%;
 }
 
-.detay-meta {
+.detay-hero__meta {
+    list-style: none;
+    margin: 0 auto;
+    padding: 0;
     display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-    margin-bottom: 4px;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    max-width: 320px;
+}
+
+.detay-hero__meta-oge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: auto;
+    max-width: 100%;
+    margin: 0 auto;
     font-size: 13px;
+    line-height: 1.4;
+    color: var(--aurix-text);
+    text-align: center;
+}
+
+.detay-hero__ikon {
+    flex-shrink: 0;
+    opacity: 0.9;
+}
+
+.detay-hero__kat {
+    margin: 12px 0 0;
+    font-size: 12px;
     color: var(--aurix-muted);
 }
 
-.detay-meta__oge {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    padding: 4px 10px;
-    border-radius: 999px;
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(201, 169, 98, 0.12);
+/* Eski kimlik sınıfları (geriye uyum) */
+.detay-kimlik { padding: 0; }
+.detay-kimlik__rozetler { display: none; }
+.detay-meta { display: none; }
+
+.modal__kutu--profil .detay-guven {
+    margin: 14px 20px 0;
+    padding: 0;
+    background: transparent;
+    border: none;
 }
 
-.detay-meta__oge--puan {
+.detay-guven__kart {
+    padding: 20px 18px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(201, 169, 98, 0.16);
+    border-radius: 14px;
+}
+
+.detay-guven__kart--beklemede {
+    border-color: rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.detay-guven__baslik {
+    margin: 0 0 10px;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
     color: var(--aurix-gold-light);
-    border-color: rgba(201, 169, 98, 0.28);
+    line-height: 1.3;
 }
 
-.detay-meta__oge--sehir {
+.detay-guven__kart--beklemede .detay-guven__baslik {
     color: var(--aurix-text);
 }
 
-.modal__kutu--profil .detay-guven {
-    margin: 16px 24px 0;
+.detay-guven__metin {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.65;
+    color: var(--aurix-muted);
+}
+
+.detay-guven__meta {
+    margin: 12px 0 0;
+    font-size: 12px;
+    color: var(--aurix-muted);
+    opacity: 0.9;
+}
+
+.detay-guven__not {
+    margin: 12px 0 0;
+    padding-top: 12px;
+    border-top: 1px solid rgba(201, 169, 98, 0.1);
+    font-size: 12px;
+    line-height: 1.55;
+    color: var(--aurix-muted);
 }
 
 .detay-bolum {
-    padding: 16px 24px 0;
+    padding: 18px 20px 0;
 }
 
 .detay-bolum__baslik {
-    margin: 0 0 10px;
+    margin: 0 0 12px;
     font-size: 12px;
     font-weight: 700;
     letter-spacing: 0.08em;
@@ -2752,26 +2878,68 @@ a { color: inherit; text-decoration: none; }
     color: var(--aurix-gold-light);
 }
 
+.detay-bilgi-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px 16px;
+    margin: 0;
+}
+
+.detay-bilgi-grid__oge {
+    min-width: 0;
+    padding: 12px 14px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(201, 169, 98, 0.1);
+}
+
+.detay-bilgi-grid__oge dt {
+    margin: 0 0 4px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--aurix-muted);
+}
+
+.detay-bilgi-grid__oge dd {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.4;
+    color: var(--aurix-text);
+    word-break: break-word;
+}
+
 .detay-hizmetler {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
+    align-items: flex-start;
+    gap: 10px;
+    min-height: 36px;
 }
 
 .detay-hizmet-chip {
     display: inline-flex;
     align-items: center;
-    padding: 6px 12px;
+    justify-content: center;
+    padding: 8px 14px;
     border-radius: 999px;
     font-size: 12px;
     font-weight: 500;
+    line-height: 1.3;
     color: var(--aurix-text);
     background: rgba(201, 169, 98, 0.08);
-    border: 1px solid rgba(201, 169, 98, 0.2);
+    border: 1px solid rgba(201, 169, 98, 0.22);
+    max-width: 100%;
+}
+
+.detay-hizmetler:has(.detay-hizmet-chip:only-child) {
+    justify-content: flex-start;
 }
 
 .detay-aciklama {
-    background: rgba(0, 0, 0, 0.3);
+    background: rgba(0, 0, 0, 0.28);
     border: 1px solid var(--aurix-border);
     border-radius: var(--aurix-radius);
     padding: 16px;
@@ -2858,43 +3026,80 @@ a { color: inherit; text-decoration: none; }
     display: flex;
     flex-direction: column;
     gap: 10px;
-    padding: 20px 24px 0;
+    padding: 22px 20px 0;
 }
 
-@media (max-width: 560px) {
-    .modal__kutu--profil .detay-gorsel-wrap {
-        height: 200px;
+.detay-aksiyon__btn {
+    width: 100%;
+}
+
+@media (max-width: 640px) {
+    .detay-bilgi-grid {
+        grid-template-columns: 1fr;
     }
 
-    .detay-logo {
-        left: 16px;
-        width: 60px;
-        height: 60px;
-        bottom: -24px;
-        border-radius: 14px;
+    .modal__kutu--profil .detay-gorsel-wrap,
+    .modal__kutu--profil .detay-gorsel-wrap.firma-gorsel-alan {
+        height: 140px;
+        min-height: 140px;
     }
 
-    .detay-kimlik,
+    .detay-hero {
+        margin: 12px 14px 0;
+        padding: 20px 14px 16px;
+    }
+
     .detay-bolum,
-    .detay-aksiyon,
-    .modal__kutu--profil .detay-guven {
-        padding-left: 16px;
-        padding-right: 16px;
-    }
-
-    .modal__kutu--profil .detay-guven {
-        margin-left: 16px;
-        margin-right: 16px;
+    .detay-aksiyon {
         padding-left: 14px;
         padding-right: 14px;
+    }
+
+    .modal__kutu--profil .detay-guven {
+        margin-left: 14px;
+        margin-right: 14px;
+    }
+
+    .detay-guven__kart {
+        padding: 16px 14px;
     }
 
     .detay-galeri {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
-    .detay-kimlik {
-        padding-top: 32px;
+    .modal__kutu--profil .detay-profil__ust {
+        padding: 12px 14px;
+    }
+}
+
+@media (min-width: 768px) {
+    .modal__kutu--profil .detay-gorsel-wrap,
+    .modal__kutu--profil .detay-gorsel-wrap.firma-gorsel-alan {
+        height: 180px;
+        min-height: 180px;
+    }
+
+    .detay-hero {
+        margin: 18px 24px 0;
+        padding: 28px 24px 22px;
+    }
+
+    .modal__kutu--profil .detay-guven {
+        margin-left: 24px;
+        margin-right: 24px;
+    }
+
+    .detay-bolum,
+    .detay-aksiyon {
+        padding-left: 24px;
+        padding-right: 24px;
+    }
+}
+
+@media (min-width: 1024px) {
+    .modal__kutu--profil {
+        max-width: 720px;
     }
 }
 
@@ -6104,13 +6309,9 @@ a { color: inherit; text-decoration: none; }
     border: 1px solid rgba(201, 169, 98, 0.3);
 }
 
-/* Detay modal güven paneli */
+/* Detay modal güven paneli — kart stilleri .detay-guven__kart üzerinde */
 .detay-guven {
     margin: 16px 0;
-    padding: 14px;
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(201, 169, 98, 0.12);
-    border-radius: var(--aurix-radius);
 }
 
 .detay-guven__metrikler {
@@ -7682,12 +7883,6 @@ a { color: inherit; text-decoration: none; }
     margin: 0;
     font-size: 14px;
     color: var(--aurix-text);
-}
-
-.detay-guven__metin {
-    font-size: 13px;
-    color: var(--aurix-muted);
-    margin: 6px 0 0;
 }
 
 .detay-guven__rozetler--beklemede .detay-guven__metin {
@@ -9551,10 +9746,30 @@ a { color: inherit; text-decoration: none; }
 
 .firma-kart__gorsel .firma-gorsel-alan,
 .firma-kart__thumb .firma-gorsel-alan,
-.sponsor-alani-kart__gorsel .firma-gorsel-alan,
-.detay-gorsel-wrap.firma-gorsel-alan {
+.sponsor-alani-kart__gorsel .firma-gorsel-alan {
     min-height: 100%;
     height: 100%;
+}
+
+/* Profil modal kapağı: height:100% üstte yükseklik olmadığı için çökmesin (bu kural dosyada sonra gelir) */
+.modal__kutu--profil .detay-gorsel-wrap.firma-gorsel-alan {
+    height: 168px;
+    min-height: 168px;
+    max-height: none;
+}
+
+@media (max-width: 640px) {
+    .modal__kutu--profil .detay-gorsel-wrap.firma-gorsel-alan {
+        height: 140px;
+        min-height: 140px;
+    }
+}
+
+@media (min-width: 768px) {
+    .modal__kutu--profil .detay-gorsel-wrap.firma-gorsel-alan {
+        height: 180px;
+        min-height: 180px;
+    }
 }
 
 .firma-kart:hover .firma-gorsel-alan.firma-gorsel-alan--ok > img:not(.firma-sektor-ph__logo) {
@@ -11111,11 +11326,6 @@ button.nav__link {
 }
 .fp-belge-satir {
     margin: 6px 0;
-}
-.detay-guven__meta {
-    margin: 6px 0 0;
-    font-size: 0.85rem;
-    opacity: 0.85;
 }
 
 /* ========== Firma değerlendirme / performans ========== */

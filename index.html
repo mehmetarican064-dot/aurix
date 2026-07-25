@@ -41,7 +41,7 @@
     <link rel="preconnect" href="https://svsouqnhtlpcpdvqahmd.supabase.co" crossorigin>
     <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/styles.css?v=34">
+    <link rel="stylesheet" href="css/styles.css?v=35">
     <link rel="stylesheet" href="css/admin.css?v=25">
 </head>
 <body>
@@ -740,73 +740,80 @@
 
     <!-- DETAY MODAL — Firma Profil -->
     <div class="modal" id="detayModal">
-        <div class="modal__kutu modal__kutu--genis modal__kutu--profil">
+        <div class="modal__kutu modal__kutu--genis modal__kutu--profil" id="detayModalKutu">
             <div class="modal__baslik detay-profil__ust">
-                <h3 id="detayAd">Firma Profili</h3>
+                <h3 class="detay-profil__ust-baslik">Firma Profili</h3>
                 <button class="modal__kapat" data-modal-kapat="detayModal" aria-label="Kapat">×</button>
             </div>
 
-            <div class="detay-kapak-alan">
-                <div class="detay-gorsel-wrap firma-gorsel-alan firma-gorsel-alan--genel" id="detayGorselWrap">
-                    <img class="detay-gorsel aurix-img-fallback" id="detayGorsel" src="assets/images/firma.png" alt="" width="720" height="280" decoding="async">
+            <div class="detay-profil__govde">
+                <div class="detay-kapak-alan">
+                    <div class="detay-gorsel-wrap firma-gorsel-alan firma-gorsel-alan--genel" id="detayGorselWrap">
+                        <img class="detay-gorsel aurix-img-fallback" id="detayGorsel" src="assets/images/firma.png" alt="" width="720" height="200" decoding="async">
+                    </div>
                 </div>
-                <div class="detay-logo" id="detayLogo" aria-hidden="true"></div>
-            </div>
 
-            <div class="detay-kimlik">
-                <div class="detay-kimlik__rozetler" id="detayRozetler"></div>
-                <div class="detay-meta">
-                    <span class="detay-meta__oge" id="detayKat"></span>
-                    <span class="detay-meta__oge detay-meta__oge--sehir" id="detaySehir"></span>
-                    <span class="detay-meta__oge detay-meta__oge--puan" id="detayPuan"></span>
+                <section class="detay-hero" aria-labelledby="detayAd">
+                    <div class="detay-logo" id="detayLogo" aria-hidden="true"></div>
+                    <h2 class="detay-hero__ad" id="detayAd">Firma</h2>
+                    <div class="detay-hero__rozet" id="detayRozetler"></div>
+                    <ul class="detay-hero__meta">
+                        <li class="detay-hero__meta-oge" id="detaySehirSatir" hidden>
+                            <span class="detay-hero__ikon" aria-hidden="true">📍</span>
+                            <span id="detaySehir"></span>
+                        </li>
+                        <li class="detay-hero__meta-oge" id="detayFirmaTuruSatir" hidden>
+                            <span class="detay-hero__ikon" aria-hidden="true">🏭</span>
+                            <span id="detayFirmaTuru"></span>
+                        </li>
+                        <li class="detay-hero__meta-oge" id="detayKurulusSatir" hidden>
+                            <span class="detay-hero__ikon" aria-hidden="true">📅</span>
+                            <span id="detayKurulus"></span>
+                        </li>
+                    </ul>
+                    <p class="detay-hero__kat" id="detayKat" hidden></p>
+                    <span id="detayPuan" hidden></span>
+                </section>
+
+                <div class="detay-guven" id="detayGuven" aria-label="Firma güven bilgileri"></div>
+
+                <section class="detay-bolum detay-bolum--bilgi" id="detayBilgiBolum" aria-labelledby="detayBilgiBaslik" hidden>
+                    <h4 class="detay-bolum__baslik" id="detayBilgiBaslik">Firma Bilgileri</h4>
+                    <dl class="detay-bilgi-grid" id="detayBilgiGrid"></dl>
+                </section>
+
+                <!-- Geriye dönük id uyumu (gizli; JS grid’e taşır) -->
+                <div id="detayExtraMeta" hidden></div>
+
+                <section class="detay-bolum" aria-labelledby="detayHizmetBaslik">
+                    <h4 class="detay-bolum__baslik" id="detayHizmetBaslik">Hizmet Alanları</h4>
+                    <div class="detay-hizmetler" id="detayHizmetler"></div>
+                </section>
+
+                <section class="detay-bolum" aria-labelledby="detayAciklamaBaslik">
+                    <h4 class="detay-bolum__baslik" id="detayAciklamaBaslik">Firma Hakkında</h4>
+                    <p class="detay-aciklama" id="detayAciklama"></p>
+                </section>
+
+                <div class="detay-bolum detay-bolum--performans" id="detayPerformans" aria-live="polite"></div>
+
+                <section class="detay-bolum" aria-labelledby="detayGaleriBaslik">
+                    <h4 class="detay-bolum__baslik" id="detayGaleriBaslik">Galeri</h4>
+                    <div class="detay-galeri" id="detayGaleri"></div>
+                </section>
+
+                <section class="detay-bolum" aria-labelledby="detayIslerBaslik">
+                    <h4 class="detay-bolum__baslik" id="detayIslerBaslik">Son Tamamlanan İşler</h4>
+                    <ul class="detay-isler" id="detayIsler"></ul>
+                </section>
+
+                <div class="detay-bolum detay-bolum--degerlendirme" id="detayDegerlendirmeler" aria-live="polite"></div>
+
+                <div class="detay-aksiyon">
+                    <button type="button" class="btn btn--gold detay-aksiyon__btn" id="detayTeklifBtn">Teklif Gönder</button>
+                    <button type="button" class="btn btn--ghost detay-aksiyon__btn" id="detaySohbetBtn">Sohbet Başlat</button>
+                    <p class="detay-mesaj-not" id="detayMesajNot" role="note" hidden>Mesajlaşma yakında kullanıma açılacaktır.</p>
                 </div>
-            </div>
-
-            <div class="detay-guven" id="detayGuven" aria-label="Firma güven bilgileri"></div>
-
-            <section class="detay-bolum detay-bolum--meta" aria-labelledby="detayFirmaTuruBaslik" hidden>
-                <h4 class="detay-bolum__baslik" id="detayFirmaTuruBaslik">Firma Türü</h4>
-                <p class="detay-meta-deger" id="detayFirmaTuru"></p>
-            </section>
-
-            <section class="detay-bolum detay-bolum--meta" aria-labelledby="detayKurulusBaslik" hidden>
-                <h4 class="detay-bolum__baslik" id="detayKurulusBaslik">Kuruluş Yılı</h4>
-                <p class="detay-meta-deger" id="detayKurulus"></p>
-            </section>
-
-            <section class="detay-bolum detay-bolum--extra" aria-labelledby="detayExtraBaslik" hidden>
-                <h4 class="detay-bolum__baslik" id="detayExtraBaslik">İletişim & Bilgiler</h4>
-                <div class="detay-extra-meta" id="detayExtraMeta"></div>
-            </section>
-
-            <section class="detay-bolum" aria-labelledby="detayHizmetBaslik">
-                <h4 class="detay-bolum__baslik" id="detayHizmetBaslik">Hizmet Alanları</h4>
-                <div class="detay-hizmetler" id="detayHizmetler"></div>
-            </section>
-
-            <section class="detay-bolum" aria-labelledby="detayAciklamaBaslik">
-                <h4 class="detay-bolum__baslik" id="detayAciklamaBaslik">Firma Hakkında</h4>
-                <p class="detay-aciklama" id="detayAciklama"></p>
-            </section>
-
-            <div class="detay-bolum detay-bolum--performans" id="detayPerformans" aria-live="polite"></div>
-
-            <section class="detay-bolum" aria-labelledby="detayGaleriBaslik">
-                <h4 class="detay-bolum__baslik" id="detayGaleriBaslik">Galeri</h4>
-                <div class="detay-galeri" id="detayGaleri"></div>
-            </section>
-
-            <section class="detay-bolum" aria-labelledby="detayIslerBaslik">
-                <h4 class="detay-bolum__baslik" id="detayIslerBaslik">Son Tamamlanan İşler</h4>
-                <ul class="detay-isler" id="detayIsler"></ul>
-            </section>
-
-            <div class="detay-bolum detay-bolum--degerlendirme" id="detayDegerlendirmeler" aria-live="polite"></div>
-
-            <div class="detay-aksiyon">
-                <button type="button" class="btn btn--gold" id="detayTeklifBtn" style="width:100%">Teklif Gönder</button>
-                <button type="button" class="btn btn--ghost" id="detaySohbetBtn" style="width:100%;margin-top:8px">Sohbet Başlat</button>
-                <p class="detay-mesaj-not" id="detayMesajNot" role="note" hidden>Mesajlaşma yakında kullanıma açılacaktır.</p>
             </div>
         </div>
     </div>
@@ -1124,6 +1131,6 @@
     <script src="js/market-service.js?v=21" defer></script>
     <script src="js/admin-service.js?v=32" defer></script>
     <script src="js/admin.js?v=32" defer></script>
-    <script src="js/app.js?v=34" defer></script>
+    <script src="js/app.js?v=35" defer></script>
 </body>
 </html>
