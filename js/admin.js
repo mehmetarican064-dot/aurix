@@ -428,6 +428,7 @@
         var map = {
             genel: 'Genel Bakış',
             onaylar: 'Firma Onayları',
+            dogrulama: 'Güven Doğrulama',
             firmalar: 'Firmalar',
             kullanicilar: 'Kullanıcılar',
             isler: 'İş Talepleri',
@@ -449,6 +450,7 @@
 
         if (id === 'genel') return yukleGenel();
         if (id === 'onaylar') return yukleOnaylar();
+        if (id === 'dogrulama') return yukleDogrulama();
         if (id === 'firmalar') return yukleFirmalar();
         if (id === 'kullanicilar') return yukleKullanicilar();
         if (id === 'isler') return yukleIsler();
@@ -1379,6 +1381,136 @@
     }
 
     /* ---------- Firma onayları ---------- */
+    var dogrulamaFiltre = 'hepsi';
+    var dogrulamaDetayId = null;
+
+    function yukleDogrulama() {
+        var s = svc();
+        if (!s || typeof s.dogrulamaListesi !== 'function') {
+            $('apIcerik').innerHTML = hataDurum('Doğrulama API’si yok. Migration 025 uygulayın.');
+            return;
+        }
+        setBolumLoading('dogrulama', true);
+        if (dogrulamaDetayId) {
+            s.dogrulamaDetay(dogrulamaDetayId).then(function (res) {
+                setBolumLoading('dogrulama', false);
+                if (aktifBolum !== 'dogrulama') return;
+                if (!res.ok) {
+                    $('apIcerik').innerHTML = hataDurum(res.error);
+                    return;
+                }
+                renderDogrulamaDetay(res.data || {});
+            });
+            return;
+        }
+        s.dogrulamaListesi(dogrulamaFiltre).then(function (res) {
+            setBolumLoading('dogrulama', false);
+            if (aktifBolum !== 'dogrulama') return;
+            if (!res.ok) {
+                $('apIcerik').innerHTML = hataDurum(res.error);
+                return;
+            }
+            renderDogrulamaListe(Array.isArray(res.data) ? res.data : []);
+        });
+    }
+
+    function renderDogrulamaListe(rows) {
+        var FD = window.AurixFirmaDogrulama || {};
+        var sekmeler = [
+            ['hepsi', 'Tümü'],
+            ['incelemede', 'İncelemede'],
+            ['ek_belge_gerekli', 'Ek belge'],
+            ['dogrulandi', 'Doğrulandı'],
+            ['reddedildi', 'Red'],
+            ['askiya_alindi', 'Askı']
+        ];
+        var tabHtml = sekmeler.map(function (t) {
+            return '<button type="button" class="ap-sekme' +
+                (dogrulamaFiltre === t[0] ? ' ap-sekme--aktif' : '') +
+                '" data-ap-fd-filtre="' + t[0] + '">' + esc(t[1]) + '</button>';
+        }).join('');
+        var satirlar = rows.map(function (r) {
+            var durumAd = FD.durumEtiket ? FD.durumEtiket(r.durum) : r.durum;
+            return '<tr class="ap-satir-masa">' +
+                '<td>' + esc(r.firma_adi || '—') + '</td>' +
+                '<td>' + esc(r.sehir || '—') + '</td>' +
+                '<td>' + esc(durumAd) + '</td>' +
+                '<td>' + esc(String(r.risk_skoru != null ? r.risk_skoru : '—')) + '</td>' +
+                '<td><button type="button" class="btn btn--ghost btn--xs" data-ap-fd-detay="' +
+                esc(r.id) + '">İncele</button></td></tr>';
+        }).join('');
+        $('apIcerik').innerHTML =
+            '<p class="panel-not">Yayın onayı (Firma Onayları) ile güven doğrulama ayrıdır. Rozet yalnızca burada verilir.</p>' +
+            '<div class="ap-sekmeler">' + tabHtml + '</div>' +
+            (rows.length
+                ? '<div class="ap-tablo-wrap"><table class="ap-tablo"><thead><tr>' +
+                '<th>Firma</th><th>Şehir</th><th>Durum</th><th>Risk</th><th></th></tr></thead><tbody>' +
+                satirlar + '</tbody></table></div>'
+                : bosDurum('Bu filtrede başvuru yok.'));
+    }
+
+    function renderDogrulamaDetay(data) {
+        var FD = window.AurixFirmaDogrulama || {};
+        var b = data.basvuru || {};
+        var f = data.firma || {};
+        var belgeler = data.belgeler || [];
+        var riskler = data.riskler || [];
+        var loglar = data.loglar || [];
+        var gerekOpts = (FD.GEREKCE_HAZIR || []).map(function (g) {
+            return '<option value="' + esc(g.id) + '">' + esc(g.ad) + '</option>';
+        }).join('');
+        var belgeHtml = belgeler.map(function (d) {
+            return '<li><strong>' + esc(d.belge_turu) + '</strong> · ' + esc(d.mime_type || '') +
+                ' · ' + esc(d.admin_durum || '') +
+                ' <button type="button" class="btn btn--ghost btn--xs" data-ap-fd-belge="' +
+                esc(d.id) + '">Signed URL</button></li>';
+        }).join('') || '<li>Belge yok</li>';
+        var riskHtml = riskler.map(function (r) {
+            return '<li class="ap-risk ap-risk--' + esc(r.seviye || 'orta') + '">' +
+                esc(r.seviye) + ': ' + esc(r.mesaj) + '</li>';
+        }).join('') || '<li>Otomatik risk yok</li>';
+        var logHtml = loglar.slice(0, 12).map(function (l) {
+            return '<li>' + esc(String(l.created_at || '').slice(0, 19)) + ' · ' +
+                esc(l.islem) + ' · ' + esc(l.eski_durum || '') + ' → ' + esc(l.yeni_durum || '') +
+                (l.gerekce ? ' — ' + esc(l.gerekce) : '') + '</li>';
+        }).join('') || '<li>Log yok</li>';
+
+        $('apIcerik').innerHTML =
+            '<button type="button" class="btn btn--ghost btn--sm" data-ap-fd-geri>← Listeye dön</button>' +
+            '<h3 style="margin:12px 0 8px">' + esc(f.firma_adi || 'Firma') + '</h3>' +
+            '<dl class="ap-dl">' +
+            '<div><dt>Başvuru durumu</dt><dd>' + esc(FD.durumEtiket ? FD.durumEtiket(b.durum) : b.durum) + '</dd></div>' +
+            '<div><dt>Güven rozeti</dt><dd>' + esc(f.guven_dogrulama_durumu || '—') + '</dd></div>' +
+            '<div><dt>Vergi no</dt><dd>' + esc(f.vergi_no || '—') + '</dd></div>' +
+            '<div><dt>MERSİS</dt><dd>' + esc(f.mersis_no || '—') + '</dd></div>' +
+            '<div><dt>Yetkili</dt><dd>' + esc(f.yetkili_ad || '—') + '</dd></div>' +
+            '<div><dt>İl / İlçe</dt><dd>' + esc([f.ilce, f.sehir].filter(Boolean).join(', ') || '—') + '</dd></div>' +
+            '<div><dt>Risk skoru</dt><dd>' + esc(String(b.risk_skoru != null ? b.risk_skoru : '—')) + '</dd></div>' +
+            '<div><dt>Yayın (ayrı eksen)</dt><dd>' + esc(f.durum) + ' / ' + esc(f.yayin_durumu) +
+            ' / dogrulanmis=' + esc(String(f.dogrulanmis)) + '</dd></div>' +
+            '</dl>' +
+            '<h4>Risk uyarıları (otomatik red değil)</h4><ul>' + riskHtml + '</ul>' +
+            '<h4>Belgeler</h4><ul>' + belgeHtml + '</ul>' +
+            '<h4>Karar</h4>' +
+            '<div class="form-grup"><label class="form-label">Hazır gerekçe</label>' +
+            '<select class="form-select" id="apFdGerekceKod"><option value="">Seçin</option>' + gerekOpts + '</select></div>' +
+            '<div class="form-grup"><label class="form-label">Gerekçe (zorunlu)</label>' +
+            '<textarea class="form-textarea" id="apFdGerekce" rows="3" required></textarea></div>' +
+            '<div class="form-grup"><label class="form-label">İç admin notu (kullanıcı görmez)</label>' +
+            '<textarea class="form-textarea" id="apFdIcNot" rows="2"></textarea></div>' +
+            '<div class="form-grup"><label class="form-label">Yenileme süresi (ay)</label>' +
+            '<input class="form-input" type="number" id="apFdYenileme" min="1" max="36" value="12"></div>' +
+            '<p class="fp-aksiyon-satir fp-aksiyon-satir--cift">' +
+            '<button type="button" class="btn btn--primary btn--sm" data-ap-fd-karar="dogrula">Doğrula</button>' +
+            '<button type="button" class="btn btn--ghost btn--sm" data-ap-fd-karar="ek_belge">Ek belge iste</button>' +
+            '<button type="button" class="btn btn--ghost btn--sm" data-ap-fd-karar="reddet">Reddet</button>' +
+            '<button type="button" class="btn btn--ghost btn--sm" data-ap-fd-karar="askiya_al">Askıya al</button>' +
+            '<button type="button" class="btn btn--ghost btn--sm" data-ap-fd-karar="dogrulamayi_kaldir">Doğrulamayı kaldır</button>' +
+            '<button type="button" class="btn btn--ghost btn--sm" data-ap-fd-karar="kalici_kapat">Kalıcı kapat</button>' +
+            '</p>' +
+            '<h4>İşlem kayıtları</h4><ul class="ap-log-mini">' + logHtml + '</ul>';
+    }
+
     function yukleOnaylar() {
         var s = svc();
         if (!s) return;
@@ -1926,6 +2058,59 @@
             if (onaySekme) {
                 firmaOnaySekme = onaySekme.getAttribute('data-ap-onay-sekme');
                 yukleOnaylar();
+                return;
+            }
+
+            var fdFiltre = e.target.closest('[data-ap-fd-filtre]');
+            if (fdFiltre) {
+                dogrulamaFiltre = fdFiltre.getAttribute('data-ap-fd-filtre') || 'hepsi';
+                dogrulamaDetayId = null;
+                yukleDogrulama();
+                return;
+            }
+            var fdDetay = e.target.closest('[data-ap-fd-detay]');
+            if (fdDetay) {
+                dogrulamaDetayId = fdDetay.getAttribute('data-ap-fd-detay');
+                yukleDogrulama();
+                return;
+            }
+            if (e.target.closest('[data-ap-fd-geri]')) {
+                dogrulamaDetayId = null;
+                yukleDogrulama();
+                return;
+            }
+            var fdBelge = e.target.closest('[data-ap-fd-belge]');
+            if (fdBelge) {
+                var bid = fdBelge.getAttribute('data-ap-fd-belge');
+                if (window.AurixSupabase && typeof AurixSupabase.firmaDogrulamaBelgeImzaliUrl === 'function') {
+                    AurixSupabase.firmaDogrulamaBelgeImzaliUrl(bid).then(function (r) {
+                        if (!r.ok) return toast(r.error || 'URL alınamadı.', 'error');
+                        if (r.url) window.open(r.url, '_blank', 'noopener');
+                    });
+                }
+                return;
+            }
+            var fdKarar = e.target.closest('[data-ap-fd-karar]');
+            if (fdKarar) {
+                var karar = fdKarar.getAttribute('data-ap-fd-karar');
+                var gerekce = (($('apFdGerekce') && $('apFdGerekce').value) || '').trim();
+                var gerekceKod = ($('apFdGerekceKod') && $('apFdGerekceKod').value) || '';
+                var icNot = ($('apFdIcNot') && $('apFdIcNot').value) || '';
+                var yenileme = parseInt(($('apFdYenileme') && $('apFdYenileme').value) || '12', 10);
+                if (gerekce.length < 3) {
+                    toast('Gerekçe zorunludur (en az 3 karakter).', 'error');
+                    return;
+                }
+                if (!svc() || typeof svc().dogrulamaKarar !== 'function') {
+                    toast('Doğrulama API’si yok.', 'error');
+                    return;
+                }
+                svc().dogrulamaKarar(dogrulamaDetayId, karar, gerekce, gerekceKod, icNot, yenileme)
+                    .then(function (res) {
+                        if (!res.ok) return toast(res.error || 'Karar kaydedilemedi.', 'error');
+                        toast('Karar kaydedildi.', 'success');
+                        yukleDogrulama();
+                    });
                 return;
             }
 

@@ -634,14 +634,23 @@
     }
 
     function detayGuvenPanelHtml(firma) {
-        if (firma.dogrulanmis && firma.durum === 'onaylandi') {
+        var FD = window.AurixFirmaDogrulama || {};
+        var guvenOk = typeof FD.guvenRozetAktifMi === 'function'
+            ? FD.guvenRozetAktifMi(firma)
+            : String(firma.guven_dogrulama_durumu || firma.guvenDogrulamaDurumu || '') === 'dogrulandi';
+        var tarih = firma.guven_dogrulama_tarihi || firma.guvenDogrulamaTarihi || '';
+        var rozetMetin = (AURIX_DATA.icerik && AURIX_DATA.icerik.rozet_aciklama) ||
+            'Firma kaydı ve başvuruda sunulan belgeler AURIX tarafından kontrol edilmiştir. Bu doğrulama, firmanın tüm işlemlerinin risksiz olduğu veya AURIX tarafından garanti edildiği anlamına gelmez.';
+        if (guvenOk) {
             return '<div class="detay-guven__rozetler">' +
-                '<span class="firma-dogrulama__rozet firma-dogrulama__rozet--aktif">✓ Doğrulanmış firma</span>' +
-                '<p class="detay-guven__metin">Bu firma AURIX tarafından doğrulanmıştır.</p>' +
+                '<span class="firma-dogrulama__rozet firma-dogrulama__rozet--aktif">✓ AURIX tarafından doğrulandı</span>' +
+                (tarih ? '<p class="detay-guven__meta">Son doğrulama: ' + esc(String(tarih).slice(0, 10)) + '</p>' : '') +
+                '<p class="detay-guven__metin">' + esc(rozetMetin) + '</p>' +
+                '<p class="panel-not">Kontrol edilen başlıklar: işletme kimliği, vergi/sicil belgeleri, yetkili beyanı.</p>' +
                 '</div>';
         }
         return '<div class="detay-guven__rozetler detay-guven__rozetler--beklemede">' +
-            '<p class="detay-guven__metin">Bu firma henüz AURIX tarafından doğrulanmamıştır.</p>' +
+            '<p class="detay-guven__metin">Bu firmanın belge tabanlı güven doğrulaması henüz tamamlanmamıştır. Yayında olması doğrulanmış rozet anlamına gelmez.</p>' +
             '</div>';
     }
 
@@ -1297,6 +1306,13 @@
             eklenmeTarihi: row.created_at || new Date().toISOString(),
             kaynak: 'supabase',
             dogrulanmis: row.dogrulanmis === true,
+            guven_dogrulama_durumu: row.guven_dogrulama_durumu || 'yok',
+            guvenDogrulamaDurumu: row.guven_dogrulama_durumu || 'yok',
+            guven_dogrulama_tarihi: row.guven_dogrulama_tarihi || null,
+            guvenDogrulamaTarihi: row.guven_dogrulama_tarihi || null,
+            dogrulama: {
+                guven: row.guven_dogrulama_durumu === 'dogrulandi'
+            },
             gizliIletisim: true
         };
     }

@@ -187,6 +187,38 @@
         return rpc('firma_yeniden_basvur');
     }
 
+    function dogrulamaListesi(filtre) {
+        return rpc('admin_dogrulama_listesi').then(function (res) {
+            if (!res.ok) return res;
+            var rows = [];
+            if (res.data && Array.isArray(res.data.items)) rows = res.data.items;
+            else if (Array.isArray(res.data)) rows = res.data;
+            if (filtre && filtre !== 'hepsi') {
+                rows = rows.filter(function (r) {
+                    return String(r.durum || '') === filtre;
+                });
+            }
+            return { ok: true, data: rows, error: null };
+        });
+    }
+
+    function dogrulamaDetay(basvuruId) {
+        return rpc('admin_dogrulama_detay', { p_basvuru_id: basvuruId });
+    }
+
+    function dogrulamaKarar(basvuruId, karar, gerekce, gerekceKod, icNot, yenilemeAy) {
+        return rpc('admin_dogrulama_karar', {
+            p_basvuru_id: basvuruId,
+            p_karar: karar,
+            p_gerekce: gerekce,
+            p_gerekce_kod: gerekceKod || null,
+            p_ic_not: icNot || null,
+            p_yenileme_ay: yenilemeAy != null ? yenilemeAy : null
+        }).then(function (res) {
+            return rpcJsonOk(res, 'Doğrulama kararı kaydedilemedi.');
+        });
+    }
+
     /** İstemci tarafı sağlık kontrolleri — uydurma “çalışıyor” yok. */
     function sistemDurumu() {
         var sb = getSb();
@@ -305,6 +337,9 @@
         teklifGizle: teklifGizle,
         islemListesi: islemListesi,
         firmaYenidenBasvur: firmaYenidenBasvur,
+        dogrulamaListesi: dogrulamaListesi,
+        dogrulamaDetay: dogrulamaDetay,
+        dogrulamaKarar: dogrulamaKarar,
         sistemDurumu: sistemDurumu,
         hataMesaji: hataMesaji
     };

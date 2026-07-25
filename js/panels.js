@@ -54,6 +54,7 @@
             { id: 'gelen', label: 'Gelen İşler' },
             { id: 'teklifler', label: 'Verdiğim Teklifler' },
             { id: 'profil', label: meta.baslik || 'Firma Profilim' },
+            { id: 'dogrulama', label: 'Firma Doğrulama' },
             { id: 'mesajlar', label: 'Mesajlar' },
             { id: 'ayarlar', label: 'Firma Ayarları' }
         ];
@@ -659,9 +660,197 @@
             }, 80);
             return;
         }
-        if (aksiyon === 'gelen' || aksiyon === 'teklifler' || aksiyon === 'profil') {
+        if (aksiyon === 'gelen' || aksiyon === 'teklifler' || aksiyon === 'profil' || aksiyon === 'dogrulama') {
             panelTabSec(aksiyon);
         }
+    }
+
+    function renderDogrulamaPlaceholder() {
+        return '<div class="fp-bos-kutu"><p class="fp-bos-metin">Doğrulama bilgileri yükleniyor…</p></div>';
+    }
+
+    function yukleDogrulamaSekmesi() {
+        var el = $('panelSekmeDogrulama');
+        if (!el) return;
+        if (!global.AurixSupabase || typeof AurixSupabase.firmaDogrulamaOzet !== 'function') {
+            el.innerHTML = '<div class="fp-bos-kutu"><p class="fp-bos-metin">Doğrulama servisi hazır değil. Migration 025 gerekir.</p></div>';
+            return;
+        }
+        el.innerHTML = renderDogrulamaPlaceholder();
+        AurixSupabase.firmaDogrulamaOzet().then(function (res) {
+            if (!el) return;
+            if (!res || !res.ok) {
+                el.innerHTML = '<div class="fp-bos-kutu" role="alert">' +
+                    '<p class="fp-bos-metin">' + esc((res && res.error) || 'Doğrulama yüklenemedi.') + '</p>' +
+                    (res && res.teknik ? '<p class="panel-not">' + esc(res.teknik) + '</p>' : '') +
+                    '</div>';
+                return;
+            }
+            el.innerHTML = renderDogrulamaHtml(res);
+            bindDogrulamaForm(el, res);
+        });
+    }
+
+    function renderDogrulamaHtml(res) {
+        var FD = global.AurixFirmaDogrulama || {};
+        var f = res.firma;
+        if (!f) {
+            return '<div class="fp-bos-kutu"><p class="fp-bos-metin">Önce firma hesabı oluşturun.</p>' +
+                '<button type="button" class="btn btn--gold btn--sm" data-panel-aksiyon="firma-hesabi">Firma Hesabı</button></div>';
+        }
+        var b = res.basvuru;
+        var belgeler = res.belgeler || [];
+        var icerik = res.icerik || {};
+        var kvkk = icerik.kvkk_aydinlatma_dogrulama || {};
+        var riza = icerik.acik_riza_dogrulama || {};
+        var saklama = icerik.belge_saklama_politikasi || {};
+        var durum = (b && b.durum) || f.guven_dogrulama_durumu || 'yok';
+        var durumAd = typeof FD.durumEtiket === 'function' ? FD.durumEtiket(durum) : durum;
+        var liste = typeof FD.belgeListesiForFirma === 'function' ? FD.belgeListesiForFirma(f) : [];
+        var emailOk = !!res.email_dogrulandi;
+        var telDurum = res.telefon_dogrulama_durumu || 'bekliyor';
+        var profilOk = typeof FD.profilTamamMi === 'function' ? FD.profilTamamMi(f) : true;
+        var duzenlenebilir = !b || ['taslak', 'ek_belge_gerekli', 'yenileme_gerekli'].indexOf(b.durum) !== -1;
+
+        var belgeSatir = belgeler.map(function (d) {
+            return '<li class="fp-belge-satir">' +
+                '<strong>' + esc(d.belge_turu) + '</strong> · ' + esc(d.admin_durum || 'beklemede') +
+                (d.belge_no ? ' · No: ' + esc(d.belge_no) : '') +
+                ' <button type="button" class="btn btn--ghost btn--xs" data-fd-belge-gor="' + esc(d.id) + '">Görüntüle</button></li>';
+        }).join('') || '<li class="fp-bos-metin">Henüz belge yok.</li>';
+
+        var turOpts = liste.map(function (t) {
+            return '<option value="' + esc(t.id) + '">' + esc(t.ad) + (t.zorunlu ? ' *' : '') + '</option>';
+        }).join('');
+
+        return '<div class="fp-dogrulama" data-fd-basvuru="' + esc(b && b.id ? b.id : '') + '" data-fd-firma="' + esc(String(f.id)) + '">' +
+            '<h3 class="fp-bolum__baslik">Firma Doğrulama</h3>' +
+            '<p class="panel-not">Yayında olmak ile güven rozeti aynı şey değildir. Rozet yalnızca belge incelemesi tamamlanınca verilir.</p>' +
+            '<div class="fp-basvuru-durum" role="status">' +
+            '<strong>Durum: ' + esc(durumAd) + '</strong>' +
+            (b && b.admin_aciklama ? '<p>' + esc(b.admin_aciklama) + '</p>' : '') +
+            (f.guven_kullanici_aciklama ? '<p>' + esc(f.guven_kullanici_aciklama) + '</p>' : '') +
+            (f.guven_dogrulama_tarihi ? '<p class="panel-not">Son doğrulama: ' + esc(String(f.guven_dogrulama_tarihi).slice(0, 10)) + '</p>' : '') +
+            '</div>' +
+            '<ul class="fp-onkosul">' +
+            '<li>E-posta: ' + (emailOk ? '✓ Doğrulandı' : '✗ Doğrulanmadı') + '</li>' +
+            '<li>Telefon doğrulama: ' + esc(telDurum) + ' (altyapı hazırlanıyor)</li>' +
+            '<li>Profil zorunlu alanlar: ' + (profilOk ? '✓ Tamam' : '✗ Eksik — Profil sekmesinden tamamlayın') + '</li>' +
+            '</ul>' +
+            '<div class="fp-icerik-kutu"><h4>' + esc(kvkk.baslik || 'KVKK Aydınlatma') + '</h4>' +
+            '<p class="panel-not">' + esc(kvkk.govde || '') + '</p></div>' +
+            '<div class="fp-icerik-kutu"><h4>' + esc(riza.baslik || 'Açık Rıza') + '</h4>' +
+            '<p class="panel-not">' + esc(riza.govde || '') + '</p></div>' +
+            '<div class="fp-icerik-kutu"><h4>' + esc(saklama.baslik || 'Saklama') + '</h4>' +
+            '<p class="panel-not">' + esc(saklama.govde || '') + '</p></div>' +
+            '<h4 class="fp-profil-kart__alt-baslik">Yüklenen belgeler</h4><ul class="fp-belge-list">' + belgeSatir + '</ul>' +
+            (duzenlenebilir
+                ? ('<div class="fp-profil-kart" style="margin-top:12px">' +
+                    '<h4 class="fp-profil-kart__alt-baslik">Belge yükle</h4>' +
+                    '<div class="form-grup"><label class="form-label">Belge türü</label>' +
+                    '<select class="form-select" id="fdBelgeTur">' + turOpts + '</select></div>' +
+                    '<div class="form-grup"><label class="form-label">Belge no</label>' +
+                    '<input class="form-input" type="text" id="fdBelgeNo" maxlength="80"></div>' +
+                    '<div class="form-grup"><label class="form-label">Düzenlenme tarihi</label>' +
+                    '<input class="form-input" type="date" id="fdBelgeDuzen"></div>' +
+                    '<div class="form-grup"><label class="form-label">Son geçerlilik (varsa)</label>' +
+                    '<input class="form-input" type="date" id="fdBelgeGecer"></div>' +
+                    '<div class="form-grup"><label class="form-label">Dosya (PDF/JPG/PNG/WEBP, max 10MB)</label>' +
+                    '<input class="form-input" type="file" id="fdBelgeDosya" accept=".pdf,image/jpeg,image/png,image/webp"></div>' +
+                    '<button type="button" class="btn btn--ghost btn--sm" id="fdBelgeYukleBtn">Belgeyi Yükle</button></div>' +
+                    '<label class="fp-check"><input type="checkbox" id="fdSahipBeyan"> Firma sahibi/yetkilisi olduğumu beyan ederim.</label>' +
+                    '<label class="fp-check"><input type="checkbox" id="fdKvkk"> KVKK Aydınlatma Metni’ni okudum.</label>' +
+                    '<label class="fp-check"><input type="checkbox" id="fdRiza"> Belge incelemesi için açık rıza veriyorum (ayrı onay).</label>' +
+                    '<p class="fp-aksiyon-satir" style="margin-top:12px">' +
+                    '<button type="button" class="btn btn--ghost btn--sm" id="fdHazirlaBtn">Başvuru Taslağı Oluştur</button> ' +
+                    '<button type="button" class="btn btn--gold btn--sm" id="fdGonderBtn">İncelemeye Gönder</button></p>')
+                : '<p class="panel-not">Bu durumda belge düzenlemesi kapalı. Admin açıklamasını bekleyin.</p>') +
+            '</div>';
+    }
+
+    function bindDogrulamaForm(el, res) {
+        if (!el) return;
+        var toast = function (m, t) {
+            if (global.Aurix && Aurix.toast) Aurix.toast(m, t || 'info');
+            else toastInfo(m);
+        };
+        var hazirla = el.querySelector('#fdHazirlaBtn');
+        if (hazirla) {
+            hazirla.addEventListener('click', function () {
+                AurixSupabase.firmaDogrulamaBasvuruHazirla().then(function (r) {
+                    if (!r.ok) return toast(r.error, 'error');
+                    toast('Taslak hazır.', 'success');
+                    yukleDogrulamaSekmesi();
+                });
+            });
+        }
+        var yukleBtn = el.querySelector('#fdBelgeYukleBtn');
+        if (yukleBtn) {
+            yukleBtn.addEventListener('click', function () {
+                var fileEl = el.querySelector('#fdBelgeDosya');
+                var file = fileEl && fileEl.files && fileEl.files[0];
+                var basvuruId = el.querySelector('.fp-dogrulama').getAttribute('data-fd-basvuru');
+                var firmaId = el.querySelector('.fp-dogrulama').getAttribute('data-fd-firma');
+                function doUpload(bid) {
+                    yukleBtn.disabled = true;
+                    AurixSupabase.yukleFirmaDogrulamaBelgesi({
+                        file: file,
+                        basvuruId: bid,
+                        firmaId: firmaId,
+                        belgeTuru: (el.querySelector('#fdBelgeTur') || {}).value,
+                        belgeNo: (el.querySelector('#fdBelgeNo') || {}).value,
+                        duzenlenmeTarihi: (el.querySelector('#fdBelgeDuzen') || {}).value || null,
+                        gecerlilikTarihi: (el.querySelector('#fdBelgeGecer') || {}).value || null
+                    }).then(function (r) {
+                        yukleBtn.disabled = false;
+                        if (!r.ok) return toast(r.error, 'error');
+                        toast('Belge yüklendi.', 'success');
+                        yukleDogrulamaSekmesi();
+                    });
+                }
+                if (!file) return toast('Dosya seçin.', 'error');
+                if (basvuruId) return doUpload(basvuruId);
+                AurixSupabase.firmaDogrulamaBasvuruHazirla().then(function (r) {
+                    if (!r.ok) return toast(r.error, 'error');
+                    doUpload(r.basvuru_id);
+                });
+            });
+        }
+        var gonder = el.querySelector('#fdGonderBtn');
+        if (gonder) {
+            gonder.addEventListener('click', function () {
+                var root = el.querySelector('.fp-dogrulama');
+                var bid = root && root.getAttribute('data-fd-basvuru');
+                var flags = {
+                    sahipBeyani: !!(el.querySelector('#fdSahipBeyan') || {}).checked,
+                    kvkk: !!(el.querySelector('#fdKvkk') || {}).checked,
+                    acikRiza: !!(el.querySelector('#fdRiza') || {}).checked
+                };
+                function send(id) {
+                    gonder.disabled = true;
+                    AurixSupabase.firmaDogrulamaBasvuruGonder(id, flags).then(function (r) {
+                        gonder.disabled = false;
+                        if (!r.ok) return toast(r.error, 'error');
+                        toast('Başvurunuz incelemeye alındı.', 'success');
+                        yukleDogrulamaSekmesi();
+                    });
+                }
+                if (bid) return send(bid);
+                AurixSupabase.firmaDogrulamaBasvuruHazirla().then(function (r) {
+                    if (!r.ok) return toast(r.error, 'error');
+                    send(r.basvuru_id);
+                });
+            });
+        }
+        el.querySelectorAll('[data-fd-belge-gor]').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var id = btn.getAttribute('data-fd-belge-gor');
+                AurixSupabase.firmaDogrulamaBelgeImzaliUrl(id).then(function (r) {
+                    if (!r.ok) return toast(r.error, 'error');
+                    if (r.url) global.open(r.url, '_blank', 'noopener');
+                });
+            });
+        });
     }
 
     function bindPanelActions() {
@@ -729,6 +918,14 @@
             profilEl.innerHTML = renderProfil(veri, user);
             if (global.Aurix && typeof Aurix.firmaProfilFormHazirla === 'function') {
                 Aurix.firmaProfilFormHazirla(veri && veri.firma ? veri.firma : null);
+            }
+        }
+
+        var dogrulamaEl = $('panelSekmeDogrulama');
+        if (dogrulamaEl) {
+            if (hasFirma) yukleDogrulamaSekmesi();
+            else {
+                dogrulamaEl.innerHTML = '<div class="fp-bos-kutu"><p class="fp-bos-metin">Doğrulama için önce firma hesabı gerekir.</p></div>';
             }
         }
 

@@ -171,8 +171,10 @@ window.AURIX_DATA = {
 
     CANLI_AKTIVITE: [],
 
-    /* Public’te ayrıntılı doğrulama rozetleri gösterilmez; yalnızca firma inceleme onayı */
-    DOGRULAMA_ALANLARI: [],
+    /* Public rozet alanları — belge dosyası/vergi/MERSİS asla burada yok */
+    DOGRULAMA_ALANLARI: [
+        { id: 'guven', etiket: 'AURIX doğrulaması' }
+    ],
 
     /* Malzeme Pazarı kategorileri */
     MALZEME_KATEGORILER: [

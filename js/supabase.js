@@ -10,7 +10,7 @@
     var SUPABASE_ANON_KEY = 'sb_publishable_c2mZqJ7T3rcM0Jlcm_405Q_UqRv7peK';
 
     /** Public liste — telefon/email/adres/vergi çekilmez */
-    var FIRMA_PUBLIC_SELECT = 'id,firma_adi,sehir,ilce,firma_turu,yetkili_ad,kurulus_yili,website,calisan_sayisi,calisma_saatleri,kapasite,instagram,hizmet_kategorileri,yayin_durumu,calisma_gorselleri,kategori,aciklama,dogrulanmis,durum,created_at,logo_url,kapak_url';
+    var FIRMA_PUBLIC_SELECT = 'id,firma_adi,sehir,ilce,firma_turu,yetkili_ad,kurulus_yili,website,calisan_sayisi,calisma_saatleri,kapasite,instagram,hizmet_kategorileri,yayin_durumu,calisma_gorselleri,kategori,aciklama,dogrulanmis,durum,guven_dogrulama_durumu,guven_dogrulama_tarihi,created_at,logo_url,kapak_url';
 
     /** Panel sahibi — tüm profil alanları (özel alanlar dahil) */
     var FIRMA_PANEL_SELECT = 'id,firma_adi,sehir,ilce,firma_turu,kategori,hizmet_kategorileri,aciklama,yetkili_ad,kurulus_yili,adres,website,calisan_sayisi,calisma_saatleri,kapasite,instagram,vergi_dairesi,vergi_no,telefon,durum,dogrulanmis,yayin_durumu,created_at,updated_at,user_id,logo_url,kapak_url,calisma_gorselleri,red_nedeni,askiya_alindi,askiya_alma_nedeni';
@@ -34,7 +34,7 @@
 
     function sutunEksikMi(err) {
         var msg = String((err && err.message) || err || '');
-        return /is_seed|owner_id|user_id|kapak_url|logo_url|calisma_gorselleri|ilce|firma_turu|hizmet_kategorileri|yayin_durumu|yetkili_ad|kurulus_yili|updated_at|vergi_|adres|column.*does not exist|permission denied for column|PGRST204/i.test(msg);
+        return /is_seed|owner_id|user_id|kapak_url|logo_url|calisma_gorselleri|ilce|firma_turu|hizmet_kategorileri|yayin_durumu|yetkili_ad|kurulus_yili|updated_at|vergi_|adres|guven_dogrulama|mersis|column.*does not exist|permission denied for column|PGRST204/i.test(msg);
     }
 
     function logSupabaseHata(baglam, err) {
@@ -1268,6 +1268,142 @@
         });
     }
 
+    function dogrulamaRpcHata(err) {
+        var msg = String((err && err.message) || '');
+        if (/email_dogrulanmadi/i.test(msg)) return 'Önce e-posta adresinizi doğrulayın.';
+        if (/profil_eksik/i.test(msg)) return 'Firma profilindeki zorunlu alanları tamamlayın.';
+        if (/belge_zorunlu/i.test(msg)) return 'En az bir belge yükleyin.';
+        if (/sahip_beyani|kvkk_aydinlatma|acik_riza/i.test(msg)) return 'Zorunlu onay kutularını işaretleyin.';
+        if (/PGRST202|firma_dogrulama|does not exist/i.test(msg)) {
+            return 'Doğrulama API’si eksik. Migration 025 uygulanmalı.';
+        }
+        return hataMesaji(err);
+    }
+
+    function firmaDogrulamaOzet() {
+        var sb = getClient();
+        if (!sb) return Promise.resolve({ ok: false, error: 'Bağlantı yok.' });
+        return sb.rpc('firma_dogrulama_ozet').then(function (res) {
+            if (res.error) {
+                logSupabaseHata('firma_dogrulama_ozet', res.error);
+                return { ok: false, error: dogrulamaRpcHata(res.error), teknik: hataTeknikOzet(res.error) };
+            }
+            return Object.assign({ ok: true }, res.data || {});
+        }).catch(function (err) {
+            return { ok: false, error: dogrulamaRpcHata(err) };
+        });
+    }
+
+    function firmaDogrulamaBasvuruHazirla() {
+        var sb = getClient();
+        if (!sb) return Promise.resolve({ ok: false, error: 'Bağlantı yok.' });
+        return sb.rpc('firma_dogrulama_basvuru_hazirla').then(function (res) {
+            if (res.error) return { ok: false, error: dogrulamaRpcHata(res.error) };
+            return Object.assign({ ok: true }, res.data || {});
+        });
+    }
+
+    function firmaDogrulamaBasvuruGonder(basvuruId, flags) {
+        var sb = getClient();
+        if (!sb) return Promise.resolve({ ok: false, error: 'Bağlantı yok.' });
+        flags = flags || {};
+        return sb.rpc('firma_dogrulama_basvuru_gonder', {
+            p_basvuru_id: basvuruId,
+            p_sahip_beyani: !!flags.sahipBeyani,
+            p_kvkk_aydinlatma: !!flags.kvkk,
+            p_acik_riza: !!flags.acikRiza
+        }).then(function (res) {
+            if (res.error) return { ok: false, error: dogrulamaRpcHata(res.error) };
+            return Object.assign({ ok: true }, res.data || {});
+        });
+    }
+
+    /** Private bucket yükleme + meta RPC — public URL tutulmaz */
+    function yukleFirmaDogrulamaBelgesi(opts) {
+        var sb = getClient();
+        var FD = global.AurixFirmaDogrulama || {};
+        if (!sb) return Promise.resolve({ ok: false, error: 'Bağlantı yok.' });
+        opts = opts || {};
+        var file = opts.file;
+        var check = typeof FD.validateBelgeFile === 'function'
+            ? FD.validateBelgeFile(file)
+            : { ok: !!file };
+        if (!check.ok) return Promise.resolve({ ok: false, error: check.error || 'Dosya geçersiz.' });
+
+        return oturumKullaniciId(sb).then(function (uid) {
+            if (!uid) return { ok: false, needsAuth: true, error: 'Oturum gerekli.' };
+            var ext = (file.name.split('.').pop() || 'bin').toLowerCase().replace(/[^a-z0-9]/g, '');
+            var firmaId = String(opts.firmaId || 'firma');
+            var tur = String(opts.belgeTuru || 'diger').replace(/[^a-z0-9_]/gi, '');
+            var yol = uid + '/' + firmaId + '/' + tur + '/' + Date.now() + '-' +
+                Math.random().toString(36).slice(2, 8) + '.' + ext;
+
+            return file.arrayBuffer().then(function (buf) {
+                var hashP = typeof FD.sha256Hex === 'function' ? FD.sha256Hex(buf) : Promise.resolve(null);
+                return hashP.then(function (hash) {
+                    return sb.storage.from('firma-belgeler').upload(yol, file, {
+                        cacheControl: '3600',
+                        upsert: false,
+                        contentType: file.type
+                    }).then(function (up) {
+                        if (up.error) {
+                            logSupabaseHata('firma-belgeler upload', up.error);
+                            return { ok: false, error: hataMesaji(up.error) };
+                        }
+                        return sb.rpc('firma_dogrulama_belge_kaydet', {
+                            p_payload: {
+                                basvuru_id: opts.basvuruId,
+                                belge_turu: tur,
+                                belge_no: opts.belgeNo || null,
+                                duzenlenme_tarihi: opts.duzenlenmeTarihi || null,
+                                gecerlilik_tarihi: opts.gecerlilikTarihi || null,
+                                storage_path: yol,
+                                mime_type: file.type,
+                                dosya_boyutu: file.size,
+                                dosya_hash: hash,
+                                orijinal_ad: file.name
+                            }
+                        }).then(function (meta) {
+                            if (meta.error) {
+                                logSupabaseHata('firma_dogrulama_belge_kaydet', meta.error);
+                                return { ok: false, error: dogrulamaRpcHata(meta.error) };
+                            }
+                            return Object.assign({ ok: true, path: yol }, meta.data || {});
+                        });
+                    });
+                });
+            });
+        }).catch(function (err) {
+            return { ok: false, error: dogrulamaRpcHata(err) };
+        });
+    }
+
+    function firmaDogrulamaBelgeImzaliUrl(belgeId) {
+        var sb = getClient();
+        if (!sb) return Promise.resolve({ ok: false, error: 'Bağlantı yok.' });
+        return sb.rpc('firma_dogrulama_belge_imzali_url', {
+            p_belge_id: belgeId,
+            p_saniye: 120
+        }).then(function (res) {
+            if (res.error) return { ok: false, error: dogrulamaRpcHata(res.error) };
+            var d = res.data || {};
+            if (!d.path) return { ok: false, error: 'Belge yolu alınamadı.' };
+            return sb.storage.from(d.bucket || 'firma-belgeler')
+                .createSignedUrl(d.path, d.expires_in || 120)
+                .then(function (signed) {
+                    if (signed.error) {
+                        logSupabaseHata('createSignedUrl', signed.error);
+                        return { ok: false, error: hataMesaji(signed.error) };
+                    }
+                    return {
+                        ok: true,
+                        url: signed.data && signed.data.signedUrl,
+                        expires_in: d.expires_in || 120
+                    };
+                });
+        });
+    }
+
     global.AurixSupabase = {
         url: SUPABASE_URL,
         getClient: getClient,
@@ -1280,6 +1416,11 @@
         kaydetTeklif: kaydetTeklif,
         yukleFirmaMedya: yukleFirmaMedya,
         silFirmaMedya: silFirmaMedya,
+        firmaDogrulamaOzet: firmaDogrulamaOzet,
+        firmaDogrulamaBasvuruHazirla: firmaDogrulamaBasvuruHazirla,
+        firmaDogrulamaBasvuruGonder: firmaDogrulamaBasvuruGonder,
+        yukleFirmaDogrulamaBelgesi: yukleFirmaDogrulamaBelgesi,
+        firmaDogrulamaBelgeImzaliUrl: firmaDogrulamaBelgeImzaliUrl,
         getirIstatistikler: getirIstatistikler,
         getirFirmaPanelOzeti: getirFirmaPanelOzeti,
         getirDogrulanmisFirmalar: getirDogrulanmisFirmalar,

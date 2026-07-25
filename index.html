@@ -41,7 +41,7 @@
     <link rel="preconnect" href="https://svsouqnhtlpcpdvqahmd.supabase.co" crossorigin>
     <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/styles.css?v=27">
+    <link rel="stylesheet" href="css/styles.css?v=31">
     <link rel="stylesheet" href="css/admin.css?v=25">
 </head>
 <body>
@@ -430,6 +430,7 @@
                     <div class="panel-sekme" data-panel-icerik="gelen" id="panelSekmeGelen" role="tabpanel" hidden></div>
                     <div class="panel-sekme" data-panel-icerik="teklifler" id="panelSekmeTeklifler" role="tabpanel" hidden></div>
                     <div class="panel-sekme" data-panel-icerik="profil" id="panelSekmeProfil" role="tabpanel" hidden></div>
+                    <div class="panel-sekme" data-panel-icerik="dogrulama" id="panelSekmeDogrulama" role="tabpanel" hidden></div>
                     <div class="panel-sekme" data-panel-icerik="mesajlar" id="panelSekmeMesajlar" role="tabpanel" hidden></div>
                     <div class="panel-sekme" data-panel-icerik="ayarlar" id="panelSekmeAyarlar" role="tabpanel" hidden></div>
                 </div>
@@ -447,6 +448,7 @@
                         <nav class="ap-nav">
                             <button type="button" class="ap-nav__item ap-nav__item--aktif" data-ap-bolum="genel">Genel Bakış</button>
                             <button type="button" class="ap-nav__item" data-ap-bolum="onaylar">Firma Onayları</button>
+                            <button type="button" class="ap-nav__item" data-ap-bolum="dogrulama">Güven Doğrulama</button>
                             <button type="button" class="ap-nav__item" data-ap-bolum="firmalar">Firmalar</button>
                             <button type="button" class="ap-nav__item" data-ap-bolum="kullanicilar">Kullanıcılar</button>
                             <button type="button" class="ap-nav__item" data-ap-bolum="isler">İş Talepleri</button>
@@ -1096,15 +1098,16 @@
     <!-- UMD build: GitHub Pages’te window.supabase global’i için zorunlu -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.2/dist/umd/supabase.js" defer></script>
     <script src="js/utils.js?v=21" defer></script>
-    <script src="js/data.js?v=27" defer></script>
+    <script src="js/data.js?v=31" defer></script>
     <script src="js/tr-ilceler.js?v=27" defer></script>
     <script src="js/firma-profil.js?v=29" defer></script>
-    <script src="js/supabase.js?v=30" defer></script>
+    <script src="js/firma-dogrulama.js?v=31" defer></script>
+    <script src="js/supabase.js?v=31" defer></script>
     <script src="js/authService.js?v=21" defer></script>
-    <script src="js/panels.js?v=30" defer></script>
+    <script src="js/panels.js?v=31" defer></script>
     <script src="js/market-service.js?v=21" defer></script>
-    <script src="js/admin-service.js?v=28" defer></script>
-    <script src="js/admin.js?v=28" defer></script>
-    <script src="js/app.js?v=29" defer></script>
+    <script src="js/admin-service.js?v=31" defer></script>
+    <script src="js/admin.js?v=31" defer></script>
+    <script src="js/app.js?v=31" defer></script>
 </body>
 </html>
