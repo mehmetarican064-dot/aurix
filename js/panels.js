@@ -380,8 +380,13 @@
                 '</div>';
         } else if (durumEtiket === 'onaylandi' && f.dogrulanmis) {
             incelemeNotu = '<p class="fp-basvuru-durum fp-basvuru-durum--onay" style="margin-top:12px">' +
-                'Firma hesabınız onaylandı. Doğrulanmış firma rozeti aktiftir.</p>';
+                'Firma hesabınız yayında. “AURIX Doğrulanmış Firma” rozeti için Firma Doğrulama sekmesinden belge başvurusu gerekir.</p>';
         }
+
+        var FD = global.AurixFirmaDogrulama || {};
+        var dogrulamaKartHtml = typeof FD.dogrulamaDurumKartiHtml === 'function'
+            ? FD.dogrulamaDurumKartiHtml(f, null)
+            : '';
 
         var duzenleForm = '';
         if (!f.askiya_alindi) {
@@ -492,11 +497,6 @@
                 esc(f.adres || '') + '</textarea></div>' +
 
                 '<div class="form-grup">' +
-                '<label class="form-label" for="firmaProfilWebsite">Web Sitesi</label>' +
-                '<input class="form-input" type="url" id="firmaProfilWebsite" placeholder="https://" value="' +
-                esc(f.website || '') + '"></div>' +
-
-                '<div class="form-grup">' +
                 '<label class="form-label" for="firmaProfilCalisan">Çalışan Sayısı</label>' +
                 '<input class="form-input" type="text" id="firmaProfilCalisan" maxlength="80" value="' +
                 esc(f.calisan_sayisi || '') + '"></div>' +
@@ -510,21 +510,6 @@
                 '<label class="form-label" for="firmaProfilKapasite">Kapasite / Üretim Bilgisi</label>' +
                 '<input class="form-input" type="text" id="firmaProfilKapasite" maxlength="200" value="' +
                 esc(f.kapasite || '') + '"></div>' +
-
-                '<div class="form-grup">' +
-                '<label class="form-label" for="firmaProfilInstagram">Instagram</label>' +
-                '<input class="form-input" type="text" id="firmaProfilInstagram" placeholder="@kullaniciadi" value="' +
-                esc(f.instagram || '') + '"></div>' +
-
-                '<div class="form-grup fp-ozel-alan">' +
-                '<label class="form-label" for="firmaProfilVergiDairesi">Vergi Dairesi <span class="fp-ozel-etiket">(gizli)</span></label>' +
-                '<input class="form-input" type="text" id="firmaProfilVergiDairesi" maxlength="120" value="' +
-                esc(f.vergi_dairesi || '') + '"></div>' +
-
-                '<div class="form-grup fp-ozel-alan">' +
-                '<label class="form-label" for="firmaProfilVergiNo">Vergi No <span class="fp-ozel-etiket">(gizli)</span></label>' +
-                '<input class="form-input" type="text" id="firmaProfilVergiNo" maxlength="20" value="' +
-                esc(f.vergi_no || '') + '"></div>' +
 
                 '<p class="fp-aksiyon-satir fp-aksiyon-satir--cift">' +
                 '<button type="button" class="btn btn--ghost btn--sm" id="firmaProfilTaslakBtn" data-fp-kayit="taslak">Taslak Kaydet</button>' +
@@ -556,6 +541,7 @@
             '<div><dt>Açıklama</dt><dd>' + esc(f.aciklama || '—') + '</dd></div>' +
             '</dl>' +
             incelemeNotu +
+            dogrulamaKartHtml +
             duzenleForm +
             '</article>' +
             '<article class="fp-profil-kart">' +
@@ -723,26 +709,74 @@
             return '<option value="' + esc(t.id) + '">' + esc(t.ad) + (t.zorunlu ? ' *' : '') + '</option>';
         }).join('');
 
+        var isletmeOpts = (FD.ISLETME_TURLERI || []).map(function (t) {
+            var sel = (b && b.isletme_turu) === t.id || f.isletme_turu === t.id ? ' selected' : '';
+            return '<option value="' + esc(t.id) + '"' + sel + '>' + esc(t.ad) + '</option>';
+        }).join('');
+        var sifatOpts = (FD.BASVURAN_SIFATLARI || []).map(function (t) {
+            var sel = (b && b.basvuran_sifati) === t.id || f.basvuran_sifati === t.id ? ' selected' : '';
+            return '<option value="' + esc(t.id) + '"' + sel + '>' + esc(t.ad) + '</option>';
+        }).join('');
+        var vergiDurum = f.vergi_kimlik_durumu || (b && b.vergi_format_durumu) || 'girilmedi';
+        var vergiEtiket = typeof FD.vergiDurumEtiket === 'function'
+            ? FD.vergiDurumEtiket(vergiDurum)
+            : vergiDurum;
+        var hukuki = (b && b.hukuki_unvan) || f.hukuki_unvan || f.firma_adi || '';
+        var vergiNo = (b && b.vergi_no) || f.vergi_no || '';
+        var vergiDairesi = (b && b.vergi_dairesi) || f.vergi_dairesi || '';
+        var mersis = (b && b.mersis_no) || f.mersis_no || '';
+        var sicil = (b && b.sicil_no) || f.sicil_no || '';
+        var islemKod = (b && b.vergi_levha_islem_kodu) || f.vergi_levha_islem_kodu || '';
+        var riskHtml = (res.riskler || []).map(function (r) {
+            return '<li class="fp-risk fp-risk--' + esc(r.seviye || 'orta') + '">' + esc(r.mesaj || r.risk_kod) + '</li>';
+        }).join('');
+
         return '<div class="fp-dogrulama" data-fd-basvuru="' + esc(b && b.id ? b.id : '') + '" data-fd-firma="' + esc(String(f.id)) + '">' +
             '<h3 class="fp-bolum__baslik">Firma Doğrulama</h3>' +
-            '<p class="panel-not">Yayında olmak ile güven rozeti aynı şey değildir. Rozet yalnızca belge incelemesi tamamlanınca verilir.</p>' +
+            '<p class="panel-not">Yayında olmak ile “AURIX Doğrulanmış Firma” rozeti aynı şey değildir. ' +
+            'Vergi numarası format kontrolü resmî doğrulama sayılmaz.</p>' +
             '<div class="fp-basvuru-durum" role="status">' +
-            '<strong>Durum: ' + esc(durumAd) + '</strong>' +
+            '<strong>Başvuru: ' + esc(durumAd) + '</strong>' +
+            '<p>Vergi kimlik: ' + esc(vergiEtiket) + '</p>' +
             (b && b.admin_aciklama ? '<p>' + esc(b.admin_aciklama) + '</p>' : '') +
             (f.guven_kullanici_aciklama ? '<p>' + esc(f.guven_kullanici_aciklama) + '</p>' : '') +
             (f.guven_dogrulama_tarihi ? '<p class="panel-not">Son doğrulama: ' + esc(String(f.guven_dogrulama_tarihi).slice(0, 10)) + '</p>' : '') +
             '</div>' +
             '<ul class="fp-onkosul">' +
             '<li>E-posta: ' + (emailOk ? '✓ Doğrulandı' : '✗ Doğrulanmadı') + '</li>' +
-            '<li>Telefon doğrulama: ' + esc(telDurum) + ' (altyapı hazırlanıyor)</li>' +
-            '<li>Profil zorunlu alanlar: ' + (profilOk ? '✓ Tamam' : '✗ Eksik — Profil sekmesinden tamamlayın') + '</li>' +
+            '<li>Telefon: ' + esc(telDurum) +
+            (res.telefon_admin_teyit ? ' (admin teyitli)' : ' — altyapı yoksa admin teyidi gerekir') + '</li>' +
+            '<li>Kimlik alanları: ' + (profilOk ? '✓ Tamam' : '✗ Eksik — aşağıdaki formu doldurun') + '</li>' +
             '</ul>' +
+            (riskHtml ? '<ul class="fp-risk-list" role="alert">' + riskHtml + '</ul>' : '') +
             '<div class="fp-icerik-kutu"><h4>' + esc(kvkk.baslik || 'KVKK Aydınlatma') + '</h4>' +
             '<p class="panel-not">' + esc(kvkk.govde || '') + '</p></div>' +
             '<div class="fp-icerik-kutu"><h4>' + esc(riza.baslik || 'Açık Rıza') + '</h4>' +
             '<p class="panel-not">' + esc(riza.govde || '') + '</p></div>' +
             '<div class="fp-icerik-kutu"><h4>' + esc(saklama.baslik || 'Saklama') + '</h4>' +
             '<p class="panel-not">' + esc(saklama.govde || '') + '</p></div>' +
+            (duzenlenebilir
+                ? ('<div class="fp-profil-kart" style="margin-top:12px">' +
+                    '<h4 class="fp-profil-kart__alt-baslik">Vergi ve resmî kimlik</h4>' +
+                    '<div class="form-grup"><label class="form-label" for="fdHukukiUnvan">Firma hukuki unvanı *</label>' +
+                    '<input class="form-input" type="text" id="fdHukukiUnvan" maxlength="200" value="' + esc(hukuki) + '"></div>' +
+                    '<div class="form-grup"><label class="form-label" for="fdIsletmeTuru">İşletme türü *</label>' +
+                    '<select class="form-select" id="fdIsletmeTuru"><option value="">Seçin</option>' + isletmeOpts + '</select></div>' +
+                    '<div class="form-grup"><label class="form-label" for="fdVergiNo">Vergi kimlik no (VKN/TCKN) *</label>' +
+                    '<input class="form-input" type="text" id="fdVergiNo" inputmode="numeric" maxlength="11" value="' + esc(vergiNo) + '">' +
+                    '<p class="form-yardim" id="fdVergiYardim">VKN 10, şahıs TCKN 11 hane. Geçerli format = doğrulanmış rozet değildir.</p></div>' +
+                    '<div class="form-grup"><label class="form-label" for="fdVergiDairesi">Vergi dairesi *</label>' +
+                    '<input class="form-input" type="text" id="fdVergiDairesi" maxlength="120" value="' + esc(vergiDairesi) + '"></div>' +
+                    '<div class="form-grup"><label class="form-label" for="fdMersis">MERSİS numarası (uygulanıyorsa)</label>' +
+                    '<input class="form-input" type="text" id="fdMersis" maxlength="40" value="' + esc(mersis) + '"></div>' +
+                    '<div class="form-grup"><label class="form-label" for="fdSicil">Ticaret / esnaf sicil numarası</label>' +
+                    '<input class="form-input" type="text" id="fdSicil" maxlength="80" value="' + esc(sicil) + '"></div>' +
+                    '<div class="form-grup"><label class="form-label" for="fdBasvuranSifat">Başvuran kişinin firma sıfatı *</label>' +
+                    '<select class="form-select" id="fdBasvuranSifat"><option value="">Seçin</option>' + sifatOpts + '</select></div>' +
+                    '<div class="form-grup"><label class="form-label" for="fdIslemKod">e-Vergi levhası işlem/doğrulama kodu (varsa)</label>' +
+                    '<input class="form-input" type="text" id="fdIslemKod" maxlength="80" value="' + esc(islemKod) + '"></div>' +
+                    '<button type="button" class="btn btn--ghost btn--sm" id="fdKimlikKaydetBtn">Kimlik Bilgilerini Kaydet</button></div>')
+                : '') +
             '<h4 class="fp-profil-kart__alt-baslik">Yüklenen belgeler</h4><ul class="fp-belge-list">' + belgeSatir + '</ul>' +
             (duzenlenebilir
                 ? ('<div class="fp-profil-kart" style="margin-top:12px">' +
@@ -770,10 +804,67 @@
 
     function bindDogrulamaForm(el, res) {
         if (!el) return;
+        var FD = global.AurixFirmaDogrulama || {};
         var toast = function (m, t) {
             if (global.Aurix && Aurix.toast) Aurix.toast(m, t || 'info');
             else toastInfo(m);
         };
+        var vergiNoEl = el.querySelector('#fdVergiNo');
+        var isletmeEl = el.querySelector('#fdIsletmeTuru');
+        var yardimEl = el.querySelector('#fdVergiYardim');
+        function guncelleVergiYardim() {
+            if (!vergiNoEl || !yardimEl || typeof FD.vergiNoKontrol !== 'function') return;
+            var r = FD.vergiNoKontrol(vergiNoEl.value, isletmeEl && isletmeEl.value);
+            if (!vergiNoEl.value) {
+                yardimEl.textContent = 'VKN 10, şahıs TCKN 11 hane. Geçerli format = doğrulanmış rozet değildir.';
+                return;
+            }
+            yardimEl.textContent = r.ok
+                ? 'Format geçerli (' + r.tur.toUpperCase() + '). Bu, resmî doğrulama değildir.'
+                : (r.error || 'Geçersiz numara.');
+        }
+        if (vergiNoEl) vergiNoEl.addEventListener('input', guncelleVergiYardim);
+        if (isletmeEl) isletmeEl.addEventListener('change', guncelleVergiYardim);
+
+        var kimlikBtn = el.querySelector('#fdKimlikKaydetBtn');
+        if (kimlikBtn) {
+            kimlikBtn.addEventListener('click', function () {
+                var root = el.querySelector('.fp-dogrulama');
+                var bid = root && root.getAttribute('data-fd-basvuru');
+                var kontrol = typeof FD.vergiNoKontrol === 'function'
+                    ? FD.vergiNoKontrol(
+                        (el.querySelector('#fdVergiNo') || {}).value,
+                        (el.querySelector('#fdIsletmeTuru') || {}).value
+                    )
+                    : { ok: true };
+                if (!kontrol.ok) return toast(kontrol.error || 'Vergi no geçersiz.', 'error');
+                function kaydet(id) {
+                    kimlikBtn.disabled = true;
+                    AurixSupabase.firmaDogrulamaKimlikKaydet({
+                        basvuru_id: id,
+                        hukuki_unvan: (el.querySelector('#fdHukukiUnvan') || {}).value,
+                        vergi_no: kontrol.value || (el.querySelector('#fdVergiNo') || {}).value,
+                        vergi_kimlik_turu: kontrol.tur,
+                        vergi_dairesi: (el.querySelector('#fdVergiDairesi') || {}).value,
+                        isletme_turu: (el.querySelector('#fdIsletmeTuru') || {}).value,
+                        mersis_no: (el.querySelector('#fdMersis') || {}).value,
+                        sicil_no: (el.querySelector('#fdSicil') || {}).value,
+                        basvuran_sifati: (el.querySelector('#fdBasvuranSifat') || {}).value,
+                        vergi_levha_islem_kodu: (el.querySelector('#fdIslemKod') || {}).value
+                    }).then(function (r) {
+                        kimlikBtn.disabled = false;
+                        if (!r.ok) return toast(r.error, 'error');
+                        toast('Kimlik kaydedildi. Format geçerli ≠ resmî doğrulama.', 'success');
+                        yukleDogrulamaSekmesi();
+                    });
+                }
+                if (bid) return kaydet(bid);
+                AurixSupabase.firmaDogrulamaBasvuruHazirla().then(function (r) {
+                    if (!r.ok) return toast(r.error, 'error');
+                    kaydet(r.basvuru_id);
+                });
+            });
+        }
         var hazirla = el.querySelector('#fdHazirlaBtn');
         if (hazirla) {
             hazirla.addEventListener('click', function () {

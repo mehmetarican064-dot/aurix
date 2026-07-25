@@ -10,10 +10,10 @@
     var SUPABASE_ANON_KEY = 'sb_publishable_c2mZqJ7T3rcM0Jlcm_405Q_UqRv7peK';
 
     /** Public liste — telefon/email/adres/vergi çekilmez */
-    var FIRMA_PUBLIC_SELECT = 'id,firma_adi,sehir,ilce,firma_turu,yetkili_ad,kurulus_yili,website,calisan_sayisi,calisma_saatleri,kapasite,instagram,hizmet_kategorileri,yayin_durumu,calisma_gorselleri,kategori,aciklama,dogrulanmis,durum,guven_dogrulama_durumu,guven_dogrulama_tarihi,created_at,logo_url,kapak_url';
+    var FIRMA_PUBLIC_SELECT = 'id,firma_adi,sehir,ilce,firma_turu,yetkili_ad,kurulus_yili,calisan_sayisi,calisma_saatleri,kapasite,hizmet_kategorileri,yayin_durumu,calisma_gorselleri,kategori,aciklama,dogrulanmis,durum,guven_dogrulama_durumu,guven_dogrulama_tarihi,created_at,logo_url,kapak_url';
 
     /** Panel sahibi — tüm profil alanları (özel alanlar dahil) */
-    var FIRMA_PANEL_SELECT = 'id,firma_adi,sehir,ilce,firma_turu,kategori,hizmet_kategorileri,aciklama,yetkili_ad,kurulus_yili,adres,website,calisan_sayisi,calisma_saatleri,kapasite,instagram,vergi_dairesi,vergi_no,telefon,durum,dogrulanmis,yayin_durumu,created_at,updated_at,user_id,logo_url,kapak_url,calisma_gorselleri,red_nedeni,askiya_alindi,askiya_alma_nedeni';
+    var FIRMA_PANEL_SELECT = 'id,firma_adi,sehir,ilce,firma_turu,kategori,hizmet_kategorileri,aciklama,yetkili_ad,kurulus_yili,adres,calisan_sayisi,calisma_saatleri,kapasite,telefon,durum,dogrulanmis,yayin_durumu,guven_dogrulama_durumu,guven_dogrulama_tarihi,guven_kullanici_aciklama,vergi_kimlik_durumu,created_at,updated_at,user_id,logo_url,kapak_url,calisma_gorselleri,red_nedeni,askiya_alindi,askiya_alma_nedeni';
 
     var ADMIN_TOKEN_KEY = 'aurix_supabase_admin_token';
     var client = null;
@@ -321,7 +321,7 @@
 
     var FIRMA_SAHIP_SELECT_YEDEK = [
         FIRMA_PANEL_SELECT,
-        'id,firma_adi,sehir,ilce,firma_turu,kategori,hizmet_kategorileri,aciklama,yetkili_ad,kurulus_yili,adres,website,telefon,durum,dogrulanmis,yayin_durumu,created_at,updated_at,user_id,logo_url,kapak_url,calisma_gorselleri,red_nedeni,askiya_alindi,askiya_alma_nedeni',
+        'id,firma_adi,sehir,ilce,firma_turu,kategori,hizmet_kategorileri,aciklama,yetkili_ad,kurulus_yili,adres,telefon,durum,dogrulanmis,yayin_durumu,guven_dogrulama_durumu,created_at,updated_at,user_id,logo_url,kapak_url,calisma_gorselleri,red_nedeni,askiya_alindi,askiya_alma_nedeni',
         'id,firma_adi,sehir,kategori,aciklama,telefon,durum,dogrulanmis,yayin_durumu,created_at,user_id,logo_url,kapak_url,calisma_gorselleri,red_nedeni,askiya_alindi,askiya_alma_nedeni',
         'id,firma_adi,sehir,kategori,aciklama,telefon,durum,dogrulanmis,created_at,user_id,logo_url,kapak_url,calisma_gorselleri,red_nedeni,askiya_alindi,askiya_alma_nedeni',
         'id,firma_adi,sehir,kategori,aciklama,telefon,durum,dogrulanmis,created_at,user_id,logo_url,kapak_url,calisma_gorselleri',
@@ -1274,10 +1274,25 @@
         if (/profil_eksik/i.test(msg)) return 'Firma profilindeki zorunlu alanları tamamlayın.';
         if (/belge_zorunlu/i.test(msg)) return 'En az bir belge yükleyin.';
         if (/sahip_beyani|kvkk_aydinlatma|acik_riza/i.test(msg)) return 'Zorunlu onay kutularını işaretleyin.';
+        if (/vergi_no_gecersiz/i.test(msg)) return 'Vergi kimlik numarası formatı geçersiz.';
+        if (/vergi_belgesi_zorunlu/i.test(msg)) return 'Güncel e-Vergi levhası yükleyin.';
+        if (/oda_belgesi_zorunlu/i.test(msg)) return 'Oda veya sicil belgesi yükleyin.';
+        if (/vergi_eslesmedi/i.test(msg)) return 'Önce vergi kaydı GİB kontrolü ile eşleşmeli.';
+        if (/oda_sicil_eslesmedi|sahiplik_eslesmedi/i.test(msg)) return 'Oda/sicil veya sahiplik eşleşmesi işaretlenmedi.';
+        if (/telefon_teyit_yok/i.test(msg)) return 'Telefon doğrulaması veya admin teyidi gerekli.';
         if (/PGRST202|firma_dogrulama|does not exist/i.test(msg)) {
-            return 'Doğrulama API’si eksik. Migration 025 uygulanmalı.';
+            return 'Doğrulama API’si eksik. Migration 025/026 uygulanmalı.';
         }
         return hataMesaji(err);
+    }
+
+    function firmaDogrulamaKimlikKaydet(payload) {
+        var sb = getClient();
+        if (!sb) return Promise.resolve({ ok: false, error: 'Bağlantı yok.' });
+        return sb.rpc('firma_dogrulama_kimlik_kaydet', { p_payload: payload || {} }).then(function (res) {
+            if (res.error) return { ok: false, error: dogrulamaRpcHata(res.error) };
+            return Object.assign({ ok: true }, res.data || {});
+        });
     }
 
     function firmaDogrulamaOzet() {
@@ -1419,6 +1434,7 @@
         firmaDogrulamaOzet: firmaDogrulamaOzet,
         firmaDogrulamaBasvuruHazirla: firmaDogrulamaBasvuruHazirla,
         firmaDogrulamaBasvuruGonder: firmaDogrulamaBasvuruGonder,
+        firmaDogrulamaKimlikKaydet: firmaDogrulamaKimlikKaydet,
         yukleFirmaDogrulamaBelgesi: yukleFirmaDogrulamaBelgesi,
         firmaDogrulamaBelgeImzaliUrl: firmaDogrulamaBelgeImzaliUrl,
         getirIstatistikler: getirIstatistikler,

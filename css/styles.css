@@ -6047,6 +6047,28 @@ a { color: inherit; text-decoration: none; }
     }
 }
 
+/* Profil doğrulama durum kartı */
+.fp-dogrulama-kart {
+    margin: 14px 0 4px;
+    padding: 12px 14px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.03);
+}
+.fp-dogrulama-kart__ust {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 6px;
+}
+.fp-dogrulama-kart--ok { border-color: rgba(201, 169, 98, 0.35); }
+.fp-dogrulama-kart--inceleme { border-color: rgba(120, 160, 220, 0.35); }
+.fp-dogrulama-kart--uyari { border-color: rgba(220, 140, 80, 0.4); }
+.fp-dogrulama-kart--bekliyor { border-color: rgba(255, 255, 255, 0.1); }
+.fp-risk-list { margin: 8px 0; padding-left: 18px; }
+.fp-risk--kritik { color: #e8a070; }
+
 /* Firma doğrulama rozetleri */
 .firma-dogrulama {
     display: flex;

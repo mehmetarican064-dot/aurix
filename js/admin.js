@@ -1475,23 +1475,70 @@
                 (l.gerekce ? ' — ' + esc(l.gerekce) : '') + '</li>';
         }).join('') || '<li>Log yok</li>';
 
+        var gibOpts = (FD.GIB_KARARLAR || []).map(function (g) {
+            return '<option value="' + esc(g.id) + '">' + esc(g.ad) + '</option>';
+        }).join('');
+        var vergiEtiket = FD.vergiDurumEtiket
+            ? FD.vergiDurumEtiket(f.vergi_kimlik_durumu || b.vergi_format_durumu)
+            : (f.vergi_kimlik_durumu || '—');
+
         $('apIcerik').innerHTML =
             '<button type="button" class="btn btn--ghost btn--sm" data-ap-fd-geri>← Listeye dön</button>' +
             '<h3 style="margin:12px 0 8px">' + esc(f.firma_adi || 'Firma') + '</h3>' +
             '<dl class="ap-dl">' +
             '<div><dt>Başvuru durumu</dt><dd>' + esc(FD.durumEtiket ? FD.durumEtiket(b.durum) : b.durum) + '</dd></div>' +
             '<div><dt>Güven rozeti</dt><dd>' + esc(f.guven_dogrulama_durumu || '—') + '</dd></div>' +
-            '<div><dt>Vergi no</dt><dd>' + esc(f.vergi_no || '—') + '</dd></div>' +
-            '<div><dt>MERSİS</dt><dd>' + esc(f.mersis_no || '—') + '</dd></div>' +
+            '<div><dt>Vergi kimlik durumu</dt><dd>' + esc(vergiEtiket) + '</dd></div>' +
+            '<div><dt>Hukuki unvan</dt><dd>' + esc(b.hukuki_unvan || f.hukuki_unvan || '—') + '</dd></div>' +
+            '<div><dt>VKN / TCKN</dt><dd>' + esc(b.vergi_no || f.vergi_no || '—') + '</dd></div>' +
+            '<div><dt>Vergi dairesi</dt><dd>' + esc(b.vergi_dairesi || f.vergi_dairesi || '—') + '</dd></div>' +
+            '<div><dt>Belge işlem/doğrulama kodu</dt><dd>' + esc(b.vergi_levha_islem_kodu || f.vergi_levha_islem_kodu || '—') + '</dd></div>' +
+            '<div><dt>İşletme türü</dt><dd>' + esc(b.isletme_turu || f.isletme_turu || '—') + '</dd></div>' +
+            '<div><dt>MERSİS</dt><dd>' + esc(b.mersis_no || f.mersis_no || '—') + '</dd></div>' +
+            '<div><dt>Sicil no</dt><dd>' + esc(b.sicil_no || f.sicil_no || '—') + '</dd></div>' +
+            '<div><dt>Başvuran sıfatı</dt><dd>' + esc(b.basvuran_sifati || f.basvuran_sifati || '—') + '</dd></div>' +
             '<div><dt>Yetkili</dt><dd>' + esc(f.yetkili_ad || '—') + '</dd></div>' +
             '<div><dt>İl / İlçe</dt><dd>' + esc([f.ilce, f.sehir].filter(Boolean).join(', ') || '—') + '</dd></div>' +
             '<div><dt>Risk skoru</dt><dd>' + esc(String(b.risk_skoru != null ? b.risk_skoru : '—')) + '</dd></div>' +
             '<div><dt>Yayın (ayrı eksen)</dt><dd>' + esc(f.durum) + ' / ' + esc(f.yayin_durumu) +
             ' / dogrulanmis=' + esc(String(f.dogrulanmis)) + '</dd></div>' +
+            '<div><dt>GİB kontrol</dt><dd>' +
+            (b.gib_kontrol_edildi ? 'Evet · ' + esc(String(b.gib_kontrol_tarihi || '').slice(0, 19)) : 'Hayır') +
+            (b.gib_karar ? ' · ' + esc(b.gib_karar) : '') + '</dd></div>' +
             '</dl>' +
+            '<h4>Karşılaştırma checklist</h4>' +
+            '<ul class="ap-check-list">' +
+            '<li>Profil firma adı ↔ vergi levhası unvanı</li>' +
+            '<li>Girilen VKN/TCKN ↔ belgedeki numara</li>' +
+            '<li>Vergi dairesi ↔ belgedeki vergi dairesi</li>' +
+            '<li>Şehir ↔ belge/adres</li>' +
+            '<li>Firma türü ↔ hukuki statü</li>' +
+            '<li>MERSİS/sicil ↔ ilgili belge</li>' +
+            '<li>Başvuran kişi ↔ sahip/ortak/yetkili belgesi</li>' +
+            '</ul>' +
             '<h4>Risk uyarıları (otomatik red değil)</h4><ul>' + riskHtml + '</ul>' +
-            '<h4>Belgeler</h4><ul>' + belgeHtml + '</ul>' +
-            '<h4>Karar</h4>' +
+            '<h4>Belgeler (signed URL)</h4><ul>' + belgeHtml + '</ul>' +
+            '<h4>GİB üzerinden manuel kontrol</h4>' +
+            '<p class="panel-not">Scrape/CAPTCHA/e-Devlet şifresi yok. Resmî sayfada kontrol edip sonucu kaydedin.</p>' +
+            '<label class="fp-check"><input type="checkbox" id="apFdGibKontrol" checked> GİB üzerinden kontrol edildi</label>' +
+            '<div class="form-grup"><label class="form-label">GİB karar</label>' +
+            '<select class="form-select" id="apFdGibKarar"><option value="">Seçin</option>' + gibOpts + '</select></div>' +
+            '<div class="form-grup"><label class="form-label">Eşleşen bilgiler</label>' +
+            '<textarea class="form-textarea" id="apFdEslesen" rows="2" placeholder="unvan, vkn, vergi dairesi…"></textarea></div>' +
+            '<div class="form-grup"><label class="form-label">Uyuşmayan bilgiler</label>' +
+            '<textarea class="form-textarea" id="apFdUyusmayan" rows="2"></textarea></div>' +
+            '<div class="form-grup"><label class="form-label">GİB gerekçesi (zorunlu)</label>' +
+            '<textarea class="form-textarea" id="apFdGibGerekce" rows="2"></textarea></div>' +
+            '<button type="button" class="btn btn--ghost btn--sm" data-ap-fd-gib>GİB kontrol sonucunu kaydet</button>' +
+            '<h4 style="margin-top:16px">Eşleşme işaretleri (rozet önkoşulu)</h4>' +
+            '<label class="fp-check"><input type="checkbox" id="apFdOdaEslesti"' +
+            (b.oda_sicil_eslesti ? ' checked' : '') + '> Oda/sicil kaydı eşleşti</label>' +
+            '<label class="fp-check"><input type="checkbox" id="apFdSahiplikEslesti"' +
+            (b.sahiplik_eslesti ? ' checked' : '') + '> Sahiplik/yetki doğrulandı</label>' +
+            '<label class="fp-check"><input type="checkbox" id="apFdTelTeyit"' +
+            (f.telefon_admin_teyit ? ' checked' : '') + '> Telefon admince teyit edildi</label>' +
+            '<button type="button" class="btn btn--ghost btn--sm" data-ap-fd-eslesme>Eşleşmeleri kaydet</button>' +
+            '<h4 style="margin-top:16px">Rozet kararı</h4>' +
             '<div class="form-grup"><label class="form-label">Hazır gerekçe</label>' +
             '<select class="form-select" id="apFdGerekceKod"><option value="">Seçin</option>' + gerekOpts + '</select></div>' +
             '<div class="form-grup"><label class="form-label">Gerekçe (zorunlu)</label>' +
@@ -1501,7 +1548,7 @@
             '<div class="form-grup"><label class="form-label">Yenileme süresi (ay)</label>' +
             '<input class="form-input" type="number" id="apFdYenileme" min="1" max="36" value="12"></div>' +
             '<p class="fp-aksiyon-satir fp-aksiyon-satir--cift">' +
-            '<button type="button" class="btn btn--primary btn--sm" data-ap-fd-karar="dogrula">Doğrula</button>' +
+            '<button type="button" class="btn btn--primary btn--sm" data-ap-fd-karar="dogrula">Doğrula (rozet)</button>' +
             '<button type="button" class="btn btn--ghost btn--sm" data-ap-fd-karar="ek_belge">Ek belge iste</button>' +
             '<button type="button" class="btn btn--ghost btn--sm" data-ap-fd-karar="reddet">Reddet</button>' +
             '<button type="button" class="btn btn--ghost btn--sm" data-ap-fd-karar="askiya_al">Askıya al</button>' +
@@ -2088,6 +2135,49 @@
                         if (r.url) window.open(r.url, '_blank', 'noopener');
                     });
                 }
+                return;
+            }
+            if (e.target.closest('[data-ap-fd-gib]')) {
+                var gibKarar = ($('apFdGibKarar') && $('apFdGibKarar').value) || '';
+                var gibGerekce = (($('apFdGibGerekce') && $('apFdGibGerekce').value) || '').trim();
+                if (!gibKarar) {
+                    toast('GİB kararı seçin.', 'error');
+                    return;
+                }
+                if (gibGerekce.length < 3) {
+                    toast('GİB gerekçesi zorunludur.', 'error');
+                    return;
+                }
+                if (!svc() || typeof svc().vergiKontrolKarar !== 'function') {
+                    toast('Vergi kontrol API’si yok (026).', 'error');
+                    return;
+                }
+                svc().vergiKontrolKarar(dogrulamaDetayId, gibKarar, gibGerekce, {
+                    gibKontrolEdildi: !($('apFdGibKontrol') && !$('apFdGibKontrol').checked),
+                    eslesen: { not: ($('apFdEslesen') && $('apFdEslesen').value) || '' },
+                    uyusmayan: { not: ($('apFdUyusmayan') && $('apFdUyusmayan').value) || '' }
+                }).then(function (res) {
+                    if (!res.ok) return toast(res.error || 'GİB sonucu kaydedilemedi.', 'error');
+                    toast('GİB kontrol sonucu kaydedildi.', 'success');
+                    yukleDogrulama();
+                });
+                return;
+            }
+            if (e.target.closest('[data-ap-fd-eslesme]')) {
+                if (!svc() || typeof svc().dogrulamaEslesmeIsaretle !== 'function') {
+                    toast('Eşleşme API’si yok (026).', 'error');
+                    return;
+                }
+                svc().dogrulamaEslesmeIsaretle(
+                    dogrulamaDetayId,
+                    !!($('apFdOdaEslesti') && $('apFdOdaEslesti').checked),
+                    !!($('apFdSahiplikEslesti') && $('apFdSahiplikEslesti').checked),
+                    !!($('apFdTelTeyit') && $('apFdTelTeyit').checked)
+                ).then(function (res) {
+                    if (!res.ok) return toast(res.error || 'Kaydedilemedi.', 'error');
+                    toast('Eşleşmeler kaydedildi.', 'success');
+                    yukleDogrulama();
+                });
                 return;
             }
             var fdKarar = e.target.closest('[data-ap-fd-karar]');

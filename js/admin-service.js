@@ -16,8 +16,11 @@
         if (/not_admin|42501|permission denied|jwt/i.test(msg)) {
             return 'Bu alana erişim yetkiniz bulunmuyor.';
         }
-        if (/red_nedeni_zorunlu|aski_nedeni_zorunlu|kaldirma_nedeni/i.test(msg)) {
-            return 'Neden alanı zorunludur.';
+        if (/red_nedeni_zorunlu|aski_nedeni_zorunlu|kaldirma_nedeni|gerekce_zorunlu/i.test(msg)) {
+            return 'Neden / gerekçe alanı zorunludur.';
+        }
+        if (/vergi_eslesmedi|oda_sicil_eslesmedi|sahiplik_eslesmedi|telefon_teyit_yok|email_dogrulanmadi|firma_askida/i.test(msg)) {
+            return 'Rozet önkoşulları eksik (vergi eşleşmesi, oda/sicil, sahiplik, e-posta/telefon teyidi).';
         }
         if (/firma_yok|kullanici_yok|is_yok|teklif_yok/i.test(msg)) {
             return 'Kayıt bulunamadı.';
@@ -219,6 +222,31 @@
         });
     }
 
+    function vergiKontrolKarar(basvuruId, karar, gerekce, opts) {
+        opts = opts || {};
+        return rpc('admin_vergi_kontrol_karar', {
+            p_basvuru_id: basvuruId,
+            p_karar: karar,
+            p_gerekce: gerekce,
+            p_eslesen: opts.eslesen || {},
+            p_uyusmayan: opts.uyusmayan || {},
+            p_gib_kontrol_edildi: opts.gibKontrolEdildi !== false
+        }).then(function (res) {
+            return rpcJsonOk(res, 'Vergi kontrol kararı kaydedilemedi.');
+        });
+    }
+
+    function dogrulamaEslesmeIsaretle(basvuruId, odaSicil, sahiplik, telefonTeyit) {
+        return rpc('admin_dogrulama_eslesme_isaretle', {
+            p_basvuru_id: basvuruId,
+            p_oda_sicil: !!odaSicil,
+            p_sahiplik: !!sahiplik,
+            p_telefon_teyit: telefonTeyit == null ? null : !!telefonTeyit
+        }).then(function (res) {
+            return rpcJsonOk(res, 'Eşleşme kaydedilemedi.');
+        });
+    }
+
     /** İstemci tarafı sağlık kontrolleri — uydurma “çalışıyor” yok. */
     function sistemDurumu() {
         var sb = getSb();
@@ -340,6 +368,8 @@
         dogrulamaListesi: dogrulamaListesi,
         dogrulamaDetay: dogrulamaDetay,
         dogrulamaKarar: dogrulamaKarar,
+        vergiKontrolKarar: vergiKontrolKarar,
+        dogrulamaEslesmeIsaretle: dogrulamaEslesmeIsaretle,
         sistemDurumu: sistemDurumu,
         hataMesaji: hataMesaji
     };

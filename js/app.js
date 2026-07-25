@@ -640,13 +640,13 @@
             : String(firma.guven_dogrulama_durumu || firma.guvenDogrulamaDurumu || '') === 'dogrulandi';
         var tarih = firma.guven_dogrulama_tarihi || firma.guvenDogrulamaTarihi || '';
         var rozetMetin = (AURIX_DATA.icerik && AURIX_DATA.icerik.rozet_aciklama) ||
-            'Firma kaydı ve başvuruda sunulan belgeler AURIX tarafından kontrol edilmiştir. Bu doğrulama, firmanın tüm işlemlerinin risksiz olduğu veya AURIX tarafından garanti edildiği anlamına gelmez.';
+            'Firmanın kayıt ve başvuruda sunduğu belgeler AURIX tarafından kontrol edilmiştir. Bu doğrulama, firmanın tüm işlemlerinin risksiz olduğu veya AURIX tarafından garanti edildiği anlamına gelmez.';
         if (guvenOk) {
             return '<div class="detay-guven__rozetler">' +
-                '<span class="firma-dogrulama__rozet firma-dogrulama__rozet--aktif">✓ AURIX tarafından doğrulandı</span>' +
+                '<span class="firma-dogrulama__rozet firma-dogrulama__rozet--aktif">✓ AURIX Doğrulanmış Firma</span>' +
                 (tarih ? '<p class="detay-guven__meta">Son doğrulama: ' + esc(String(tarih).slice(0, 10)) + '</p>' : '') +
                 '<p class="detay-guven__metin">' + esc(rozetMetin) + '</p>' +
-                '<p class="panel-not">Kontrol edilen başlıklar: işletme kimliği, vergi/sicil belgeleri, yetkili beyanı.</p>' +
+                '<p class="panel-not">Kontrol edilen başlıklar: vergi kaydı, oda/sicil, sahiplik/yetki. Format kontrolü tek başına rozet vermez.</p>' +
                 '</div>';
         }
         return '<div class="detay-guven__rozetler detay-guven__rozetler--beklemede">' +
@@ -1282,11 +1282,9 @@
             firmaTuru: row.firma_turu || '',
             yetkiliAd: row.yetkili_ad || '',
             kurulusYili: row.kurulus_yili || null,
-            website: row.website || '',
             calisanSayisi: row.calisan_sayisi || '',
             calismaSaatleri: row.calisma_saatleri || '',
             kapasite: row.kapasite || '',
-            instagram: row.instagram || '',
             yayinDurumu: row.yayin_durumu || '',
             /* telefon/email/adres public API'de yok */
             tel: '',
@@ -2956,13 +2954,9 @@
                 yetkili_ad: yetkili || null,
                 kurulus_yili: kurulus ? parseInt(kurulus, 10) : null,
                 adres: ($('firmaProfilAdres') && $('firmaProfilAdres').value || '').trim() || null,
-                website: ($('firmaProfilWebsite') && $('firmaProfilWebsite').value || '').trim() || null,
                 calisan_sayisi: ($('firmaProfilCalisan') && $('firmaProfilCalisan').value || '').trim() || null,
                 calisma_saatleri: ($('firmaProfilSaatler') && $('firmaProfilSaatler').value || '').trim() || null,
                 kapasite: ($('firmaProfilKapasite') && $('firmaProfilKapasite').value || '').trim() || null,
-                instagram: ($('firmaProfilInstagram') && $('firmaProfilInstagram').value || '').trim() || null,
-                vergi_dairesi: ($('firmaProfilVergiDairesi') && $('firmaProfilVergiDairesi').value || '').trim() || null,
-                vergi_no: ($('firmaProfilVergiNo') && $('firmaProfilVergiNo').value || '').trim() || null,
                 telefon: toE164TrCep(telDigits) || null,
                 calisma_gorselleri: calismaGorselleri
             };
@@ -3177,14 +3171,6 @@
         if (firma.yetkiliAd) {
             var ad = typeof FP.yetkiliPublicAd === 'function' ? FP.yetkiliPublicAd(firma.yetkiliAd) : firma.yetkiliAd;
             if (ad) parcalar.push('<span class="detay-extra__oge"><strong>Yetkili:</strong> ' + esc(ad) + '</span>');
-        }
-        if (firma.website) {
-            var web = firma.website.indexOf('http') === 0 ? firma.website : 'https://' + firma.website;
-            parcalar.push('<span class="detay-extra__oge"><a href="' + esc(web) + '" target="_blank" rel="noopener noreferrer">Web sitesi</a></span>');
-        }
-        if (firma.instagram) {
-            var ig = firma.instagram.indexOf('http') === 0 ? firma.instagram : 'https://instagram.com/' + firma.instagram.replace(/^@/, '');
-            parcalar.push('<span class="detay-extra__oge"><a href="' + esc(ig) + '" target="_blank" rel="noopener noreferrer">Instagram</a></span>');
         }
         if (firma.calisanSayisi) {
             parcalar.push('<span class="detay-extra__oge"><strong>Çalışan:</strong> ' + esc(firma.calisanSayisi) + '</span>');
