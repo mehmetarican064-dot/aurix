@@ -34,14 +34,14 @@
 
     function sutunEksikMi(err) {
         var msg = String((err && err.message) || err || '');
-        return /is_seed|owner_id|user_id|kapak_url|logo_url|calisma_gorselleri|ilce|firma_turu|hizmet_kategorileri|yayin_durumu|yetkili_ad|kurulus_yili|column.*does not exist|PGRST204/i.test(msg);
+        return /is_seed|owner_id|user_id|kapak_url|logo_url|calisma_gorselleri|ilce|firma_turu|hizmet_kategorileri|yayin_durumu|yetkili_ad|kurulus_yili|updated_at|vergi_|adres|column.*does not exist|permission denied for column|PGRST204/i.test(msg);
     }
 
     function logSupabaseHata(baglam, err) {
         try {
             var code = err && (err.code || err.CODE);
             var msg = err && (err.message || err.error_description || err.details);
-            console.error(baglam, {
+            console.error('[AURIX]', baglam, {
                 code: code || null,
                 message: msg || null,
                 details: err && err.details != null ? err.details : null,
@@ -50,6 +50,15 @@
                 raw: err
             });
         } catch (e) { /* ignore */ }
+    }
+
+    /** Kullanıcıya gösterilecek kısa teknik ek (debug) */
+    function hataTeknikOzet(err) {
+        if (!err) return '';
+        var code = err.code || err.CODE || '';
+        var msg = err.message || err.error_description || '';
+        var parca = [code, msg].filter(Boolean).join(' — ');
+        return parca ? String(parca).slice(0, 220) : '';
     }
 
     function aktifKullaniciId() {
@@ -135,10 +144,19 @@
             if (/teklif/i.test(msg) || /teklifler/i.test(String(err.hint || '') + String(err.details || ''))) {
                 return 'Teklif reddedildi. Giriş yapmış olmalı ve teklifi kendi onaylı firmanız adına vermelisiniz.';
             }
+            if (/permission denied for column|column/i.test(msg) && /firmalar|firma/i.test(msg)) {
+                return 'Firma profil alanları okunamadı (yetki). Migration 024 uygulanmalı.';
+            }
             if (/firmalar|firma/i.test(msg)) {
-                return 'Firma başvurusu kaydedilemedi. Giriş yaptığınızdan emin olun; zaten başvurunuz varsa panelden kontrol edin.';
+                return 'Firma kaydı okunamadı veya yazılamadı. Oturumunuzu kontrol edin; sorun sürerse Migration 024 uygulayın.';
             }
             return 'Kayıt güvenlik kuralları nedeniyle reddedildi. Lütfen alanları kontrol edin.';
+        }
+        if (/oturum_yok/i.test(msg)) {
+            return 'Giriş yapmış olmalısınız.';
+        }
+        if (/function.*firma_panel_getir|PGRST202|Could not find the function/i.test(msg)) {
+            return 'Firma profil API’si eksik. Migration 024 uygulanmalı.';
         }
         if (/JWT|Invalid API key|401/i.test(msg)) {
             return 'Oturum veya API anahtarı geçersiz. Sayfayı yenileyip tekrar deneyin.';
@@ -313,6 +331,38 @@
     ];
 
     /**
+     * Önce SECURITY DEFINER RPC (firma_panel_getir), olmazsa doğrudan SELECT.
+     * RLS beklemede-kısıtı veya kolon GRANT sorunlarında RPC kurtarır.
+     */
+    function getirKullaniciFirmaRpc(sb) {
+        return sb.rpc('firma_panel_getir').then(function (res) {
+            if (res.error) {
+                logSupabaseHata('firma_panel_getir rpc', res.error);
+                return {
+                    ok: false,
+                    usedRpc: true,
+                    firma: null,
+                    error: hataMesaji(res.error),
+                    supabase: {
+                        code: res.error.code || null,
+                        message: res.error.message || null,
+                        details: res.error.details || null,
+                        hint: res.error.hint || null
+                    },
+                    teknik: hataTeknikOzet(res.error)
+                };
+            }
+            var payload = res.data;
+            var firma = null;
+            if (payload && typeof payload === 'object') {
+                if (payload.firma != null) firma = payload.firma;
+                else if (payload.id) firma = payload;
+            }
+            return { ok: true, usedRpc: true, firma: firma || null };
+        });
+    }
+
+    /**
      * Oturum sahibinin firma kaydı (beklemede / onaylandi / reddedildi fark etmez).
      */
     function getirKullaniciFirma() {
@@ -328,23 +378,49 @@
             if (!uid) {
                 return { ok: false, needsAuth: true, firma: null, error: 'Giriş yapmış olmalısınız.' };
             }
-            return sahipFirmaSelectDene(sb, uid, FIRMA_SAHIP_SELECT_YEDEK).then(function (res) {
-                if (res.error) {
-                    logSupabaseHata('firmalar kullanici kaydi', res.error);
-                    return {
-                        ok: false,
-                        firma: null,
-                        error: hataMesaji(res.error),
-                        supabase: {
-                            code: res.error.code || null,
-                            message: res.error.message || null
-                        }
-                    };
+
+            return getirKullaniciFirmaRpc(sb).then(function (rpcRes) {
+                /* RPC yoksa / şema cache: doğrudan SELECT yedeği */
+                var rpcEksik = rpcRes && rpcRes.supabase &&
+                    /PGRST202|does not exist|Could not find the function|firma_panel_getir/i.test(
+                        String(rpcRes.supabase.message || '') + String(rpcRes.supabase.code || '')
+                    );
+                if (rpcRes && rpcRes.ok) {
+                    return rpcRes;
                 }
-                return { ok: true, firma: res.data || null };
+                if (rpcRes && !rpcEksik && rpcRes.error) {
+                    /* Gerçek RPC hatası — sahte “yok” sayma */
+                    return rpcRes;
+                }
+
+                return sahipFirmaSelectDene(sb, uid, FIRMA_SAHIP_SELECT_YEDEK).then(function (res) {
+                    if (res.error) {
+                        logSupabaseHata('firmalar kullanici kaydi select', res.error);
+                        return {
+                            ok: false,
+                            usedRpc: false,
+                            firma: null,
+                            error: hataMesaji(res.error),
+                            supabase: {
+                                code: res.error.code || null,
+                                message: res.error.message || null,
+                                details: res.error.details || null,
+                                hint: res.error.hint || null
+                            },
+                            teknik: hataTeknikOzet(res.error)
+                        };
+                    }
+                    return { ok: true, usedRpc: false, firma: res.data || null };
+                });
             });
         }).catch(function (err) {
-            return { ok: false, firma: null, error: hataMesaji(err) };
+            logSupabaseHata('getirKullaniciFirma', err);
+            return {
+                ok: false,
+                firma: null,
+                error: hataMesaji(err),
+                teknik: hataTeknikOzet(err)
+            };
         });
     }
 
@@ -370,6 +446,17 @@
             var zatenVarMesaj = 'Bu hesapla zaten bir firma başvurusu bulunuyor.';
 
             return getirKullaniciFirma().then(function (mevcut) {
+                if (mevcut && mevcut.ok === false && !mevcut.needsAuth) {
+                    /* SELECT/RPC başarısızken INSERT deneme — yanlış ikinci kayıt riski */
+                    logSupabaseHata('kaydetFirma: mevcut sorgu basarisiz', mevcut.supabase || mevcut);
+                    return {
+                        ok: false,
+                        firma: null,
+                        error: mevcut.error || 'Mevcut firma kaydı okunamadı; yeni başvuru yapılmadı.',
+                        teknik: mevcut.teknik || null,
+                        supabase: mevcut.supabase || null
+                    };
+                }
                 if (mevcut && mevcut.firma && mevcut.firma.id) {
                     return {
                         ok: false,
@@ -536,19 +623,25 @@
                 return Object.assign({}, bos, { ok: false, needsAuth: true });
             }
 
-            return sahipFirmaSelectDene(sb, uid, FIRMA_SAHIP_SELECT_YEDEK).then(function (firmaRes) {
-                if (firmaRes.error) {
-                    logSupabaseHata('firma panel firma', firmaRes.error);
-                    /* Sahte “kayıt yok” gösterme — sorgu başarısız */
+            return getirKullaniciFirma().then(function (firmaRes) {
+                if (firmaRes && firmaRes.needsAuth) {
+                    return Object.assign({}, bos, { ok: false, needsAuth: true });
+                }
+                if (firmaRes && firmaRes.ok === false) {
+                    var msg = firmaRes.error || 'Firma kaydı yüklenemedi.';
+                    var teknik = firmaRes.teknik || '';
+                    logSupabaseHata('firma panel firma', firmaRes.supabase || { message: msg });
                     return Object.assign({}, bos, {
                         ok: false,
                         hasFirma: false,
                         firma: null,
-                        error: hataMesaji(firmaRes.error),
-                        firmaError: hataMesaji(firmaRes.error)
+                        error: msg,
+                        firmaError: teknik ? (msg + ' (' + teknik + ')') : msg,
+                        supabase: firmaRes.supabase || null,
+                        teknik: teknik
                     });
                 }
-                var firma = firmaRes.data || null;
+                var firma = firmaRes && firmaRes.firma ? firmaRes.firma : null;
                 if (!firma || !firma.id) {
                     return Object.assign({}, bos, { ok: true, hasFirma: false });
                 }
@@ -576,16 +669,20 @@
                             ok: true,
                             hasFirma: true,
                             firma: firma,
-                            teklifler: teklifKartlari
+                            teklifler: teklifKartlari,
+                            usedRpc: !!(firmaRes && firmaRes.usedRpc)
                         };
                     });
             });
         }).catch(function (err) {
             logSupabaseHata('firma panel', err);
+            var msg = hataMesaji(err);
+            var teknik = hataTeknikOzet(err);
             return Object.assign({}, bos, {
                 ok: false,
-                error: hataMesaji(err),
-                firmaError: hataMesaji(err)
+                error: msg,
+                firmaError: teknik ? (msg + ' (' + teknik + ')') : msg,
+                teknik: teknik
             });
         });
     }
