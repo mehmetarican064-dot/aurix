@@ -145,6 +145,129 @@
         return false;
     }
 
+    /** Açık firma profili deep-link: ?firma=ID | #firma/ID | #firma=ID */
+    function parseFirmaRouteId() {
+        try {
+            var params = new URLSearchParams(window.location.search || '');
+            var q = params.get('firma') || params.get('firmaId') || params.get('firma_id');
+            if (q && String(q).trim()) return String(q).trim();
+            var hash = String(window.location.hash || '').replace(/^#/, '');
+            var m = hash.match(/^firma\/([^/?&#]+)/i) || hash.match(/^firma=([^&]+)/i);
+            if (m && m[1]) return decodeURIComponent(m[1]);
+        } catch (e) { /* ignore */ }
+        return null;
+    }
+
+    function demoDegerlendirmeRouteIsteniyorMu() {
+        try {
+            return new URLSearchParams(window.location.search || '').get('demoDegerlendirme') === '1';
+        } catch (e) {
+            return false;
+        }
+    }
+
+    function firmaProfilRouteIsteniyorMu() {
+        return !!(parseFirmaRouteId() || demoDegerlendirmeRouteIsteniyorMu());
+    }
+
+    function demoFirmaKaydi() {
+        return {
+            id: 'demo-firma',
+            supabaseId: 'demo-firma',
+            ad: 'Örnek Atölye',
+            kategoriId: 'dokum',
+            hizmetKategoriler: ['dokum'],
+            sehir: 'İstanbul',
+            ilce: 'Kapalıçarşı',
+            firmaTuru: 'Atölye',
+            yetkiliAd: 'Örnek',
+            kurulusYili: 2014,
+            yayinDurumu: 'yayinda',
+            tel: '',
+            email: '',
+            aciklama: 'Demo profil — değerlendirme arayüzünü incelemek için örnek kayıttır. Gerçek bir işlem geçmişi değildir.',
+            logo: '',
+            gorsel: '',
+            galeri: [],
+            calismaGorselleri: [],
+            premium: false,
+            sponsor: false,
+            durum: 'onaylandi',
+            dogrulanmis: true,
+            guven_dogrulama_durumu: 'dogrulandi',
+            guvenDogrulamaDurumu: 'dogrulandi',
+            dogrulama: { guven: true },
+            gizliIletisim: true,
+            kaynak: 'demo',
+            _demoProfil: true
+        };
+    }
+
+    function firmaBulByRouteId(raw) {
+        var id = String(raw == null ? '' : raw).trim();
+        if (!id) return null;
+        if (id === 'demo' || id === 'demo-firma') return demoFirmaKaydi();
+        var list = onayliFirmalar().slice();
+        if (isAdminSession() && Array.isArray(state.firmalar)) {
+            state.firmalar.forEach(function (f) {
+                if (!list.some(function (x) { return String(x.id) === String(f.id); })) list.push(f);
+            });
+        }
+        var i;
+        for (i = 0; i < list.length; i++) {
+            var f = list[i];
+            if (String(f.id) === id) return f;
+            if (f.supabaseId != null && String(f.supabaseId) === id) return f;
+            if (String(f.id) === 'sb-f-' + id) return f;
+        }
+        return null;
+    }
+
+    function syncFirmaUrl(firmaKey, opts) {
+        opts = opts || {};
+        try {
+            var url = new URL(window.location.href);
+            if (firmaKey) url.searchParams.set('firma', String(firmaKey));
+            else url.searchParams.delete('firma');
+            /* Hash sayfa route’unu koru; #firma/... ise temizle, diğer hash kalsın */
+            var hash = String(url.hash || '').replace(/^#/, '');
+            if (/^firma([/=]|$)/i.test(hash)) url.hash = '';
+            var temiz = url.pathname + (url.search || '') + (url.hash || '');
+            if (opts.replace !== false) window.history.replaceState({}, '', temiz);
+            else window.history.pushState({}, '', temiz);
+        } catch (e) { /* ignore */ }
+    }
+
+    function deepLinkFirmaProfilIsle() {
+        if (!firmaProfilRouteIsteniyorMu()) return false;
+        /* Firma profili isteniyorsa admin paneline otomatik düşme */
+        if (window.AurixAdmin && typeof AurixAdmin.panelKapat === 'function') {
+            AurixAdmin.panelKapat();
+        }
+        if (state.aktifSayfa === 'admin') {
+            sayfaGoster('ana-sayfa');
+        }
+
+        var routeId = parseFirmaRouteId();
+        var demoFlag = demoDegerlendirmeRouteIsteniyorMu();
+        var firma = routeId ? firmaBulByRouteId(routeId) : null;
+
+        if (!firma && demoFlag) {
+            var liste = onayliFirmalar();
+            firma = liste.length ? liste[0] : demoFirmaKaydi();
+        }
+        if (!firma && routeId) {
+            toast('Firma profili bulunamadı.', 'error');
+            return false;
+        }
+        if (!firma) return false;
+
+        var urlKey = firma.supabaseId != null ? String(firma.supabaseId) : String(firma.id);
+        syncFirmaUrl(urlKey, { replace: true });
+        detayModalAc(firma.id);
+        return true;
+    }
+
     function renderDevAdminBanner() {
         var el = $('devAdminBanner');
         if (el) el.hidden = !devAdminMode;
@@ -1499,9 +1622,11 @@
         ]).then(function () {
             heroIstatistikCanliListeden();
             canliVeriInFlight = null;
+            deepLinkFirmaProfilIsle();
         }).catch(function () {
             heroIstatistikCanliListeden();
             canliVeriInFlight = null;
+            deepLinkFirmaProfilIsle();
         });
         return canliVeriInFlight;
     }
@@ -3185,11 +3310,18 @@
     }
 
     function detayModalAc(id) {
-        var firma = onayliFirmalar().find(function (f) { return String(f.id) === String(id); });
+        var firma = firmaBulByRouteId(id);
+        if (!firma) {
+            firma = onayliFirmalar().find(function (f) { return String(f.id) === String(id); });
+        }
         if (!firma && isAdminSession()) {
-            firma = state.firmalar.find(function (f) { return String(f.id) === String(id); });
+            firma = (state.firmalar || []).find(function (f) { return String(f.id) === String(id); });
         }
         if (!firma) return;
+        /* Admin oturumu açık olsa bile profil modalı admin paneline zorlamaz */
+        if (window.AurixAdmin && typeof AurixAdmin.panelKapat === 'function' && state.aktifSayfa !== 'admin') {
+            AurixAdmin.panelKapat();
+        }
         var kat = kategoriBul(firma.kategoriId);
         var FP = window.AurixFirmaProfil || {};
         /* Public kart/profil: telefon ve e-posta gösterilmez */
@@ -3275,6 +3407,11 @@
             };
         }
 
+        try {
+            var urlKey = firma.supabaseId != null ? String(firma.supabaseId) : String(firma.id);
+            syncFirmaUrl(urlKey, { replace: true });
+        } catch (eSync) { /* ignore */ }
+
         modalAc('detayModal');
         AurixUtils.refreshFirmaGorselleri($('detayModal'));
     }
@@ -3287,6 +3424,10 @@
     function modalKapat(id) {
         var el = $(id);
         if (el) { el.classList.remove('modal--acik'); document.body.classList.remove('modal-acik'); }
+        if (id === 'detayModal') {
+            /* firma query temizle; demoDegerlendirme ve diğer parametreler kalsın */
+            syncFirmaUrl(null, { replace: true });
+        }
     }
 
     function teklifFirmaSelectDoldur() {
@@ -3964,6 +4105,13 @@
             if (window.AurixAdmin && typeof AurixAdmin.init === 'function') {
                 AurixAdmin.init();
             }
+            /* Firma profil / demo route açıksa admin paneline otomatik düşme */
+            if (firmaProfilRouteIsteniyorMu()) {
+                if (window.AurixAdmin && typeof AurixAdmin.panelKapat === 'function') {
+                    AurixAdmin.panelKapat();
+                }
+                return;
+            }
             if (adminRouteIsteniyorMu()) {
                 if (isAdminSession()) {
                     sayfaGoster('admin');
@@ -4566,6 +4714,10 @@
         renderAdminUI();
 
         window.addEventListener('hashchange', function () {
+            if (firmaProfilRouteIsteniyorMu()) {
+                deepLinkFirmaProfilIsle();
+                return;
+            }
             if (adminRouteIsteniyorMu()) {
                 if (isAdminSession()) sayfaGoster('admin');
                 else {
@@ -4575,7 +4727,20 @@
             }
         });
 
-        if (devAdminMode && isAdminSession()) {
+        window.addEventListener('popstate', function () {
+            if (firmaProfilRouteIsteniyorMu()) {
+                deepLinkFirmaProfilIsle();
+            } else {
+                var detay = $('detayModal');
+                if (detay && detay.classList.contains('modal--acik')) {
+                    detay.classList.remove('modal--acik');
+                    document.body.classList.remove('modal-acik');
+                }
+            }
+        });
+
+        /* ?devAdmin=1 açık admin niyeti; firma/demo route varken paneli zorlama */
+        if (devAdminMode && isAdminSession() && !firmaProfilRouteIsteniyorMu()) {
             sayfaGoster('admin');
         }
     }

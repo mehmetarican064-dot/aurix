@@ -1,6 +1,6 @@
 /**
  * AURIX Firma Değerlendirmeleri — profil özeti + yorum listesi
- * Demo yalnızca geliştirme ortamında; production’da sahte veri yok.
+ * Demo: localhost varsayılan; production’da yalnız ?demoDegerlendirme=1 (açık opt-in).
  * Gerçek işlem iddiası oluşturmaz (_kaynak: 'demo' | 'api').
  */
 (function (global) {
@@ -15,18 +15,20 @@
     var PROD_HOST = /(?:^|\.)aurixb2b\.com$/i;
 
     function demoModAktifMi() {
-        var host = '';
-        try { host = String(global.location && location.hostname || '').toLowerCase(); } catch (e) { host = ''; }
-        if (PROD_HOST.test(host)) return false;
-        var local = host === 'localhost' || host === '127.0.0.1' || host === '[::1]' ||
-            host === '' || /\.local$/i.test(host) || host === '0.0.0.0';
-        if (local) return true;
+        /* Açık bayrak önce — production’da da ?demoDegerlendirme=1 ile çalışır */
         try {
             if (new URLSearchParams(location.search).get('demoDegerlendirme') === '1') return true;
             if (global.localStorage && localStorage.getItem('aurix_demo_degerlendirme') === '1') return true;
         } catch (e2) { /* ignore */ }
         if (global.AURIX_DEMO_DEGERLENDIRME === true) return true;
-        return false;
+
+        var host = '';
+        try { host = String(global.location && location.hostname || '').toLowerCase(); } catch (e) { host = ''; }
+        if (PROD_HOST.test(host)) return false;
+
+        var local = host === 'localhost' || host === '127.0.0.1' || host === '[::1]' ||
+            host === '' || /\.local$/i.test(host) || host === '0.0.0.0';
+        return local;
     }
 
     function demoOzet() {
