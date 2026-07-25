@@ -22,14 +22,20 @@
         if (/firma_yok|kullanici_yok|is_yok|teklif_yok/i.test(msg)) {
             return 'Kayıt bulunamadı.';
         }
+        if (/firma_onay_basarisiz|firma_red_basarisiz|firma_aski/i.test(msg)) {
+            return 'Firma durumu güncellenemedi. Lütfen tekrar deneyin.';
+        }
         if (/admin_askiya_alinamaz|kendini_askiya/i.test(msg)) {
             return 'Bu kullanıcı için işlem yapılamaz.';
+        }
+        if (/invalid input syntax for type uuid|22P02|operator does not exist/i.test(msg)) {
+            return 'Firma kimliği uyumsuz. Migration 023 uygulanmalı.';
         }
         if (/network|Failed to fetch|Load failed/i.test(msg)) {
             return 'Bağlantı kurulamadı. İnternetinizi kontrol edin.';
         }
-        if (/function.*does not exist|PGRST202/i.test(msg)) {
-            return 'Admin API henüz kurulmadı. Migration 013/019/021 uygulanmalı.';
+        if (/function.*does not exist|PGRST202|Could not find the function/i.test(msg)) {
+            return 'Admin API güncel değil. Migration 023 (firma onay) uygulanmalı.';
         }
         return msg.length < 180 ? msg : 'İşlem başarısız. Lütfen tekrar deneyin.';
     }
@@ -47,6 +53,28 @@
         }).catch(function (err) {
             return { ok: false, data: null, error: hataMesaji(err) };
         });
+    }
+
+    /** RPC gövdesinde { ok:false } varsa sahte başarı sayma */
+    function rpcJsonOk(res, varsayilanHata) {
+        if (!res || !res.ok) return res || { ok: false, data: null, error: varsayilanHata || 'İşlem başarısız.' };
+        var d = res.data;
+        if (d && typeof d === 'object' && !Array.isArray(d) && d.ok === false) {
+            return {
+                ok: false,
+                data: d,
+                error: d.error || d.message || varsayilanHata || 'İşlem başarısız.'
+            };
+        }
+        return res;
+    }
+
+    function firmaIdArg(id) {
+        var fid = String(id == null ? '' : id).trim();
+        if (!fid) {
+            return { ok: false, arg: null, error: 'Firma kimliği eksik.' };
+        }
+        return { ok: true, arg: fid, error: null };
     }
 
     function ozet() {
@@ -82,19 +110,35 @@
     }
 
     function firmaOnayla(id) {
-        return rpc('admin_firma_onayla', { p_firma_id: id });
+        var p = firmaIdArg(id);
+        if (!p.ok) return Promise.resolve({ ok: false, data: null, error: p.error });
+        return rpc('admin_firma_onayla', { p_firma_id: p.arg }).then(function (res) {
+            return rpcJsonOk(res, 'Firma onaylanamadı.');
+        });
     }
 
     function firmaReddet(id, neden) {
-        return rpc('admin_firma_reddet', { p_firma_id: id, p_neden: neden });
+        var p = firmaIdArg(id);
+        if (!p.ok) return Promise.resolve({ ok: false, data: null, error: p.error });
+        return rpc('admin_firma_reddet', { p_firma_id: p.arg, p_neden: neden }).then(function (res) {
+            return rpcJsonOk(res, 'Firma reddedilemedi.');
+        });
     }
 
     function firmaAskiyaAl(id, neden) {
-        return rpc('admin_firma_askiya_al', { p_firma_id: id, p_neden: neden });
+        var p = firmaIdArg(id);
+        if (!p.ok) return Promise.resolve({ ok: false, data: null, error: p.error });
+        return rpc('admin_firma_askiya_al', { p_firma_id: p.arg, p_neden: neden }).then(function (res) {
+            return rpcJsonOk(res, 'Firma askıya alınamadı.');
+        });
     }
 
     function firmaAskiKaldir(id) {
-        return rpc('admin_firma_aski_kaldir', { p_firma_id: id });
+        var p = firmaIdArg(id);
+        if (!p.ok) return Promise.resolve({ ok: false, data: null, error: p.error });
+        return rpc('admin_firma_aski_kaldir', { p_firma_id: p.arg }).then(function (res) {
+            return rpcJsonOk(res, 'Askı kaldırılamadı.');
+        });
     }
 
     function kullaniciListesi() {

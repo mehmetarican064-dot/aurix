@@ -1974,11 +1974,22 @@
                     .then(function (ok) {
                         if (!ok || !svc()) return;
                         return svc().firmaOnayla(fid).then(function (res) {
-                            if (!res.ok) return toast(res.error, 'error');
+                            if (!res || !res.ok) {
+                                return toast((res && res.error) || 'Firma onaylanamadı.', 'error');
+                            }
+                            var d = res.data || {};
+                            if (d.durum && d.durum !== 'onaylandi') {
+                                return toast('Onay tamamlanamadı. Firma durumu: ' + d.durum, 'error');
+                            }
+                            if (d.yayin_durumu && d.yayin_durumu !== 'yayinda') {
+                                return toast('Onay yazıldı ancak yayın durumu güncellenemedi.', 'error');
+                            }
                             toast('Firma onaylandı.', 'success');
                             if (aktifBolum === 'onaylar') yukleOnaylar();
                             else if (aktifBolum === 'firmalar') yukleFirmalar();
                             else if (aktifBolum === 'genel') yukleGenel();
+                        }).catch(function (err) {
+                            toast((err && err.message) || 'Firma onaylanamadı.', 'error');
                         });
                     });
                 return;
@@ -1990,10 +2001,14 @@
                 nedenPenceresi('Firmayı reddet', RED_NEDENLERI).then(function (neden) {
                     if (!neden || !svc()) return;
                     return svc().firmaReddet(rid, neden).then(function (res) {
-                        if (!res.ok) return toast(res.error, 'error');
+                        if (!res || !res.ok) {
+                            return toast((res && res.error) || 'Firma reddedilemedi.', 'error');
+                        }
                         toast('Firma reddedildi.', 'success');
                         if (aktifBolum === 'onaylar') yukleOnaylar();
                         else yukleFirmalar();
+                    }).catch(function (err) {
+                        toast((err && err.message) || 'Firma reddedilemedi.', 'error');
                     });
                 });
                 return;
@@ -2005,10 +2020,14 @@
                 nedenPenceresi('Firmayı askıya al', []).then(function (neden) {
                     if (!neden || !svc()) return;
                     return svc().firmaAskiyaAl(aid, neden).then(function (res) {
-                        if (!res.ok) return toast(res.error, 'error');
+                        if (!res || !res.ok) {
+                            return toast((res && res.error) || 'Firma askıya alınamadı.', 'error');
+                        }
                         toast('Firma askıya alındı.', 'success');
                         if (aktifBolum === 'onaylar') yukleOnaylar();
                         else yukleFirmalar();
+                    }).catch(function (err) {
+                        toast((err && err.message) || 'Firma askıya alınamadı.', 'error');
                     });
                 });
                 return;
@@ -2019,10 +2038,14 @@
                 var kid = askiKaldir.getAttribute('data-ap-firma-aski-kaldir');
                 if (!svc()) return;
                 svc().firmaAskiKaldir(kid).then(function (res) {
-                    if (!res.ok) return toast(res.error, 'error');
+                    if (!res || !res.ok) {
+                        return toast((res && res.error) || 'Askı kaldırılamadı.', 'error');
+                    }
                     toast('Askı kaldırıldı.', 'success');
                     if (aktifBolum === 'onaylar') yukleOnaylar();
                     else yukleFirmalar();
+                }).catch(function (err) {
+                    toast((err && err.message) || 'Askı kaldırılamadı.', 'error');
                 });
                 return;
             }
