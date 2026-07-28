@@ -1478,6 +1478,34 @@
         return '';
     }
 
+    function formatMoneyTRShort(n, pb) {
+        var num = Number(n);
+        if (!isFinite(num)) return '';
+        try {
+            return new Intl.NumberFormat('tr-TR', {
+                style: 'currency',
+                currency: pb || 'TRY',
+                maximumFractionDigits: 0
+            }).format(num);
+        } catch (e) {
+            return Math.round(num) + ' ' + (pb || 'TRY');
+        }
+    }
+
+    function formatBudgetTR(row) {
+        var tip = row.butce_tipi || 'teklif_bekliyorum';
+        var min = row.butce_min != null && row.butce_min !== '' ? Number(row.butce_min) : null;
+        var max = row.butce_max != null && row.butce_max !== '' ? Number(row.butce_max) : null;
+        var pb = row.para_birimi || 'TRY';
+        if (tip === 'sabit' && (isFinite(max) && max != null || isFinite(min) && min != null)) {
+            return 'Sabit ' + formatMoneyTRShort(max != null ? max : min, pb);
+        }
+        if (tip === 'tahmini' && min != null && max != null && isFinite(min) && isFinite(max)) {
+            return formatMoneyTRShort(min, pb) + ' – ' + formatMoneyTRShort(max, pb);
+        }
+        return 'Teklif bekliyor';
+    }
+
     function supabaseIsTalebiMap(row) {
         var aciklama = row.aciklama || row.aciklama_ozet || '';
         var created = row.yayinlanma_tarihi || row.created_at
@@ -1487,8 +1515,7 @@
         if (created && !isNaN(created.getTime())) {
             acilis = created.toLocaleDateString('tr-TR', { day: '2-digit', month: 'short', year: 'numeric' });
         }
-        var butceEtiket = row.butce_etiket || '';
-        if (!butceEtiket && row.butce_tipi === 'teklif_bekliyorum') butceEtiket = 'Teklif bekliyor';
+        var butceEtiket = formatBudgetTR(row);
         if (!butceEtiket) {
             butceEtiket = aciklamadanAlanCek(aciklama, 'Bütçe') || 'Teklif bekliyor';
         }

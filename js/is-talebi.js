@@ -453,6 +453,7 @@
         var minDate = todayISO();
         var h = '';
         h += '<div class="it-wizard it-wizard--mobile-steps" id="itWizard">';
+        h += '<p class="it-guven-metni">Talebiniz yalnızca seçtiğiniz görünürlük ayarlarına uygun firmalar tarafından görüntülenir.</p>';
         h += '<div class="it-adimlar" id="itAdimlar" role="tablist" aria-label="Adımlar">';
         for (var s = 0; s < SECTIONS.length; s++) {
             h += '<button type="button" class="it-adim' + (s === 0 ? ' it-adim--aktif' : '') + '" data-it-step="' + s + '" role="tab">' + (s + 1) + '. ' + esc(SECTION_LABELS[SECTIONS[s]]) + '</button>';
@@ -539,9 +540,9 @@
         h += '<div class="it-alan"><label class="form-label">Bütçe tipi *</label>' + radioGroupHtml('butce_tipi', BUTCE_TIPI, 'teklif_bekliyorum') + '</div>';
         h += '<div class="it-butce-alanlari" id="itButceAlanlari" hidden>';
         h += '<div class="it-alan it-alan--iki">';
-        h += '<div><label class="form-label" for="itButceMin">Min. bütçe (₺)</label>';
+        h += '<div id="itButceMinKutu"><label class="form-label" for="itButceMin">Min. bütçe (₺)</label>';
         h += '<input class="form-input" type="number" id="itButceMin" data-it-field="butce_min" min="0" step="1" inputmode="numeric"></div>';
-        h += '<div><label class="form-label" for="itButceMax">Max. / sabit bütçe (₺)</label>';
+        h += '<div><label class="form-label" for="itButceMax" id="itButceMaxLabel">Max. bütçe (₺)</label>';
         h += '<input class="form-input" type="number" id="itButceMax" data-it-field="butce_max" min="0" step="1" inputmode="numeric"></div></div>';
         h += '<div class="it-hata" data-it-error="butce" hidden></div></div>';
         h += '<div class="it-alan"><label class="form-label">Bütçe görünürlüğü</label>' + radioGroupHtml('butce_gorunurlugu', BUTCE_GORUNURLUGU, 'dogrulanmis_firmalar') + '</div>';
@@ -637,6 +638,27 @@
                 '<div class="modal__baslik"><h3>İş Talebi Detayı</h3></div>' +
                 '<div class="it-detay" id="isTalepDetayGovde"></div></div>';
             document.body.appendChild(detay);
+            detay.addEventListener('click', function (ev) {
+                var kapat = ev.target.closest('[data-modal-kapat="isTalepDetayModal"]');
+                if (kapat || ev.target === detay) modalKapat('isTalepDetayModal');
+            });
+        }
+
+        var taleplerim = document.getElementById('isTaleplerimModal');
+        if (!taleplerim) {
+            taleplerim = document.createElement('div');
+            taleplerim.id = 'isTaleplerimModal';
+            taleplerim.className = 'modal';
+            taleplerim.setAttribute('aria-hidden', 'true');
+            taleplerim.innerHTML = '<div class="modal__kutu modal__kutu--it" role="dialog" aria-modal="true">' +
+                '<button type="button" class="modal__kapat" data-modal-kapat="isTaleplerimModal" aria-label="Kapat">×</button>' +
+                '<div class="modal__baslik"><h3>Taleplerim</h3></div>' +
+                '<div class="it-taleplerim" id="isTaleplerimGovde"></div></div>';
+            document.body.appendChild(taleplerim);
+            taleplerim.addEventListener('click', function (ev) {
+                var kapat = ev.target.closest('[data-modal-kapat="isTaleplerimModal"]');
+                if (kapat || ev.target === taleplerim) modalKapat('isTaleplerimModal');
+            });
         }
         return modal;
     }
@@ -684,6 +706,7 @@
         if (next) next.textContent = state.stepIndex >= SECTIONS.length - 1 ? 'Önizleme' : 'İleri';
         if (SECTIONS[state.stepIndex] === 'onizleme') renderPreviewCard();
         updateBudgetVisibility();
+        updateGramGorunurVisibility();
     }
 
     function goStep(idx) {
@@ -768,6 +791,28 @@
         var show = tip === 'tahmini' || tip === 'sabit';
         if (show) box.removeAttribute('hidden');
         else box.setAttribute('hidden', '');
+
+        var minKutu = document.getElementById('itButceMinKutu');
+        var maxLabel = document.getElementById('itButceMaxLabel');
+        if (tip === 'sabit') {
+            if (minKutu) minKutu.setAttribute('hidden', '');
+            if (maxLabel) maxLabel.textContent = 'Sabit bütçe (₺)';
+        } else {
+            if (minKutu) minKutu.removeAttribute('hidden');
+            if (maxLabel) maxLabel.textContent = 'Max. bütçe (₺)';
+        }
+    }
+
+    function updateGramGorunurVisibility() {
+        var gram = readField('tahmini_gram');
+        var els = fieldEls('gram_gorunur');
+        var hasVal = gram !== '' && gram != null && isFinite(Number(gram));
+        els.forEach(function (el) {
+            el.disabled = !hasVal;
+            if (!hasVal) el.checked = false;
+            var label = el.closest('.it-radyo');
+            if (label) label.classList.toggle('is-disabled', !hasVal);
+        });
     }
 
     function collectForm() {
@@ -812,6 +857,7 @@
         if (ilceSel) ilceSel.innerHTML = ilceOptions(sehir, state.formData.ilce || '');
         updateCounters();
         updateBudgetVisibility();
+        updateGramGorunurVisibility();
         renderFileList();
     }
 
@@ -898,6 +944,12 @@
         }
         if (!found) list.unshift(row);
         if (list.length > 20) list = list.slice(0, 20);
+        lsSet(LS_DRAFTS, list);
+    }
+
+    function removeDraftFromList(id) {
+        if (!id) return;
+        var list = pruneDrafts().filter(function (d) { return d.id !== id; });
         lsSet(LS_DRAFTS, list);
     }
 
@@ -1185,7 +1237,17 @@
             state.talepId = res.id || state.talepId;
             return uploadPendingFiles(state.talepId).then(function () {
                 state.dirty = false;
-                try { localStorage.removeItem(LS_PENDING); localStorage.removeItem(LS_PENDING_FLAG); } catch (e) { /* ignore */ }
+                try {
+                    localStorage.removeItem(LS_PENDING);
+                    localStorage.removeItem(LS_PENDING_FLAG);
+                    /* KRİTİK: yayınlanan kaydın istemci_anahtar'ı autosave/taslak
+                       listesinde kalmasın; aksi halde bir sonraki "Yeni Talep"
+                       açılışında bu YAYINDAKİ kayıt taslak olarak yeniden hedeflenir
+                       ve sessizce taslağa düşürülebilir. */
+                    localStorage.removeItem(LS_AUTOSAVE);
+                    removeDraftFromList(state.istemciAnahtar);
+                } catch (e) { /* ignore */ }
+                state.istemciAnahtar = uuid();
                 setMode('basari');
                 toast('İş talebiniz yayınlandı.', 'success');
                 try {
@@ -1207,6 +1269,220 @@
             toast('İş talebi bilgileri kaydedilirken bir uyumsuzluk oluştu. Lütfen tekrar deneyin.', 'error');
             return done({ ok: false, error: 'publish_failed' });
         });
+    }
+
+    var OWNER_ISLEM_ONAY = {
+        yayindan_kaldir: 'Talep taslağa alınacak ve açık listeden kaldırılacak. Onaylıyor musunuz?',
+        iptal: 'Talep iptal edilecek. Bu işlem geri alınamaz. Onaylıyor musunuz?',
+        arsiv: 'Talep arşivlenecek. Onaylıyor musunuz?',
+        sil: 'Taslak kalıcı olarak silinecek. Onaylıyor musunuz?'
+    };
+
+    function buildOwnerActionsHtml(t) {
+        var durum = t.durum;
+        var h = '<div class="it-sahip-aksiyon">';
+        if (durum === 'taslak') {
+            h += '<button type="button" class="btn btn--primary" data-it-owner-edit="' + esc(t.id) + '">Düzenle</button>';
+            h += '<button type="button" class="btn btn--secondary" data-it-owner-islem="sil" data-it-owner-id="' + esc(t.id) + '">Sil</button>';
+        } else if (durum === 'teklif_bekliyor' || durum === 'Acik') {
+            h += '<button type="button" class="btn btn--primary" data-it-owner-edit="' + esc(t.id) + '">Düzenle</button>';
+            h += '<button type="button" class="btn btn--secondary" data-it-owner-islem="yayindan_kaldir" data-it-owner-id="' + esc(t.id) + '">Yayından Kaldır</button>';
+            h += '<button type="button" class="btn btn--ghost" data-it-owner-islem="iptal" data-it-owner-id="' + esc(t.id) + '">İptal Et</button>';
+        } else if (durum === 'iptal_edildi' || durum === 'Iptal') {
+            h += '<button type="button" class="btn btn--secondary" data-it-owner-islem="arsiv" data-it-owner-id="' + esc(t.id) + '">Arşivle</button>';
+            h += '<p class="it-yardim">Talep iptal edilmiş. Yalnızca görüntüleyebilir veya arşivleyebilirsiniz.</p>';
+        } else if (durum === 'tamamlandi' || durum === 'Tamamlandi') {
+            h += '<p class="it-yardim">Talep tamamlanmış. Yalnızca görüntüleyebilirsiniz.</p>';
+        } else {
+            h += '<p class="it-yardim">Bu talep şu an düzenlenemez (' + esc(durum || '—') + ').</p>';
+        }
+        h += '</div>';
+        return h;
+    }
+
+    function bindOwnerActionButtons(govde, id) {
+        var editBtn = govde.querySelector('[data-it-owner-edit]');
+        if (editBtn) {
+            editBtn.addEventListener('click', function () {
+                modalKapat('isTalepDetayModal');
+                openEditById(id);
+            });
+        }
+        var islemBtns = govde.querySelectorAll('[data-it-owner-islem]');
+        islemBtns.forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var islem = btn.getAttribute('data-it-owner-islem');
+                var pid = btn.getAttribute('data-it-owner-id');
+                var onay = OWNER_ISLEM_ONAY[islem] || 'Bu işlemi yapmak istediğinize emin misiniz?';
+                if (!window.confirm(onay)) return;
+                var s = svc();
+                if (!s || typeof s.sahipIslem !== 'function') return;
+                btn.disabled = true;
+                s.sahipIslem(pid, islem).then(function (res) {
+                    if (!res || !res.ok) {
+                        toast((res && res.error) || 'İşlem yapılamadı.', 'error');
+                        btn.disabled = false;
+                        return;
+                    }
+                    toast('İşlem tamamlandı.', 'success');
+                    modalKapat('isTalepDetayModal');
+                    try {
+                        if (global.Aurix && typeof Aurix.yukleAcikIsTalepleri === 'function') {
+                            Aurix.yukleAcikIsTalepleri();
+                        }
+                    } catch (e) { /* ignore */ }
+                }).catch(function () {
+                    toast('İşlem yapılamadı. Lütfen tekrar deneyin.', 'error');
+                    btn.disabled = false;
+                });
+            });
+        });
+    }
+
+    function openEditById(id, opts) {
+        opts = opts || {};
+        var s = svc();
+        if (!s || typeof s.detay !== 'function') return;
+        s.detay(id).then(function (res) {
+            if (!res || !res.ok || !res.data) {
+                toast('Talep yüklenemedi.', 'error');
+                return;
+            }
+            var t = res.data;
+            openCreate({ useAutosave: false });
+            state.talepId = t.id;
+            state.istemciAnahtar = t.istemci_anahtar || uuid();
+            applyForm(t);
+            state.dirty = false;
+            if (opts.gotoPreview) showPreview();
+        });
+    }
+
+    function openTaleplerim() {
+        if (!isLoggedIn()) {
+            toast('Taleplerinizi görmek için giriş yapmanız gerekir.', 'info');
+            openAuthModal();
+            return;
+        }
+        ensureModalDom();
+        var govde = document.getElementById('isTaleplerimGovde');
+        if (!govde) return;
+        govde.innerHTML = '<p class="it-yardim">Yükleniyor…</p>';
+        modalAc('isTaleplerimModal');
+
+        var s = svc();
+        if (!s || typeof s.taleplerim !== 'function') {
+            govde.innerHTML = '<p class="it-hata">Taleplerim servisi hazır değil.</p>';
+            return;
+        }
+        s.taleplerim({}).then(function (res) {
+            if (!res || !res.ok) {
+                govde.innerHTML = '<p class="it-hata">' + esc((res && res.error) || 'Talepleriniz yüklenemedi.') + '</p>';
+                return;
+            }
+            renderTaleplerimList(govde, Array.isArray(res.data) ? res.data : []);
+        }).catch(function () {
+            govde.innerHTML = '<p class="it-hata">Talepleriniz yüklenemedi.</p>';
+        });
+    }
+
+    var TALEP_DURUM_ETIKET = {
+        taslak: 'Taslak',
+        teklif_bekliyor: 'Yayında',
+        Acik: 'Yayında',
+        teklif_secildi: 'Teklif Seçildi',
+        is_emri_olusturuldu: 'İş Emri Oluşturuldu',
+        uretimde: 'Üretimde',
+        tamamlandi: 'Tamamlandı',
+        Tamamlandi: 'Tamamlandı',
+        iptal_edildi: 'İptal Edildi',
+        Iptal: 'İptal Edildi',
+        arsivlendi: 'Arşivlendi'
+    };
+
+    function renderTaleplerimList(govde, items) {
+        if (!items.length) {
+            govde.innerHTML = '<p class="it-yardim">Henüz bir iş talebiniz yok.</p>' +
+                '<button type="button" class="btn btn--primary" id="itTaleplerimYeniBtn">İlk iş talebini oluştur</button>';
+            var yeniBtn = govde.querySelector('#itTaleplerimYeniBtn');
+            if (yeniBtn) {
+                yeniBtn.addEventListener('click', function () {
+                    modalKapat('isTaleplerimModal');
+                    openCreate();
+                });
+            }
+            return;
+        }
+        var h = '<div class="it-taleplerim-liste">';
+        items.forEach(function (t) {
+            var etiket = TALEP_DURUM_ETIKET[t.durum] || t.durum || '—';
+            var guncelleme = t.guncellenme_tarihi || t.created_at;
+            h += '<div class="it-taleplerim-satir" data-it-tp-id="' + esc(t.id) + '">';
+            h += '<div class="it-taleplerim-satir__bilgi">';
+            h += '<b>' + esc(t.baslik || 'Başlıksız talep') + '</b>';
+            h += '<span class="it-badge">' + esc(etiket) + '</span>';
+            h += '<span class="it-yardim">Son güncelleme: ' + esc(formatTarihGoreliTR(guncelleme)) + '</span>';
+            h += '</div>';
+            h += '<div class="it-taleplerim-satir__aksiyon">';
+            if (t.durum === 'taslak') {
+                h += '<button type="button" class="btn btn--ghost btn--sm" data-it-tp-edit="' + esc(t.id) + '">Düzenle</button>';
+                h += '<button type="button" class="btn btn--primary btn--sm" data-it-tp-publish="' + esc(t.id) + '">Yayınla</button>';
+                h += '<button type="button" class="btn btn--ghost btn--sm" data-it-tp-sil="' + esc(t.id) + '">Sil</button>';
+            } else if (t.durum === 'teklif_bekliyor' || t.durum === 'Acik') {
+                h += '<button type="button" class="btn btn--ghost btn--sm" data-it-tp-detay="' + esc(t.id) + '">Görüntüle</button>';
+            } else {
+                h += '<button type="button" class="btn btn--ghost btn--sm" data-it-tp-detay="' + esc(t.id) + '">Görüntüle</button>';
+            }
+            h += '</div></div>';
+        });
+        h += '</div>';
+        govde.innerHTML = h;
+
+        govde.querySelectorAll('[data-it-tp-edit]').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                modalKapat('isTaleplerimModal');
+                openEditById(btn.getAttribute('data-it-tp-edit'));
+            });
+        });
+        govde.querySelectorAll('[data-it-tp-publish]').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                modalKapat('isTaleplerimModal');
+                openEditById(btn.getAttribute('data-it-tp-publish'), { gotoPreview: true });
+            });
+        });
+        govde.querySelectorAll('[data-it-tp-detay]').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                modalKapat('isTaleplerimModal');
+                openDetail(btn.getAttribute('data-it-tp-detay'));
+            });
+        });
+        govde.querySelectorAll('[data-it-tp-sil]').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                if (!window.confirm('Taslak kalıcı olarak silinecek. Onaylıyor musunuz?')) return;
+                var s = svc();
+                if (!s || typeof s.sahipIslem !== 'function') return;
+                var pid = btn.getAttribute('data-it-tp-sil');
+                s.sahipIslem(pid, 'sil').then(function (res) {
+                    if (!res || !res.ok) {
+                        toast((res && res.error) || 'Taslak silinemedi.', 'error');
+                        return;
+                    }
+                    toast('Taslak silindi.', 'success');
+                    openTaleplerim();
+                });
+            });
+        });
+    }
+
+    function formatTarihGoreliTR(iso) {
+        if (!iso) return '—';
+        var d = new Date(iso);
+        if (isNaN(d.getTime())) return '—';
+        try {
+            return d.toLocaleDateString('tr-TR', { day: '2-digit', month: 'short', year: 'numeric' });
+        } catch (e) {
+            return d.toISOString().slice(0, 10);
+        }
     }
 
     function openDetail(id) {
@@ -1239,9 +1515,15 @@
             h += '<dt>Teslim</dt><dd>' + esc(t.teslim_tarihi || '—') + '</dd>';
             h += '<dt>Durum</dt><dd>' + esc(t.durum || '—') + '</dd></dl>';
             h += '<div class="it-detay__aksiyon">';
-            h += '<button type="button" class="btn btn--primary" disabled title="Sonraki faz">Teklif Ver</button>';
-            h += '<p class="it-yardim">Teklif verme, firma doğrulaması tamamlandıktan sonraki fazda açılacak.</p></div>';
+            if (t.sahip_mi) {
+                h += buildOwnerActionsHtml(t);
+            } else {
+                h += '<button type="button" class="btn btn--primary" disabled title="Sonraki faz">Teklif Ver</button>';
+                h += '<p class="it-yardim">Teklif verme, firma doğrulaması tamamlandıktan sonraki fazda açılacak.</p>';
+            }
+            h += '</div>';
             govde.innerHTML = h;
+            bindOwnerActionButtons(govde, t.id);
         };
 
         var demos = getDemoTalepler();
@@ -1318,6 +1600,7 @@
             if (!t || !t.getAttribute('data-it-field')) return;
             updateCounters();
             updateBudgetVisibility();
+            if (t.getAttribute('data-it-field') === 'tahmini_gram') updateGramGorunurVisibility();
             scheduleAutosave();
         });
         govde.addEventListener('change', function (ev) {
@@ -1497,6 +1780,15 @@
             acBtn.addEventListener('click', function (e) {
                 e.preventDefault();
                 openCreate();
+            });
+        }
+
+        var taleplerimBtn = document.getElementById('isTaleplerimBtn');
+        if (taleplerimBtn && !taleplerimBtn.getAttribute('data-it-bound')) {
+            taleplerimBtn.setAttribute('data-it-bound', '1');
+            taleplerimBtn.addEventListener('click', function (e) {
+                e.preventDefault();
+                openTaleplerim();
             });
         }
 

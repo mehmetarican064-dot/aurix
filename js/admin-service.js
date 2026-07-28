@@ -161,10 +161,17 @@
     }
 
     function isModerasyon(id, durum, notu) {
-        /* 028: admin_is_talebi_moderasyon; yoksa eski admin_is_moderasyon */
-        var islem = durum;
-        if (durum === 'kaldirildi') islem = 'yayindan_kaldir';
-        if (durum === 'aktif') islem = 'tekrar_yayin';
+        /* Standart: aktif | incelemede | yayindan_kaldirildi */
+        var mod = String(durum || '').toLowerCase();
+        if (mod === 'kaldirildi' || mod === 'reddedildi') mod = 'yayindan_kaldirildi';
+        if (mod === 'beklemede') mod = 'incelemede';
+        if (mod === 'onaylandi' || mod === 'acik') mod = 'aktif';
+
+        var islem = mod;
+        if (mod === 'yayindan_kaldirildi') islem = 'yayindan_kaldir';
+        if (mod === 'aktif') islem = 'tekrar_yayin';
+        if (mod === 'incelemede') islem = 'incelemede';
+
         return rpc('admin_is_talebi_moderasyon', {
             p_id: id,
             p_islem: islem,
@@ -173,13 +180,13 @@
             if (res && res.ok) return res;
             return rpc('admin_is_moderasyon', {
                 p_is_id: id,
-                p_durum: durum,
+                p_durum: mod,
                 p_not: notu || null
             });
         }).catch(function () {
             return rpc('admin_is_moderasyon', {
                 p_is_id: id,
-                p_durum: durum,
+                p_durum: mod,
                 p_not: notu || null
             });
         });

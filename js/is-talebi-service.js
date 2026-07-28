@@ -498,6 +498,39 @@
         });
     }
 
+    function taleplerim(filters) {
+        var sb = getSb();
+        if (!sb) return Promise.resolve(fail('Supabase bağlantısı yok.'));
+        var f = filters || {};
+        return sb.rpc('is_talebi_taleplerim', {
+            p_durum: f.durum || null,
+            p_limit: Math.min(Number(f.limit) || 50, 100),
+            p_offset: Math.max(Number(f.offset) || 0, 0)
+        }).then(function (res) {
+            if (res.error) return fail(hataMesaji(res.error, 'Taleplerim listelenemedi.'));
+            var u = unwrapRpcData(res.data);
+            if (!u.ok) return u;
+            var d = u.data || {};
+            return ok({ data: Array.isArray(d.items) ? d.items : [] });
+        }).catch(function (err) {
+            return fail(hataMesaji(err, 'Taleplerim listelenemedi.'));
+        });
+    }
+
+    function sahipIslem(id, islem) {
+        var sb = getSb();
+        if (!sb) return Promise.resolve(fail('Supabase bağlantısı yok.'));
+        if (!id) return Promise.resolve(fail('Talep kimliği eksik.'));
+        return sb.rpc('is_talebi_sahip_islem', { p_id: id, p_islem: islem }).then(function (res) {
+            if (res.error) return fail(hataMesaji(res.error, 'İşlem yapılamadı.'));
+            var u = unwrapRpcData(res.data);
+            if (!u.ok) return u;
+            return ok({ data: u.data });
+        }).catch(function (err) {
+            return fail(hataMesaji(err, 'İşlem yapılamadı.'));
+        });
+    }
+
     function dosyaSil(dosyaId) {
         var sb = getSb();
         if (!sb) return Promise.resolve(fail('Supabase bağlantısı yok.'));
@@ -524,6 +557,8 @@
         kaydet: kaydet,
         listele: listele,
         detay: detay,
+        taleplerim: taleplerim,
+        sahipIslem: sahipIslem,
         dosyaYukle: dosyaYukle,
         dosyaImzaliUrl: dosyaImzaliUrl,
         dosyaSil: dosyaSil,

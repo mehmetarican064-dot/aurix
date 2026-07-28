@@ -373,7 +373,7 @@
         var cls = 'ap-badge';
         if (d === 'onaylandi' || d === 'aktif' || d === 'acik') cls += ' ap-badge--ok';
         else if (d === 'beklemede' || d === 'incelemede') cls += ' ap-badge--warn';
-        else if (d === 'reddedildi' || d === 'kaldirildi' || d === 'aski') cls += ' ap-badge--bad';
+        else if (d === 'reddedildi' || d === 'kaldirildi' || d === 'yayindan_kaldirildi' || d === 'aski') cls += ' ap-badge--bad';
         return '<span class="' + cls + '">' + esc(durum || '—') + '</span>';
     }
 
@@ -1826,23 +1826,32 @@
             if (filtre === 'tamamlandi' && d !== 'Tamamlandi' && d !== 'Tamamlandı' && d !== 'tamamlandi') return false;
             if (filtre === 'iptal' && d !== 'Iptal' && d !== 'İptal' && d !== 'iptal_edildi') return false;
             if (filtre === 'incelemede' && mod !== 'incelemede') return false;
-            if (filtre === 'kaldirildi' && mod !== 'kaldirildi') return false;
+            if (filtre === 'yayindan_kaldirildi' && mod !== 'yayindan_kaldirildi' && mod !== 'kaldirildi') return false;
             return true;
         });
 
         var satirlar = liste.map(function (i) {
+            var durumStr = String(i.durum || '');
+            var arsivlenebilir = durumStr === 'iptal_edildi' || durumStr === 'Iptal'
+                || durumStr === 'tamamlandi' || durumStr === 'Tamamlandi';
             return '<tr>' +
                 '<td>' + esc(i.baslik || '—') + '</td>' +
-                '<td>' + esc(i.kategori || '—') + '</td>' +
                 '<td>' + esc(i.olusturan_ad || '—') + '</td>' +
+                '<td>' + esc(i.kategori || '—') + '</td>' +
                 '<td>' + esc(i.sehir || '—') + '</td>' +
-                '<td>' + esc(String(i.teklif_sayisi != null ? i.teklif_sayisi : 0)) + '</td>' +
-                '<td>' + esc(tarihKisa(i.created_at)) + '</td>' +
-                '<td>' + durumRozet(i.durum) + ' ' + durumRozet(i.moderasyon_durumu || 'aktif') + '</td>' +
+                '<td>' + durumRozet(i.durum) + '</td>' +
+                '<td>' + durumRozet(i.moderasyon_durumu || 'aktif') + '</td>' +
+                '<td>' + esc(i.yayinlanma_tarihi ? tarihKisa(i.yayinlanma_tarihi) : '—') + '</td>' +
+                '<td>' + esc(String(i.dosya_sayisi != null ? i.dosya_sayisi : 0)) + '</td>' +
                 '<td class="ap-islemler">' +
+                '<button type="button" class="btn btn--ghost btn--xs" data-ap-is-detay="' + esc(i.id) + '">Detay</button> ' +
                 '<button type="button" class="btn btn--ghost btn--xs" data-ap-is-mod="incelemede" data-ap-is-id="' + esc(i.id) + '">İncelemeye al</button> ' +
-                '<button type="button" class="btn btn--ghost btn--xs" data-ap-is-mod="aktif" data-ap-is-id="' + esc(i.id) + '">Yayına aç</button> ' +
-                '<button type="button" class="btn btn--ghost btn--xs" data-ap-is-mod="kaldirildi" data-ap-is-id="' + esc(i.id) + '">Kaldır</button>' +
+                '<button type="button" class="btn btn--ghost btn--xs" data-ap-is-mod="aktif" data-ap-is-id="' + esc(i.id) + '">Tekrar yayına al</button> ' +
+                '<button type="button" class="btn btn--ghost btn--xs" data-ap-is-mod="yayindan_kaldirildi" data-ap-is-id="' + esc(i.id) + '">Yayından kaldır</button> ' +
+                '<button type="button" class="btn btn--ghost btn--xs" data-ap-is-mod="iptal" data-ap-is-id="' + esc(i.id) + '">İptal et</button>' +
+                (arsivlenebilir
+                    ? ' <button type="button" class="btn btn--ghost btn--xs" data-ap-is-mod="arsiv" data-ap-is-id="' + esc(i.id) + '">Arşivle</button>'
+                    : '') +
                 '</td></tr>';
         }).join('');
 
@@ -1855,14 +1864,14 @@
             '<option value="tamamlandi"' + (filtre === 'tamamlandi' ? ' selected' : '') + '>Tamamlandı</option>' +
             '<option value="iptal"' + (filtre === 'iptal' ? ' selected' : '') + '>İptal</option>' +
             '<option value="incelemede"' + (filtre === 'incelemede' ? ' selected' : '') + '>İncelemede</option>' +
-            '<option value="kaldirildi"' + (filtre === 'kaldirildi' ? ' selected' : '') + '>Kaldırıldı</option>' +
+            '<option value="yayindan_kaldirildi"' + (filtre === 'yayindan_kaldirildi' || filtre === 'kaldirildi' ? ' selected' : '') + '>Yayından kaldırıldı</option>' +
             '</select>' +
             sehirSelectHtml('apIsSehir', sehirSec) +
             '</div>' +
-            '<p class="ap-yardim">Moderasyon işlemleri ayrı loglanır. Teklif / iş emri akışı sonraki aşamada bağlanacaktır.</p>' +
+            '<p class="ap-yardim">Moderasyon işlemleri ayrı loglanır. Teklif seçme veya kullanıcı adına içerik düzenleme admin ekranından yapılmaz.</p>' +
             (liste.length
                 ? '<div class="ap-tablo-wrap"><table class="ap-tablo"><thead><tr>' +
-                '<th>Başlık</th><th>Kategori</th><th>Oluşturan</th><th>Şehir</th><th>Teklif</th><th>Tarih</th><th>Durum</th><th>İşlem</th>' +
+                '<th>Başlık</th><th>Sahip</th><th>Kategori</th><th>Şehir</th><th>Durum</th><th>Moderasyon</th><th>Yayın tarihi</th><th>Dosya</th><th>İşlem</th>' +
                 '</tr></thead><tbody>' + satirlar + '</tbody></table></div>'
                 : bosDurum('İş talebi bulunamadı.'));
     }
@@ -2070,6 +2079,35 @@
                 overlay.remove();
                 resolve(neden);
             });
+        });
+    }
+
+    function isTalebiDetayGoster(i) {
+        var overlay = document.createElement('div');
+        overlay.className = 'ap-modal-overlay';
+        var satir = function (etiket, deger) {
+            return '<div class="ap-detay-satir"><b>' + esc(etiket) + ':</b> ' + esc(deger || '—') + '</div>';
+        };
+        overlay.innerHTML =
+            '<div class="ap-modal" role="dialog" aria-modal="true">' +
+            '<h3 class="ap-modal__baslik">' + esc(i.baslik || 'İş talebi') + '</h3>' +
+            satir('Sahip', i.olusturan_ad) +
+            satir('Kategori', i.kategori) +
+            satir('Şehir', i.sehir) +
+            satir('Durum', i.durum) +
+            satir('Moderasyon', i.moderasyon_durumu) +
+            satir('Moderasyon notu', i.moderasyon_notu) +
+            satir('Oluşturma', tarihTR(i.created_at)) +
+            satir('Yayın tarihi', i.yayinlanma_tarihi ? tarihTR(i.yayinlanma_tarihi) : 'Yayınlanmadı') +
+            satir('Dosya sayısı', String(i.dosya_sayisi != null ? i.dosya_sayisi : 0)) +
+            '<div class="ap-modal__aksiyon">' +
+            '<button type="button" class="btn btn--primary btn--sm" data-ap-modal="hayir">Kapat</button>' +
+            '</div></div>';
+        document.body.appendChild(overlay);
+        overlay.addEventListener('click', function (e) {
+            var t = e.target.getAttribute('data-ap-modal');
+            if (!t && e.target === overlay) t = 'hayir';
+            if (t) overlay.remove();
         });
     }
 
@@ -2366,13 +2404,25 @@
                         yukleIsler();
                     });
                 };
-                if (mod === 'kaldirildi') {
+                if (mod === 'yayindan_kaldirildi' || mod === 'kaldirildi') {
                     nedenPenceresi('İlanı yayından kaldır', []).then(function (n) {
                         if (n) run(n);
+                    });
+                } else if (mod === 'iptal' || mod === 'arsiv') {
+                    nedenPenceresi(mod === 'iptal' ? 'İlanı iptal et' : 'İlanı arşivle', []).then(function (n) {
+                        run(n || null);
                     });
                 } else {
                     run(null);
                 }
+                return;
+            }
+
+            var isDetay = e.target.closest('[data-ap-is-detay]');
+            if (isDetay) {
+                var detayId = isDetay.getAttribute('data-ap-is-detay');
+                var kayit = (cache.isler || []).filter(function (x) { return String(x.id) === String(detayId); })[0];
+                if (kayit) isTalebiDetayGoster(kayit);
                 return;
             }
 

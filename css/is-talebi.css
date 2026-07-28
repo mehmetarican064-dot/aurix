@@ -5,6 +5,55 @@
   padding-bottom: 88px;
 }
 
+.it-taleplerim-liste {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.it-taleplerim-satir {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--aurix-border);
+  border-radius: var(--aurix-radius);
+  background: var(--aurix-surface);
+}
+
+.it-taleplerim-satir__bilgi {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.it-taleplerim-satir__aksiyon {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.it-sahip-aksiyon {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.it-guven-metni {
+  margin: 0 0 12px;
+  padding: 8px 12px;
+  border-radius: var(--aurix-radius);
+  border: 1px solid var(--aurix-border);
+  background: var(--aurix-surface);
+  color: var(--aurix-text-secondary);
+  font-size: 0.8125rem;
+  line-height: 1.4;
+}
+
 .it-adimlar {
   display: flex;
   flex-wrap: nowrap;

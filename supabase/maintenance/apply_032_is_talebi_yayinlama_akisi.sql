@@ -24,6 +24,12 @@ ALTER TABLE public.is_talepleri
 ALTER TABLE public.is_talepleri
     ADD COLUMN IF NOT EXISTS yayinlanma_tarihi TIMESTAMPTZ;
 
+-- ÖNCE CHECK drop (013: aktif|incelemede|kaldirildi). UPDATE önce olursa 032 fail eder.
+ALTER TABLE public.is_talepleri
+    DROP CONSTRAINT IF EXISTS is_talepleri_moderasyon_check;
+ALTER TABLE public.is_talepleri
+    DROP CONSTRAINT IF EXISTS is_talepleri_moderasyon_durumu_check;
+
 -- Eski 'kaldirildi' → yeni standart
 UPDATE public.is_talepleri
 SET moderasyon_durumu = 'yayindan_kaldirildi'
@@ -78,7 +84,7 @@ BEGIN
             CHECK (
                 moderasyon_durumu IS NULL
                 OR moderasyon_durumu IN (
-                    'aktif', 'incelemede', 'yayindan_kaldirildi', 'kaldirildi'
+                    'aktif', 'incelemede', 'yayindan_kaldirildi'
                 )
             );
     END IF;

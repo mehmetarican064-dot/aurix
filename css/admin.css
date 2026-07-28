@@ -450,6 +450,17 @@
   margin-top: 1rem;
 }
 
+.ap-detay-satir {
+  padding: 0.35rem 0;
+  border-bottom: 1px solid var(--ap-border);
+  font-size: 0.85rem;
+  color: var(--ap-text);
+}
+
+.ap-detay-satir:last-of-type {
+  border-bottom: none;
+}
+
 .ap-modal .form-label {
   display: block;
   margin: 0.65rem 0 0.3rem;
