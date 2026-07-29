@@ -927,9 +927,17 @@
 .fp-teklif-kart__aksiyon {
   margin-top: 10px;
 }
-.fp-is-satir__sag {
+.fp-is-satir {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+.fp-is-teklifler {
+  flex: 1 1 100%;
+  margin-top: 8px;
+}
+.fp-teklif-liste--inline {
+  margin-top: 4px;
 }

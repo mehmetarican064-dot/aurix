@@ -190,15 +190,16 @@
                 taslak: 'taslak',
                 teklif_bekliyor: 'teklif_bekliyor',
                 acik: 'teklif_bekliyor',
-                teklif_secildi: 'teklif_secildi',
-                is_emri_olusturuldu: 'is_emri_olusturuldu',
+                teklif_secildi: 'firma_secildi',
+                firma_secildi: 'firma_secildi',
+                is_emri_olusturuldu: 'firma_secildi',
                 uretimde: 'uretimde',
                 tamamlandi: 'tamamlandi',
                 iptal_edildi: 'iptal_edildi',
                 arsivlendi: 'arsivlendi'
             },
             allowed: {
-                taslak: 1, teklif_bekliyor: 1, teklif_secildi: 1,
+                taslak: 1, teklif_bekliyor: 1, firma_secildi: 1, teklif_secildi: 1,
                 is_emri_olusturuldu: 1, uretimde: 1, tamamlandi: 1,
                 iptal_edildi: 1, arsivlendi: 1, Acik: 1
             }

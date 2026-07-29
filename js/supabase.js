@@ -708,7 +708,8 @@
                                 fiyat: t.fiyat != null ? Number(t.fiyat) : null,
                                 terminGun: t.termin_gun != null ? Number(t.termin_gun) : null,
                                 termin: t.termin_gun != null ? (t.termin_gun + ' gün') : '—',
-                                durum: 'Gönderildi',
+                                durum: t.durum || 'gonderildi',
+                                secilenFirmaId: t.secilen_firma_id || null,
                                 createdAt: t.created_at || null
                             };
                         });
@@ -1384,8 +1385,17 @@
                 return { ok: false, data: [], needsAuth: true, error: 'Oturum gerekli.' };
             }
             return sb.from('is_talepleri')
-                .select('id,baslik,aciklama,kategori,sehir,durum,created_at')
+                .select('id,baslik,aciklama,kategori,sehir,durum,secilen_firma_id,created_at,guncellenme_tarihi')
                 .order('created_at', { ascending: false })
+                .then(function (res) {
+                    if (res.error) {
+                        /* secilen_firma_id yoksa (043 öncesi) sade select */
+                        return sb.from('is_talepleri')
+                            .select('id,baslik,aciklama,kategori,sehir,durum,created_at')
+                            .order('created_at', { ascending: false });
+                    }
+                    return res;
+                })
                 .then(function (res) {
                     if (res.error) {
                         return { ok: false, data: [], error: hataMesaji(res.error) };
@@ -1394,6 +1404,74 @@
                 });
         }).catch(function (err) {
             return { ok: false, data: [], error: hataMesaji(err) };
+        });
+    }
+
+    function teklifDurumHata(err) {
+        var msg = String((err && err.message) || err || '');
+        if (/oturum_yok|JWT/i.test(msg)) return 'Oturum gerekli.';
+        if (/yetkisiz|42501/i.test(msg)) return 'Bu işlem için yetkiniz yok.';
+        if (/durum_uygun_degil|teklif_durum/i.test(msg)) return 'İş/teklif durumu bu işleme uygun değil.';
+        if (/teklif_yok|is_yok|P0002/i.test(msg)) return 'Kayıt bulunamadı.';
+        if (/gecersiz_durum/i.test(msg)) return 'Geçersiz durum.';
+        if (/function.*is_teklif|function.*is_durum|PGRST202/i.test(msg)) {
+            return 'Teklif kabul API’si eksik. Migration 043 uygulanmalı.';
+        }
+        return hataMesaji(err);
+    }
+
+    function isTalebiTeklifleri(isId) {
+        var sb = getClient();
+        if (!sb) return Promise.resolve({ ok: false, teklifler: [], error: 'Bağlantı yok.' });
+        return sb.rpc('is_talebi_teklifleri', { p_is_talebi_id: String(isId) }).then(function (res) {
+            if (res.error) return { ok: false, teklifler: [], error: teklifDurumHata(res.error) };
+            var d = res.data || {};
+            return {
+                ok: true,
+                teklifler: Array.isArray(d.teklifler) ? d.teklifler : []
+            };
+        }).catch(function (e) {
+            return { ok: false, teklifler: [], error: teklifDurumHata(e) };
+        });
+    }
+
+    function isTeklifKabulEt(teklifId) {
+        var sb = getClient();
+        if (!sb) return Promise.resolve({ ok: false, error: 'Bağlantı yok.' });
+        return sb.rpc('is_teklif_kabul_et', { p_teklif_id: Number(teklifId) }).then(function (res) {
+            if (res.error) return { ok: false, error: teklifDurumHata(res.error) };
+            return Object.assign({ ok: true }, res.data || {});
+        }).catch(function (e) {
+            return { ok: false, error: teklifDurumHata(e) };
+        });
+    }
+
+    function isDurumGuncelle(isId, yeniDurum) {
+        var sb = getClient();
+        if (!sb) return Promise.resolve({ ok: false, error: 'Bağlantı yok.' });
+        return sb.rpc('is_durum_guncelle', {
+            p_is_talebi_id: String(isId),
+            p_yeni_durum: String(yeniDurum)
+        }).then(function (res) {
+            if (res.error) return { ok: false, error: teklifDurumHata(res.error) };
+            return Object.assign({ ok: true }, res.data || {});
+        }).catch(function (e) {
+            return { ok: false, error: teklifDurumHata(e) };
+        });
+    }
+
+    function firmaGelenIsler() {
+        var sb = getClient();
+        if (!sb) return Promise.resolve({ ok: false, isler: [], error: 'Bağlantı yok.' });
+        return sb.rpc('firma_gelen_isler').then(function (res) {
+            if (res.error) return { ok: false, isler: [], error: teklifDurumHata(res.error) };
+            var d = res.data || {};
+            return {
+                ok: true,
+                isler: Array.isArray(d.isler) ? d.isler : []
+            };
+        }).catch(function (e) {
+            return { ok: false, isler: [], error: teklifDurumHata(e) };
         });
     }
 
@@ -1693,6 +1771,10 @@
         getirDogrulanmisFirmalar: getirDogrulanmisFirmalar,
         getirAcikIsTalepleri: getirAcikIsTalepleri,
         getirKullaniciIsTalepleri: getirKullaniciIsTalepleri,
+        isTalebiTeklifleri: isTalebiTeklifleri,
+        isTeklifKabulEt: isTeklifKabulEt,
+        isDurumGuncelle: isDurumGuncelle,
+        firmaGelenIsler: firmaGelenIsler,
         getirTeklifSayilari: getirTeklifSayilari,
         adminFirmalar: adminFirmalar,
         getAdminToken: getAdminToken,

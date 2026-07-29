@@ -84,6 +84,12 @@
         if (tab === 'teklifler') {
             yenileTekliflerSekmesi();
         }
+        if (tab === 'gelen') {
+            yenileGelenIslerSekmesi();
+        }
+        if (tab === 'islerim') {
+            yenileIslerimSekmesi();
+        }
         if (tab === 'mesajlar') {
             if (global.AurixMesajlasma && typeof AurixMesajlasma.renderPanelMesajlar === 'function') {
                 AurixMesajlasma.renderPanelMesajlar();
@@ -164,6 +170,32 @@
         }
     }
 
+    function teklifDurumEtiket(d) {
+        var map = {
+            gonderildi: 'Gönderildi',
+            kabul_edildi: 'Kabul edildi',
+            reddedildi: 'Reddedildi',
+            Gönderildi: 'Gönderildi'
+        };
+        return map[d] || d || 'Gönderildi';
+    }
+
+    function isDurumEtiket(d) {
+        var map = {
+            taslak: 'Taslak',
+            teklif_bekliyor: 'Teklif bekliyor',
+            Acik: 'Teklif bekliyor',
+            firma_secildi: 'Firma seçildi',
+            teklif_secildi: 'Firma seçildi',
+            is_emri_olusturuldu: 'Firma seçildi',
+            uretimde: 'Üretimde',
+            tamamlandi: 'Tamamlandı',
+            iptal_edildi: 'İptal',
+            arsivlendi: 'Arşiv'
+        };
+        return map[d] || d || '—';
+    }
+
     function renderTeklifler(veri) {
         var teklifler = (veri && veri.teklifler) || [];
         if (!teklifler.length) {
@@ -184,11 +216,14 @@
             if (t.isSehir) {
                 metaSatir += '<span class="fp-teklif-kart__sehir">' + esc(t.isSehir) + '</span>';
             }
+            if (t.isDurum) {
+                metaSatir += '<span class="fp-teklif-kart__sehir">' + esc(isDurumEtiket(t.isDurum)) + '</span>';
+            }
             return '<article class="fp-teklif-kart" data-teklif-id="' + esc(String(t.id || '')) +
                 '" data-is-id="' + esc(String(t.isId || t.is_id || '')) + '">' +
                 '<div class="fp-teklif-kart__ust">' +
                 '<h4 class="fp-teklif-kart__baslik">' + esc(baslik) + '</h4>' +
-                fpDurumBadge(t.durum || 'Gönderildi') +
+                fpDurumBadge(teklifDurumEtiket(t.durum)) +
                 '</div>' +
                 (metaSatir ? '<div class="fp-teklif-kart__alt">' + metaSatir + '</div>' : '') +
                 '<div class="fp-teklif-kart__rozetler">' +
@@ -370,29 +405,164 @@
                 '</div>';
         }
         var html = liste.map(function (o) {
-            return '<li class="fp-is-satir">' +
+            var durum = o.durum || 'teklif_bekliyor';
+            var teklifBekliyor = durum === 'teklif_bekliyor' || durum === 'Acik';
+            return '<li class="fp-is-satir" data-is-id="' + esc(String(o.id || '')) + '">' +
                 '<div class="fp-is-satir__sol">' +
                 '<strong>' + esc(o.baslik || 'İş talebi') + '</strong>' +
                 '<span class="fp-is-satir__musteri">' + esc(o.sehir || '—') +
                 (o.kategori ? ' · ' + esc(o.kategori) : '') + '</span>' +
                 '</div>' +
                 '<div class="fp-is-satir__sag">' +
-                fpDurumBadge(o.durum || 'Acik') +
+                fpDurumBadge(isDurumEtiket(durum)) +
+                (teklifBekliyor
+                    ? '<button type="button" class="btn btn--primary btn--sm" data-panel-aksiyon="teklifleri-goster" data-is-id="' +
+                      esc(String(o.id || '')) + '" data-sohbet-baslik="' + esc(o.baslik || 'İş talebi') +
+                      '">Teklifleri Gör</button>'
+                    : '') +
                 '<button type="button" class="btn btn--ghost btn--sm" data-panel-aksiyon="sohbet" data-is-id="' +
                 esc(String(o.id || '')) + '" data-sohbet-baslik="' + esc(o.baslik || 'İş talebi') +
                 '">Sohbet</button>' +
-                '</div></li>';
+                '</div>' +
+                '<div class="fp-is-teklifler" data-is-teklifler="' + esc(String(o.id || '')) + '" hidden></div>' +
+                '</li>';
         }).join('');
         return fpBolumHtml('İş Taleplerim',
             '<ul class="fp-is-list">' + html + '</ul>' +
             '<p class="fp-aksiyon-satir"><button type="button" class="btn btn--primary btn--sm" data-panel-aksiyon="is-talebi">Yeni İş Talebi</button></p>');
     }
 
+    function renderGelenIslerHtml(isler) {
+        if (!isler || !isler.length) {
+            return '<div class="fp-bos-kutu">' +
+                '<p class="fp-bos-metin">Henüz size atanmış kabul edilmiş iş yok. Teklifiniz kabul edildiğinde burada görünür.</p>' +
+                '<button type="button" class="btn btn--primary btn--sm" data-panel-aksiyon="acik-isler">Açık İş Taleplerine Git</button>' +
+                '</div>';
+        }
+        var html = isler.map(function (o) {
+            var durum = o.durum || '';
+            var aksiyon = '';
+            if (durum === 'firma_secildi' || durum === 'teklif_secildi' || durum === 'is_emri_olusturuldu') {
+                aksiyon = '<button type="button" class="btn btn--primary btn--sm" data-panel-aksiyon="uretime-basla" data-is-id="' +
+                    esc(String(o.id || '')) + '">Üretime Başla</button>';
+            } else if (durum === 'uretimde') {
+                aksiyon = '<button type="button" class="btn btn--primary btn--sm" data-panel-aksiyon="isi-tamamla" data-is-id="' +
+                    esc(String(o.id || '')) + '">İşi Tamamla</button>';
+            }
+            return '<article class="fp-teklif-kart">' +
+                '<div class="fp-teklif-kart__ust">' +
+                '<h4 class="fp-teklif-kart__baslik">' + esc(o.baslik || 'İş talebi') + '</h4>' +
+                fpDurumBadge(isDurumEtiket(durum)) +
+                '</div>' +
+                '<div class="fp-teklif-kart__alt">' +
+                esc(o.sehir || '—') +
+                (o.kategori ? ' · ' + esc(o.kategori) : '') +
+                (o.fiyat != null ? ' · ' + esc(fpParaFormat(o.fiyat)) : '') +
+                '</div>' +
+                '<div class="fp-teklif-kart__aksiyon">' +
+                aksiyon +
+                '<button type="button" class="btn btn--ghost btn--sm" data-panel-aksiyon="sohbet" data-is-id="' +
+                esc(String(o.id || '')) + '" data-sohbet-baslik="' + esc(o.baslik || 'İş talebi') +
+                '">Sohbet</button>' +
+                '</div></article>';
+        }).join('');
+        return fpBolumHtml('Gelen İşler', '<div class="fp-teklif-liste">' + html + '</div>');
+    }
+
     function renderGelenIsler() {
-        return '<div class="fp-bos-kutu">' +
-            '<p class="fp-bos-metin">Açık iş taleplerini ana sayfadaki listeden inceleyebilirsiniz.</p>' +
-            '<button type="button" class="btn btn--primary btn--sm" data-panel-aksiyon="acik-isler">Açık İş Taleplerine Git</button>' +
-            '</div>';
+        return '<div class="fp-bos-kutu"><p class="fp-bos-metin">Gelen işler yükleniyor…</p></div>';
+    }
+
+    function yenileGelenIslerSekmesi() {
+        var el = $('panelSekmeGelen');
+        if (!el) return;
+        if (!lastHasFirma) {
+            el.innerHTML = '<div class="fp-bos-kutu"><p class="fp-bos-metin">Gelen işler firma hesabı içindir.</p></div>';
+            return;
+        }
+        el.innerHTML = renderGelenIsler();
+        if (!global.AurixSupabase || typeof AurixSupabase.firmaGelenIsler !== 'function') {
+            el.innerHTML = '<div class="fp-bos-kutu" role="alert"><p class="fp-bos-metin">Gelen işler servisi hazır değil.</p></div>';
+            return;
+        }
+        AurixSupabase.firmaGelenIsler().then(function (res) {
+            if (!el) return;
+            if (!res.ok) {
+                el.innerHTML = '<div class="fp-bos-kutu" role="alert"><p class="fp-bos-metin">' +
+                    esc(res.error || 'Gelen işler yüklenemedi.') + '</p></div>';
+                return;
+            }
+            el.innerHTML = renderGelenIslerHtml(res.isler || []);
+            bindPanelActions();
+        }).catch(function () {
+            if (el) {
+                el.innerHTML = '<div class="fp-bos-kutu" role="alert"><p class="fp-bos-metin">Gelen işler yüklenemedi.</p></div>';
+            }
+        });
+    }
+
+    function yenileIslerimSekmesi() {
+        var el = $('panelSekmeIslerim');
+        if (!el) return;
+        el.innerHTML = '<div class="fp-bos-kutu"><p class="fp-bos-metin">İş talepleri güncelleniyor…</p></div>';
+        if (!global.AurixSupabase || typeof AurixSupabase.getirKullaniciIsTalepleri !== 'function') return;
+        AurixSupabase.getirKullaniciIsTalepleri().then(function (res) {
+            if (!el) return;
+            el.innerHTML = renderIslerim({
+                kullaniciIsleri: (res && res.ok && res.data) ? res.data : []
+            });
+            bindPanelActions();
+        }).catch(function () {
+            if (el) {
+                el.innerHTML = '<div class="fp-bos-kutu" role="alert"><p class="fp-bos-metin">İş talepleri yüklenemedi.</p></div>';
+            }
+        });
+    }
+
+    function teklifleriGoster(isId, baslik, hedef) {
+        if (!hedef) return;
+        hedef.hidden = false;
+        hedef.innerHTML = '<p class="fp-bos-metin">Teklifler yükleniyor…</p>';
+        if (!global.AurixSupabase || typeof AurixSupabase.isTalebiTeklifleri !== 'function') {
+            hedef.innerHTML = '<p class="fp-bos-metin">Teklif listesi servisi hazır değil (043).</p>';
+            return;
+        }
+        AurixSupabase.isTalebiTeklifleri(isId).then(function (res) {
+            if (!res.ok) {
+                hedef.innerHTML = '<p class="fp-bos-metin">' + esc(res.error || 'Teklifler yüklenemedi.') + '</p>';
+                return;
+            }
+            var liste = res.teklifler || [];
+            if (!liste.length) {
+                hedef.innerHTML = '<p class="fp-bos-metin">Bu iş için henüz teklif yok.</p>';
+                return;
+            }
+            hedef.innerHTML = '<div class="fp-teklif-liste fp-teklif-liste--inline">' +
+                liste.map(function (t) {
+                    var kabulEdilebilir = (t.durum || 'gonderildi') === 'gonderildi';
+                    return '<article class="fp-teklif-kart">' +
+                        '<div class="fp-teklif-kart__ust">' +
+                        '<h4 class="fp-teklif-kart__baslik">' + esc(t.firma_adi || 'Firma') + '</h4>' +
+                        fpDurumBadge(teklifDurumEtiket(t.durum)) +
+                        '</div>' +
+                        '<div class="fp-teklif-kart__rozetler">' +
+                        '<span class="fp-teklif-rozet fp-teklif-rozet--fiyat">' + esc(fpParaFormat(t.fiyat)) + '</span>' +
+                        '<span class="fp-teklif-rozet fp-teklif-rozet--termin">' +
+                        esc(t.termin_gun != null ? (t.termin_gun + ' gün') : '—') + '</span>' +
+                        '</div>' +
+                        (t.mesaj ? '<p class="fp-teklif-kart__alt">' + esc(t.mesaj) + '</p>' : '') +
+                        '<div class="fp-teklif-kart__aksiyon">' +
+                        (kabulEdilebilir
+                            ? '<button type="button" class="btn btn--primary btn--sm" data-panel-aksiyon="teklif-kabul" data-teklif-id="' +
+                              esc(String(t.id)) + '">Teklifi Kabul Et</button>'
+                            : '') +
+                        '<button type="button" class="btn btn--ghost btn--sm" data-panel-aksiyon="sohbet" data-is-id="' +
+                        esc(String(isId)) + '" data-sohbet-baslik="' + esc(baslik || 'İş talebi') +
+                        '">Sohbet</button>' +
+                        '</div></article>';
+                }).join('') +
+                '</div>';
+        });
     }
 
     function renderProfil(veri, user) {
@@ -1051,6 +1221,81 @@
                     });
                     return;
                 }
+
+                var teklifGoster = e.target.closest('[data-panel-aksiyon="teklifleri-goster"]');
+                if (teklifGoster && icerik.contains(teklifGoster)) {
+                    e.preventDefault();
+                    var tid = teklifGoster.getAttribute('data-is-id');
+                    var satir = teklifGoster.closest('.fp-is-satir');
+                    var kutu = satir ? satir.querySelector('[data-is-teklifler]') : null;
+                    teklifleriGoster(tid, teklifGoster.getAttribute('data-sohbet-baslik'), kutu);
+                    return;
+                }
+
+                var kabulBtn = e.target.closest('[data-panel-aksiyon="teklif-kabul"]');
+                if (kabulBtn && icerik.contains(kabulBtn)) {
+                    e.preventDefault();
+                    var teklifId = kabulBtn.getAttribute('data-teklif-id');
+                    if (!teklifId || !global.AurixSupabase || typeof AurixSupabase.isTeklifKabulEt !== 'function') {
+                        toastInfo('Teklif kabul servisi hazır değil.');
+                        return;
+                    }
+                    if (!window.confirm('Bu teklifi kabul etmek istediğinize emin misiniz? Diğer teklifler reddedilir.')) return;
+                    kabulBtn.disabled = true;
+                    AurixSupabase.isTeklifKabulEt(teklifId).then(function (res) {
+                        if (!res.ok) {
+                            if (global.Aurix && Aurix.toast) Aurix.toast(res.error || 'Kabul edilemedi.', 'error');
+                            kabulBtn.disabled = false;
+                            return;
+                        }
+                        if (global.Aurix && Aurix.toast) Aurix.toast('Teklif kabul edildi. Firma seçildi.', 'success');
+                        yenileIslerimSekmesi();
+                        if (lastHasFirma) yenileGelenIslerSekmesi();
+                    }).catch(function () {
+                        kabulBtn.disabled = false;
+                    });
+                    return;
+                }
+
+                var uretimBtn = e.target.closest('[data-panel-aksiyon="uretime-basla"]');
+                if (uretimBtn && icerik.contains(uretimBtn)) {
+                    e.preventDefault();
+                    var uidIs = uretimBtn.getAttribute('data-is-id');
+                    if (!uidIs || !global.AurixSupabase || typeof AurixSupabase.isDurumGuncelle !== 'function') return;
+                    uretimBtn.disabled = true;
+                    AurixSupabase.isDurumGuncelle(uidIs, 'uretimde').then(function (res) {
+                        if (!res.ok) {
+                            if (global.Aurix && Aurix.toast) Aurix.toast(res.error || 'Güncellenemedi.', 'error');
+                            uretimBtn.disabled = false;
+                            return;
+                        }
+                        if (global.Aurix && Aurix.toast) Aurix.toast('Üretime başlandı.', 'success');
+                        yenileGelenIslerSekmesi();
+                        yenileTekliflerSekmesi();
+                    }).catch(function () { uretimBtn.disabled = false; });
+                    return;
+                }
+
+                var tamamBtn = e.target.closest('[data-panel-aksiyon="isi-tamamla"]');
+                if (tamamBtn && icerik.contains(tamamBtn)) {
+                    e.preventDefault();
+                    var tidIs = tamamBtn.getAttribute('data-is-id');
+                    if (!tidIs || !global.AurixSupabase || typeof AurixSupabase.isDurumGuncelle !== 'function') return;
+                    if (!window.confirm('İşi tamamlandı olarak işaretlemek istediğinize emin misiniz?')) return;
+                    tamamBtn.disabled = true;
+                    AurixSupabase.isDurumGuncelle(tidIs, 'tamamlandi').then(function (res) {
+                        if (!res.ok) {
+                            if (global.Aurix && Aurix.toast) Aurix.toast(res.error || 'Güncellenemedi.', 'error');
+                            tamamBtn.disabled = false;
+                            return;
+                        }
+                        if (global.Aurix && Aurix.toast) Aurix.toast('İş tamamlandı.', 'success');
+                        yenileGelenIslerSekmesi();
+                        yenileTekliflerSekmesi();
+                    }).catch(function () { tamamBtn.disabled = false; });
+                    return;
+                }
+
                 var btn = e.target.closest('[data-panel-aksiyon]');
                 if (!btn) return;
                 panelAksiyon(btn.getAttribute('data-panel-aksiyon'));
@@ -1092,7 +1337,10 @@
         if (islerEl) islerEl.innerHTML = renderIslerim(veri);
 
         var gelenEl = $('panelSekmeGelen');
-        if (gelenEl) gelenEl.innerHTML = renderGelenIsler();
+        if (gelenEl) {
+            if (hasFirma) yenileGelenIslerSekmesi();
+            else gelenEl.innerHTML = renderGelenIsler();
+        }
 
         var teklifEl = $('panelSekmeTeklifler');
         if (teklifEl) teklifEl.innerHTML = fpBolumHtml('Verdiğim Teklifler', renderTeklifler(veri));
