@@ -691,25 +691,27 @@
                     return Object.assign({}, bos, { ok: true, hasFirma: false });
                 }
 
-                return sb.from('teklifler')
-                    .select('id,is_id,firma_id,termin_gun,created_at')
-                    .eq('firma_id', firma.id)
-                    .order('created_at', { ascending: false })
-                    .then(function (tekRes) {
-                        if (tekRes.error) {
-                            logSupabaseHata('firma panel teklifler', tekRes.error);
-                        }
-                        var teklifler = (!tekRes.error && tekRes.data) ? tekRes.data : [];
-
-                        var teklifKartlari = teklifler.map(function (t) {
+                return sb.rpc('firma_tekliflerim').then(function (tekRes) {
+                    var teklifKartlari = [];
+                    if (!tekRes.error && tekRes.data) {
+                        var payload = tekRes.data;
+                        var rows = Array.isArray(payload)
+                            ? payload
+                            : (payload && Array.isArray(payload.teklifler) ? payload.teklifler : []);
+                        teklifKartlari = rows.map(function (t) {
                             return {
                                 id: t.id,
-                                isAdi: 'İş #' + String(t.is_id || '—'),
+                                isId: t.is_id,
+                                isAdi: t.is_baslik || 'İş talebi',
+                                isSehir: t.is_sehir || '',
+                                isDurum: t.is_durum || '',
+                                fiyat: t.fiyat != null ? Number(t.fiyat) : null,
+                                terminGun: t.termin_gun != null ? Number(t.termin_gun) : null,
                                 termin: t.termin_gun != null ? (t.termin_gun + ' gün') : '—',
-                                durum: 'Gönderildi'
+                                durum: 'Gönderildi',
+                                createdAt: t.created_at || null
                             };
                         });
-
                         return {
                             ok: true,
                             hasFirma: true,
@@ -717,7 +719,58 @@
                             teklifler: teklifKartlari,
                             usedRpc: !!(firmaRes && firmaRes.usedRpc)
                         };
-                    });
+                    }
+
+                    /* RPC yoksa / hata: başlık için join dene, fiyat gösterilmez */
+                    if (tekRes.error) {
+                        logSupabaseHata('firma_tekliflerim', tekRes.error);
+                    }
+
+                    return sb.from('teklifler')
+                        .select('id,is_id,firma_id,termin_gun,created_at,is_talepleri(baslik,sehir,durum)')
+                        .eq('firma_id', firma.id)
+                        .order('created_at', { ascending: false })
+                        .then(function (fallback) {
+                            if (fallback.error) {
+                                logSupabaseHata('firma panel teklifler fallback', fallback.error);
+                                /* Son çare: eski select */
+                                return sb.from('teklifler')
+                                    .select('id,is_id,firma_id,termin_gun,created_at')
+                                    .eq('firma_id', firma.id)
+                                    .order('created_at', { ascending: false });
+                            }
+                            return fallback;
+                        })
+                        .then(function (tekFallback) {
+                            var teklifler = (!tekFallback.error && tekFallback.data) ? tekFallback.data : [];
+                            teklifKartlari = teklifler.map(function (t) {
+                                var isRel = t.is_talepleri;
+                                if (Array.isArray(isRel)) isRel = isRel[0] || null;
+                                var baslik = isRel && isRel.baslik
+                                    ? String(isRel.baslik)
+                                    : null;
+                                return {
+                                    id: t.id,
+                                    isId: t.is_id,
+                                    isAdi: baslik || 'İş talebi',
+                                    isSehir: (isRel && isRel.sehir) || '',
+                                    isDurum: (isRel && isRel.durum) || '',
+                                    fiyat: null,
+                                    terminGun: t.termin_gun != null ? Number(t.termin_gun) : null,
+                                    termin: t.termin_gun != null ? (t.termin_gun + ' gün') : '—',
+                                    durum: 'Gönderildi',
+                                    createdAt: t.created_at || null
+                                };
+                            });
+                            return {
+                                ok: true,
+                                hasFirma: true,
+                                firma: firma,
+                                teklifler: teklifKartlari,
+                                usedRpc: !!(firmaRes && firmaRes.usedRpc)
+                            };
+                        });
+                });
             });
         }).catch(function (err) {
             logSupabaseHata('firma panel', err);

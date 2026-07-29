@@ -7635,6 +7635,43 @@ a.iletisim-kurumsal__deger:hover {
     min-width: 0;
 }
 
+.fp-teklif-kart__alt {
+    margin: 0 0 10px;
+    font-size: 0.78rem;
+    color: var(--aurix-muted, rgba(245, 242, 234, 0.65));
+}
+
+.fp-teklif-kart__rozetler {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+}
+
+.fp-teklif-rozet {
+    display: inline-flex;
+    align-items: center;
+    min-height: 28px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    border: 1px solid transparent;
+}
+
+.fp-teklif-rozet--fiyat {
+    color: #1a1510;
+    background: linear-gradient(135deg, #e8c97a, #c9a962);
+    border-color: rgba(201, 169, 98, 0.55);
+}
+
+.fp-teklif-rozet--termin {
+    color: var(--aurix-gold-light, #e8c97a);
+    background: rgba(201, 169, 98, 0.12);
+    border-color: rgba(201, 169, 98, 0.35);
+}
+
 .fp-teklif-kart__meta {
     display: grid;
     grid-template-columns: 1fr;
