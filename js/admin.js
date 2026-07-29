@@ -419,21 +419,37 @@
         return !!(global.AuthService && AuthService.isAdmin && AuthService.isAdmin());
     }
 
-    function panelAc() {
-        if (!yetkiliMi()) {
-            toast('Bu alana erişim yetkiniz bulunmuyor.', 'error');
-            if (global.Aurix && Aurix.sayfaGoster) Aurix.sayfaGoster('ana-sayfa');
-            return false;
+    /** Canlı is_admin RPC; oturum yoksa / admin değilse false. */
+    function yetkiDogrula() {
+        if (!global.AuthService) return Promise.resolve(false);
+        var user = AuthService.getCurrentUser && AuthService.getCurrentUser();
+        if (!user || !user.id) return Promise.resolve(false);
+        if (typeof AuthService.verifyAdmin === 'function') {
+            return AuthService.verifyAdmin();
         }
-        document.documentElement.classList.add('ap-aktif');
-        menuyuSenkronla();
-        bolumGoster(aktifBolum || 'genel');
-        return true;
+        return Promise.resolve(yetkiliMi());
+    }
+
+    function panelAc() {
+        return yetkiDogrula().then(function (ok) {
+            if (!ok) {
+                toast('Bu alana erişim yetkiniz bulunmuyor.', 'error');
+                panelKapat();
+                if (global.Aurix && Aurix.sayfaGoster) Aurix.sayfaGoster('ana-sayfa');
+                return false;
+            }
+            document.documentElement.classList.add('ap-aktif');
+            menuyuSenkronla();
+            bolumGoster(aktifBolum || 'genel');
+            return true;
+        });
     }
 
     function panelKapat() {
         document.documentElement.classList.remove('ap-aktif');
         document.documentElement.classList.remove('ap-menu-acik');
+        var el = $('apIcerik');
+        if (el && !yetkiliMi()) el.innerHTML = '';
     }
 
     /* ---------- Menü ---------- */
@@ -465,22 +481,31 @@
         document.documentElement.classList.remove('ap-menu-acik');
         var el = $('apIcerik');
         if (!el) return;
-        el.innerHTML = yukleniyorHtml();
 
-        if (id === 'genel') return yukleGenel();
-        if (id === 'onaylar') return yukleOnaylar();
-        if (id === 'dogrulama') return yukleDogrulama();
-        if (id === 'firmalar') return yukleFirmalar();
-        if (id === 'kullanicilar') return yukleKullanicilar();
-        if (id === 'isler') return yukleIsler();
-        if (id === 'teklifler') return yukleTeklifler();
-        if (id === 'sikayetler') {
-            el.innerHTML = bosDurum('Henüz şikâyet sistemi etkin değil.');
-            return;
-        }
-        if (id === 'islemler') return yukleIslemler();
-        if (id === 'sistem') return yukleSistem();
-        el.innerHTML = bosDurum('Bölüm bulunamadı.');
+        yetkiDogrula().then(function (ok) {
+            if (!ok) {
+                el.innerHTML = '';
+                toast('Bu alana erişim yetkiniz bulunmuyor.', 'error');
+                panelKapat();
+                if (global.Aurix && Aurix.sayfaGoster) Aurix.sayfaGoster('ana-sayfa');
+                return;
+            }
+            el.innerHTML = yukleniyorHtml();
+            if (id === 'genel') return yukleGenel();
+            if (id === 'onaylar') return yukleOnaylar();
+            if (id === 'dogrulama') return yukleDogrulama();
+            if (id === 'firmalar') return yukleFirmalar();
+            if (id === 'kullanicilar') return yukleKullanicilar();
+            if (id === 'isler') return yukleIsler();
+            if (id === 'teklifler') return yukleTeklifler();
+            if (id === 'sikayetler') {
+                el.innerHTML = bosDurum('Henüz şikâyet sistemi etkin değil.');
+                return;
+            }
+            if (id === 'islemler') return yukleIslemler();
+            if (id === 'sistem') return yukleSistem();
+            el.innerHTML = bosDurum('Bölüm bulunamadı.');
+        });
     }
 
     /* ---------- Genel ---------- */
@@ -2577,6 +2602,7 @@
         panelAc: panelAc,
         panelKapat: panelKapat,
         bolumGoster: bolumGoster,
-        yetkiliMi: yetkiliMi
+        yetkiliMi: yetkiliMi,
+        yetkiDogrula: yetkiDogrula
     };
 })(typeof window !== 'undefined' ? window : this);

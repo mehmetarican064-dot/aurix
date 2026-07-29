@@ -136,6 +136,56 @@
         return false;
     }
 
+    /** Admin menü / sayfa DOM — yalnızca admin’e görünür. */
+    function adminOnlyDomGuncelle(adminMi) {
+        document.querySelectorAll('[data-admin-only]').forEach(function (el) {
+            el.hidden = !adminMi;
+            if (adminMi) el.removeAttribute('aria-hidden');
+            else el.setAttribute('aria-hidden', 'true');
+        });
+    }
+
+    /**
+     * Admin erişimini oturum + is_admin RPC ile doğrular.
+     * @returns {Promise<'ok'|'login'|'forbidden'>}
+     */
+    function adminErisimDogrula() {
+        var ready = (window.AuthService && typeof AuthService.isReady === 'function')
+            ? AuthService.isReady()
+            : Promise.resolve(null);
+        return ready.then(function () {
+            var user = window.AuthService ? AuthService.getCurrentUser() : null;
+            if (!user || !user.id) return 'login';
+            if (typeof AuthService.verifyAdmin === 'function') {
+                return AuthService.verifyAdmin().then(function (ok) {
+                    return ok ? 'ok' : 'forbidden';
+                });
+            }
+            return isAdminSession() ? 'ok' : 'forbidden';
+        }).catch(function () {
+            return 'forbidden';
+        });
+    }
+
+    function adminErisimEngelle(sonuc) {
+        if (window.AurixAdmin && typeof AurixAdmin.panelKapat === 'function') {
+            AurixAdmin.panelKapat();
+        }
+        renderAdminUI();
+        if (sonuc === 'login') {
+            toast('Admin paneline erişmek için giriş yapın.', 'error');
+            uyelikModalAc('giris');
+            return;
+        }
+        toast('Bu alana erişim yetkiniz bulunmuyor.', 'error');
+        if (state.aktifSayfa === 'admin') {
+            state.aktifSayfa = 'ana-sayfa';
+            document.querySelectorAll('[data-sayfa]').forEach(function (s) {
+                s.classList.toggle('sayfa--aktif', s.getAttribute('data-sayfa') === 'ana-sayfa');
+            });
+        }
+    }
+
     function adminRouteIsteniyorMu() {
         try {
             var path = String(window.location.pathname || '').replace(/\/+$/, '');
@@ -2822,15 +2872,28 @@
 
     function renderAdminUI() {
         var adminSayfa = document.querySelector('[data-sayfa="admin"]');
+        var adminMi = isAdminSession();
         renderDevAdminBanner();
+        adminOnlyDomGuncelle(adminMi);
         if (adminSayfa) {
-            /* Admin sayfa DOM’da kalır ama yalnızca yetkili oturumda aktif sınıf alır */
-            adminSayfa.hidden = false;
+            /* Yetkisiz kullanıcıda admin DOM tamamen gizli kalsın */
+            if (!adminMi) {
+                adminSayfa.hidden = true;
+                adminSayfa.classList.remove('sayfa--aktif');
+                if (window.AurixAdmin && typeof AurixAdmin.panelKapat === 'function') {
+                    AurixAdmin.panelKapat();
+                }
+            } else if (state.aktifSayfa === 'admin') {
+                adminSayfa.hidden = false;
+            } else {
+                /* DOM’da kalsın ama sayfa aktif değilken gizli tut (hash sızıntısı) */
+                adminSayfa.hidden = true;
+            }
         }
         var ustKul = document.getElementById('apUstKullanici');
         if (ustKul && window.AuthService) {
             var u = AuthService.getCurrentUser();
-            if (u && isAdminSession()) {
+            if (u && adminMi) {
                 var ad = u.displayName || u.email || '';
                 var roleRaw = String(u.role || '').toLowerCase();
                 var rolEtiket = (roleRaw === 'super_admin' || roleRaw === 'super')
@@ -2866,7 +2929,10 @@
                     String(user.role || '').toLowerCase() === 'admin'
                 )
             );
+            adminOnlyDomGuncelle(adminMi);
+
             if (user) {
+                /* Admin CTA yalnızca admin’e; diğerleri Hesabım → panel */
                 el.innerHTML =
                     '<button type="button" class="nav__link nav__link--cta nav__cta-sm" id="navHesabim" data-nav="' +
                     (adminMi ? 'admin' : 'panel') +
@@ -3875,11 +3941,31 @@
             modalKapat(m.id);
         });
         if (id === 'admin') {
-            if (!isAdminSession()) {
-                toast('Bu alana erişim yetkiniz bulunmuyor.', 'error');
-                id = 'ana-sayfa';
-                if (window.AurixAdmin && AurixAdmin.panelKapat) AurixAdmin.panelKapat();
-            }
+            navMenuKapat();
+            adminErisimDogrula().then(function (sonuc) {
+                if (sonuc !== 'ok') {
+                    adminErisimEngelle(sonuc);
+                    return;
+                }
+                document.querySelectorAll('.modal--acik').forEach(function (m) {
+                    modalKapat(m.id);
+                });
+                state.aktifSayfa = 'admin';
+                var adminSayfa = document.querySelector('[data-sayfa="admin"]');
+                if (adminSayfa) adminSayfa.hidden = false;
+                document.querySelectorAll('[data-sayfa]').forEach(function (s) {
+                    s.classList.toggle('sayfa--aktif', s.getAttribute('data-sayfa') === 'admin');
+                });
+                document.querySelectorAll('[data-nav]').forEach(function (n) {
+                    n.classList.toggle('nav__link--aktif', n.getAttribute('data-nav') === 'admin');
+                });
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                renderAdminUI();
+                if (window.AurixAdmin && typeof AurixAdmin.panelAc === 'function') {
+                    AurixAdmin.panelAc();
+                }
+            });
+            return;
         }
         if (id === 'panel') {
             var user = window.AuthService ? AuthService.getCurrentUser() : null;
@@ -4417,19 +4503,25 @@
                 return;
             }
             if (adminRouteIsteniyorMu()) {
-                if (isAdminSession()) {
-                    sayfaGoster('admin');
-                } else {
-                    toast('Bu alana erişim yetkiniz bulunmuyor.', 'error');
-                    sayfaGoster('ana-sayfa');
+                adminErisimDogrula().then(function (sonuc) {
+                    if (sonuc === 'ok') {
+                        sayfaGoster('admin');
+                        return;
+                    }
+                    adminErisimEngelle(sonuc);
+                    if (sonuc === 'forbidden') sayfaGoster('ana-sayfa');
                     try {
                         var temiz = window.location.pathname + (window.location.search || '');
                         if (/\/admin$/i.test(String(window.location.pathname || '').replace(/\/+$/, ''))) {
                             temiz = temiz.replace(/\/admin\/?$/i, '/') || '/';
                         }
+                        if (String(window.location.hash || '').replace(/^#/, '').split('?')[0] === 'admin') {
+                            window.history.replaceState({}, '', temiz.split('#')[0] || temiz);
+                            return;
+                        }
                         window.history.replaceState({}, '', temiz);
                     } catch (e) { /* ignore */ }
-                }
+                });
             }
         }
 
@@ -4490,8 +4582,13 @@
                     sayfaGoster('ana-sayfa');
                 }
                 if ((!user || !isAdminSession()) && state.aktifSayfa === 'admin') {
-                    toast('Bu alana erişim yetkiniz bulunmuyor.', 'error');
-                    sayfaGoster('ana-sayfa');
+                    adminErisimDogrula().then(function (sonuc) {
+                        if (sonuc === 'ok') return;
+                        adminErisimEngelle(sonuc);
+                        if (sonuc === 'forbidden' || !user) {
+                            sayfaGoster('ana-sayfa');
+                        }
+                    });
                 }
             });
         }

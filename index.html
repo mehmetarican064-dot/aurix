@@ -464,8 +464,8 @@
         </section>
     </div>
 
-    <!-- ===================== ADMIN (gizli rota: #admin / /admin) ===================== -->
-    <div class="sayfa" data-sayfa="admin" hidden>
+    <!-- ===================== ADMIN (gizli rota: #admin / /admin — yalnızca role=admin) ===================== -->
+    <div class="sayfa" data-sayfa="admin" data-admin-only="page" hidden aria-hidden="true">
         <section class="bolum bolum--admin bolum--panel">
             <div class="kapsayici" id="apRoot">
                 <div class="ap-shell">
@@ -1199,11 +1199,11 @@
     <script src="js/supabase.js?v=38" defer></script>
     <script src="js/is-talebi-service.js?v=39" defer></script>
     <script src="js/is-talebi.js?v=39" defer></script>
-    <script src="js/authService.js?v=21" defer></script>
+    <script src="js/authService.js?v=22" defer></script>
     <script src="js/panels.js?v=32" defer></script>
     <script src="js/market-service.js?v=21" defer></script>
-    <script src="js/admin-service.js?v=40" defer></script>
-    <script src="js/admin.js?v=40" defer></script>
-    <script src="js/app.js?v=39" defer></script>
+    <script src="js/admin-service.js?v=41" defer></script>
+    <script src="js/admin.js?v=41" defer></script>
+    <script src="js/app.js?v=40" defer></script>
 </body>
 </html>

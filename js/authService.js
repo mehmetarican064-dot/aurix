@@ -300,19 +300,14 @@
         }
         var uid = session.user.id;
         return ensureProfil(session.user, opts).then(function (profile) {
-            /* geçici doğrulama — profiles.role client’a geliyor mu? */
-            try {
-                console.log('[AURIX auth] profiles', uid, profile);
-            } catch (e) { /* ignore */ }
-
             var user = mapUser(session.user, profile);
             if (user.role === 'admin') {
                 currentUser = user;
                 return currentUser;
             }
             /* SELECT role gelmezse / ezilirse: profiles.role üzerinden is_admin() */
-            return loadAdminFlag().then(function (isAdmin) {
-                if (isAdmin === true) user.role = 'admin';
+            return loadAdminFlag().then(function (isAdminFlag) {
+                if (isAdminFlag === true) user.role = 'admin';
                 currentUser = user;
                 return currentUser;
             });
@@ -876,6 +871,30 @@
         return !!(currentUser && currentUser.role === 'admin');
     }
 
+    /**
+     * Admin erişimini sunucu tarafında yeniden doğrular (RPC is_admin).
+     * Cache’e güvenmez; false ise local role demote edilir.
+     * RPC ulaşılamazsa profiles SELECT + refresh ile yedekler.
+     */
+    function verifyAdmin() {
+        if (!currentUser || !currentUser.id) return Promise.resolve(false);
+        return loadAdminFlag().then(function (flag) {
+            if (flag === true) {
+                currentUser.role = 'admin';
+                return true;
+            }
+            if (flag === false) {
+                if (currentUser.role === 'admin') currentUser.role = 'user';
+                return false;
+            }
+            return refreshProfile().then(function () {
+                return isAdmin();
+            }).catch(function () {
+                return false;
+            });
+        });
+    }
+
     global.AuthService = {
         init: init,
         isReady: isReady,
@@ -889,6 +908,7 @@
         getCurrentUser: getCurrentUser,
         refreshProfile: refreshProfile,
         isAdmin: isAdmin,
+        verifyAdmin: verifyAdmin,
         onAuthStateChange: onAuthStateChange,
         redirectUrl: redirectUrl,
         emailConfirmRedirect: emailConfirmRedirect,
