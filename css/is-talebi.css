@@ -941,3 +941,48 @@
 .fp-teklif-liste--inline {
   margin-top: 4px;
 }
+
+/* ---- Değerlendirme / Şikayet modalı ---- */
+.ds-alt-baslik {
+  margin: -4px 0 16px;
+  color: var(--aurix-muted, #6b7280);
+  font-size: 0.9rem;
+}
+.ds-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.ds-alan {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.ds-yildiz-secim {
+  display: flex;
+  gap: 6px;
+}
+.ds-yildiz-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 28px;
+  line-height: 1;
+  padding: 2px;
+  color: rgba(255, 255, 255, 0.25);
+  transition: color 0.15s ease, transform 0.15s ease;
+}
+.ds-yildiz-btn:hover {
+  transform: scale(1.12);
+  color: #f5c451;
+}
+.ds-yildiz-btn--dolu {
+  color: #f5c451;
+}
+
+/* ---- Tamamlanan iş satırı aksiyonları ---- */
+.fp-is-satir__aksiyon-grup {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}

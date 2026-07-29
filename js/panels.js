@@ -407,24 +407,35 @@
         var html = liste.map(function (o) {
             var durum = o.durum || 'teklif_bekliyor';
             var teklifBekliyor = durum === 'teklif_bekliyor' || durum === 'Acik';
-            return '<li class="fp-is-satir" data-is-id="' + esc(String(o.id || '')) + '">' +
+            var tamamlandi = durum === 'tamamlandi';
+            var idAttr = esc(String(o.id || ''));
+            var baslikAttr = esc(o.baslik || 'İş talebi');
+            return '<li class="fp-is-satir" data-is-id="' + idAttr + '">' +
                 '<div class="fp-is-satir__sol">' +
                 '<strong>' + esc(o.baslik || 'İş talebi') + '</strong>' +
                 '<span class="fp-is-satir__musteri">' + esc(o.sehir || '—') +
                 (o.kategori ? ' · ' + esc(o.kategori) : '') + '</span>' +
                 '</div>' +
-                '<div class="fp-is-satir__sag">' +
+                '<div class="fp-is-satir__sag fp-is-satir__aksiyon-grup">' +
                 fpDurumBadge(isDurumEtiket(durum)) +
                 (teklifBekliyor
                     ? '<button type="button" class="btn btn--primary btn--sm" data-panel-aksiyon="teklifleri-goster" data-is-id="' +
-                      esc(String(o.id || '')) + '" data-sohbet-baslik="' + esc(o.baslik || 'İş talebi') +
+                      idAttr + '" data-sohbet-baslik="' + baslikAttr +
                       '">Teklifleri Gör</button>'
                     : '') +
+                (tamamlandi
+                    ? '<button type="button" class="btn btn--gold btn--sm" data-panel-aksiyon="degerlendir" data-is-id="' +
+                      idAttr + '" data-sohbet-baslik="' + baslikAttr +
+                      '">Değerlendir / Puan Ver</button>' +
+                      '<button type="button" class="btn btn--ghost btn--sm" data-panel-aksiyon="sikayet-et" data-is-id="' +
+                      idAttr + '" data-sohbet-baslik="' + baslikAttr +
+                      '">Şikayet Et</button>'
+                    : '') +
                 '<button type="button" class="btn btn--ghost btn--sm" data-panel-aksiyon="sohbet" data-is-id="' +
-                esc(String(o.id || '')) + '" data-sohbet-baslik="' + esc(o.baslik || 'İş talebi') +
+                idAttr + '" data-sohbet-baslik="' + baslikAttr +
                 '">Sohbet</button>' +
                 '</div>' +
-                '<div class="fp-is-teklifler" data-is-teklifler="' + esc(String(o.id || '')) + '" hidden></div>' +
+                '<div class="fp-is-teklifler" data-is-teklifler="' + idAttr + '" hidden></div>' +
                 '</li>';
         }).join('');
         return fpBolumHtml('İş Taleplerim',
@@ -1293,6 +1304,37 @@
                         yenileGelenIslerSekmesi();
                         yenileTekliflerSekmesi();
                     }).catch(function () { tamamBtn.disabled = false; });
+                    return;
+                }
+
+                var degerlendirBtn = e.target.closest('[data-panel-aksiyon="degerlendir"]');
+                if (degerlendirBtn && icerik.contains(degerlendirBtn)) {
+                    e.preventDefault();
+                    var degIsId = degerlendirBtn.getAttribute('data-is-id');
+                    if (!degIsId || !global.AurixDegerlendirmeSikayet || typeof AurixDegerlendirmeSikayet.degerlendirAc !== 'function') {
+                        toastInfo('Değerlendirme servisi hazır değil.');
+                        return;
+                    }
+                    AurixDegerlendirmeSikayet.degerlendirAc({
+                        isTalebiId: degIsId,
+                        baslik: degerlendirBtn.getAttribute('data-sohbet-baslik') || 'İş talebi',
+                        onSuccess: function () { yenileIslerimSekmesi(); }
+                    });
+                    return;
+                }
+
+                var sikayetBtn = e.target.closest('[data-panel-aksiyon="sikayet-et"]');
+                if (sikayetBtn && icerik.contains(sikayetBtn)) {
+                    e.preventDefault();
+                    var sikIsId = sikayetBtn.getAttribute('data-is-id');
+                    if (!sikIsId || !global.AurixDegerlendirmeSikayet || typeof AurixDegerlendirmeSikayet.sikayetAc !== 'function') {
+                        toastInfo('Şikayet servisi hazır değil.');
+                        return;
+                    }
+                    AurixDegerlendirmeSikayet.sikayetAc({
+                        isTalebiId: sikIsId,
+                        baslik: sikayetBtn.getAttribute('data-sohbet-baslik') || 'İş talebi'
+                    });
                     return;
                 }
 

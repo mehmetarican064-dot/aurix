@@ -1500,7 +1500,8 @@
             premium: false,
             sponsor: false,
             durum: row.durum === 'onaylandi' || row.dogrulanmis === true ? 'onaylandi' : (row.durum || 'beklemede'),
-            puan: 0,
+            puan: row.puan_ortalama != null ? Number(row.puan_ortalama) : 0,
+            yorumSayisi: row.yorum_sayisi != null ? Number(row.yorum_sayisi) : 0,
             tamamlananIs: 0,
             cevapSuresi: '—',
             sonAktif: '—',
@@ -1829,6 +1830,7 @@
             '<h3 class="firma-kart__ad">' + esc(firma.ad) + '</h3>' +
             '<span class="firma-kart__dogrulandi firma-kart__dogrulandi--inline">Doğrulandı</span>' +
             '</div>' +
+            firmaPuanEtiketiHtml(firma) +
             '<p class="firma-kart__hizmet">' + esc(kat.ad) + '</p>' +
             '<p class="firma-kart__sehir">' + esc(firma.sehir) + '</p>' +
             (aciklama ? '<p class="firma-kart__aciklama firma-kart__aciklama--kisa">' + esc(aciklama) + '</p>' : '') +
@@ -1838,9 +1840,21 @@
             '</div></div></article>';
     }
 
+    function firmaPuanEtiketiHtml(firma) {
+        if (!firma || !firma.yorumSayisi) return '';
+        return '<span class="firma-kart__puan" title="' + esc(String(firma.yorumSayisi)) + ' değerlendirme">' +
+            esc(yildizGoster(firma.puan)) + ' <span class="firma-kart__puan--sayi">(' +
+            esc(String(firma.yorumSayisi)) + ')</span></span>';
+    }
+
     function firmaGuvenHtml(firma) {
+        var puanHtml = firmaPuanEtiketiHtml(firma);
         if (firma.durum === 'onaylandi') {
-            return '<div class="firma-kart__puan-alan"><span class="firma-kart__dogrulandi">Doğrulandı</span></div>';
+            return '<div class="firma-kart__puan-alan"><span class="firma-kart__dogrulandi">Doğrulandı</span>' +
+                puanHtml + '</div>';
+        }
+        if (puanHtml) {
+            return '<div class="firma-kart__puan-alan">' + puanHtml + '</div>';
         }
         return '';
     }
@@ -1917,7 +1931,7 @@
             '<span class="firma-kart__kat-rozet">' +
             '<span class="firma-kart__kat-ikon">' + kat.ikon + '</span>' +
             '<span class="firma-kart__kat-ad">' + esc(kat.ad || '—') + '</span>' +
-            '</span></div></div></div>' +
+            '</span>' + firmaPuanEtiketiHtml(firma) + '</div></div></div>' +
             '<p class="firma-kart__aciklama">' + esc(aciklama || '—') + '</p>' +
             '<div class="firma-kart__aksiyon">' +
             '<button type="button" class="btn btn--ghost btn--sm" data-detay="' + esc(firma.id) + '">Profili Gör</button>' +

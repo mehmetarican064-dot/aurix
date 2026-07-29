@@ -10,10 +10,10 @@
     var SUPABASE_ANON_KEY = 'sb_publishable_c2mZqJ7T3rcM0Jlcm_405Q_UqRv7peK';
 
     /** Public liste — telefon/email/adres/vergi çekilmez */
-    var FIRMA_PUBLIC_SELECT = 'id,firma_adi,sehir,ilce,firma_turu,yetkili_ad,kurulus_yili,calisan_sayisi,calisma_saatleri,kapasite,hizmet_kategorileri,yayin_durumu,calisma_gorselleri,kategori,aciklama,dogrulanmis,durum,guven_dogrulama_durumu,guven_dogrulama_tarihi,created_at,logo_url,kapak_url';
+    var FIRMA_PUBLIC_SELECT = 'id,firma_adi,sehir,ilce,firma_turu,yetkili_ad,kurulus_yili,calisan_sayisi,calisma_saatleri,kapasite,hizmet_kategorileri,yayin_durumu,calisma_gorselleri,kategori,aciklama,dogrulanmis,durum,guven_dogrulama_durumu,guven_dogrulama_tarihi,created_at,logo_url,kapak_url,puan_ortalama,yorum_sayisi';
 
     /** Panel sahibi — tüm profil alanları (özel alanlar dahil) */
-    var FIRMA_PANEL_SELECT = 'id,firma_adi,sehir,ilce,firma_turu,kategori,hizmet_kategorileri,aciklama,yetkili_ad,kurulus_yili,adres,calisan_sayisi,calisma_saatleri,kapasite,telefon,durum,dogrulanmis,yayin_durumu,guven_dogrulama_durumu,guven_dogrulama_tarihi,guven_kullanici_aciklama,vergi_kimlik_durumu,created_at,updated_at,user_id,logo_url,kapak_url,calisma_gorselleri,red_nedeni,askiya_alindi,askiya_alma_nedeni';
+    var FIRMA_PANEL_SELECT = 'id,firma_adi,sehir,ilce,firma_turu,kategori,hizmet_kategorileri,aciklama,yetkili_ad,kurulus_yili,adres,calisan_sayisi,calisma_saatleri,kapasite,telefon,durum,dogrulanmis,yayin_durumu,guven_dogrulama_durumu,guven_dogrulama_tarihi,guven_kullanici_aciklama,vergi_kimlik_durumu,created_at,updated_at,user_id,logo_url,kapak_url,calisma_gorselleri,red_nedeni,askiya_alindi,askiya_alma_nedeni,puan_ortalama,yorum_sayisi';
 
     var ADMIN_TOKEN_KEY = 'aurix_supabase_admin_token';
     var client = null;
@@ -1475,6 +1475,71 @@
         });
     }
 
+    function degerlendirmeSikayetHata(err) {
+        var msg = String((err && err.message) || err || '');
+        if (/oturum_yok|JWT/i.test(msg)) return 'Oturum gerekli.';
+        if (/yetkisiz|42501/i.test(msg)) return 'Bu işlem için yetkiniz yok.';
+        if (/zaten_degerlendirildi|23505/i.test(msg)) return 'Bu iş için zaten değerlendirme yapılmış.';
+        if (/durum_uygun_degil/i.test(msg)) return 'Bu iş henüz tamamlanmadığı için değerlendirilemez.';
+        if (/puan_gecersiz/i.test(msg)) return 'Puan 1 ile 5 arasında olmalıdır.';
+        if (/yorum_uzun/i.test(msg)) return 'Yorum en fazla 1000 karakter olabilir.';
+        if (/neden_zorunlu/i.test(msg)) return 'Şikayet nedeni zorunludur.';
+        if (/neden_uzun/i.test(msg)) return 'Şikayet nedeni en fazla 200 karakter olabilir.';
+        if (/detay_uzun/i.test(msg)) return 'Şikayet detayı en fazla 2000 karakter olabilir.';
+        if (/firma_yok|is_yok|P0002/i.test(msg)) return 'Kayıt bulunamadı.';
+        if (/function.*degerlendirme_|function.*sikayet_|PGRST202/i.test(msg)) {
+            return 'Değerlendirme/şikayet API’si eksik. Migration 044 uygulanmalı.';
+        }
+        return hataMesaji(err);
+    }
+
+    function degerlendirmeGonder(isId, puan, yorum) {
+        var sb = getClient();
+        if (!sb) return Promise.resolve({ ok: false, error: 'Bağlantı yok.' });
+        return sb.rpc('degerlendirme_gonder', {
+            p_is_talebi_id: String(isId),
+            p_puan: Number(puan),
+            p_yorum: yorum || null
+        }).then(function (res) {
+            if (res.error) return { ok: false, error: degerlendirmeSikayetHata(res.error) };
+            return Object.assign({ ok: true }, res.data || {});
+        }).catch(function (e) {
+            return { ok: false, error: degerlendirmeSikayetHata(e) };
+        });
+    }
+
+    function firmaYorumlari(firmaId) {
+        var sb = getClient();
+        if (!sb) return Promise.resolve({ ok: false, yorumlar: [], puanOrtalama: 0, yorumSayisi: 0, error: 'Bağlantı yok.' });
+        return sb.rpc('firma_yorumlari', { p_firma_id: String(firmaId) }).then(function (res) {
+            if (res.error) return { ok: false, yorumlar: [], puanOrtalama: 0, yorumSayisi: 0, error: degerlendirmeSikayetHata(res.error) };
+            var d = res.data || {};
+            return {
+                ok: true,
+                yorumlar: Array.isArray(d.yorumlar) ? d.yorumlar : [],
+                puanOrtalama: Number(d.puan_ortalama || 0),
+                yorumSayisi: Number(d.yorum_sayisi || 0)
+            };
+        }).catch(function (e) {
+            return { ok: false, yorumlar: [], puanOrtalama: 0, yorumSayisi: 0, error: degerlendirmeSikayetHata(e) };
+        });
+    }
+
+    function sikayetBildir(isId, neden, detay) {
+        var sb = getClient();
+        if (!sb) return Promise.resolve({ ok: false, error: 'Bağlantı yok.' });
+        return sb.rpc('sikayet_bildir', {
+            p_is_talebi_id: String(isId),
+            p_sikayet_nedeni: neden,
+            p_detay: detay || null
+        }).then(function (res) {
+            if (res.error) return { ok: false, error: degerlendirmeSikayetHata(res.error) };
+            return Object.assign({ ok: true }, res.data || {});
+        }).catch(function (e) {
+            return { ok: false, error: degerlendirmeSikayetHata(e) };
+        });
+    }
+
     function dogrulamaRpcHata(err) {
         var msg = String((err && err.message) || '');
         if (/email_dogrulanmadi/i.test(msg)) return 'Önce e-posta adresinizi doğrulayın.';
@@ -1775,6 +1840,9 @@
         isTeklifKabulEt: isTeklifKabulEt,
         isDurumGuncelle: isDurumGuncelle,
         firmaGelenIsler: firmaGelenIsler,
+        degerlendirmeGonder: degerlendirmeGonder,
+        firmaYorumlari: firmaYorumlari,
+        sikayetBildir: sikayetBildir,
         getirTeklifSayilari: getirTeklifSayilari,
         adminFirmalar: adminFirmalar,
         getAdminToken: getAdminToken,

@@ -37,6 +37,9 @@
         if (/network|Failed to fetch|Load failed/i.test(msg)) {
             return 'Bağlantı kurulamadı. İnternetinizi kontrol edin.';
         }
+        if (/function.*sikayet/i.test(msg)) {
+            return 'Şikâyet API’si eksik. Migration 044 uygulanmalı.';
+        }
         if (/function.*does not exist|PGRST202|Could not find the function/i.test(msg)) {
             return 'Admin API güncel değil. Migration 023 (firma onay) uygulanmalı.';
         }
@@ -260,6 +263,24 @@
         return rpc('firma_yeniden_basvur');
     }
 
+    function sikayetListesi(durum) {
+        return rpc('admin_sikayet_listesi', { p_durum: durum || null }).then(function (res) {
+            if (!res.ok) return res;
+            var rows = (res.data && Array.isArray(res.data.sikayetler)) ? res.data.sikayetler : [];
+            return { ok: true, data: rows, error: null };
+        });
+    }
+
+    function sikayetGuncelle(sikayetId, yeniDurum, adminNot) {
+        return rpc('admin_sikayet_guncelle', {
+            p_sikayet_id: sikayetId,
+            p_yeni_durum: yeniDurum,
+            p_admin_not: adminNot || null
+        }).then(function (res) {
+            return rpcJsonOk(res, 'Şikâyet durumu güncellenemedi.');
+        });
+    }
+
     function dogrulamaListesi(filtre) {
         return rpc('admin_dogrulama_listesi').then(function (res) {
             if (!res.ok) return res;
@@ -444,6 +465,8 @@
         vergiKontrolKarar: vergiKontrolKarar,
         dogrulamaEslesmeIsaretle: dogrulamaEslesmeIsaretle,
         sistemDurumu: sistemDurumu,
+        sikayetListesi: sikayetListesi,
+        sikayetGuncelle: sikayetGuncelle,
         hataMesaji: hataMesaji
     };
 })(typeof window !== 'undefined' ? window : this);

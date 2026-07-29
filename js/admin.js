@@ -7,6 +7,7 @@
 
     var aktifBolum = 'genel';
     var firmaOnaySekme = 'basvuru_bekliyor';
+    var sikayetFiltre = 'hepsi';
     var yukleniyor = {};
     var cache = {
         ozet: null,
@@ -16,6 +17,7 @@
         isler: [],
         teklifler: [],
         islemler: [],
+        sikayetler: [],
         sistem: null,
         aktiviteler: null,
         harita: null,
@@ -498,10 +500,7 @@
             if (id === 'kullanicilar') return yukleKullanicilar();
             if (id === 'isler') return yukleIsler();
             if (id === 'teklifler') return yukleTeklifler();
-            if (id === 'sikayetler') {
-                el.innerHTML = bosDurum('Henüz şikâyet sistemi etkin değil.');
-                return;
-            }
+            if (id === 'sikayetler') return yukleSikayetler();
             if (id === 'islemler') return yukleIslemler();
             if (id === 'sistem') return yukleSistem();
             el.innerHTML = bosDurum('Bölüm bulunamadı.');
@@ -1974,6 +1973,76 @@
             : bosDurum('Henüz teklif yok.');
     }
 
+    /* ---------- Şikâyetler ---------- */
+    function sikayetDurumRozet(durum) {
+        var d = String(durum || '').toLowerCase();
+        var etiketMap = { beklemede: 'Beklemede', incelendi: 'İncelendi', cozuldu: 'Çözüldü' };
+        var etiket = etiketMap[d] || durum || '—';
+        var cls = 'ap-badge';
+        if (d === 'cozuldu') cls += ' ap-badge--ok';
+        else if (d === 'incelendi') cls += ' ap-badge--warn';
+        else cls += ' ap-badge--bad';
+        return '<span class="' + cls + '">' + esc(etiket) + '</span>';
+    }
+
+    function yukleSikayetler() {
+        var s = svc();
+        if (!s || typeof s.sikayetListesi !== 'function') {
+            $('apIcerik').innerHTML = hataDurum('Şikâyet bölümü şu anda kullanılamıyor. Migration 044 uygulanmalı.');
+            return;
+        }
+        setBolumLoading('sikayetler', true);
+        s.sikayetListesi(sikayetFiltre).then(function (res) {
+            setBolumLoading('sikayetler', false);
+            if (aktifBolum !== 'sikayetler') return;
+            if (!res.ok) {
+                $('apIcerik').innerHTML = hataDurum(res.error);
+                return;
+            }
+            cache.sikayetler = Array.isArray(res.data) ? res.data : [];
+            renderSikayetler();
+        });
+    }
+
+    function renderSikayetler() {
+        var sekmeler = [
+            ['hepsi', 'Tümü'],
+            ['beklemede', 'Beklemede'],
+            ['incelendi', 'İncelendi'],
+            ['cozuldu', 'Çözüldü']
+        ];
+        var tabHtml = sekmeler.map(function (t) {
+            return '<button type="button" class="ap-sekme' +
+                (sikayetFiltre === t[0] ? ' ap-sekme--aktif' : '') +
+                '" data-ap-sikayet-sekme="' + t[0] + '">' + esc(t[1]) + '</button>';
+        }).join('');
+
+        var liste = cache.sikayetler || [];
+        var satirlar = liste.map(function (s) {
+            return '<tr>' +
+                '<td>' + esc(s.is_baslik || '—') + '</td>' +
+                '<td>' + esc(s.bildiren_email || '—') + '</td>' +
+                '<td>' + esc(s.sikayet_nedeni || '—') +
+                (s.detay ? '<br><span class="ap-yardim">' + esc(s.detay) + '</span>' : '') + '</td>' +
+                '<td>' + sikayetDurumRozet(s.durum) +
+                (s.admin_not ? '<br><span class="ap-yardim">Not: ' + esc(s.admin_not) + '</span>' : '') + '</td>' +
+                '<td>' + esc(tarihKisa(s.created_at)) + '</td>' +
+                '<td class="ap-islemler">' +
+                '<button type="button" class="btn btn--ghost btn--xs" data-ap-sikayet-durum="incelendi" data-ap-sikayet-id="' + esc(s.id) + '">İncelendi</button> ' +
+                '<button type="button" class="btn btn--ghost btn--xs" data-ap-sikayet-durum="cozuldu" data-ap-sikayet-id="' + esc(s.id) + '">Çözüldü</button> ' +
+                '<button type="button" class="btn btn--ghost btn--xs" data-ap-sikayet-durum="beklemede" data-ap-sikayet-id="' + esc(s.id) + '">Beklemede</button>' +
+                '</td></tr>';
+        }).join('');
+
+        $('apIcerik').innerHTML =
+            '<div class="ap-sekmeler" role="tablist">' + tabHtml + '</div>' +
+            (liste.length
+                ? '<div class="ap-tablo-wrap"><table class="ap-tablo"><thead><tr>' +
+                '<th>İş talebi</th><th>Bildiren</th><th>Neden</th><th>Durum</th><th>Tarih</th><th>İşlem</th>' +
+                '</tr></thead><tbody>' + satirlar + '</tbody></table></div>'
+                : bosDurum('Bu filtrede şikâyet yok.'));
+    }
+
     /* ---------- İşlem kayıtları ---------- */
     function yukleIslemler() {
         var s = svc();
@@ -2203,6 +2272,35 @@
             if (onaySekme) {
                 firmaOnaySekme = onaySekme.getAttribute('data-ap-onay-sekme');
                 yukleOnaylar();
+                return;
+            }
+
+            var sikayetSekme = e.target.closest('[data-ap-sikayet-sekme]');
+            if (sikayetSekme) {
+                sikayetFiltre = sikayetSekme.getAttribute('data-ap-sikayet-sekme');
+                yukleSikayetler();
+                return;
+            }
+
+            var sikayetDurumBtn = e.target.closest('[data-ap-sikayet-durum]');
+            if (sikayetDurumBtn) {
+                var sikayetId = sikayetDurumBtn.getAttribute('data-ap-sikayet-id');
+                var yeniDurum = sikayetDurumBtn.getAttribute('data-ap-sikayet-durum');
+                var svcInst = svc();
+                if (!svcInst || typeof svcInst.sikayetGuncelle !== 'function') {
+                    toast('Şikâyet güncelleme API’si yok (044).', 'error');
+                    return;
+                }
+                sikayetDurumBtn.disabled = true;
+                svcInst.sikayetGuncelle(sikayetId, yeniDurum).then(function (res) {
+                    if (!res.ok) {
+                        toast(res.error || 'Şikâyet durumu güncellenemedi.', 'error');
+                        sikayetDurumBtn.disabled = false;
+                        return;
+                    }
+                    toast('Şikâyet durumu güncellendi.', 'success');
+                    yukleSikayetler();
+                });
                 return;
             }
 

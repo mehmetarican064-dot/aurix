@@ -289,12 +289,16 @@
             return dagilimSatirHtml(y, dag[y] || 0, sayi);
         }).join('');
 
-        var kat = ozet.kategori || {};
-        var katHtml =
-            kategoriSatirHtml('İşçilik kalitesi', kat.iscilik_kalitesi) +
-            kategoriSatirHtml('Termin uyumu', kat.termin_uyumu) +
-            kategoriSatirHtml('İletişim', kat.iletisim) +
-            kategoriSatirHtml('İş tanımına uygunluk', kat.is_tanimina_uygunluk);
+        var kat = ozet.kategori || null;
+        var katSagHtml = kat
+            ? '<div class="fdg-ozet-sag" aria-label="Kategori puanları">' +
+              '<h5 class="fdg-ozet-sag__baslik">Kategori puanları</h5>' +
+              kategoriSatirHtml('İşçilik kalitesi', kat.iscilik_kalitesi) +
+              kategoriSatirHtml('Termin uyumu', kat.termin_uyumu) +
+              kategoriSatirHtml('İletişim', kat.iletisim) +
+              kategoriSatirHtml('İş tanımına uygunluk', kat.is_tanimina_uygunluk) +
+              '</div>'
+            : '';
 
         var goster = genis ? yorumlar : yorumlar.slice(0, limit);
         var kartlar = goster.map(yorumKartHtml).join('');
@@ -314,9 +318,7 @@
                     esc(String(ozet.yeniden_calisma_orani)) + ' yeniden çalışır</p>'
                 : '') +
             '<div class="fdg-dagilim">' + dagHtml + '</div></div>' +
-            '<div class="fdg-ozet-sag" aria-label="Kategori puanları">' +
-            '<h5 class="fdg-ozet-sag__baslik">Kategori puanları</h5>' +
-            katHtml + '</div></div>' +
+            katSagHtml + '</div>' +
             '<div class="fdg-yorum-liste" id="fdgYorumListe">' + kartlar + '</div>' +
             (dahaVar
                 ? '<p class="fdg-tum-wrap"><button type="button" class="btn btn--ghost btn--sm" id="fdgTumBtn">' +
@@ -383,6 +385,54 @@
             '</form>';
     }
 
+    /** Migration 044 — degerlendirmeler tablosu (basit puan+yorum) mevcut UI şemasına eşlenir */
+    function yeniVeriyiOzeteEsle(yeni) {
+        var yorumlar = Array.isArray(yeni.yorumlar) ? yeni.yorumlar : [];
+        var dag = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+        yorumlar.forEach(function (y) {
+            var p = Math.round(Number(y.puan));
+            if (dag[p] != null) dag[p]++;
+        });
+        return {
+            ozet: {
+                _kaynak: 'api044',
+                genel_puan: yeni.puanOrtalama || null,
+                degerlendirme_sayisi: yeni.yorumSayisi || 0,
+                tamamlanan_is: null,
+                zamaninda_teslim_orani: null,
+                yeniden_calisma_orani: null,
+                kategori: null,
+                yildiz_dagilim: dag
+            },
+            yorumlar: yorumlar.map(function (y) {
+                return {
+                    _kaynak: 'api044',
+                    id: y.id,
+                    ad_kisa: 'Müşteri',
+                    bas_harf: 'M',
+                    puan: y.puan,
+                    tarih: y.created_at,
+                    kategori: null,
+                    sehir: null,
+                    yorum: y.yorum || '',
+                    yeniden_calisir: false
+                };
+            })
+        };
+    }
+
+    function yukleYeniDegerlendirmeler(firmaId) {
+        if (!global.AurixSupabase || typeof AurixSupabase.firmaYorumlari !== 'function') {
+            return Promise.resolve(null);
+        }
+        return AurixSupabase.firmaYorumlari(firmaId).then(function (yeni) {
+            if (yeni && yeni.ok && (yeni.yorumSayisi || 0) > 0) {
+                return yeniVeriyiOzeteEsle(yeni);
+            }
+            return null;
+        }).catch(function () { return null; });
+    }
+
     function yukleFirmaDegerlendirme(firma) {
         var firmaId = firma && (firma.supabaseId != null ? firma.supabaseId : firma.id);
         var sb = global.AurixSupabase && AurixSupabase.getClient && AurixSupabase.getClient();
@@ -397,22 +447,31 @@
                         })
                     };
                 }
-                if (demoModAktifMi()) {
-                    return { ozet: demoOzet(), yorumlar: demoYorumlar() };
-                }
-                return { ozet: bosOzet(), yorumlar: [] };
+                return yukleYeniDegerlendirmeler(firmaId).then(function (yeniVeri) {
+                    if (yeniVeri) return yeniVeri;
+                    if (demoModAktifMi()) {
+                        return { ozet: demoOzet(), yorumlar: demoYorumlar() };
+                    }
+                    return { ozet: bosOzet(), yorumlar: [] };
+                });
             }).catch(function () {
-                if (demoModAktifMi()) {
-                    return { ozet: demoOzet(), yorumlar: demoYorumlar() };
-                }
-                return { ozet: bosOzet(), yorumlar: [] };
+                return yukleYeniDegerlendirmeler(firmaId).then(function (yeniVeri) {
+                    if (yeniVeri) return yeniVeri;
+                    if (demoModAktifMi()) {
+                        return { ozet: demoOzet(), yorumlar: demoYorumlar() };
+                    }
+                    return { ozet: bosOzet(), yorumlar: [] };
+                });
             });
         }
 
-        if (demoModAktifMi()) {
-            return Promise.resolve({ ozet: demoOzet(), yorumlar: demoYorumlar() });
-        }
-        return Promise.resolve({ ozet: bosOzet(), yorumlar: [] });
+        return yukleYeniDegerlendirmeler(firmaId).then(function (yeniVeri) {
+            if (yeniVeri) return yeniVeri;
+            if (demoModAktifMi()) {
+                return { ozet: demoOzet(), yorumlar: demoYorumlar() };
+            }
+            return { ozet: bosOzet(), yorumlar: [] };
+        });
     }
 
     function renderProfilDegerlendirme(kapsayiciPerformans, kapsayiciDegerlendirme, firma) {
