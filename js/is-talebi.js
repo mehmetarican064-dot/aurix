@@ -14,13 +14,12 @@
         };
 
     var PROD_HOST = /(?:^|\.)aurixb2b\.com$/i;
-    var SECTIONS = ['ozet', 'detay', 'dosyalar', 'teslimat', 'gizlilik', 'onizleme'];
+    var SECTIONS = ['ozet', 'detay', 'dosyalar', 'teslimat', 'onizleme'];
     var SECTION_LABELS = {
-        ozet: 'Özet',
-        detay: 'Detay',
+        ozet: 'Temel Bilgiler',
+        detay: 'Üretim & Teknik Detaylar',
         dosyalar: 'Dosyalar',
-        teslimat: 'Teslimat',
-        gizlilik: 'Gizlilik',
+        teslimat: 'Teslimat & Gizlilik',
         onizleme: 'Önizleme'
     };
 
@@ -461,9 +460,9 @@
         h += '</div>';
         h += '<div class="it-taslak-durum" id="itTaslakDurum" aria-live="polite"></div>';
 
-        /* Özet */
+        /* Temel Bilgiler */
         h += '<section class="it-bolum it-bolum--aktif" data-it-section="ozet">';
-        h += '<h4 class="it-bolum__baslik">Talep özeti</h4>';
+        h += '<h4 class="it-bolum__baslik">Temel Bilgiler</h4>';
         h += '<p class="it-bolum__alt">Firmaların ilk bakışta anlayacağı başlık ve kategori bilgilerini girin.</p>';
         h += '<div class="it-alan"><label class="form-label" for="itBaslik">Başlık *</label>';
         h += '<input class="form-input" id="itBaslik" data-it-field="baslik" maxlength="90" placeholder="50 adet 14 ayar yüzük için döküm hizmeti">';
@@ -484,17 +483,18 @@
         h += '<div class="it-uyari" id="itAcilUyari" hidden>Acil talepler daha yüksek işçilik teklifleri alabilir.</div>';
         h += '</section>';
 
-        /* Detay */
+        /* Üretim & Teknik Detaylar */
         h += '<section class="it-bolum" data-it-section="detay">';
-        h += '<h4 class="it-bolum__baslik">İş detayı</h4>';
+        h += '<h4 class="it-bolum__baslik">Üretim & Teknik Detaylar</h4>';
         h += '<p class="it-bolum__alt">Teklif kalitesi için açıklamayı net yazın. Teknik notlar isteğe bağlıdır.</p>';
-        h += '<div class="it-alan"><label class="form-label" for="itAciklama">Açıklama *</label>';
-        h += '<textarea class="form-textarea" id="itAciklama" data-it-field="aciklama" rows="5" maxlength="2000" placeholder="İşin kapsamı, beklenti, model referansı..."></textarea>';
+        h += '<div class="it-alan it-alan--iki">';
+        h += '<div><label class="form-label" for="itAciklama">Açıklama *</label>';
+        h += '<textarea class="form-textarea" id="itAciklama" data-it-field="aciklama" rows="6" maxlength="2000" placeholder="İşin kapsamı, beklenti, model referansı..."></textarea>';
         h += '<div class="it-sayac" data-it-count="aciklama">0 / 2000</div><div class="it-hata" data-it-error="aciklama" hidden></div></div>';
+        h += '<div><label class="form-label" for="itTeknik">Teknik bilgiler</label>';
+        h += '<textarea class="form-textarea" id="itTeknik" data-it-field="teknik_bilgiler" rows="6" maxlength="1000" placeholder="Ölçü, tolerans, alaşım notu..."></textarea>';
+        h += '<div class="it-sayac" data-it-count="teknik_bilgiler">0 / 1000</div><div class="it-hata" data-it-error="teknik_bilgiler" hidden></div></div></div>';
         h += '<p class="it-yardim">Ölçü, adet, ürün tipi, işçilik beklentisi ve özel talepleri açıkça belirtin.</p>';
-        h += '<div class="it-alan"><label class="form-label" for="itTeknik">Teknik bilgiler</label>';
-        h += '<textarea class="form-textarea" id="itTeknik" data-it-field="teknik_bilgiler" rows="3" maxlength="1000" placeholder="Ölçü, tolerans, alaşım notu..."></textarea>';
-        h += '<div class="it-sayac" data-it-count="teknik_bilgiler">0 / 1000</div><div class="it-hata" data-it-error="teknik_bilgiler" hidden></div></div>';
         h += '<div class="it-alan it-alan--iki">';
         h += '<div><label class="form-label" for="itMalzeme">Malzeme</label>';
         h += '<select class="form-select" id="itMalzeme" data-it-field="malzeme">' + optionsHtml(MALZEMELER, '', true) + '</select></div>';
@@ -522,10 +522,10 @@
         h += radioGroupHtml('dosya_gorunurlugu', DOSYA_GORUNURLUGU, 'talebi_gorenler') + '</div>';
         h += '</section>';
 
-        /* Teslimat */
+        /* Teslimat & Gizlilik */
         h += '<section class="it-bolum" data-it-section="teslimat">';
-        h += '<h4 class="it-bolum__baslik">Teslimat & bütçe</h4>';
-        h += '<p class="it-bolum__alt">Şehir, termin ve bütçe tercihlerinizi belirtin.</p>';
+        h += '<h4 class="it-bolum__baslik">Teslimat & Gizlilik</h4>';
+        h += '<p class="it-bolum__alt">Şehir, termin, bütçe ve görünürlük tercihlerinizi belirtin.</p>';
         h += '<div class="it-alan it-alan--iki">';
         h += '<div><label class="form-label" for="itSehir">Şehir *</label>';
         h += '<select class="form-select" id="itSehir" data-it-field="sehir">' + sehirOptions('') + '</select>';
@@ -538,7 +538,9 @@
         h += '<div class="it-hata" data-it-error="teslim_tarihi" hidden></div>';
         h += '<div class="it-uyari" id="itTerminUyari" hidden>Bu teslim süresi firmalar için yetersiz olabilir.</div></div>';
         h += '<div><label class="form-label">Teslim şekli</label>' + radioGroupHtml('teslim_sekli', TESLIM_SEKLI, 'gorusulecek') + '</div></div>';
-        h += '<div class="it-alan"><label class="form-label">Bütçe tipi *</label>' + radioGroupHtml('butce_tipi', BUTCE_TIPI, 'teklif_bekliyorum') + '</div>';
+        h += '<div class="it-alan it-alan--iki">';
+        h += '<div><label class="form-label">Bütçe tipi *</label>' + radioGroupHtml('butce_tipi', BUTCE_TIPI, 'teklif_bekliyorum') + '</div>';
+        h += '<div><label class="form-label">Bütçe görünürlüğü</label>' + radioGroupHtml('butce_gorunurlugu', BUTCE_GORUNURLUGU, 'dogrulanmis_firmalar') + '</div></div>';
         h += '<div class="it-butce-alanlari" id="itButceAlanlari" hidden>';
         h += '<div class="it-alan it-alan--iki">';
         h += '<div id="itButceMinKutu"><label class="form-label" for="itButceMin">Min. bütçe (₺)</label>';
@@ -546,18 +548,12 @@
         h += '<div><label class="form-label" for="itButceMax" id="itButceMaxLabel">Max. bütçe (₺)</label>';
         h += '<input class="form-input" type="number" id="itButceMax" data-it-field="butce_max" min="0" step="1" inputmode="numeric"></div></div>';
         h += '<div class="it-hata" data-it-error="butce" hidden></div></div>';
-        h += '<div class="it-alan"><label class="form-label">Bütçe görünürlüğü</label>' + radioGroupHtml('butce_gorunurlugu', BUTCE_GORUNURLUGU, 'dogrulanmis_firmalar') + '</div>';
         h += '<p class="it-yardim">Altın, taş veya diğer malzeme bedellerinin bütçeye dahil olup olmadığını açıklamada belirtin.</p>';
-        h += '</section>';
-
-        /* Gizlilik */
-        h += '<section class="it-bolum" data-it-section="gizlilik">';
-        h += '<h4 class="it-bolum__baslik">Gizlilik</h4>';
-        h += '<p class="it-bolum__alt">Talebinizi kimlerin görebileceğini seçin.</p>';
-        h += '<div class="it-alan"><label class="form-label">Görünürlük</label>' + radioGroupHtml('gorunurluk', GORUNURLUK, 'tum_dogrulanmis_firmalar') + '</div>';
-        h += '<div class="it-alan"><label class="it-radyo" for="itSahipGizli"><input type="checkbox" id="itSahipGizli" data-it-field="sahip_gizli"><span>Firma adıma gizli yayınla (isteğe bağlı)</span></label>';
-        h += '<p class="it-yardim">Gizli yayınlarda doğrulanmış firmalar işi görür; kimliğiniz teklif aşamasına kadar sınırlı kalabilir.</p></div>';
-        h += '<div class="it-uyari">Dosyaların yalnızca teklif verdikten sonra görünmesi özelliği bir sonraki fazda tamamlanacaktır.</div>';
+        h += '<h5 class="it-bolum__altbaslik">Gizlilik</h5>';
+        h += '<div class="it-alan it-alan--iki">';
+        h += '<div><label class="form-label">Görünürlük</label>' + radioGroupHtml('gorunurluk', GORUNURLUK, 'tum_dogrulanmis_firmalar') + '</div>';
+        h += '<div><label class="it-radyo" for="itSahipGizli"><input type="checkbox" id="itSahipGizli" data-it-field="sahip_gizli"><span>Firma adıma gizli yayınla (isteğe bağlı)</span></label>';
+        h += '<p class="it-yardim">Gizli yayınlarda doğrulanmış firmalar işi görür; kimliğiniz teklif aşamasına kadar sınırlı kalabilir.</p></div></div>';
         h += '</section>';
 
         /* Önizleme */
@@ -676,10 +672,12 @@
         var bar = document.getElementById('itAksiyonBar');
         if (!wizard) return;
         if (state.mode === 'basari') {
+            wizard.classList.add('it-wizard--basari');
             wizard.querySelectorAll('.it-bolum').forEach(function (el) { el.hidden = true; });
             if (basari) basari.hidden = false;
             if (bar) bar.hidden = true;
         } else {
+            wizard.classList.remove('it-wizard--basari');
             wizard.querySelectorAll('.it-bolum').forEach(function (el) { el.hidden = false; });
             if (basari) basari.hidden = true;
             if (bar) bar.hidden = false;

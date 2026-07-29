@@ -131,6 +131,15 @@
   color: var(--aurix-text-secondary);
 }
 
+.it-bolum__altbaslik {
+  margin: 18px 0 10px;
+  padding-top: 14px;
+  border-top: 1px dashed var(--aurix-border);
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--aurix-text);
+}
+
 .it-alan {
   margin-bottom: 14px;
 }
@@ -416,6 +425,16 @@
   padding: 12px 0 calc(12px + env(safe-area-inset-bottom, 0px));
   border-top: 1px solid var(--aurix-border);
   background: linear-gradient(180deg, transparent, var(--aurix-panel-solid) 28%);
+}
+
+.it-aksiyon-bar[hidden] {
+  display: none;
+}
+
+.it-wizard--basari .it-adimlar,
+.it-wizard--basari .it-bolum,
+.it-wizard--basari .it-aksiyon-bar {
+  display: none !important;
 }
 
 .it-aksiyon-bar__sol,
