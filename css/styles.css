@@ -3905,6 +3905,61 @@ a { color: inherit; text-decoration: none; }
     color: var(--aurix-text);
 }
 
+.iletisim-kurumsal {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    padding: 16px 18px;
+    border-radius: 12px;
+    border: 1px solid var(--aurix-gold-border);
+    background: rgba(201, 169, 98, 0.05);
+}
+
+.iletisim-kurumsal__oge {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    flex: 1 1 200px;
+}
+
+.iletisim-kurumsal__ikon {
+    font-size: 18px;
+    line-height: 1;
+    flex-shrink: 0;
+}
+
+.iletisim-kurumsal__metin {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.iletisim-kurumsal__etiket {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--aurix-muted);
+}
+
+.iletisim-kurumsal__deger {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--aurix-text);
+}
+
+a.iletisim-kurumsal__deger {
+    color: var(--aurix-gold-light);
+    text-decoration: none;
+    word-break: break-word;
+}
+
+a.iletisim-kurumsal__deger:hover {
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
 .icerik-form {
     display: flex;
     flex-direction: column;

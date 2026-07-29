@@ -32,7 +32,7 @@
             return 'Bu kullanıcı için işlem yapılamaz.';
         }
         if (/invalid input syntax for type uuid|22P02|operator does not exist/i.test(msg)) {
-            return 'Firma kimliği uyumsuz. Migration 023 uygulanmalı.';
+            return 'Kayıt kimliği geçersiz görünüyor. Sayfayı yenileyip tekrar deneyin.';
         }
         if (/network|Failed to fetch|Load failed/i.test(msg)) {
             return 'Bağlantı kurulamadı. İnternetinizi kontrol edin.';

@@ -133,7 +133,7 @@
                         <span class="sr-only">Şehir</span>
                         <select class="form-select" id="isTalepFiltreSehir" aria-label="Şehir filtresi">
                             <option value="">Tüm şehirler</option>
-                            <option value="FARK ETMEZ">Fark etmez / Türkiye geneli</option>
+                            <option value="Türkiye geneli">Fark etmez / Türkiye geneli</option>
                         </select>
                     </label>
                     <label class="it-filtre">
@@ -645,7 +645,7 @@
                 <p class="icerik-sayfa__ozet">Ücretlendirme modeli netleştikçe bu sayfa güncellenir.</p>
                 <div class="icerik-sayfa__govde">
                     <p>Komisyon oranı, tahsilat zamanı ve istisnalar belirlendiğinde burada duyurulur.</p>
-                    <p>Şu an emanet hesabı veya ödeme güvencesi sunulmamaktadır.</p>
+                    <p>AURIX, alıcı ve satıcı arasındaki B2B eşleşmeleri kolaylaştıran doğrulama tabanlı bir platformdur.</p>
                     <p>Sorularınız için <a href="#iletisim" data-nav="iletisim">İletişim</a> formunu kullanabilirsiniz.</p>
                 </div>
             </div>
@@ -659,8 +659,21 @@
                 <h1 class="icerik-sayfa__baslik">İletişim</h1>
                 <p class="icerik-sayfa__ozet">Taleplerinizi aşağıdaki form ile iletebilirsiniz.</p>
                 <div class="icerik-sayfa__govde">
-                    <div class="icerik-yakinda" role="note">
-                        <strong>Yakında:</strong> Resmi e-posta, telefon ve adres bilgileri eklenecektir.
+                    <div class="iletisim-kurumsal" role="note" aria-label="Kurumsal iletişim bilgileri">
+                        <div class="iletisim-kurumsal__oge">
+                            <span class="iletisim-kurumsal__ikon" aria-hidden="true">📧</span>
+                            <div class="iletisim-kurumsal__metin">
+                                <span class="iletisim-kurumsal__etiket">E-posta</span>
+                                <a class="iletisim-kurumsal__deger" href="mailto:info@aurixb2b.com">info@aurixb2b.com</a>
+                            </div>
+                        </div>
+                        <div class="iletisim-kurumsal__oge">
+                            <span class="iletisim-kurumsal__ikon" aria-hidden="true">🕒</span>
+                            <div class="iletisim-kurumsal__metin">
+                                <span class="iletisim-kurumsal__etiket">Çalışma Saatleri</span>
+                                <span class="iletisim-kurumsal__deger">Hafta içi 09:00 - 18:00</span>
+                            </div>
+                        </div>
                     </div>
                     <form class="icerik-form" id="iletisimForm" novalidate>
                         <div class="form-grup">
@@ -874,7 +887,7 @@
             </div>
             <div class="uyelik-panel" id="uyelikPanelGiris" role="tabpanel" aria-labelledby="uyelikSekmeGiris">
                 <p class="giris-modal__metin" id="girisModalGirisMetin">Hesabınıza giriş yapın.</p>
-                <form id="girisForm">
+                <form id="girisForm" novalidate>
                     <div class="form-grup">
                         <label class="form-label" for="girisEmail">E-posta</label>
                         <input class="form-input" type="email" id="girisEmail" placeholder="ornek@firma.com" autocomplete="email" required>
@@ -888,7 +901,7 @@
                         <button type="button" class="link-btn" id="sifreUnuttumBtn">Şifremi unuttum</button>
                     </p>
                 </form>
-                <form id="sifreSifirlaForm" hidden>
+                <form id="sifreSifirlaForm" hidden novalidate>
                     <p class="giris-modal__metin">Şifre sıfırlama bağlantısı e-posta adresinize gönderilir.</p>
                     <div class="form-grup">
                         <label class="form-label" for="sifreSifirlaEmail">E-posta</label>
@@ -899,7 +912,7 @@
                         <button type="button" class="link-btn" id="sifreSifirlaGeriBtn">Girişe dön</button>
                     </p>
                 </form>
-                <form id="sifreYenileForm" hidden>
+                <form id="sifreYenileForm" hidden novalidate>
                     <p class="giris-modal__metin">Yeni şifrenizi belirleyin.</p>
                     <div class="form-grup">
                         <label class="form-label" for="sifreYenileYeni">Yeni şifre</label>
@@ -926,7 +939,7 @@
             </div>
             <div class="uyelik-panel" id="uyelikPanelKayit" role="tabpanel" aria-labelledby="uyelikSekmeKayit" hidden>
                 <p class="giris-modal__metin">Yeni üyelik oluşturun. Firma başvurusunu giriş sonrası yapabilirsiniz.</p>
-                <form id="kayitForm">
+                <form id="kayitForm" novalidate>
                     <div class="form-grup">
                         <label class="form-label" for="kayitAdSoyad">Ad Soyad</label>
                         <input class="form-input" type="text" id="kayitAdSoyad" required maxlength="120" placeholder="Adınız ve soyadınız" autocomplete="name">
@@ -971,7 +984,7 @@
                 <button class="modal__kapat" data-modal-kapat="firmaBasvuruModal" aria-label="Kapat">×</button>
             </div>
             <p class="giris-modal__metin">Firma hesabınızı oluşturun. Başvuru incelenir; onaylanmadan Firmalar sayfasında görünmez.</p>
-            <form id="firmaBasvuruForm">
+            <form id="firmaBasvuruForm" novalidate>
                 <div class="form-grup">
                     <label class="form-label" for="firmaBasvuruAd">Firma Adı</label>
                     <input class="form-input" type="text" id="firmaBasvuruAd" required maxlength="200" placeholder="Ticari unvanınız" autocomplete="organization">
@@ -1098,7 +1111,7 @@
                 <p class="teklif-modal__is-baslik" id="teklifIsBaslik">—</p>
                 <p class="teklif-modal__is-meta" id="teklifIsOzet"></p>
             </div>
-            <form id="teklifForm">
+            <form id="teklifForm" novalidate>
                 <input type="hidden" id="teklifIsId" value="">
                 <div class="form-grup">
                     <label class="form-label" for="teklifFirma">Firma</label>

@@ -499,6 +499,7 @@
     function toast(mesaj, tip) {
         var wrap = $('toastWrap');
         if (!wrap) return;
+        if (!mesaj || typeof mesaj !== 'string') mesaj = 'Bir hata oluştu. Lütfen tekrar deneyin.';
         var el = document.createElement('div');
         el.className = 'toast toast--' + (tip || 'info');
         el.textContent = mesaj;
@@ -2186,7 +2187,16 @@
 
         var liste = onayliIsTalepleri();
         if (!liste.length) {
-            el.innerHTML = '<p class="bolum-bos">Henüz açık iş talebi bulunmuyor.</p>';
+            var aktifFiltre = state.isTalebiFiltre || {};
+            var filtreVarMi = !!(aktifFiltre.kategori || aktifFiltre.sehir || aktifFiltre.aciliyet);
+            if (filtreVarMi) {
+                el.innerHTML = '<p class="bolum-bos">Bu filtrelerle eşleşen iş talebi bulunamadı. Filtreleri değiştirip tekrar deneyin.</p>';
+            } else {
+                el.innerHTML = '<p class="bolum-bos">Henüz açık iş talebi bulunmuyor.</p>' +
+                    '<p class="bolum-bos"><button type="button" class="btn btn--ghost btn--sm" id="isTalepBosCta">İlk iş talebini oluştur</button></p>';
+                var ctaBtn = $('isTalepBosCta');
+                if (ctaBtn) ctaBtn.addEventListener('click', isTalepModalAc);
+            }
             return;
         }
 
@@ -2226,9 +2236,8 @@
                 '</ul>' +
                 '<div class="is-talep-kart__aksiyon">' +
                 '<button type="button" class="btn btn--ghost btn--sm" data-is-detay="' + esc(detayId) + '">Detay</button>' +
-                '<button type="button" class="btn btn--primary btn--sm is-talep-kart__btn" data-teklif-is="' + esc(talep.id) + '" disabled title="Teklif sistemi bir sonraki aşamada aktif edilecektir.">Teklif Ver</button>' +
+                '<button type="button" class="btn btn--primary btn--sm is-talep-kart__btn" data-teklif-is="' + esc(talep.id) + '">Teklif Ver</button>' +
                 '</div>' +
-                '<p class="is-talep-kart__not">Teklif sistemi bir sonraki aşamada aktif edilecektir.</p>' +
                 '</article>';
         }).join('');
         el.querySelectorAll('[data-is-detay]').forEach(function (btn) {
@@ -2237,6 +2246,13 @@
                 if (window.AurixIsTalebi && typeof AurixIsTalebi.openDetail === 'function') {
                     AurixIsTalebi.openDetail(id);
                 }
+            });
+        });
+        el.querySelectorAll('[data-teklif-is]').forEach(function (btn) {
+            btn.addEventListener('click', function (ev) {
+                ev.stopPropagation();
+                var id = btn.getAttribute('data-teklif-is');
+                teklifModalAc(id);
             });
         });
     }
@@ -2944,6 +2960,7 @@
             }
             if (res && res.firma && res.firma.id) {
                 /* Mevcut kayıt: oluşturma değil, profil düzenleme */
+                toast('Zaten bir firma hesabınız var. Profilinizi buradan düzenleyebilirsiniz.', 'info');
                 mevcutFirmaPanelProfilAc();
                 return;
             }
@@ -3610,7 +3627,7 @@
         var teklifBtn = $('detayTeklifBtn');
         if (teklifBtn) {
             teklifBtn.onclick = function () {
-                toast(firma.ad + ' firmasına teklif talebiniz alındı. En kısa sürede dönüş yapılacak.', 'success');
+                toast('Bu firmaya teklif vermek için ilgili iş talebinin detayındaki "Teklif Ver" butonunu kullanın.', 'info');
             };
         }
 
@@ -3674,7 +3691,9 @@
             toast('Teklif vermek yalnızca firma hesabı olan kullanıcılar içindir.', 'error');
             return;
         }
-        var talep = onayliIsTalepleri().find(function (t) { return String(t.id) === String(talepId); });
+        var talep = onayliIsTalepleri().find(function (t) {
+            return String(t.id) === String(talepId) || String(t.supabaseId) === String(talepId);
+        });
         if (!talep || talep.supabaseId == null) {
             toast('İş talebi bulunamadı. Listeyi yenileyip tekrar deneyin.', 'error');
             return;
@@ -4935,7 +4954,8 @@
         firmaProfilFormHazirla: firmaProfilFormHazirla,
         isTalepModalAc: isTalepModalAc,
         yukleAcikIsTalepleri: yukleAcikIsTalepleriSupabase,
-        getMarketStatus: getMarketStatus
+        getMarketStatus: getMarketStatus,
+        teklifModalAc: teklifModalAc
     };
 
     document.addEventListener('DOMContentLoaded', init);

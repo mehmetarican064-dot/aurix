@@ -145,10 +145,10 @@
                 return 'Teklif reddedildi. Giriş yapmış olmalı ve teklifi kendi onaylı firmanız adına vermelisiniz.';
             }
             if (/permission denied for column|column/i.test(msg) && /firmalar|firma/i.test(msg)) {
-                return 'Firma profil alanları okunamadı (yetki). Migration 024 uygulanmalı.';
+                return 'Firma profil alanlarına şu anda erişilemiyor. Lütfen daha sonra tekrar deneyin.';
             }
             if (/firmalar|firma/i.test(msg)) {
-                return 'Firma kaydı okunamadı veya yazılamadı. Oturumunuzu kontrol edin; sorun sürerse Migration 024 uygulayın.';
+                return 'Firma kaydınız okunamadı veya güncellenemedi. Oturumunuzu kontrol edip tekrar deneyin.';
             }
             return 'Kayıt güvenlik kuralları nedeniyle reddedildi. Lütfen alanları kontrol edin.';
         }
@@ -156,7 +156,7 @@
             return 'Giriş yapmış olmalısınız.';
         }
         if (/function.*firma_panel_getir|PGRST202|Could not find the function/i.test(msg)) {
-            return 'Firma profil API’si eksik. Migration 024 uygulanmalı.';
+            return 'Bu özellik şu anda kullanılamıyor. Lütfen daha sonra tekrar deneyin.';
         }
         if (/JWT|Invalid API key|401/i.test(msg)) {
             return 'Oturum veya API anahtarı geçersiz. Sayfayı yenileyip tekrar deneyin.';
@@ -659,7 +659,7 @@
                         hasFirma: false,
                         firma: null,
                         error: msg,
-                        firmaError: teknik ? (msg + ' (' + teknik + ')') : msg,
+                        firmaError: msg,
                         supabase: firmaRes.supabase || null,
                         teknik: teknik
                     });
@@ -704,7 +704,7 @@
             return Object.assign({}, bos, {
                 ok: false,
                 error: msg,
-                firmaError: teknik ? (msg + ' (' + teknik + ')') : msg,
+                firmaError: msg,
                 teknik: teknik
             });
         });
@@ -932,7 +932,8 @@
             }
 
             var isOk = (isRes.data || []).some(function (row) {
-                return row && String(row.id) === String(isId) && String(row.durum || '') === 'Acik';
+                return row && String(row.id) === String(isId) &&
+                    (String(row.durum || '') === 'teklif_bekliyor' || String(row.durum || '') === 'Acik');
             });
             if (!isOk) {
                 return {

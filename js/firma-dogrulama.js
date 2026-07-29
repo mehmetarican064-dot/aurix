@@ -147,7 +147,7 @@
                 return { ok: false, durum: 'gecersiz', tur: 'tckn', error: 'Şahıs işletmesi için TCKN 11 hane olmalıdır.' };
             }
             if (!tcknGecerli(v)) {
-                return { ok: false, durum: 'gecersiz', tur: 'tckn', error: 'TCKN format/checksum geçersiz.' };
+                return { ok: false, durum: 'gecersiz', tur: 'tckn', error: 'TC Kimlik numarası geçerli değil, lütfen kontrol edin.' };
             }
             return { ok: true, durum: 'format_gecerli', tur: 'tckn', value: v };
         }
@@ -155,7 +155,7 @@
             return { ok: false, durum: 'gecersiz', tur: 'vkn', error: 'VKN yalnızca 10 rakamdan oluşmalıdır.' };
         }
         if (!vknGecerli(v)) {
-            return { ok: false, durum: 'gecersiz', tur: 'vkn', error: 'VKN format/checksum geçersiz.' };
+            return { ok: false, durum: 'gecersiz', tur: 'vkn', error: 'Vergi kimlik numarası geçerli değil, lütfen kontrol edin.' };
         }
         return { ok: true, durum: 'format_gecerli', tur: 'vkn', value: v };
     }
@@ -227,10 +227,10 @@
         }
         var ad = String(file.name || '').toLowerCase();
         if (mime === 'application/pdf' && !/\.pdf$/i.test(ad)) {
-            return { ok: false, error: 'PDF uzantısı ile MIME uyuşmuyor.' };
+            return { ok: false, error: 'Bu dosya türü desteklenmiyor. Lütfen .pdf uzantılı bir dosya yükleyin.' };
         }
         if (/^image\//.test(mime) && !/\.(jpe?g|png|webp)$/i.test(ad)) {
-            return { ok: false, error: 'Görsel uzantısı ile MIME uyuşmuyor.' };
+            return { ok: false, error: 'Bu dosya türü desteklenmiyor. Lütfen JPG, PNG veya WEBP formatında bir görsel yükleyin.' };
         }
         return { ok: true };
     }

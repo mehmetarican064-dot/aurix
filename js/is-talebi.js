@@ -477,7 +477,8 @@
         h += '<div class="it-hata" data-it-error="urun_turu" hidden></div></div></div>';
         h += '<div class="it-alan it-alan--iki">';
         h += '<div><label class="form-label" for="itAdet">Adet / kapsam</label>';
-        h += '<input class="form-input" id="itAdet" data-it-field="adet" maxlength="80" placeholder="Örn. 120 adet"></div>';
+        h += '<input class="form-input" id="itAdet" data-it-field="adet" maxlength="80" inputmode="numeric" placeholder="Örn. 120">';
+        h += '<div class="it-hata" data-it-error="adet" hidden></div></div>';
         h += '<div><label class="form-label" for="itAciliyet">Aciliyet</label>';
         h += '<select class="form-select" id="itAciliyet" data-it-field="aciliyet">' + optionsHtml(ACILIYET, 'standart', false) + '</select></div></div>';
         h += '<div class="it-uyari" id="itAcilUyari" hidden>Acil talepler daha yüksek işçilik teklifleri alabilir.</div>';
@@ -493,7 +494,7 @@
         h += '<p class="it-yardim">Ölçü, adet, ürün tipi, işçilik beklentisi ve özel talepleri açıkça belirtin.</p>';
         h += '<div class="it-alan"><label class="form-label" for="itTeknik">Teknik bilgiler</label>';
         h += '<textarea class="form-textarea" id="itTeknik" data-it-field="teknik_bilgiler" rows="3" maxlength="1000" placeholder="Ölçü, tolerans, alaşım notu..."></textarea>';
-        h += '<div class="it-sayac" data-it-count="teknik_bilgiler">0 / 1000</div></div>';
+        h += '<div class="it-sayac" data-it-count="teknik_bilgiler">0 / 1000</div><div class="it-hata" data-it-error="teknik_bilgiler" hidden></div></div>';
         h += '<div class="it-alan it-alan--iki">';
         h += '<div><label class="form-label" for="itMalzeme">Malzeme</label>';
         h += '<select class="form-select" id="itMalzeme" data-it-field="malzeme">' + optionsHtml(MALZEMELER, '', true) + '</select></div>';
@@ -501,7 +502,7 @@
         h += '<div class="it-alan it-alan--iki">';
         h += '<div><label class="form-label" for="itGram">Tahmini gram</label>';
         h += '<input class="form-input" type="number" id="itGram" data-it-field="tahmini_gram" min="0" step="0.001" inputmode="decimal" placeholder="örn. 12.5">';
-        h += '<p class="it-yardim">Birim: gr</p></div>';
+        h += '<p class="it-yardim">Birim: gr</p><div class="it-hata" data-it-error="tahmini_gram" hidden></div></div>';
         h += '<div><label class="it-radyo" for="itGramGorunur"><input type="checkbox" id="itGramGorunur" data-it-field="gram_gorunur"><span>Tahmini gramı herkese açık göster</span></label></div></div>';
         h += '<div class="it-alan"><label class="form-label">Taş durumu</label>' + radioGroupHtml('tas_durumu', TAS_DURUMU, 'yok') + '</div>';
         h += '</section>';
@@ -556,7 +557,7 @@
         h += '<div class="it-alan"><label class="form-label">Görünürlük</label>' + radioGroupHtml('gorunurluk', GORUNURLUK, 'tum_dogrulanmis_firmalar') + '</div>';
         h += '<div class="it-alan"><label class="it-radyo" for="itSahipGizli"><input type="checkbox" id="itSahipGizli" data-it-field="sahip_gizli"><span>Firma adıma gizli yayınla (isteğe bağlı)</span></label>';
         h += '<p class="it-yardim">Gizli yayınlarda doğrulanmış firmalar işi görür; kimliğiniz teklif aşamasına kadar sınırlı kalabilir.</p></div>';
-        h += '<div class="it-uyari">Teklif verme ve doğrulama akışı bir sonraki fazda tamamlanacaktır.</div>';
+        h += '<div class="it-uyari">Dosyaların yalnızca teklif verdikten sonra görünmesi özelliği bir sonraki fazda tamamlanacaktır.</div>';
         h += '</section>';
 
         /* Önizleme */
@@ -570,6 +571,7 @@
         h += '<div class="it-basari__ikon" aria-hidden="true">✓</div>';
         h += '<h3>İş talebiniz yayınlandı</h3>';
         h += '<p id="itBasariMetin">Uygun firmalar talebinizi inceleyerek teklif gönderebilir.</p>';
+        h += '<p class="it-uyari" id="itBasariUyari" hidden></p>';
         h += '<div class="it-basari__aksiyon">';
         h += '<button type="button" class="btn btn--primary" id="itBasariGoruntule">Talebi Görüntüle</button>';
         h += '<button type="button" class="btn btn--secondary" id="itBasariYeni">Yeni Talep Oluştur</button>';
@@ -784,6 +786,18 @@
         });
     }
 
+    function setBasariUyari(msg) {
+        var el = document.getElementById('itBasariUyari');
+        if (!el) return;
+        if (msg) {
+            el.hidden = false;
+            el.textContent = msg;
+        } else {
+            el.hidden = true;
+            el.textContent = '';
+        }
+    }
+
     function updateBudgetVisibility() {
         var tip = readField('butce_tipi') || (state.formData && state.formData.butce_tipi) || 'teklif_bekliyorum';
         var box = document.getElementById('itButceAlanlari');
@@ -881,12 +895,17 @@
         if (!d.kategori) fail('kategori', 'İş kategorisi seçin.', 'ozet');
         if (!d.urun_turu) fail('urun_turu', 'Ürün türü seçin.', 'ozet');
 
+        var adetStr = String(d.adet || '').trim();
+        if (adetStr !== '' && (!/^\d+$/.test(adetStr) || parseInt(adetStr, 10) <= 0)) {
+            fail('adet', 'Adet sayısal bir değer olmalıdır (örn. 120).', 'ozet');
+        }
+
         var aciklama = String(d.aciklama || '').trim();
         if (aciklama.length < 40) fail('aciklama', 'Açıklama en az 40 karakter olmalı.', 'detay');
         else if (aciklama.length > 2000) fail('aciklama', 'Açıklama en fazla 2000 karakter olabilir.', 'detay');
 
         var teknik = String(d.teknik_bilgiler || '');
-        if (teknik.length > 1000) fail('aciklama', 'Teknik notlar en fazla 1000 karakter olabilir.', 'detay');
+        if (teknik.length > 1000) fail('teknik_bilgiler', 'Teknik notlar en fazla 1000 karakter olabilir.', 'detay');
 
         if (!opts.draftOnly) {
             if (!d.sehir) fail('sehir', 'Şehir seçin.', 'teslimat');
@@ -894,7 +913,7 @@
 
             if (d.tahmini_gram !== '' && d.tahmini_gram != null) {
                 var gram = Number(d.tahmini_gram);
-                if (!isFinite(gram) || gram < 0) fail('aciklama', 'Tahmini gram 0 veya daha büyük olmalı.', 'detay');
+                if (!isFinite(gram) || gram < 0) fail('tahmini_gram', 'Tahmini gram 0 veya daha büyük olmalı.', 'detay');
             }
 
             if (d.butce_tipi === 'tahmini') {
@@ -1121,6 +1140,14 @@
 
     function saveDraft() {
         var data = collectForm();
+
+        var draftAdet = String(data.adet || '').trim();
+        if (draftAdet !== '' && (!/^\d+$/.test(draftAdet) || parseInt(draftAdet, 10) <= 0)) {
+            showError('adet', 'Adet sayısal bir değer olmalıdır (örn. 120).');
+            toast('Adet alanı sayısal olmalıdır (örn. 120). Taslak kaydedilmedi.', 'error');
+            return Promise.resolve({ ok: false, error: 'adet_gecersiz' });
+        }
+
         if (!state.istemciAnahtar) state.istemciAnahtar = uuid();
         lsSet(LS_AUTOSAVE, { updatedAt: new Date().toISOString(), data: data, istemciAnahtar: state.istemciAnahtar });
         upsertDraftList(data);
@@ -1153,8 +1180,9 @@
 
     function uploadPendingFiles(talepId) {
         var s = svc();
-        if (!s || typeof s.dosyaYukle !== 'function') return Promise.resolve({ ok: true });
-        var chain = Promise.resolve({ ok: true });
+        var failedNames = [];
+        if (!s || typeof s.dosyaYukle !== 'function') return Promise.resolve({ ok: true, failedCount: 0, failedNames: failedNames });
+        var chain = Promise.resolve();
         state.localFiles.forEach(function (f) {
             if (f.remoteId) return;
             chain = chain.then(function () {
@@ -1170,6 +1198,7 @@
                         f.progress = 100;
                         f.remoteId = (res.data && (res.data.id || res.data.dosya_id)) || res.id || true;
                     } else {
+                        failedNames.push((f.file && f.file.name) || 'dosya');
                         toast((res && res.error) || ('Dosya yüklenemedi: ' + ((f.file && f.file.name) || '')), 'error');
                     }
                     renderFileList();
@@ -1177,7 +1206,9 @@
                 });
             });
         });
-        return chain;
+        return chain.then(function () {
+            return { ok: failedNames.length === 0, failedCount: failedNames.length, failedNames: failedNames };
+        });
     }
 
     function publish() {
@@ -1235,7 +1266,7 @@
                 return done({ ok: false, error: 'not_published', data: d });
             }
             state.talepId = res.id || state.talepId;
-            return uploadPendingFiles(state.talepId).then(function () {
+            return uploadPendingFiles(state.talepId).then(function (uploadRes) {
                 state.dirty = false;
                 try {
                     localStorage.removeItem(LS_PENDING);
@@ -1249,7 +1280,16 @@
                 } catch (e) { /* ignore */ }
                 state.istemciAnahtar = uuid();
                 setMode('basari');
-                toast('İş talebiniz yayınlandı.', 'success');
+                if (uploadRes && !uploadRes.ok && uploadRes.failedCount > 0) {
+                    setBasariUyari(
+                        uploadRes.failedCount + ' dosya yüklenemedi. Talebiniz yayında; ' +
+                        '"Taleplerim" üzerinden düzenleyerek dosyaları tekrar ekleyebilirsiniz.'
+                    );
+                    toast('İş talebiniz yayınlandı ancak bazı dosyalar yüklenemedi.', 'error');
+                } else {
+                    setBasariUyari(null);
+                    toast('İş talebiniz yayınlandı.', 'success');
+                }
                 try {
                     document.dispatchEvent(new CustomEvent('aurix:is-talebi-yayinlandi', {
                         detail: { id: state.talepId, durum: 'teklif_bekliyor' }
@@ -1518,12 +1558,22 @@
             if (t.sahip_mi) {
                 h += buildOwnerActionsHtml(t);
             } else {
-                h += '<button type="button" class="btn btn--primary" disabled title="Sonraki faz">Teklif Ver</button>';
-                h += '<p class="it-yardim">Teklif verme, firma doğrulaması tamamlandıktan sonraki fazda açılacak.</p>';
+                h += '<button type="button" class="btn btn--primary" data-it-teklif-ver="' + esc(t.id) + '">Teklif Ver</button>';
+                h += '<p class="it-yardim">Teklif vermek için firmanızın doğrulanmış ve onaylı olması gerekir.</p>';
             }
             h += '</div>';
             govde.innerHTML = h;
             bindOwnerActionButtons(govde, t.id);
+            var teklifVerBtn = govde.querySelector('[data-it-teklif-ver]');
+            if (teklifVerBtn) {
+                teklifVerBtn.addEventListener('click', function () {
+                    if (global.Aurix && typeof Aurix.teklifModalAc === 'function') {
+                        Aurix.teklifModalAc(t.id);
+                    } else {
+                        toast('Teklif verme şu anda kullanılamıyor. Sayfayı yenileyip tekrar deneyin.', 'error');
+                    }
+                });
+            }
         };
 
         var demos = getDemoTalepler();
@@ -1672,7 +1722,7 @@
                 modalKapat('isTalepModal');
                 try {
                     if (global.Aurix && typeof Aurix.sayfaGoster === 'function') {
-                        Aurix.sayfaGoster('ana');
+                        Aurix.sayfaGoster('ana-sayfa');
                     } else {
                         location.hash = '';
                         window.scrollTo(0, 0);

@@ -1387,7 +1387,7 @@
     function yukleDogrulama() {
         var s = svc();
         if (!s || typeof s.dogrulamaListesi !== 'function') {
-            $('apIcerik').innerHTML = hataDurum('Doğrulama API’si yok. Migration 025 uygulayın.');
+            $('apIcerik').innerHTML = hataDurum('Doğrulama bölümü şu anda kullanılamıyor. Lütfen daha sonra tekrar deneyin.');
             return;
         }
         setBolumLoading('dogrulama', true);

@@ -45,13 +45,16 @@
             }
         } catch (eLog) { /* ignore */ }
         if (rpcMissing(err)) {
-            return 'İş talebi API henüz hazır değil. Migration 028/029 uygulanmalı.';
+            return 'Bu özellik şu anda kullanılamıyor, lütfen daha sonra tekrar deneyin.';
         }
         if (bucketMissing(err)) {
-            return 'Dosya deposu (is-talebi-dosyalari) henüz yapılandırılmamış.';
+            return 'Dosya yükleme şu anda kullanılamıyor, lütfen daha sonra tekrar deneyin.';
         }
         if (/check constraint|violates check|malzeme_saglayici|tas_durumu|teslim_sekli|butce_tipi|gorunurluk|aciliyet|23514/i.test(msg)) {
             return 'İş talebi bilgileri kaydedilirken bir uyumsuzluk oluştu. Lütfen tekrar deneyin.';
+        }
+        if (/invalid input syntax|22P02/i.test(msg)) {
+            return 'Adet alanı sayısal olmalıdır. Lütfen kontrol edip tekrar deneyin.';
         }
         if (/JWT|not authenticated|oturum|session|401/i.test(msg)) {
             return 'Bu işlem için giriş yapmanız gerekir.';

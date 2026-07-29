@@ -171,8 +171,6 @@
         return '<div class="fp-bos-kutu" role="alert">' +
             '<p class="fp-bos-metin"><strong>Firma kaydı yüklenemedi.</strong></p>' +
             '<p class="fp-bos-metin">' + esc(mesaj || 'Lütfen sayfayı yenileyip tekrar deneyin.') + '</p>' +
-            '<p class="panel-not">Tarayıcı konsolunda <code>[AURIX]</code> ile başlayan hata satırına bakın. ' +
-            'Çoğu durumda Supabase’de Migration 024 uygulanmalıdır.</p>' +
             '<button type="button" class="btn btn--primary btn--sm" data-panel-aksiyon="firma-yenile">Tekrar Dene</button>' +
             '</div>';
     }
