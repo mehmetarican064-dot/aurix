@@ -200,8 +200,9 @@
     function mapUser(sessionUser, profile) {
         if (!sessionUser) return null;
         var meta = sessionUser.user_metadata || {};
-        var hesapTipi = (profile && profile.hesap_tipi) || 'normal';
-        if (hesapTipi !== 'firma') hesapTipi = 'normal';
+        var hesapTipi = (profile && profile.hesap_tipi) || 'bireysel';
+        if (hesapTipi === 'normal') hesapTipi = 'bireysel';
+        if (hesapTipi !== 'firma' && hesapTipi !== 'bireysel') hesapTipi = 'bireysel';
         /* Admin kaynağı yalnızca profiles.role — auth metadata kullanılmaz */
         var role = roleFromProfile(profile) || 'user';
         return {
@@ -213,6 +214,7 @@
             role: role,
             hesapTipi: hesapTipi,
             isFirmaHesabi: hesapTipi === 'firma',
+            isBireyselHesap: hesapTipi !== 'firma',
             emailConfirmed: emailOnayliMi(sessionUser)
         };
     }
@@ -575,6 +577,8 @@
         var password2 = String(opts.passwordAgain || opts.passwordConfirm || '');
         var adSoyad = String(opts.adSoyad || opts.ad_soyad || '').trim();
         var telefon = String(opts.telefon || '').trim();
+        var hesapNiyeti = String(opts.hesapTipi || opts.hesap_tipi || 'bireysel').toLowerCase();
+        if (hesapNiyeti !== 'firma') hesapNiyeti = 'bireysel';
 
         if (adSoyad.length < 2) {
             return Promise.resolve({ ok: false, error: 'Ad soyad en az 2 karakter olmalı.' });
@@ -601,7 +605,9 @@
                 emailRedirectTo: emailConfirmRedirect(),
                 data: {
                     ad_soyad: adSoyad,
-                    telefon: telefon || null
+                    telefon: telefon || null,
+                    hesap_tipi: 'bireysel',
+                    hesap_niyeti: hesapNiyeti
                 }
             }
         }).then(function (res) {
@@ -632,6 +638,7 @@
                     ok: true,
                     needsEmailConfirmation: true,
                     email: email,
+                    hesapNiyeti: hesapNiyeti,
                     message: MSG_DOGRULAMA,
                     detail: MSG_DOGRULAMA_DETAY,
                     user: mapUser(user, null)
@@ -647,6 +654,7 @@
                         ok: true,
                         needsEmailConfirmation: true,
                         email: email,
+                        hesapNiyeti: hesapNiyeti,
                         message: MSG_DOGRULAMA,
                         detail: MSG_DOGRULAMA_DETAY
                     };
@@ -655,7 +663,13 @@
 
             return setCurrentFromSession(session).then(function (u) {
                 notify('SIGNED_IN');
-                return { ok: true, user: u, needsEmailConfirmation: false, message: MSG_GIRIS_OK };
+                return {
+                    ok: true,
+                    user: u,
+                    needsEmailConfirmation: false,
+                    hesapNiyeti: hesapNiyeti,
+                    message: MSG_GIRIS_OK
+                };
             });
         }).catch(function (err) {
             return { ok: false, error: turkceAuthHata(err) };

@@ -474,9 +474,23 @@
                     telefon: veri.telefon || veri.tel || null,
                     email: (veri.email || '').trim().toLowerCase() || null,
                     dogrulanmis: false,
-                    durum: 'beklemede',
+                    durum: 'basvuru_bekliyor',
+                    yayin_durumu: 'incelemede',
                     user_id: userId
                 };
+
+                if (veri.yetkili_ad) satir.yetkili_ad = String(veri.yetkili_ad).trim();
+                if (veri.ilce) satir.ilce = String(veri.ilce).trim();
+                if (veri.adres) satir.adres = String(veri.adres).trim();
+                if (veri.vergi_no) satir.vergi_no = String(veri.vergi_no).trim();
+                if (veri.vergi_dairesi) satir.vergi_dairesi = String(veri.vergi_dairesi).trim();
+                if (veri.hizmet_kategorileri != null) {
+                    satir.hizmet_kategorileri = Array.isArray(veri.hizmet_kategorileri)
+                        ? veri.hizmet_kategorileri
+                        : [veri.hizmet_kategorileri];
+                } else if (satir.kategori) {
+                    satir.hizmet_kategorileri = [satir.kategori];
+                }
 
                 if (veri.logo_url) satir.logo_url = veri.logo_url;
                 if (veri.kapak_url) satir.kapak_url = veri.kapak_url;
@@ -496,6 +510,14 @@
                                 delete yedek.logo_url;
                                 delete yedek.calisma_gorselleri;
                                 delete yedek.kapak_url;
+                            } else if (/yetkili_ad|ilce|adres|vergi_|hizmet_kategorileri|yayin_durumu/i.test(msg)) {
+                                delete yedek.yetkili_ad;
+                                delete yedek.ilce;
+                                delete yedek.adres;
+                                delete yedek.vergi_no;
+                                delete yedek.vergi_dairesi;
+                                delete yedek.hizmet_kategorileri;
+                                delete yedek.yayin_durumu;
                             } else if (/user_id/i.test(msg)) {
                                 return {
                                     ok: false,
@@ -540,7 +562,7 @@
                             return {
                                 ok: true,
                                 id: row ? row.id : null,
-                                durum: row ? row.durum : 'beklemede',
+                                durum: row ? row.durum : 'basvuru_bekliyor',
                                 dogrulanmis: false,
                                 firma: row
                             };
@@ -1494,6 +1516,103 @@
         });
     }
 
+    function validateBasvuruBelgeFile(file) {
+        if (!file) return { ok: false, error: 'Dosya seçilmedi.' };
+        var max = 10 * 1024 * 1024;
+        if (file.size > max) return { ok: false, error: 'Dosya boyutu en fazla 10 MB olabilir.' };
+        var mime = String(file.type || '').toLowerCase();
+        var ad = String(file.name || '').toLowerCase();
+        var okMime = mime === 'application/pdf' || mime === 'image/jpeg' || mime === 'image/png';
+        var okExt = /\.(pdf|jpe?g|png)$/i.test(ad);
+        if (!okMime && !okExt) {
+            return { ok: false, error: 'Yalnızca PDF, JPG veya PNG dosyaları kabul edilir.' };
+        }
+        if (mime === 'application/pdf' && !/\.pdf$/i.test(ad)) {
+            return { ok: false, error: 'PDF dosyasının uzantısı .pdf olmalıdır.' };
+        }
+        return { ok: true };
+    }
+
+    /** Private bucket: başvuru belgeleri (vergi levhası / oda belgesi) */
+    function yukleFirmaBasvuruBelgesi(opts) {
+        var sb = getClient();
+        if (!sb) return Promise.resolve({ ok: false, error: 'Bağlantı yok.' });
+        opts = opts || {};
+        var file = opts.file;
+        var check = validateBasvuruBelgeFile(file);
+        if (!check.ok) return Promise.resolve({ ok: false, error: check.error });
+
+        return oturumKullaniciId(sb).then(function (uid) {
+            if (!uid) return { ok: false, needsAuth: true, error: 'Oturum gerekli.' };
+            var ext = (file.name.split('.').pop() || 'bin').toLowerCase().replace(/[^a-z0-9]/g, '');
+            if (ext === 'jpeg') ext = 'jpg';
+            var firmaId = String(opts.firmaId || 'firma');
+            var tur = String(opts.belgeTuru || '').replace(/[^a-z0-9_]/gi, '');
+            if (tur !== 'vergi_levhasi' && tur !== 'oda_belgesi') {
+                return { ok: false, error: 'Belge türü geçersiz.' };
+            }
+            var yol = uid + '/' + firmaId + '/' + tur + '/' + Date.now() + '-' +
+                Math.random().toString(36).slice(2, 8) + '.' + ext;
+            var mime = file.type || (ext === 'pdf' ? 'application/pdf' : (ext === 'png' ? 'image/png' : 'image/jpeg'));
+
+            return sb.storage.from('firma-belgeler').upload(yol, file, {
+                cacheControl: '3600',
+                upsert: false,
+                contentType: mime
+            }).then(function (up) {
+                if (up.error) {
+                    logSupabaseHata('firma-belgeler basvuru upload', up.error);
+                    return { ok: false, error: hataMesaji(up.error) };
+                }
+                return sb.rpc('firma_basvuru_belge_kaydet', {
+                    p_firma_id: firmaId,
+                    p_belge_turu: tur,
+                    p_storage_path: yol,
+                    p_mime_type: mime,
+                    p_dosya_boyutu: file.size,
+                    p_orijinal_ad: file.name
+                }).then(function (meta) {
+                    if (meta.error) {
+                        logSupabaseHata('firma_basvuru_belge_kaydet', meta.error);
+                        return { ok: false, error: hataMesaji(meta.error) };
+                    }
+                    return Object.assign({ ok: true, path: yol }, meta.data || {});
+                });
+            });
+        }).catch(function (err) {
+            return { ok: false, error: hataMesaji(err) };
+        });
+    }
+
+    function firmaBasvuruBelgeImzaliUrl(belgeId) {
+        var sb = getClient();
+        if (!sb) return Promise.resolve({ ok: false, error: 'Bağlantı yok.' });
+        return sb.rpc('firma_basvuru_belge_imzali_url', {
+            p_belge_id: belgeId,
+            p_saniye: 120
+        }).then(function (res) {
+            if (res.error) return { ok: false, error: hataMesaji(res.error) };
+            var d = res.data || {};
+            if (!d.path) return { ok: false, error: 'Belge yolu alınamadı.' };
+            return sb.storage.from(d.bucket || 'firma-belgeler')
+                .createSignedUrl(d.path, d.expires_in || 120)
+                .then(function (signed) {
+                    if (signed.error || !signed.data || !signed.data.signedUrl) {
+                        return { ok: false, error: 'Belge bağlantısı oluşturulamadı.' };
+                    }
+                    return {
+                        ok: true,
+                        url: signed.data.signedUrl,
+                        expiresIn: d.expires_in || 120,
+                        belgeTuru: d.belge_turu,
+                        orijinalAd: d.orijinal_ad
+                    };
+                });
+        }).catch(function (err) {
+            return { ok: false, error: hataMesaji(err) };
+        });
+    }
+
     global.AurixSupabase = {
         url: SUPABASE_URL,
         getClient: getClient,
@@ -1512,6 +1631,9 @@
         firmaDogrulamaKimlikKaydet: firmaDogrulamaKimlikKaydet,
         yukleFirmaDogrulamaBelgesi: yukleFirmaDogrulamaBelgesi,
         firmaDogrulamaBelgeImzaliUrl: firmaDogrulamaBelgeImzaliUrl,
+        yukleFirmaBasvuruBelgesi: yukleFirmaBasvuruBelgesi,
+        firmaBasvuruBelgeImzaliUrl: firmaBasvuruBelgeImzaliUrl,
+        validateBasvuruBelgeFile: validateBasvuruBelgeFile,
         firmaDegerlendirmeOzet: firmaDegerlendirmeOzet,
         getirIstatistikler: getirIstatistikler,
         getirFirmaPanelOzeti: getirFirmaPanelOzeti,

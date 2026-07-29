@@ -144,6 +144,52 @@
         });
     }
 
+    function firmaEkBelgeIste(id, neden) {
+        var p = firmaIdArg(id);
+        if (!p.ok) return Promise.resolve({ ok: false, data: null, error: p.error });
+        return rpc('admin_firma_ek_belge_iste', { p_firma_id: p.arg, p_neden: neden }).then(function (res) {
+            return rpcJsonOk(res, 'Ek belge isteği kaydedilemedi.');
+        });
+    }
+
+    function firmaDetay(id) {
+        var p = firmaIdArg(id);
+        if (!p.ok) return Promise.resolve({ ok: false, data: null, error: p.error });
+        return rpc('admin_firma_detay', { p_firma_id: p.arg }).then(function (res) {
+            return rpcJsonOk(res, 'Firma detayı alınamadı.');
+        });
+    }
+
+    function firmaBasvuruBelgeImzaliUrl(belgeId) {
+        if (!belgeId) return Promise.resolve({ ok: false, error: 'Belge kimliği eksik.' });
+        var sb = getSb();
+        if (!sb) return Promise.resolve({ ok: false, error: 'Bağlantı yok.' });
+        return sb.rpc('firma_basvuru_belge_imzali_url', {
+            p_belge_id: belgeId,
+            p_saniye: 120
+        }).then(function (res) {
+            if (res.error) return { ok: false, error: hataMesaji(res.error) };
+            var d = res.data || {};
+            if (!d.path) return { ok: false, error: 'Belge yolu alınamadı.' };
+            return sb.storage.from(d.bucket || 'firma-belgeler')
+                .createSignedUrl(d.path, d.expires_in || 120)
+                .then(function (signed) {
+                    if (signed.error || !signed.data || !signed.data.signedUrl) {
+                        return { ok: false, error: 'Belge bağlantısı oluşturulamadı.' };
+                    }
+                    return {
+                        ok: true,
+                        url: signed.data.signedUrl,
+                        expiresIn: d.expires_in || 120,
+                        belgeTuru: d.belge_turu,
+                        orijinalAd: d.orijinal_ad
+                    };
+                });
+        }).catch(function (err) {
+            return { ok: false, error: hataMesaji(err) };
+        });
+    }
+
     function kullaniciListesi() {
         return rpc('admin_kullanici_listesi');
     }
@@ -380,6 +426,9 @@
         firmaReddet: firmaReddet,
         firmaAskiyaAl: firmaAskiyaAl,
         firmaAskiKaldir: firmaAskiKaldir,
+        firmaEkBelgeIste: firmaEkBelgeIste,
+        firmaDetay: firmaDetay,
+        firmaBasvuruBelgeImzaliUrl: firmaBasvuruBelgeImzaliUrl,
         kullaniciListesi: kullaniciListesi,
         kullaniciAskiyaAl: kullaniciAskiyaAl,
         kullaniciAskiKaldir: kullaniciAskiKaldir,

@@ -938,8 +938,23 @@
                 </div>
             </div>
             <div class="uyelik-panel" id="uyelikPanelKayit" role="tabpanel" aria-labelledby="uyelikSekmeKayit" hidden>
-                <p class="giris-modal__metin">Yeni üyelik oluşturun. Firma başvurusunu giriş sonrası yapabilirsiniz.</p>
+                <p class="giris-modal__metin">Hesap türünüzü seçerek üyelik oluşturun. Firma / atölye hesabı için başvuru formu giriş sonrası açılır.</p>
                 <form id="kayitForm" novalidate>
+                    <div class="form-grup">
+                        <span class="form-label">Hesap türü</span>
+                        <div class="hesap-tipi-secim" role="radiogroup" aria-label="Hesap türü">
+                            <label class="hesap-tipi-secim__kart">
+                                <input type="radio" name="kayitHesapTipi" id="kayitHesapBireysel" value="bireysel" checked>
+                                <span class="hesap-tipi-secim__baslik">Bireysel İş Veren</span>
+                                <span class="hesap-tipi-secim__alt">İş talebi oluşturmak için kişisel hesap</span>
+                            </label>
+                            <label class="hesap-tipi-secim__kart">
+                                <input type="radio" name="kayitHesapTipi" id="kayitHesapFirma" value="firma">
+                                <span class="hesap-tipi-secim__baslik">Firma / Atölye</span>
+                                <span class="hesap-tipi-secim__alt">Teklif vermek için doğrulanmış firma hesabı</span>
+                            </label>
+                        </div>
+                    </div>
                     <div class="form-grup">
                         <label class="form-label" for="kayitAdSoyad">Ad Soyad</label>
                         <input class="form-input" type="text" id="kayitAdSoyad" required maxlength="120" placeholder="Adınız ve soyadınız" autocomplete="name">
@@ -983,22 +998,34 @@
                 <h3 id="firmaBasvuruBaslik">Firma Hesabı Oluştur</h3>
                 <button class="modal__kapat" data-modal-kapat="firmaBasvuruModal" aria-label="Kapat">×</button>
             </div>
-            <p class="giris-modal__metin">Firma hesabınızı oluşturun. Başvuru incelenir; onaylanmadan Firmalar sayfasında görünmez.</p>
+            <p class="giris-modal__metin">Firma / atölye başvurusunu tamamlayın. Belgeler gizli saklanır; onaylanmadan Firmalar sayfasında görünmezsiniz.</p>
             <form id="firmaBasvuruForm" novalidate>
                 <div class="form-grup">
-                    <label class="form-label" for="firmaBasvuruAd">Firma Adı</label>
+                    <label class="form-label" for="firmaBasvuruAd">Firma Unvanı *</label>
                     <input class="form-input" type="text" id="firmaBasvuruAd" required maxlength="200" placeholder="Ticari unvanınız" autocomplete="organization">
                 </div>
                 <div class="form-grup">
-                    <label class="form-label" for="firmaBasvuruSehir">Şehir</label>
-                    <select class="form-select" id="firmaBasvuruSehir" required></select>
+                    <label class="form-label" for="firmaBasvuruYetkili">Yetkili Ad Soyad *</label>
+                    <input class="form-input" type="text" id="firmaBasvuruYetkili" required maxlength="120" placeholder="Yetkili kişinin adı soyadı" autocomplete="name">
+                </div>
+                <div class="form-grup form-grup--iki">
+                    <div>
+                        <label class="form-label" for="firmaBasvuruSehir">Şehir *</label>
+                        <select class="form-select" id="firmaBasvuruSehir" required></select>
+                    </div>
+                    <div>
+                        <label class="form-label" for="firmaBasvuruIlce">İlçe</label>
+                        <select class="form-select" id="firmaBasvuruIlce">
+                            <option value="">İlçe seçin</option>
+                        </select>
+                    </div>
                 </div>
                 <div class="form-grup">
-                    <label class="form-label" for="firmaBasvuruKategori">Hizmet Kategorisi</label>
+                    <label class="form-label" for="firmaBasvuruKategori">Hizmet Kategorisi *</label>
                     <select class="form-select" id="firmaBasvuruKategori" required></select>
                 </div>
                 <div class="form-grup">
-                    <label class="form-label" for="firmaBasvuruTel">Telefon</label>
+                    <label class="form-label" for="firmaBasvuruTel">Telefon *</label>
                     <div class="tel-input" role="group" aria-label="Telefon numarası">
                         <span class="tel-input__kod" aria-hidden="true">+90</span>
                         <input class="form-input tel-input__alan" type="tel" id="firmaBasvuruTel"
@@ -1008,9 +1035,33 @@
                     </div>
                     <p class="form-yardim" id="firmaBasvuruTelYardim">Başvuru için iletişim numarası. Public vitrinde gösterilmez.</p>
                 </div>
+                <div class="form-grup form-grup--iki">
+                    <div>
+                        <label class="form-label" for="firmaBasvuruVergiNo">Vergi No *</label>
+                        <input class="form-input" type="text" id="firmaBasvuruVergiNo" required maxlength="11" inputmode="numeric" placeholder="10 veya 11 haneli">
+                    </div>
+                    <div>
+                        <label class="form-label" for="firmaBasvuruVergiDairesi">Vergi Dairesi *</label>
+                        <input class="form-input" type="text" id="firmaBasvuruVergiDairesi" required maxlength="120" placeholder="Örn. Kadıköy">
+                    </div>
+                </div>
                 <div class="form-grup">
-                    <label class="form-label" for="firmaBasvuruAciklama">Kısa Açıklama</label>
+                    <label class="form-label" for="firmaBasvuruAdres">Açık Adres *</label>
+                    <textarea class="form-textarea" id="firmaBasvuruAdres" rows="2" required maxlength="400" placeholder="Mahalle, cadde, no…"></textarea>
+                </div>
+                <div class="form-grup">
+                    <label class="form-label" for="firmaBasvuruAciklama">Kısa Açıklama *</label>
                     <textarea class="form-textarea" id="firmaBasvuruAciklama" rows="3" required maxlength="500" placeholder="Hizmetlerinizi kısaca anlatın (en az 10 karakter)"></textarea>
+                </div>
+                <div class="form-grup">
+                    <label class="form-label" for="firmaBasvuruVergiLevha">Vergi Levhası *</label>
+                    <input class="form-input" type="file" id="firmaBasvuruVergiLevha" accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png" required>
+                    <p class="form-yardim">PDF, JPG veya PNG. En fazla 10 MB. Belge gizli (private) saklanır.</p>
+                </div>
+                <div class="form-grup">
+                    <label class="form-label" for="firmaBasvuruOdaBelgesi">Oda Belgesi *</label>
+                    <input class="form-input" type="file" id="firmaBasvuruOdaBelgesi" accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png" required>
+                    <p class="form-yardim">PDF, JPG veya PNG. En fazla 10 MB. Belge gizli (private) saklanır.</p>
                 </div>
                 <div class="form-grup">
                     <label class="form-label" for="firmaBasvuruLogo">Logo</label>

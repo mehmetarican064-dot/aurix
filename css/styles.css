@@ -1892,6 +1892,63 @@ a { color: inherit; text-decoration: none; }
 }
 
 .form-grup { margin-bottom: 18px; }
+
+.form-grup--iki {
+    display: grid;
+    gap: 12px;
+}
+
+@media (min-width: 520px) {
+    .form-grup--iki {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+.hesap-tipi-secim {
+    display: grid;
+    gap: 10px;
+}
+
+@media (min-width: 520px) {
+    .hesap-tipi-secim {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+.hesap-tipi-secim__kart {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 12px 14px;
+    border: 1px solid var(--aurix-border, rgba(245, 242, 234, 0.14));
+    border-radius: 10px;
+    cursor: pointer;
+    background: rgba(255, 255, 255, 0.03);
+    transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.hesap-tipi-secim__kart:has(input:checked) {
+    border-color: var(--aurix-gold-border, rgba(201, 169, 98, 0.55));
+    background: rgba(201, 169, 98, 0.1);
+}
+
+.hesap-tipi-secim__kart input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.hesap-tipi-secim__baslik {
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: var(--aurix-text, #f5f2ea);
+}
+
+.hesap-tipi-secim__alt {
+    font-size: 0.78rem;
+    line-height: 1.35;
+    color: var(--aurix-muted, rgba(245, 242, 234, 0.65));
+}
 .form-label {
     display: block;
     font-size: 12px;

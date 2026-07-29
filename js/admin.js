@@ -6,7 +6,7 @@
     'use strict';
 
     var aktifBolum = 'genel';
-    var firmaOnaySekme = 'beklemede';
+    var firmaOnaySekme = 'basvuru_bekliyor';
     var yukleniyor = {};
     var cache = {
         ozet: null,
@@ -370,11 +370,30 @@
 
     function durumRozet(durum) {
         var d = String(durum || '').toLowerCase();
+        var etiketMap = {
+            taslak: 'Taslak',
+            basvuru_bekliyor: 'Başvuru bekliyor',
+            beklemede: 'Başvuru bekliyor',
+            inceleniyor: 'İnceleniyor',
+            incelemede: 'İnceleniyor',
+            ek_belge_gerekli: 'Ek belge gerekli',
+            onaylandi: 'Onaylandı',
+            reddedildi: 'Reddedildi',
+            askiya_alindi: 'Askıya alındı',
+            aski: 'Askıya alındı'
+        };
+        var etiket = etiketMap[d] || durum || '—';
         var cls = 'ap-badge';
         if (d === 'onaylandi' || d === 'aktif' || d === 'acik') cls += ' ap-badge--ok';
-        else if (d === 'beklemede' || d === 'incelemede') cls += ' ap-badge--warn';
-        else if (d === 'reddedildi' || d === 'kaldirildi' || d === 'yayindan_kaldirildi' || d === 'aski') cls += ' ap-badge--bad';
-        return '<span class="' + cls + '">' + esc(durum || '—') + '</span>';
+        else if (
+            d === 'beklemede' || d === 'basvuru_bekliyor' || d === 'inceleniyor' ||
+            d === 'incelemede' || d === 'ek_belge_gerekli' || d === 'taslak'
+        ) cls += ' ap-badge--warn';
+        else if (
+            d === 'reddedildi' || d === 'kaldirildi' || d === 'yayindan_kaldirildi' ||
+            d === 'aski' || d === 'askiya_alindi'
+        ) cls += ' ap-badge--bad';
+        return '<span class="' + cls + '">' + esc(etiket) + '</span>';
     }
 
     function bosDurum(mesaj) {
@@ -1236,7 +1255,7 @@
                 }));
             }
             if (needBek && typeof s.firmaListesi === 'function') {
-                fallbacks.push(s.firmaListesi('beklemede').then(function (res) {
+                fallbacks.push(s.firmaListesi('basvuru_bekliyor').then(function (res) {
                     if (res.ok) {
                         cache.son.bekleyen_firmalar = asArray(res.data).slice(0, 8).map(function (f) {
                             return {
@@ -1293,7 +1312,7 @@
             return '<tr>' +
                 '<td>' + esc(u.ad_soyad || '—') + '</td>' +
                 '<td>' + esc(u.email || '—') + '</td>' +
-                '<td>' + esc(u.hesap_tipi || 'normal') + '</td>' +
+                '<td>' + esc(u.hesap_tipi === 'firma' ? 'Firma / Atölye' : 'Bireysel İş Veren') + '</td>' +
                 '<td>' + esc(tarihKisa(u.created_at)) + '</td></tr>';
         }).join('');
 
@@ -1576,10 +1595,12 @@
 
     function renderOnaylar() {
         var sekmeler = [
-            ['beklemede', 'Bekleyenler'],
-            ['onaylandi', 'Onaylananlar'],
-            ['reddedildi', 'Reddedilenler'],
-            ['aski', 'Askıya Alınanlar']
+            ['basvuru_bekliyor', 'Başvuru bekleyen'],
+            ['inceleniyor', 'İncelenen'],
+            ['ek_belge_gerekli', 'Ek belge'],
+            ['onaylandi', 'Onaylanan'],
+            ['reddedildi', 'Reddedilen'],
+            ['aski', 'Askıya alınan']
         ];
         var tabHtml = sekmeler.map(function (t) {
             return '<button type="button" class="ap-sekme' +
@@ -1612,7 +1633,8 @@
         var logo = f.logo_url
             ? '<img class="ap-firma-kart__logo" src="' + esc(f.logo_url) + '" alt="" width="56" height="56">'
             : '<div class="ap-firma-kart__logo ap-firma-kart__logo--bos" aria-hidden="true"></div>';
-        var aski = f.askiya_alindi ? durumRozet('Askı') : durumRozet(f.durum);
+        var aski = f.askiya_alindi || f.durum === 'askiya_alindi' ? durumRozet('askiya_alindi') : durumRozet(f.durum);
+        var belgeSayisi = Number(f.belge_sayisi || 0);
         return '<article class="ap-firma-kart" data-firma-id="' + esc(f.id) + '">' +
             '<div class="ap-firma-kart__ust">' + logo +
             '<div><h3 class="ap-firma-kart__ad">' + esc(f.firma_adi || '—') + '</h3>' +
@@ -1621,21 +1643,27 @@
             '<div><dt>Yetkili</dt><dd>' + esc(f.yetkili_ad || '—') + '</dd></div>' +
             '<div><dt>E-posta</dt><dd>' + esc(f.email || '—') + '</dd></div>' +
             '<div><dt>Telefon</dt><dd>' + esc(f.telefon || '—') + '</dd></div>' +
-            '<div><dt>Şehir</dt><dd>' + esc(f.sehir || '—') + '</dd></div>' +
-            (f.ilce ? '<div><dt>İlçe</dt><dd>' + esc(f.ilce) + '</dd></div>' : '') +
+            '<div><dt>Şehir</dt><dd>' + esc(f.sehir || '—') + (f.ilce ? ' / ' + esc(f.ilce) : '') + '</dd></div>' +
+            (f.vergi_no ? '<div><dt>Vergi No</dt><dd>' + esc(f.vergi_no) + '</dd></div>' : '') +
+            (f.vergi_dairesi ? '<div><dt>Vergi Dairesi</dt><dd>' + esc(f.vergi_dairesi) + '</dd></div>' : '') +
+            (f.adres ? '<div><dt>Adres</dt><dd>' + esc(f.adres) + '</dd></div>' : '') +
             (f.firma_turu ? '<div><dt>Firma türü</dt><dd>' + esc(f.firma_turu) + '</dd></div>' : '') +
             (f.yayin_durumu ? '<div><dt>Yayın</dt><dd>' + esc(f.yayin_durumu) + '</dd></div>' : '') +
             '<div><dt>Hizmet</dt><dd>' + esc(f.kategori || '—') + '</dd></div>' +
+            '<div><dt>Belgeler</dt><dd>' + esc(String(belgeSayisi)) + '</dd></div>' +
             '<div><dt>Başvuru</dt><dd>' + esc(tarihTR(f.created_at)) + '</dd></div>' +
             '<div><dt>Profil</dt><dd>%' + esc(String(profilTamamlanma(f))) + '</dd></div>' +
             '</dl>' +
             (f.aciklama ? '<p class="ap-firma-kart__aciklama">' + esc(f.aciklama) + '</p>' : '') +
             (f.red_nedeni ? '<p class="ap-uyari">Red: ' + esc(f.red_nedeni) + '</p>' : '') +
+            (f.ek_belge_notu ? '<p class="ap-uyari">Ek belge: ' + esc(f.ek_belge_notu) + '</p>' : '') +
             (f.askiya_alma_nedeni ? '<p class="ap-uyari">Askı: ' + esc(f.askiya_alma_nedeni) + '</p>' : '') +
             '<div class="ap-firma-kart__aksiyon">' +
+            '<button type="button" class="btn btn--ghost btn--xs" data-ap-firma-detay="' + esc(f.id) + '">Belgeleri Gör</button>' +
             '<button type="button" class="btn btn--primary btn--xs" data-ap-firma-onay="' + esc(f.id) + '">Onayla</button>' +
             '<button type="button" class="btn btn--ghost btn--xs" data-ap-firma-red="' + esc(f.id) + '">Reddet</button>' +
-            (f.askiya_alindi
+            '<button type="button" class="btn btn--ghost btn--xs" data-ap-firma-ek-belge="' + esc(f.id) + '">Ek Belge İste</button>' +
+            (f.askiya_alindi || f.durum === 'askiya_alindi'
                 ? '<button type="button" class="btn btn--ghost btn--xs" data-ap-firma-aski-kaldir="' + esc(f.id) + '">Askıyı Kaldır</button>'
                 : '<button type="button" class="btn btn--ghost btn--xs" data-ap-firma-aski="' + esc(f.id) + '">Askıya Al</button>') +
             '</div></article>';
@@ -1709,10 +1737,12 @@
             '<input type="text" class="form-input" id="apFirmaKat" placeholder="Kategori" value="' + esc(kat) + '">' +
             '<select class="form-input" id="apFirmaDurum">' +
             '<option value="">Tüm durumlar</option>' +
-            '<option value="beklemede"' + (durum === 'beklemede' ? ' selected' : '') + '>Beklemede</option>' +
+            '<option value="basvuru_bekliyor"' + (durum === 'basvuru_bekliyor' || durum === 'beklemede' ? ' selected' : '') + '>Başvuru bekliyor</option>' +
+            '<option value="inceleniyor"' + (durum === 'inceleniyor' ? ' selected' : '') + '>İnceleniyor</option>' +
+            '<option value="ek_belge_gerekli"' + (durum === 'ek_belge_gerekli' ? ' selected' : '') + '>Ek belge gerekli</option>' +
             '<option value="onaylandi"' + (durum === 'onaylandi' ? ' selected' : '') + '>Onaylandı</option>' +
             '<option value="reddedildi"' + (durum === 'reddedildi' ? ' selected' : '') + '>Reddedildi</option>' +
-            '<option value="aski"' + (durum === 'aski' ? ' selected' : '') + '>Askıda</option>' +
+            '<option value="aski"' + (durum === 'aski' || durum === 'askiya_alindi' ? ' selected' : '') + '>Askıda</option>' +
             '</select>' +
             '<button type="button" class="btn btn--ghost btn--sm" id="apFirmaFiltreBtn">Filtrele</button>' +
             '</div>' +
@@ -1745,7 +1775,9 @@
         var sehirSec = ($('apKulSehir') && $('apKulSehir').value) || '';
         var liste = (cache.kullanicilar || []).filter(function (u) {
             if (!sehirEslesir(u.firma_sehir, sehirSec)) return false;
-            if (filtre === 'normal' && u.hesap_tipi === 'firma') return false;
+            if (filtre === 'normal' || filtre === 'bireysel') {
+                if (u.hesap_tipi === 'firma') return false;
+            }
             if (filtre === 'firma' && u.hesap_tipi !== 'firma' && !u.firma_var) return false;
             if (filtre === 'admin' && u.role !== 'admin') return false;
             if (filtre === 'dogrulanmis' && !u.email_confirmed_at) return false;
@@ -1760,7 +1792,7 @@
             return '<tr>' +
                 '<td>' + esc(u.ad_soyad || '—') + '</td>' +
                 '<td>' + esc(u.email || '—') + '</td>' +
-                '<td>' + esc(u.hesap_tipi || 'normal') + '</td>' +
+                '<td>' + esc(u.hesap_tipi === 'firma' ? 'Firma / Atölye' : 'Bireysel İş Veren') + '</td>' +
                 '<td>' + (u.firma_var ? 'Evet' : 'Hayır') + '</td>' +
                 '<td>' + (u.email_confirmed_at ? 'Evet' : 'Hayır') + '</td>' +
                 '<td>' + esc(tarihKisa(u.created_at)) + '</td>' +
@@ -1779,8 +1811,8 @@
             '<div class="ap-filtreler">' +
             '<select class="form-input" id="apKulFiltre">' +
             '<option value="hepsi"' + (filtre === 'hepsi' ? ' selected' : '') + '>Tümü</option>' +
-            '<option value="normal"' + (filtre === 'normal' ? ' selected' : '') + '>Normal kullanıcı</option>' +
-            '<option value="firma"' + (filtre === 'firma' ? ' selected' : '') + '>Firma sahibi</option>' +
+            '<option value="normal"' + (filtre === 'normal' || filtre === 'bireysel' ? ' selected' : '') + '>Bireysel iş veren</option>' +
+            '<option value="firma"' + (filtre === 'firma' ? ' selected' : '') + '>Firma / Atölye</option>' +
             '<option value="admin"' + (filtre === 'admin' ? ' selected' : '') + '>Admin</option>' +
             '<option value="dogrulanmis"' + (filtre === 'dogrulanmis' ? ' selected' : '') + '>Doğrulanmış</option>' +
             '<option value="dogrulanmamis"' + (filtre === 'dogrulanmamis' ? ' selected' : '') + '>Doğrulanmamış</option>' +
@@ -2246,7 +2278,7 @@
             }
 
             if (e.target.closest('[data-ap-goto-onay]')) {
-                firmaOnaySekme = 'beklemede';
+                firmaOnaySekme = 'basvuru_bekliyor';
                 bolumGoster('onaylar');
                 return;
             }
@@ -2326,6 +2358,77 @@
                     }).catch(function (err) {
                         toast((err && err.message) || 'Firma reddedilemedi.', 'error');
                     });
+                });
+                return;
+            }
+
+            var ekBelgeId = e.target.closest('[data-ap-firma-ek-belge]');
+            if (ekBelgeId) {
+                var eid = ekBelgeId.getAttribute('data-ap-firma-ek-belge');
+                nedenPenceresi('Ek belge iste', [
+                    'Vergi levhası okunaklı değil',
+                    'Oda belgesi eksik veya süresi dolmuş',
+                    'Kimlik / yetki belgesi gerekli',
+                    'Adres bilgisi belgelerle uyuşmuyor'
+                ]).then(function (neden) {
+                    if (!neden || !svc()) return;
+                    return svc().firmaEkBelgeIste(eid, neden).then(function (res) {
+                        if (!res || !res.ok) {
+                            return toast((res && res.error) || 'Ek belge isteği kaydedilemedi.', 'error');
+                        }
+                        toast('Ek belge talebi iletildi.', 'success');
+                        if (aktifBolum === 'onaylar') yukleOnaylar();
+                        else yukleFirmalar();
+                    }).catch(function (err) {
+                        toast((err && err.message) || 'Ek belge isteği kaydedilemedi.', 'error');
+                    });
+                });
+                return;
+            }
+
+            var detayId = e.target.closest('[data-ap-firma-detay]');
+            if (detayId) {
+                var did = detayId.getAttribute('data-ap-firma-detay');
+                if (!svc()) return;
+                toast('Belgeler yükleniyor…', 'info');
+                svc().firmaDetay(did).then(function (res) {
+                    if (!res || !res.ok) {
+                        return toast((res && res.error) || 'Firma detayı alınamadı.', 'error');
+                    }
+                    var data = res.data || {};
+                    var belgeler = Array.isArray(data.belgeler) ? data.belgeler : [];
+                    if (!belgeler.length) {
+                        toast('Bu başvuruya ait yüklenmiş belge bulunamadı.', 'info');
+                        if (aktifBolum === 'onaylar') yukleOnaylar();
+                        return;
+                    }
+                    var ozet = belgeler.map(function (b, i) {
+                        var tur = b.belge_turu === 'vergi_levhasi' ? 'Vergi Levhası'
+                            : (b.belge_turu === 'oda_belgesi' ? 'Oda Belgesi' : (b.belge_turu || 'Belge'));
+                        return (i + 1) + ') ' + tur + (b.orijinal_ad ? ' — ' + b.orijinal_ad : '');
+                    }).join('\n');
+                    onayPenceresi(
+                        'Başvuru belgeleri (kısa süreli güvenli bağlantı):\n\n' + ozet +
+                        '\n\nBelgeleri sırayla yeni sekmede açmak ister misiniz?'
+                    ).then(function (ok) {
+                        if (!ok || !svc()) return;
+                        var chain = Promise.resolve();
+                        belgeler.forEach(function (b) {
+                            chain = chain.then(function () {
+                                return svc().firmaBasvuruBelgeImzaliUrl(b.id).then(function (u) {
+                                    if (u && u.ok && u.url) {
+                                        window.open(u.url, '_blank', 'noopener,noreferrer');
+                                    } else {
+                                        toast((u && u.error) || 'Bir belge açılamadı.', 'error');
+                                    }
+                                });
+                            });
+                        });
+                        return chain;
+                    });
+                    if (aktifBolum === 'onaylar') yukleOnaylar();
+                }).catch(function (err) {
+                    toast((err && err.message) || 'Firma detayı alınamadı.', 'error');
                 });
                 return;
             }
