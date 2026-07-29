@@ -231,13 +231,15 @@
                 '<div class="msg-secici" id="mesajKarsiSecici" hidden></div>' +
                 '<div class="msg-akisi" id="mesajAkisi" aria-live="polite"></div>' +
                 '<form class="msg-form" id="mesajForm" autocomplete="off">' +
-                '<input type="file" id="mesajDosyaInput" accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf" hidden>' +
-                '<button type="button" class="btn btn--ghost btn--sm msg-form__ek" id="mesajDosyaBtn" title="Dosya ekle" aria-label="Dosya ekle">Dosya</button>' +
-                '<div class="msg-form__govde">' +
                 '<div class="msg-form__dosya" id="mesajDosyaOnizleme" hidden></div>' +
-                '<textarea class="form-textarea msg-form__input" id="mesajMetin" rows="1" maxlength="4000" placeholder="Mesajınızı yazın…"></textarea>' +
+                '<div class="msg-form__bar">' +
+                '<input type="file" id="mesajDosyaInput" accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf" hidden>' +
+                '<button type="button" class="msg-form__ek" id="mesajDosyaBtn" title="Dosya ekle" aria-label="Dosya ekle">📎</button>' +
+                '<div class="msg-form__govde">' +
+                '<textarea class="msg-form__input" id="mesajMetin" rows="1" maxlength="4000" placeholder="Mesajınızı yazın…"></textarea>' +
                 '</div>' +
                 '<button type="submit" class="btn btn--primary btn--sm msg-form__gonder" id="mesajGonderBtn">Gönder</button>' +
+                '</div>' +
                 '</form>' +
                 '</div>';
             document.body.appendChild(el);
@@ -320,6 +322,22 @@
         return name;
     }
 
+    function dosyaGorselMi(path) {
+        return /\.(png|jpe?g)$/i.test(String(path || ''));
+    }
+
+    function gorselLightboxAc(url) {
+        if (!url) return;
+        var lb = document.getElementById('galeriLightbox');
+        if (!lb) {
+            global.open(url, '_blank', 'noopener');
+            return;
+        }
+        var img = lb.querySelector('.galeri-lightbox__img');
+        if (img) img.src = url;
+        lb.classList.add('galeri-lightbox--acik');
+    }
+
     function renderMesajlar() {
         var akis = document.getElementById('mesajAkisi');
         if (!akis) return;
@@ -335,7 +353,12 @@
             if (m.mesaj_metni) {
                 icerik += '<p class="msg-balon__metin">' + esc(m.mesaj_metni) + '</p>';
             }
-            if (m.dosya_url) {
+            if (m.dosya_url && dosyaGorselMi(m.dosya_url)) {
+                icerik += '<button type="button" class="msg-balon__gorsel" data-msg-gorsel="' +
+                    esc(m.dosya_url) + '" aria-label="Görseli büyüt">' +
+                    '<span class="msg-balon__gorsel-yukleniyor">Görsel yükleniyor…</span>' +
+                    '</button>';
+            } else if (m.dosya_url) {
                 icerik += '<button type="button" class="msg-balon__dosya" data-msg-dosya="' +
                     esc(m.dosya_url) + '">' + esc(dosyaEtiket(m.dosya_url)) + '</button>';
             }
@@ -357,6 +380,27 @@
                     }
                     global.open(url, '_blank', 'noopener');
                 });
+            });
+        });
+
+        akis.querySelectorAll('[data-msg-gorsel]').forEach(function (btn) {
+            var path = btn.getAttribute('data-msg-gorsel');
+            dosyaImzaliUrl(path).then(function (url) {
+                if (!url) {
+                    btn.innerHTML = '<span class="msg-balon__gorsel-yukleniyor">Görsel açılamadı</span>';
+                    return;
+                }
+                btn.innerHTML = '<img class="msg-balon__gorsel-img" src="' + esc(url) +
+                    '" alt="Gönderilen görsel" loading="lazy">';
+                btn.setAttribute('data-msg-gorsel-url', url);
+            });
+            btn.addEventListener('click', function () {
+                var url = btn.getAttribute('data-msg-gorsel-url');
+                if (url) {
+                    gorselLightboxAc(url);
+                } else {
+                    dosyaImzaliUrl(path).then(gorselLightboxAc);
+                }
             });
         });
     }
