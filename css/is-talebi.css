@@ -740,3 +740,196 @@
   white-space: nowrap;
   border: 0;
 }
+
+/* ---------- Mesajlasma (msg-*) ---------- */
+.modal__kutu--msg {
+  width: min(560px, 96vw);
+  max-height: min(88vh, 720px);
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 0;
+}
+.msg-baslik {
+  align-items: flex-start;
+}
+.msg-baslik__metin {
+  min-width: 0;
+}
+.msg-baslik__alt {
+  margin: 4px 0 0;
+  font-size: 0.85rem;
+  color: var(--aurix-muted, #6b7280);
+}
+.msg-akisi {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding: 12px 4px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 220px;
+  max-height: 48vh;
+  background:
+    linear-gradient(180deg, rgba(15, 23, 42, 0.02), transparent 40%),
+    var(--aurix-bg, #f8fafc);
+  border-radius: 12px;
+  margin: 0 0 8px;
+}
+.msg-bos {
+  margin: auto;
+  text-align: center;
+  color: var(--aurix-muted, #6b7280);
+  font-size: 0.92rem;
+  padding: 24px 12px;
+}
+.msg-balon {
+  max-width: 82%;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: #fff;
+  border: 1px solid var(--aurix-border, #e5e7eb);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+.msg-balon--ben {
+  align-self: flex-end;
+  background: linear-gradient(160deg, #0f766e, #115e59);
+  color: #f8fafc;
+  border-color: transparent;
+}
+.msg-balon--karsi {
+  align-self: flex-start;
+}
+.msg-balon__metin {
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+.msg-balon__dosya {
+  display: inline-flex;
+  margin-top: 6px;
+  padding: 4px 8px;
+  border-radius: 8px;
+  border: 1px dashed rgba(255,255,255,0.45);
+  background: rgba(255,255,255,0.12);
+  color: inherit;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+.msg-balon--karsi .msg-balon__dosya {
+  border-color: var(--aurix-border, #d1d5db);
+  background: #f3f4f6;
+  color: var(--aurix-text, #111827);
+}
+.msg-balon__zaman {
+  display: block;
+  margin-top: 6px;
+  font-size: 0.72rem;
+  opacity: 0.75;
+}
+.msg-form {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  padding: 10px 0 14px;
+  border-top: 1px solid var(--aurix-border, #e5e7eb);
+}
+.msg-form__govde {
+  flex: 1;
+  min-width: 0;
+}
+.msg-form__input {
+  width: 100%;
+  min-height: 42px;
+  max-height: 120px;
+  resize: vertical;
+  margin: 0;
+}
+.msg-form__dosya {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  background: #f3f4f6;
+  font-size: 0.82rem;
+}
+.msg-form__dosya-sil {
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  font-size: 1.1rem;
+  line-height: 1;
+}
+.msg-secici {
+  padding: 8px 0 12px;
+}
+.msg-secici__baslik {
+  margin: 0 0 10px;
+  font-size: 0.95rem;
+}
+.msg-secici__liste {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.msg-secici__btn {
+  width: 100%;
+  justify-content: flex-start;
+}
+.msg-inbox {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.msg-inbox__oge {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+  text-align: left;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--aurix-border, #e5e7eb);
+  background: var(--aurix-surface, #fff);
+  cursor: pointer;
+  transition: border-color 0.15s ease, transform 0.15s ease;
+}
+.msg-inbox__oge:hover {
+  border-color: #0f766e;
+  transform: translateY(-1px);
+}
+.msg-inbox__ust {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.msg-inbox__badge {
+  min-width: 1.4rem;
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: #0f766e;
+  color: #fff;
+  font-size: 0.75rem;
+  text-align: center;
+}
+.msg-inbox__alt {
+  font-size: 0.85rem;
+  color: var(--aurix-muted, #6b7280);
+}
+.fp-teklif-kart__aksiyon {
+  margin-top: 10px;
+}
+.fp-is-satir__sag {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}

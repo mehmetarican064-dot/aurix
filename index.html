@@ -42,7 +42,7 @@
     <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/styles.css?v=35">
-    <link rel="stylesheet" href="css/is-talebi.css?v=39">
+    <link rel="stylesheet" href="css/is-talebi.css?v=40">
     <link rel="stylesheet" href="css/admin.css?v=27">
 </head>
 <body>
@@ -1186,6 +1186,29 @@
         </div>
     </div>
 
+    <div class="modal" id="mesajSohbetModal" aria-hidden="true">
+        <div class="modal__kutu modal__kutu--msg" role="dialog" aria-modal="true" aria-labelledby="mesajSohbetBaslik">
+            <div class="modal__baslik msg-baslik">
+                <div class="msg-baslik__metin">
+                    <h3 id="mesajSohbetBaslik">Sohbet</h3>
+                    <p class="msg-baslik__alt" id="mesajSohbetAlt"></p>
+                </div>
+                <button type="button" class="modal__kapat" data-modal-kapat="mesajSohbetModal" aria-label="Kapat">×</button>
+            </div>
+            <div class="msg-secici" id="mesajKarsiSecici" hidden></div>
+            <div class="msg-akisi" id="mesajAkisi" aria-live="polite"></div>
+            <form class="msg-form" id="mesajForm" autocomplete="off">
+                <input type="file" id="mesajDosyaInput" accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf" hidden>
+                <button type="button" class="btn btn--ghost btn--sm msg-form__ek" id="mesajDosyaBtn" title="Dosya ekle" aria-label="Dosya ekle">Dosya</button>
+                <div class="msg-form__govde">
+                    <div class="msg-form__dosya" id="mesajDosyaOnizleme" hidden></div>
+                    <textarea class="form-textarea msg-form__input" id="mesajMetin" rows="1" maxlength="4000" placeholder="Mesajınızı yazın…"></textarea>
+                </div>
+                <button type="submit" class="btn btn--primary btn--sm msg-form__gonder" id="mesajGonderBtn">Gönder</button>
+            </form>
+        </div>
+    </div>
+
     <div id="toastWrap"></div>
 
     <!-- UMD build: GitHub Pages’te window.supabase global’i için zorunlu -->
@@ -1198,12 +1221,13 @@
     <script src="js/firma-degerlendirme.js?v=34" defer></script>
     <script src="js/supabase.js?v=38" defer></script>
     <script src="js/is-talebi-service.js?v=39" defer></script>
-    <script src="js/is-talebi.js?v=39" defer></script>
+    <script src="js/is-talebi.js?v=40" defer></script>
+    <script src="js/mesajlasma.js?v=1" defer></script>
     <script src="js/authService.js?v=22" defer></script>
-    <script src="js/panels.js?v=32" defer></script>
+    <script src="js/panels.js?v=33" defer></script>
     <script src="js/market-service.js?v=21" defer></script>
     <script src="js/admin-service.js?v=41" defer></script>
     <script src="js/admin.js?v=41" defer></script>
-    <script src="js/app.js?v=40" defer></script>
+    <script src="js/app.js?v=41" defer></script>
 </body>
 </html>

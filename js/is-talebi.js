@@ -1468,8 +1468,12 @@
                 h += '<button type="button" class="btn btn--ghost btn--sm" data-it-tp-sil="' + esc(t.id) + '">Sil</button>';
             } else if (t.durum === 'teklif_bekliyor' || t.durum === 'Acik') {
                 h += '<button type="button" class="btn btn--ghost btn--sm" data-it-tp-detay="' + esc(t.id) + '">Görüntüle</button>';
+                h += '<button type="button" class="btn btn--ghost btn--sm" data-it-tp-sohbet="' + esc(t.id) +
+                    '" data-it-tp-baslik="' + esc(t.baslik || 'İş talebi') + '">Sohbet</button>';
             } else {
                 h += '<button type="button" class="btn btn--ghost btn--sm" data-it-tp-detay="' + esc(t.id) + '">Görüntüle</button>';
+                h += '<button type="button" class="btn btn--ghost btn--sm" data-it-tp-sohbet="' + esc(t.id) +
+                    '" data-it-tp-baslik="' + esc(t.baslik || 'İş talebi') + '">Sohbet</button>';
             }
             h += '</div></div>';
         });
@@ -1486,6 +1490,18 @@
             btn.addEventListener('click', function () {
                 modalKapat('isTaleplerimModal');
                 openEditById(btn.getAttribute('data-it-tp-publish'), { gotoPreview: true });
+            });
+        });
+        govde.querySelectorAll('[data-it-tp-sohbet]').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                if (!global.AurixMesajlasma || typeof AurixMesajlasma.ac !== 'function') {
+                    toast('Mesajlaşma yüklenemedi.', 'error');
+                    return;
+                }
+                AurixMesajlasma.ac({
+                    isTalebiId: btn.getAttribute('data-it-tp-sohbet'),
+                    baslik: btn.getAttribute('data-it-tp-baslik') || 'Sohbet'
+                });
             });
         });
         govde.querySelectorAll('[data-it-tp-detay]').forEach(function (btn) {
@@ -1555,9 +1571,15 @@
             h += '<div class="it-detay__aksiyon">';
             if (t.sahip_mi) {
                 h += buildOwnerActionsHtml(t);
+                if (t.durum !== 'taslak') {
+                    h += '<button type="button" class="btn btn--ghost" data-it-sohbet="' + esc(t.id) +
+                        '" data-it-sohbet-baslik="' + esc(t.baslik || 'İş talebi') + '">Sohbet</button>';
+                }
             } else {
                 h += '<button type="button" class="btn btn--primary" data-it-teklif-ver="' + esc(t.id) + '">Teklif Ver</button>';
-                h += '<p class="it-yardim">Teklif vermek için firmanızın doğrulanmış ve onaylı olması gerekir.</p>';
+                h += '<button type="button" class="btn btn--ghost" data-it-sohbet="' + esc(t.id) +
+                    '" data-it-sohbet-baslik="' + esc(t.baslik || 'İş talebi') + '">Mesaj Gönder</button>';
+                h += '<p class="it-yardim">Teklif vermek için firmanızın doğrulanmış ve onaylı olması gerekir. Mesajlaşma teklif sonrası açılır.</p>';
             }
             h += '</div>';
             govde.innerHTML = h;
@@ -1570,6 +1592,19 @@
                     } else {
                         toast('Teklif verme şu anda kullanılamıyor. Sayfayı yenileyip tekrar deneyin.', 'error');
                     }
+                });
+            }
+            var sohbetBtn = govde.querySelector('[data-it-sohbet]');
+            if (sohbetBtn) {
+                sohbetBtn.addEventListener('click', function () {
+                    if (!global.AurixMesajlasma || typeof AurixMesajlasma.ac !== 'function') {
+                        toast('Mesajlaşma yüklenemedi.', 'error');
+                        return;
+                    }
+                    AurixMesajlasma.ac({
+                        isTalebiId: sohbetBtn.getAttribute('data-it-sohbet'),
+                        baslik: sohbetBtn.getAttribute('data-it-sohbet-baslik') || 'Sohbet'
+                    });
                 });
             }
         };

@@ -3750,6 +3750,10 @@
     function modalKapat(id) {
         var el = $(id);
         if (el) { el.classList.remove('modal--acik'); document.body.classList.remove('modal-acik'); }
+        if (id === 'mesajSohbetModal' && window.AurixMesajlasma &&
+            typeof AurixMesajlasma.onModalClosed === 'function') {
+            AurixMesajlasma.onModalClosed();
+        }
         if (id === 'detayModal') {
             /* firma query temizle; demoDegerlendirme ve diğer parametreler kalsın */
             syncFirmaUrl(null, { replace: true });
@@ -5162,6 +5166,7 @@
         sayfaGoster: sayfaGoster,
         scrollToBolum: scrollToBolum,
         modalKapat: modalKapat,
+        modalAc: modalAc,
         demoSifirla: demoVeriSifirla,
         toast: toast,
         renderAdminModeration: renderAdminModeration,

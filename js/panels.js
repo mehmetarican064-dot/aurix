@@ -84,6 +84,11 @@
         if (tab === 'teklifler') {
             yenileTekliflerSekmesi();
         }
+        if (tab === 'mesajlar') {
+            if (global.AurixMesajlasma && typeof AurixMesajlasma.renderPanelMesajlar === 'function') {
+                AurixMesajlasma.renderPanelMesajlar();
+            }
+        }
         if (tab === 'dogrulama' && lastHasFirma) {
             yukleDogrulamaSekmesi();
         }
@@ -179,7 +184,8 @@
             if (t.isSehir) {
                 metaSatir += '<span class="fp-teklif-kart__sehir">' + esc(t.isSehir) + '</span>';
             }
-            return '<article class="fp-teklif-kart" data-teklif-id="' + esc(String(t.id || '')) + '">' +
+            return '<article class="fp-teklif-kart" data-teklif-id="' + esc(String(t.id || '')) +
+                '" data-is-id="' + esc(String(t.isId || t.is_id || '')) + '">' +
                 '<div class="fp-teklif-kart__ust">' +
                 '<h4 class="fp-teklif-kart__baslik">' + esc(baslik) + '</h4>' +
                 fpDurumBadge(t.durum || 'Gönderildi') +
@@ -190,6 +196,11 @@
                 esc(fiyatEtiket) + '</span>' +
                 '<span class="fp-teklif-rozet fp-teklif-rozet--termin" title="Teslim süresi">' +
                 esc(terminEtiket) + '</span>' +
+                '</div>' +
+                '<div class="fp-teklif-kart__aksiyon">' +
+                '<button type="button" class="btn btn--ghost btn--sm" data-panel-aksiyon="sohbet" data-is-id="' +
+                esc(String(t.isId || t.is_id || '')) + '" data-sohbet-baslik="' + esc(baslik) +
+                '">Sohbet</button>' +
                 '</div>' +
                 '</article>';
         }).join('') + '</div>';
@@ -367,6 +378,9 @@
                 '</div>' +
                 '<div class="fp-is-satir__sag">' +
                 fpDurumBadge(o.durum || 'Acik') +
+                '<button type="button" class="btn btn--ghost btn--sm" data-panel-aksiyon="sohbet" data-is-id="' +
+                esc(String(o.id || '')) + '" data-sohbet-baslik="' + esc(o.baslik || 'İş talebi') +
+                '">Sohbet</button>' +
                 '</div></li>';
         }).join('');
         return fpBolumHtml('İş Taleplerim',
@@ -612,9 +626,7 @@
     }
 
     function renderMesajlar() {
-        return '<div class="fp-bos-kutu">' +
-            '<p class="fp-bos-metin">Mesajlaşma yakında kullanıma açılacaktır.</p>' +
-            '</div>';
+        return '<div class="fp-bos-kutu"><p class="fp-bos-metin">Sohbetler yükleniyor…</p></div>';
     }
 
     function renderAyarlar() {
@@ -704,6 +716,9 @@
                 var hedef = document.getElementById('acik-is-talepleri');
                 if (hedef) hedef.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }, 80);
+            return;
+        }
+        if (aksiyon === 'sohbet') {
             return;
         }
         if (aksiyon === 'gelen' || aksiyon === 'teklifler' || aksiyon === 'profil' || aksiyon === 'dogrulama') {
@@ -1018,6 +1033,24 @@
         var icerik = $('panelIcerik');
         if (icerik) {
             icerik.addEventListener('click', function (e) {
+                var sohbetBtn = e.target.closest('[data-panel-aksiyon="sohbet"]');
+                if (sohbetBtn && icerik.contains(sohbetBtn)) {
+                    e.preventDefault();
+                    var isId = sohbetBtn.getAttribute('data-is-id');
+                    if (!isId) {
+                        toastInfo('İş talebi bulunamadı.');
+                        return;
+                    }
+                    if (!global.AurixMesajlasma || typeof AurixMesajlasma.ac !== 'function') {
+                        toastInfo('Mesajlaşma yüklenemedi.');
+                        return;
+                    }
+                    AurixMesajlasma.ac({
+                        isTalebiId: isId,
+                        baslik: sohbetBtn.getAttribute('data-sohbet-baslik') || 'Sohbet'
+                    });
+                    return;
+                }
                 var btn = e.target.closest('[data-panel-aksiyon]');
                 if (!btn) return;
                 panelAksiyon(btn.getAttribute('data-panel-aksiyon'));
@@ -1081,7 +1114,12 @@
         }
 
         var mesajEl = $('panelSekmeMesajlar');
-        if (mesajEl) mesajEl.innerHTML = renderMesajlar();
+        if (mesajEl) {
+            mesajEl.innerHTML = renderMesajlar();
+            if (global.AurixMesajlasma && typeof AurixMesajlasma.renderPanelMesajlar === 'function') {
+                AurixMesajlasma.renderPanelMesajlar(mesajEl);
+            }
+        }
 
         var ayarEl = $('panelSekmeAyarlar');
         if (ayarEl) ayarEl.innerHTML = renderAyarlar();
