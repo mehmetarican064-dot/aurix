@@ -853,30 +853,38 @@ a { color: inherit; text-decoration: none; }
 
 .btn--primary,
 .btn--gold {
-    background: linear-gradient(135deg, var(--aurix-gold-light) 0%, var(--aurix-gold) 55%, var(--aurix-gold-dark) 100%);
-    color: var(--aurix-black);
-    box-shadow: var(--aurix-shadow-sm), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+    background: linear-gradient(165deg, #d8c48a 0%, #c9a962 48%, #a8893f 100%);
+    color: #0a0a0a;
+    border: 1px solid rgba(232, 213, 163, 0.32);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.28),
+        0 2px 8px rgba(0, 0, 0, 0.28);
 }
 
 .btn--primary:hover,
 .btn--gold:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--aurix-shadow-gold), var(--aurix-shadow-md);
-    background: linear-gradient(135deg, #f0e0b8 0%, var(--aurix-gold-light) 55%, var(--aurix-gold) 100%);
+    transform: translateY(-1px);
+    background: linear-gradient(165deg, #e2cfa0 0%, #d0b16c 50%, #b8944a 100%);
+    border-color: rgba(232, 213, 163, 0.48);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.34),
+        0 4px 14px rgba(201, 169, 98, 0.16);
 }
 
 .btn--primary:active,
 .btn--gold:active {
     transform: translateY(0);
-    box-shadow: var(--aurix-shadow-sm);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.18),
+        0 1px 4px rgba(0, 0, 0, 0.3);
 }
 
 .btn--ghost {
     background: rgba(255, 255, 255, 0.03);
     color: var(--aurix-text);
     border: 1px solid var(--aurix-gold-border);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
 }
 
 .btn--ghost:hover {
@@ -12001,3 +12009,322 @@ button.nav__link {
         grid-template-columns: minmax(0, 1fr) minmax(0, 0.9fr) 28px;
     }
 }
+
+/* ================================================================
+   MOBİL PERFORMANS + UI POLISH (≤767px)
+   backdrop-filter / ağır gölge / hover lift kapatılır;
+   hero, buton ve kart boşlukları kompaktlaştırılır.
+   ================================================================ */
+@media (max-width: 767px) {
+    /* —— GPU yükü: blur ve soft-glass kapat —— */
+    .nav,
+    .btn--ghost,
+    .filtre-panel,
+    .firma-kart,
+    .firma-kart__premium,
+    .firma-kart__partner,
+    .modal,
+    .modal__kutu,
+    .modal__baslik,
+    .toast,
+    .vitrin-filtre,
+    .detay-profil__ust,
+    .panel-kart,
+    .fp-kart {
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+    }
+
+    .nav {
+        background: rgba(10, 10, 10, 0.98);
+        box-shadow: 0 1px 0 rgba(255, 255, 255, 0.04) inset;
+    }
+
+    .btn--ghost {
+        background: rgba(255, 255, 255, 0.04);
+    }
+
+    .filtre-panel,
+    .firma-kart,
+    .firma-kart--kompakt,
+    .firma-kart--ana,
+    .firma-kart--vitrin,
+    .firma-kart--pro {
+        background: var(--aurix-surface);
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.28);
+    }
+
+    .modal {
+        background: rgba(0, 0, 0, 0.78);
+    }
+
+    .modal__kutu {
+        background: #1c1c1e;
+        box-shadow: 0 12px 36px rgba(0, 0, 0, 0.5);
+        animation: none;
+    }
+
+    /* —— Hover lift / ağır transition kapat (touch) —— */
+    .firma-kart,
+    .firma-kart--premium,
+    .is-talep-kart,
+    .is-talep-kart--pro,
+    .hero-istat-kutu,
+    .hero-istat-kutu--premium,
+    .btn--primary,
+    .btn--gold,
+    .btn,
+    .malzeme-kart,
+    .neden-kart,
+    .esnaf-kategori-kutu--pro {
+        transition: border-color 0.18s ease, background-color 0.18s ease, color 0.18s ease !important;
+        will-change: auto !important;
+    }
+
+    .firma-kart:hover,
+    .firma-kart--premium:hover,
+    .is-talep-kart:hover,
+    .is-talep-kart--pro:hover,
+    .hero-istat-kutu--premium:hover,
+    .btn--primary:hover,
+    .btn--gold:hover,
+    .btn:hover {
+        transform: none !important;
+    }
+
+    .firma-kart:hover .firma-kart__gorsel img {
+        transform: none !important;
+    }
+
+    .hero-istat-kutu--premium {
+        box-shadow: none;
+    }
+
+    /* Sonsuz animasyonları dondur (CPU) */
+    .piyasa-canli-dot,
+    .hero-terminal__dot,
+    .aktivite-dot,
+    .canli-aktivite__dot {
+        animation: none !important;
+    }
+
+    /* Below-fold bölümler: scroll’da lazy layout */
+    .bolum--neden-aurix,
+    .bolum--piyasa-serit,
+    .footer {
+        content-visibility: auto;
+        contain-intrinsic-size: auto 320px;
+    }
+
+    /* —— Hero: dikey ritim, arama, chip, CTA —— */
+    .hero--ticaret {
+        padding: 14px 0 16px;
+    }
+
+    .hero--ticaret__wrap {
+        gap: 14px;
+    }
+
+    .hero--ticaret__rozet {
+        margin-bottom: 6px;
+        padding: 3px 8px;
+        font-size: 9px;
+    }
+
+    .hero--ticaret__baslik {
+        font-size: 1.3125rem;
+        line-height: 1.25;
+        margin-bottom: 6px;
+    }
+
+    .hero--ticaret__metin {
+        font-size: 0.8125rem;
+        line-height: 1.45;
+        margin-bottom: 12px;
+    }
+
+    .hero--ticaret__arama-blok {
+        margin-bottom: 12px;
+    }
+
+    .hero--ticaret__arama-input {
+        padding: 11px 14px;
+        min-height: 44px;
+        font-size: 16px; /* iOS zoom engeli */
+        border-radius: 10px;
+    }
+
+    .hero--ticaret__hizli-chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: 8px;
+    }
+
+    .hero-hizli-chip {
+        padding: 6px 11px;
+        min-height: 32px;
+        font-size: 11px;
+        font-weight: 600;
+        border-radius: 999px;
+        letter-spacing: 0.01em;
+    }
+
+    .hero--ticaret__aksiyon,
+    .hero--ticaret__aksiyon--ikili {
+        gap: 8px;
+        margin-top: 2px;
+    }
+
+    .hero--ticaret__btn,
+    .hero--ticaret__btn--zarif {
+        min-height: 44px;
+        padding: 11px 16px;
+        font-size: 13px;
+        border-radius: 10px;
+    }
+
+    .hero--ticaret__istatistik {
+        gap: 6px;
+        margin-top: 4px;
+    }
+
+    .hero-istat-kutu,
+    .hero-istat-kutu--premium {
+        min-height: 52px;
+        padding: 8px 6px;
+        border-radius: 10px;
+    }
+
+    .hero-istat-kutu__deger {
+        font-size: 1.05rem;
+    }
+
+    .hero-istat-kutu__etiket {
+        font-size: 9px;
+        margin-top: 2px;
+    }
+
+    /* —— Açık iş talepleri kartları —— */
+    .is-talepleri-grid {
+        gap: 8px !important;
+    }
+
+    .is-talep-kart,
+    .is-talep-kart--pro {
+        padding: 11px 12px !important;
+        gap: 8px !important;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.24);
+    }
+
+    .is-talep-kart__baslik {
+        font-size: 13px !important;
+        line-height: 1.3;
+    }
+
+    .is-talep-kart__sehir,
+    .is-talep-kart__meta,
+    .is-talep-kart__ozet {
+        font-size: 11px !important;
+        line-height: 1.35;
+    }
+
+    .is-talep-kart__detaylar,
+    .is-talep-kart__detaylar--odak {
+        gap: 6px !important;
+    }
+
+    .is-talep-kart__detaylar li,
+    .is-talep-kart__detaylar--odak li {
+        padding: 6px 7px !important;
+        border-radius: 8px;
+    }
+
+    .is-talep-kart__detaylar li span,
+    .is-talep-kart__detaylar--odak li span {
+        font-size: 8px !important;
+    }
+
+    .is-talep-kart__detaylar li strong,
+    .is-talep-kart__detaylar--odak li strong {
+        font-size: 11px !important;
+    }
+
+    .is-talep-kart__btn,
+    .is-talep-kart .btn {
+        min-height: 36px;
+        font-size: 12px;
+        padding: 8px 12px;
+        border-radius: 8px;
+    }
+
+    /* —— Doğrulanmış firma kartları —— */
+    [data-sayfa="ana-sayfa"] .firma-grid--ana-vitrin,
+    [data-sayfa="ana-sayfa"] .firma-grid--ana-vitrin.firma-grid--kompakt,
+    [data-sayfa="ana-sayfa"] .firma-grid--ana-vitrin.firma-grid--pro {
+        gap: 8px !important;
+    }
+
+    .firma-kart,
+    .firma-kart--kompakt,
+    .firma-kart--ana,
+    .firma-kart--vitrin,
+    .firma-kart--pro {
+        border-radius: 12px;
+        min-height: 0 !important;
+    }
+
+    .firma-kart__gorsel,
+    .firma-kart--kompakt .firma-kart__gorsel,
+    .firma-kart--ana .firma-kart__gorsel,
+    .firma-kart--pro .firma-kart__gorsel {
+        height: 84px !important;
+    }
+
+    .firma-kart__govde {
+        padding: 8px 9px 10px !important;
+        gap: 4px !important;
+    }
+
+    .firma-kart__ad {
+        font-size: 12px !important;
+        line-height: 1.25;
+    }
+
+    .firma-kart__aciklama,
+    .firma-kart__aciklama--kisa,
+    .firma-kart__hizmet,
+    .firma-kart__sehir {
+        font-size: 10px !important;
+        line-height: 1.35;
+    }
+
+    .firma-kart__aksiyon .btn,
+    .firma-kart__aksiyon--kompakt .btn {
+        min-height: 34px;
+        font-size: 10px;
+        padding: 6px 8px;
+        border-radius: 8px;
+    }
+
+    /* Premium buton mobilde daha sakin */
+    .btn--primary,
+    .btn--gold {
+        box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.22),
+            0 1px 4px rgba(0, 0, 0, 0.28);
+    }
+}
+
+/* Touch cihazlarda hover lift’i tamamen kapat (tablet dahil) */
+@media (hover: none) {
+    .firma-kart:hover,
+    .is-talep-kart:hover,
+    .btn--primary:hover,
+    .btn--gold:hover,
+    .hero-istat-kutu--premium:hover {
+        transform: none !important;
+    }
+}
+

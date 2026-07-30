@@ -1341,7 +1341,8 @@
             });
         }
 
-        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches ||
+            window.matchMedia('(max-width: 767px)').matches) {
             degerleriYazdir();
             return;
         }
@@ -4620,7 +4621,28 @@
             }
         }).catch(authHazirSonrasi);
 
-        setInterval(heroTerminalSaatGuncelle, 1000);
+        /* Terminal saati: mobilde seyrek; sekme gizliyken durdur (scroll/CPU yükü) */
+        (function initHeroSaatTimer() {
+            var timer = null;
+            function intervalMs() {
+                return window.matchMedia('(max-width: 767px)').matches ? 30000 : 1000;
+            }
+            function durdur() {
+                if (timer) {
+                    clearInterval(timer);
+                    timer = null;
+                }
+            }
+            function baslat() {
+                durdur();
+                if (document.hidden) return;
+                if (!$('heroTerminalSaat')) return;
+                heroTerminalSaatGuncelle();
+                timer = setInterval(heroTerminalSaatGuncelle, intervalMs());
+            }
+            document.addEventListener('visibilitychange', baslat);
+            baslat();
+        })();
         /* firmalar / iş talepleri periyodik yok — yalnızca açılışta yukleCanliVerilerSupabase */
 
         PanelUI.bindTabs();
