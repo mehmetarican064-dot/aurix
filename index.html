@@ -73,7 +73,7 @@
     <link rel="preconnect" href="https://svsouqnhtlpcpdvqahmd.supabase.co" crossorigin>
     <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/styles.css?v=38">
+    <link rel="stylesheet" href="css/styles.css?v=39">
     <link rel="stylesheet" href="css/is-talebi.css?v=44">
     <link rel="stylesheet" href="css/admin.css?v=27">
 </head>
@@ -97,7 +97,7 @@
                 <a href="#" class="nav__link" data-nav="piyasa">Piyasa</a>
             </nav>
             <div class="nav__auth" id="navAuthAlani" aria-live="polite">
-                <button type="button" class="nav__link nav__link--cta nav__cta-sm" id="navKayitOl" data-nav="kayit">Kayıt Ol</button>
+                <button type="button" class="nav__link nav__link--cta nav__cta-sm" id="navKayitOl" data-nav="giris">GİRİŞ YAP</button>
             </div>
             <button type="button" class="nav__toggle" id="menuToggle" aria-label="Menüyü aç" aria-expanded="false" aria-controls="navMenu">
                 <span class="nav__toggle-bar" aria-hidden="true"></span>
@@ -1050,7 +1050,12 @@
                 <form id="girisForm" novalidate>
                     <div class="form-grup">
                         <label class="form-label" for="girisEmail">E-posta</label>
-                        <input class="form-input" type="email" id="girisEmail" placeholder="ornek@firma.com" autocomplete="email" required>
+                        <input class="form-input" type="email" id="girisEmail" placeholder="ornek@gmail.com veya şirket e-postanız" autocomplete="email" required>
+                        <div class="email-domain-chips" role="group" aria-label="Hızlı e-posta uzantısı">
+                            <button type="button" class="email-domain-chip" data-email-domain="@gmail.com" data-email-target="girisEmail">@gmail.com</button>
+                            <button type="button" class="email-domain-chip" data-email-domain="@hotmail.com" data-email-target="girisEmail">@hotmail.com</button>
+                            <button type="button" class="email-domain-chip" data-email-domain="@outlook.com" data-email-target="girisEmail">@outlook.com</button>
+                        </div>
                     </div>
                     <div class="form-grup">
                         <label class="form-label" for="girisSifre">Şifre</label>
@@ -1060,12 +1065,19 @@
                     <p class="form-yardim uyelik-alt-link">
                         <button type="button" class="link-btn" id="sifreUnuttumBtn">Şifremi unuttum</button>
                     </p>
+                    <div class="uyelik-yonlendirme">
+                        <span class="uyelik-yonlendirme__ayrac" aria-hidden="true"></span>
+                        <p class="uyelik-yonlendirme__metin">
+                            Henüz AURIX B2B hesabınız yok mu?
+                            <button type="button" class="link-btn uyelik-yonlendirme__cta" data-uyelik-sekme="kayit" id="girisYeniHesapBtn">Yeni Hesap Oluştur</button>
+                        </p>
+                    </div>
                 </form>
                 <form id="sifreSifirlaForm" hidden novalidate>
                     <p class="giris-modal__metin">Şifre sıfırlama bağlantısı e-posta adresinize gönderilir.</p>
                     <div class="form-grup">
                         <label class="form-label" for="sifreSifirlaEmail">E-posta</label>
-                        <input class="form-input" type="email" id="sifreSifirlaEmail" placeholder="ornek@firma.com" autocomplete="email" required>
+                        <input class="form-input" type="email" id="sifreSifirlaEmail" placeholder="ornek@gmail.com veya şirket e-postanız" autocomplete="email" required>
                     </div>
                     <button type="submit" class="btn btn--primary" id="sifreSifirlaBtn" style="width:100%" data-auth-loading="Bağlantı Gönderiliyor...">Bağlantı Gönder</button>
                     <p class="form-yardim uyelik-alt-link">
@@ -1121,7 +1133,12 @@
                     </div>
                     <div class="form-grup">
                         <label class="form-label" for="kayitEmail">E-posta</label>
-                        <input class="form-input" type="email" id="kayitEmail" required maxlength="120" placeholder="ornek@firma.com" autocomplete="email">
+                        <input class="form-input" type="email" id="kayitEmail" required maxlength="120" placeholder="ornek@gmail.com veya şirket e-postanız" autocomplete="email">
+                        <div class="email-domain-chips" role="group" aria-label="Hızlı e-posta uzantısı">
+                            <button type="button" class="email-domain-chip" data-email-domain="@gmail.com" data-email-target="kayitEmail">@gmail.com</button>
+                            <button type="button" class="email-domain-chip" data-email-domain="@hotmail.com" data-email-target="kayitEmail">@hotmail.com</button>
+                            <button type="button" class="email-domain-chip" data-email-domain="@outlook.com" data-email-target="kayitEmail">@outlook.com</button>
+                        </div>
                     </div>
                     <div class="form-grup">
                         <label class="form-label" for="kayitSifre">Şifre</label>
@@ -1389,6 +1406,6 @@
     <script src="js/market-service.js?v=21" defer></script>
     <script src="js/admin-service.js?v=42" defer></script>
     <script src="js/admin.js?v=42" defer></script>
-    <script src="js/app.js?v=43" defer></script>
+    <script src="js/app.js?v=44" defer></script>
 </body>
 </html>

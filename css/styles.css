@@ -10332,6 +10332,69 @@ html.demo-video [data-sayfa="admin"] .panel-header__alt {
     display: none !important;
 }
 
+/* —— E-posta domain chips —— */
+.email-domain-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 8px;
+}
+
+.email-domain-chip {
+    appearance: none;
+    border: 1px solid var(--border-gold, rgba(197, 160, 89, 0.25));
+    background: rgba(197, 160, 89, 0.06);
+    color: var(--aurix-gold-light, #f3e5ab);
+    font: inherit;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    padding: 6px 10px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.email-domain-chip:hover {
+    background: rgba(197, 160, 89, 0.14);
+    border-color: var(--border-gold-strong, rgba(197, 160, 89, 0.42));
+    box-shadow: 0 0 12px rgba(197, 160, 89, 0.14);
+}
+
+.email-domain-chip:active {
+    transform: translateY(0);
+    background: rgba(197, 160, 89, 0.18);
+}
+
+/* —— Giriş → Kayıt yönlendirme —— */
+.uyelik-yonlendirme {
+    margin-top: 14px;
+}
+
+.uyelik-yonlendirme__ayrac {
+    display: block;
+    height: 1px;
+    margin: 0 0 12px;
+    background: linear-gradient(90deg, transparent, rgba(197, 160, 89, 0.35), transparent);
+}
+
+.uyelik-yonlendirme__metin {
+    margin: 0;
+    text-align: center;
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--text-secondary, #a1a1aa);
+}
+
+.uyelik-yonlendirme__cta {
+    display: inline;
+    margin-left: 4px;
+    font-weight: 700;
+    color: var(--aurix-gold-light, #f3e5ab);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
 /* —— Şifre kuralları (canlı yeşil/kırmızı) —— */
 .sifre-kurallar {
     list-style: none;
