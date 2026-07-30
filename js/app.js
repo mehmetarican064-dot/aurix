@@ -3514,11 +3514,6 @@
     function uyelikSekmeSec(sekme) {
         emailDogrulamaBekleyenGizle();
         var hedef = sekme === 'giris' ? 'giris' : 'kayit';
-        document.querySelectorAll('[data-uyelik-sekme]').forEach(function (btn) {
-            var aktif = btn.getAttribute('data-uyelik-sekme') === hedef;
-            btn.classList.toggle('uyelik-sekme--aktif', aktif);
-            btn.setAttribute('aria-selected', aktif ? 'true' : 'false');
-        });
         var panelGiris = $('uyelikPanelGiris');
         var panelKayit = $('uyelikPanelKayit');
         if (panelGiris) panelGiris.hidden = hedef !== 'giris';
@@ -3531,9 +3526,9 @@
         if (sifreSifirlaForm) sifreSifirlaForm.hidden = true;
         if (sifreYenileForm) sifreYenileForm.hidden = true;
         if (basari) basari.hidden = true;
-        girisModalGirisMetinGoster(true);
-        var sekmeler = document.querySelector('.uyelik-sekmeler');
-        if (sekmeler) sekmeler.hidden = false;
+        girisModalGirisMetinGoster(false);
+        var modal = $('girisModal');
+        if (modal) modal.setAttribute('data-uyelik-mod', hedef);
     }
 
     function sifreYenileFormGoster() {

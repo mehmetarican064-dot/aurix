@@ -73,7 +73,7 @@
     <link rel="preconnect" href="https://svsouqnhtlpcpdvqahmd.supabase.co" crossorigin>
     <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/styles.css?v=40">
+    <link rel="stylesheet" href="css/styles.css?v=41">
     <link rel="stylesheet" href="css/is-talebi.css?v=44">
     <link rel="stylesheet" href="css/admin.css?v=27">
 </head>
@@ -1044,12 +1044,7 @@
                 </div>
                 <button class="modal__kapat" data-modal-kapat="girisModal" aria-label="Kapat">×</button>
             </div>
-            <div class="uyelik-sekmeler" role="tablist" aria-label="Üyelik sekmeleri">
-                <button type="button" class="uyelik-sekme uyelik-sekme--aktif" role="tab" id="uyelikSekmeGiris" aria-selected="true" aria-controls="uyelikPanelGiris" data-uyelik-sekme="giris">Giriş Yap</button>
-                <button type="button" class="uyelik-sekme" role="tab" id="uyelikSekmeKayit" aria-selected="false" aria-controls="uyelikPanelKayit" data-uyelik-sekme="kayit">Yeni Hesap Oluştur</button>
-            </div>
-            <div class="uyelik-panel" id="uyelikPanelGiris" role="tabpanel" aria-labelledby="uyelikSekmeGiris">
-                <p class="giris-modal__metin" id="girisModalGirisMetin">Hesabınıza giriş yapın.</p>
+            <div class="uyelik-panel" id="uyelikPanelGiris">
                 <form id="girisForm" novalidate>
                     <div class="form-grup">
                         <label class="form-label" for="girisEmail">E-posta</label>
@@ -1116,7 +1111,7 @@
                     <button type="button" class="btn btn--primary" id="sifreYenileBasariGirisBtn" style="width:100%">Giriş Yap</button>
                 </div>
             </div>
-            <div class="uyelik-panel" id="uyelikPanelKayit" role="tabpanel" aria-labelledby="uyelikSekmeKayit" hidden>
+            <div class="uyelik-panel" id="uyelikPanelKayit" hidden>
                 <p class="giris-modal__metin">Hesap türünüzü seçerek üyelik oluşturun. Firma / atölye hesabı için başvuru formu giriş sonrası açılır.</p>
                 <form id="kayitForm" novalidate>
                     <div class="form-grup">
@@ -1163,6 +1158,13 @@
                     </div>
                     <button type="submit" class="btn btn--primary" id="kayitBtn" style="width:100%" data-auth-loading="Kayıt Oluşturuluyor...">Hesap Oluştur</button>
                     <p class="form-yardim">Hesap oluşturduktan sonra firma başvurusu yapabilirsiniz.</p>
+                    <div class="uyelik-yonlendirme">
+                        <span class="uyelik-yonlendirme__ayrac" aria-hidden="true"></span>
+                        <p class="uyelik-yonlendirme__metin">
+                            Zaten bir hesabınız var mı?
+                            <button type="button" class="link-btn uyelik-yonlendirme__cta" data-uyelik-sekme="giris" id="kayitGirisBtn">Giriş Yap</button>
+                        </p>
+                    </div>
                 </form>
             </div>
             <div id="emailDogrulamaBekleyen" class="email-dogrulama-bekleyen" hidden>
@@ -1413,6 +1415,6 @@
     <script src="js/market-service.js?v=21" defer></script>
     <script src="js/admin-service.js?v=42" defer></script>
     <script src="js/admin.js?v=42" defer></script>
-    <script src="js/app.js?v=44" defer></script>
+    <script src="js/app.js?v=45" defer></script>
 </body>
 </html>
