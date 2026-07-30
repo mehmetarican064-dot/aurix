@@ -73,7 +73,7 @@
     <link rel="preconnect" href="https://svsouqnhtlpcpdvqahmd.supabase.co" crossorigin>
     <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/styles.css?v=39">
+    <link rel="stylesheet" href="css/styles.css?v=40">
     <link rel="stylesheet" href="css/is-talebi.css?v=44">
     <link rel="stylesheet" href="css/admin.css?v=27">
 </head>
@@ -1037,8 +1037,11 @@
     <!-- ÜYELİK MODAL (Giriş / Yeni Hesap) -->
     <div class="modal" id="girisModal" role="dialog" aria-modal="true" aria-labelledby="uyelikModalBaslik">
         <div class="modal__kutu modal__kutu--uyelik">
-            <div class="modal__baslik">
-                <h3 id="uyelikModalBaslik">Üyelik</h3>
+            <div class="modal__baslik uyelik-modal__baslik">
+                <div class="uyelik-modal__baslik-metin">
+                    <h3 id="uyelikModalBaslik">AURIX B2B Portalına Hoş Geldiniz</h3>
+                    <p class="uyelik-modal__altbaslik">Kuyumculuk sektörünün doğrulanmış B2B ticaret ve imalat ağı.</p>
+                </div>
                 <button class="modal__kapat" data-modal-kapat="girisModal" aria-label="Kapat">×</button>
             </div>
             <div class="uyelik-sekmeler" role="tablist" aria-label="Üyelik sekmeleri">
@@ -1062,6 +1065,10 @@
                         <input class="form-input" type="password" id="girisSifre" placeholder="••••••••" autocomplete="current-password" required minlength="8">
                     </div>
                     <button type="submit" class="btn btn--primary" id="girisBtn" style="width:100%" data-auth-loading="Giriş Yapılıyor...">Giriş Yap</button>
+                    <p class="uyelik-ssl-rozet" role="note">
+                        <span class="uyelik-ssl-rozet__ikon" aria-hidden="true">🔒</span>
+                        <span>256-Bit SSL Şifreli Güvenli B2B Oturumu</span>
+                    </p>
                     <p class="form-yardim uyelik-alt-link">
                         <button type="button" class="link-btn" id="sifreUnuttumBtn">Şifremi unuttum</button>
                     </p>
