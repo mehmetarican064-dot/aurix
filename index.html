@@ -3,36 +3,68 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="AURIX — Kuyumculuk sektöründe iş al, iş ver, teklif topla. Üreticiler, ustalar ve tedarikçiler tek profesyonel ağda.">
-    <title>AURIX | Kuyumculuk İş Ağı</title>
+    <title>AURIX B2B | Kuyumculuk İş Ağı — Atölye, Fason Üretim ve İş Talepleri</title>
+    <meta name="description" content="AURIX B2B — Kuyumculuk sektöründe iş al, iş ver, teklif topla. Atölye iş talepleri, fason üretim, döküm, mıhlama, CAD ve malzeme tedariki tek profesyonel ağda.">
+    <meta name="keywords" content="Kuyumculuk B2B, Atölye İş Talepleri, Fason Üretim, Kuyumculuk Platformu, Döküm, Mıhlama, CAD Matrix Rhino, Taş Tedarik, Malzeme Pazarı, Kuyumculuk İş Ağı, AURIX">
+    <meta name="author" content="AURIX B2B">
+    <meta name="robots" content="index, follow, max-image-preview:large">
+    <meta name="theme-color" content="#0a0a0a">
+    <meta name="application-name" content="AURIX B2B">
     <link rel="canonical" href="https://aurixb2b.com/">
 
     <link rel="icon" type="image/png" href="assets/logo.png">
     <link rel="apple-touch-icon" href="assets/logo.png">
     <link rel="preload" href="assets/logo.png" as="image">
 
-    <meta property="og:title" content="AURIX | Kuyumculuk İş Ağı">
-    <meta property="og:description" content="Kuyumculuk sektöründe firmaları, iş taleplerini ve teklif süreçlerini bir araya getiren profesyonel B2B platform.">
+    <!-- Open Graph (WhatsApp / Facebook / LinkedIn) -->
+    <meta property="og:title" content="AURIX B2B | Kuyumculuk İş Ağı">
+    <meta property="og:description" content="Kuyumculuk sektöründe atölye iş talepleri, fason üretim ve teklif süreçlerini bir araya getiren profesyonel B2B platform.">
     <meta property="og:image" content="https://aurixb2b.com/assets/og-image.png">
+    <meta property="og:image:secure_url" content="https://aurixb2b.com/assets/og-image.png">
+    <meta property="og:image:type" content="image/png">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="AURIX B2B — Kuyumculuk İş Ağı">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://aurixb2b.com/">
     <meta property="og:locale" content="tr_TR">
-    <meta property="og:site_name" content="AURIX">
+    <meta property="og:site_name" content="AURIX B2B">
 
+    <!-- Twitter / X -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="AURIX | Kuyumculuk İş Ağı">
-    <meta name="twitter:description" content="Kuyumculuk sektörünün profesyonel B2B iş platformu.">
+    <meta name="twitter:title" content="AURIX B2B | Kuyumculuk İş Ağı">
+    <meta name="twitter:description" content="Atölye iş talepleri, fason üretim ve kuyumculuk B2B eşleşmesi — AURIX.">
     <meta name="twitter:image" content="https://aurixb2b.com/assets/og-image.png">
+    <meta name="twitter:image:alt" content="AURIX B2B — Kuyumculuk İş Ağı">
 
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
-      "@type": "Organization",
-      "name": "AURIX",
-      "url": "https://aurixb2b.com/",
-      "logo": "https://aurixb2b.com/assets/og-image.png"
+      "@graph": [
+        {
+          "@type": "Organization",
+          "@id": "https://aurixb2b.com/#organization",
+          "name": "AURIX B2B",
+          "alternateName": "AURIX",
+          "url": "https://aurixb2b.com/",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://aurixb2b.com/assets/logo.png"
+          },
+          "image": "https://aurixb2b.com/assets/og-image.png",
+          "email": "info@aurixb2b.com",
+          "description": "Türkiye kuyumculuk sektörüne yönelik doğrulama tabanlı B2B iş ağı."
+        },
+        {
+          "@type": "WebSite",
+          "@id": "https://aurixb2b.com/#website",
+          "url": "https://aurixb2b.com/",
+          "name": "AURIX B2B",
+          "description": "Kuyumculuk B2B: atölye iş talepleri, fason üretim, teklif ve malzeme pazarı.",
+          "publisher": { "@id": "https://aurixb2b.com/#organization" },
+          "inLanguage": "tr-TR"
+        }
+      ]
     }
     </script>
 
@@ -41,7 +73,7 @@
     <link rel="preconnect" href="https://svsouqnhtlpcpdvqahmd.supabase.co" crossorigin>
     <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/styles.css?v=35">
+    <link rel="stylesheet" href="css/styles.css?v=36">
     <link rel="stylesheet" href="css/is-talebi.css?v=44">
     <link rel="stylesheet" href="css/admin.css?v=27">
 </head>
@@ -506,11 +538,21 @@
             <div class="kapsayici icerik-sayfa">
                 <p class="icerik-sayfa__rozet">Kurumsal</p>
                 <h1 class="icerik-sayfa__baslik">Hakkımızda</h1>
-                <p class="icerik-sayfa__ozet">AURIX, Türkiye’deki kuyumculuk ekosistemini tek çatı altında buluşturmayı hedefleyen bir B2B iş ağıdır.</p>
+                <p class="icerik-sayfa__ozet">AURIX, Türkiye’deki kuyumculuk ekosistemini tek çatı altında buluşturmayı hedefleyen, doğrulama tabanlı bir B2B iş ağıdır.</p>
                 <div class="icerik-sayfa__govde">
-                    <p>Platform; dökümcüler, mıhlamacılar, CAD / Matrix / Rhino uzmanları, mumcular, taş tedarikçileri, makine ve malzeme satıcıları ile atölyeleri aynı ağda buluşturur.</p>
-                    <p>AURIX üzerinden firma vitrini, iş talepleri, teklif süreçleri ve malzeme fırsatlarına erişebilirsiniz. Firma başvuruları, paylaşılan bilgiler incelendikten sonra onaylanır.</p>
-                    <p>Amacımız; sektörde iş bulmayı, teklif toplamayı ve eşleşmeyi daha şeffaf ve kontrollü hale getirmektir.</p>
+                    <h2>Ne Yapıyoruz?</h2>
+                    <p>Platform; dökümcüler, mıhlamacılar, CAD / Matrix / Rhino uzmanları, mumcular, taş tedarikçileri, makine ve malzeme satıcıları ile atölyeleri aynı ağda buluşturur. AURIX üzerinden firma vitrini oluşturabilir, iş talebi açabilir veya mevcut taleplere teklif verebilir, malzeme fırsatlarını takip edebilir ve platform içi mesajlaşma ile süreçlerinizi tek yerden yönetebilirsiniz.</p>
+                    <h2>Misyonumuz</h2>
+                    <p>Sektörde iş bulmayı, teklif toplamayı ve doğru firmayla eşleşmeyi; şeffaf, izlenebilir ve kontrollü bir dijital altyapı üzerinden mümkün kılmak. Firma başvuruları, paylaşılan bilgiler ekibimiz tarafından incelendikten sonra onaylanır; bu sayede platformdaki firma profillerinin güvenilirliği desteklenir.</p>
+                    <h2>Değerlerimiz</h2>
+                    <ul>
+                        <li><strong>Güven:</strong> Firma doğrulama süreci ile platform kalitesini korumak.</li>
+                        <li><strong>Şeffaflık:</strong> İş talebi, teklif, mesajlaşma ve değerlendirme adımlarının açık ve izlenebilir olması.</li>
+                        <li><strong>Hız:</strong> İş taleplerinin ve tekliflerin en kısa sürede ilgili taraflara ulaşması.</li>
+                        <li><strong>Sektöre Özgü Çözüm:</strong> Kuyumculuk üretim zincirinin tüm paydaşlarına (döküm, mıhlama, CAD, mum, taş, makine / malzeme) özel tasarlanmış akışlar.</li>
+                    </ul>
+                    <h2>Kimler İçin?</h2>
+                    <p>Atölyeler, dökümhaneler, mıhlama ustaları, CAD / Matrix / Rhino tasarımcıları, mumcular, taş ve malzeme tedarikçileri, makine satıcıları ve kuyumculuk sektöründe iş veren ya da iş arayan tüm profesyoneller için tasarlanmıştır.</p>
                 </div>
             </div>
         </section>
@@ -544,7 +586,31 @@
                 <div class="icerik-sayfa__govde icerik-sss">
                     <details class="icerik-sss__madde" open>
                         <summary>AURIX nedir?</summary>
-                        <p>Kuyumculuk sektörüne yönelik bir B2B eşleşme ve iş ağı platformudur. Firmaları, iş taleplerini ve malzeme fırsatlarını bir araya getirmeyi amaçlar.</p>
+                        <p>Kuyumculuk sektörüne yönelik, doğrulama tabanlı bir B2B eşleşme ve iş ağı platformudur. Firmaları, iş taleplerini, teklif süreçlerini ve malzeme fırsatlarını tek bir yerde bir araya getirmeyi amaçlar.</p>
+                    </details>
+                    <details class="icerik-sss__madde">
+                        <summary>Nasıl iş talebi açılır?</summary>
+                        <p>Giriş yaptıktan sonra “İş Talebi Oluştur” adımından işin türünü, detaylarını ve varsa görsellerini paylaşarak talebinizi yayınlayabilirsiniz. Talebiniz yayınlandıktan sonra doğrulanmış firmalar teklif vermeye başlar; gelen teklifleri Panelim / İşlerim bölümünden karşılaştırıp uygun firmayı seçebilirsiniz.</p>
+                    </details>
+                    <details class="icerik-sss__madde">
+                        <summary>Firmalar nasıl doğrulanır?</summary>
+                        <p>Firma hesabı açmak isteyen kullanıcılar; unvan, vergi / kimlik bilgisi, iletişim ve faaliyet alanı gibi bilgileri içeren bir başvuru formu doldurur. Başvuru, AURIX ekibi tarafından incelenip onaylandıktan sonra firma profili “Doğrulandı” rozetiyle yayına alınır. Doğrulanmamış firmalar iş taleplerine teklif veremez.</p>
+                    </details>
+                    <details class="icerik-sss__madde">
+                        <summary>Teklif süreci nasıl işler?</summary>
+                        <p>Doğrulanmış firmalar, açık iş taleplerine fiyat ve süre içeren bir teklif sunar. İş talebi sahibi gelen teklifleri karşılaştırır, dilediği teklifi kabul eder ve süreç sohbet ekranı üzerinden ilerler. İş tamamlandığında talep “Tamamlandı” durumuna alınır ve değerlendirme yapılabilir hale gelir.</p>
+                    </details>
+                    <details class="icerik-sss__madde">
+                        <summary>Firma hesabı nasıl oluşturulur?</summary>
+                        <p>Üyelik oluşturduktan sonra “Firma Hesabı Oluştur” adımından firma bilgilerinizi, kapak / galeri görsellerinizi ve hizmet kategorilerinizi girerek başvurunuzu iletebilirsiniz. Onay sonrası firma vitrini ve teklif verme yetkiniz aktifleşir.</p>
+                    </details>
+                    <details class="icerik-sss__madde">
+                        <summary>Sohbet ve dosya paylaşımı nasıl çalışır?</summary>
+                        <p>Bir iş talebi üzerinde anlaşan taraflar, platform içi sohbet penceresinden anlık olarak yazışabilir; PNG, JPG görsel ve PDF belge paylaşabilir. Sohbete yalnızca ilgili iş talebinin tarafları erişebilir.</p>
+                    </details>
+                    <details class="icerik-sss__madde">
+                        <summary>Tamamlanan işler için değerlendirme ve şikâyet nasıl yapılır?</summary>
+                        <p>Durumu “Tamamlandı” olan işler için karşı tarafa 1-5 yıldız arası puan ve yorum bırakabilirsiniz; bu puanlar firma profilindeki ortalama puana yansır. Süreçte bir sorun yaşarsanız aynı ekrandan “Şikâyet Et” seçeneğiyle AURIX ekibine bildirim yapabilirsiniz.</p>
                     </details>
                     <details class="icerik-sss__madde">
                         <summary>Platform ücretli mi?</summary>
@@ -553,10 +619,6 @@
                     <details class="icerik-sss__madde">
                         <summary>Firma bilgilerim ne kadar güvenli?</summary>
                         <p>Gizlilik yaklaşımımız için <a href="#gizlilik" data-nav="gizlilik">Gizlilik Politikası</a> ve <a href="#kvkk" data-nav="kvkk">KVKK Aydınlatma</a> metinlerine bakabilirsiniz.</p>
-                    </details>
-                    <details class="icerik-sss__madde">
-                        <summary>Firmalar nasıl doğrulanır?</summary>
-                        <p>Firma başvuruları, paylaşılan bilgiler incelendikten sonra onaylanır.</p>
                     </details>
                     <details class="icerik-sss__madde">
                         <summary>Mobil uygulama var mı?</summary>
@@ -576,12 +638,39 @@
             <div class="kapsayici icerik-sayfa">
                 <p class="icerik-sayfa__rozet">Yasal</p>
                 <h1 class="icerik-sayfa__baslik">KVKK Aydınlatma Metni</h1>
-                <p class="icerik-sayfa__ozet">Bu metin bilgilendirme amaçlıdır; gerektiğinde güncellenebilir. Hukuki danışmanlık yerine geçmez.</p>
+                <p class="icerik-sayfa__ozet">6698 sayılı Kişisel Verilerin Korunması Kanunu (“KVKK”) kapsamında hazırlanmış standart bir aydınlatma taslağıdır. Bu metin bilgilendirme amaçlıdır, hukuki danışmanlık yerine geçmez ve gerektiğinde güncellenebilir.</p>
                 <div class="icerik-sayfa__govde">
-                    <p>AURIX platformunu kullanırken ad, iletişim bilgisi, firma profili ve işlem kayıtları gibi kişisel veriler işlenebilir. Amaç; üyelik, eşleşme, destek ve platform güvenliğini sağlamaktır.</p>
-                    <p>Veriler, hizmetin sunulması için gerekli süre boyunca ve yürürlükteki mevzuata uygun şekilde saklanır.</p>
-                    <p>Başvuru, düzeltme veya silme taleplerinizi <a href="#iletisim" data-nav="iletisim">İletişim</a> formu ile iletebilirsiniz.</p>
-                    <p>Detaylı yaklaşım için <a href="#gizlilik" data-nav="gizlilik">Gizlilik Politikası</a> sayfasını da inceleyebilirsiniz.</p>
+                    <h2>1. Veri Sorumlusu</h2>
+                    <p>İşbu aydınlatma metni, 6698 sayılı KVKK’nın 10. maddesi uyarınca, veri sorumlusu sıfatıyla AURIX B2B Kuyumculuk Platformu (“AURIX”, “Platform”) tarafından hazırlanmıştır.</p>
+
+                    <h2>2. İşlenen Kişisel Veri Kategorileri</h2>
+                    <ul>
+                        <li><strong>Kimlik ve iletişim bilgileri:</strong> ad-soyad, firma unvanı, telefon, e-posta, adres.</li>
+                        <li><strong>Firma / mesleki bilgiler:</strong> vergi veya kimlik numarası, faaliyet alanı, hizmet kategorisi, galeri ve tanıtım görselleri.</li>
+                        <li><strong>İşlem güvenliği bilgileri:</strong> hesap bilgileri, giriş kayıtları, IP adresi, cihaz / tarayıcı bilgisi.</li>
+                        <li><strong>Platform kullanım verileri:</strong> iş talebi, teklif, sohbet mesajı ve ekleri, değerlendirme / puanlama ve şikâyet kayıtları.</li>
+                        <li><strong>Talep ve şikâyet yönetimi verileri:</strong> destek ve iletişim formu üzerinden iletilen bilgiler.</li>
+                    </ul>
+
+                    <h2>3. Kişisel Verilerin İşlenme Amaçları</h2>
+                    <p>Kişisel verileriniz; üyelik ve firma hesabı oluşturma ve doğrulama süreçlerinin yürütülmesi, iş talebi / teklif / mesajlaşma / değerlendirme süreçlerinin işletilmesi, platform güvenliğinin sağlanması, destek taleplerinin yanıtlanması, yasal yükümlülüklerin yerine getirilmesi ve hizmet kalitesinin iyileştirilmesi amaçlarıyla işlenir.</p>
+
+                    <h2>4. Toplama Yöntemi ve Hukuki Sebep</h2>
+                    <p>Kişisel verileriniz; üyelik formu, firma başvuru formu, iş talebi / teklif / sohbet ekranları ve iletişim formu aracılığıyla elektronik ortamda toplanır. Bu veriler; KVKK’nın 5. ve 6. maddelerinde belirtilen “bir sözleşmenin kurulması veya ifasıyla doğrudan ilgili olma”, “hukuki yükümlülüğün yerine getirilmesi”, “veri sorumlusunun meşru menfaati” ve gerektiğinde “açık rıza” hukuki sebeplerine dayanılarak işlenir.</p>
+
+                    <h2>5. Kişisel Verilerin Aktarılması</h2>
+                    <p>Kişisel verileriniz; platformun barındırma ve altyapı hizmetini sağlayan iş ortaklarımızla (bulut / veritabanı ve depolama hizmet sağlayıcıları), yasal olarak yetkili kamu kurum ve kuruluşlarıyla, yalnızca hizmetin ifası için gerekli ölçüde ve mevzuata uygun şekilde paylaşılabilir. Verileriniz ticari amaçla üçüncü taraflara satılmaz veya kiralanmaz.</p>
+
+                    <h2>6. Saklama Süresi</h2>
+                    <p>Kişisel verileriniz, ilgili işleme amacının gerektirdiği süre boyunca ve her hâlükârda yürürlükteki mevzuatta öngörülen zamanaşımı süreleri saklı kalmak kaydıyla saklanır; sürenin dolması veya işleme amacının ortadan kalkması hâlinde silinir, yok edilir veya anonim hâle getirilir.</p>
+
+                    <h2>7. İlgili Kişinin Hakları (KVKK m.11)</h2>
+                    <p>KVKK’nın 11. maddesi uyarınca AURIX’e başvurarak; kişisel verinizin işlenip işlenmediğini öğrenme, işlenmişse buna ilişkin bilgi talep etme, işlenme amacını ve amacına uygun kullanılıp kullanılmadığını öğrenme, yurt içinde veya yurt dışında aktarıldığı üçüncü kişileri bilme, eksik veya yanlış işlenmişse düzeltilmesini isteme, KVKK’da öngörülen şartlar çerçevesinde silinmesini veya yok edilmesini isteme, düzeltme / silme / yok etme işlemlerinin verinin aktarıldığı üçüncü kişilere bildirilmesini isteme, işlenen verilerin münhasıran otomatik sistemler vasıtasıyla analiz edilmesi suretiyle aleyhinize bir sonucun ortaya çıkmasına itiraz etme ve kanuna aykırı işleme sebebiyle zarara uğramanız hâlinde zararın giderilmesini talep etme haklarına sahipsiniz.</p>
+
+                    <h2>8. Başvuru Yöntemi</h2>
+                    <p>Yukarıdaki haklarınıza ilişkin taleplerinizi <a href="#iletisim" data-nav="iletisim">İletişim</a> sayfasındaki formu “KVKK / gizlilik talebi” konusuyla doldurarak veya belirtilen e-posta adresi üzerinden AURIX’e iletebilirsiniz. Başvurularınız, mevzuatta öngörülen süreler içinde değerlendirilerek sonuçlandırılır.</p>
+
+                    <p class="icerik-sayfa__notrozet">Detaylı yaklaşım için ayrıca <a href="#gizlilik" data-nav="gizlilik">Gizlilik Politikası</a> sayfasını inceleyebilirsiniz.</p>
                 </div>
             </div>
         </section>
@@ -592,16 +681,37 @@
             <div class="kapsayici icerik-sayfa">
                 <p class="icerik-sayfa__rozet">Yasal</p>
                 <h1 class="icerik-sayfa__baslik">Gizlilik Politikası</h1>
-                <p class="icerik-sayfa__ozet">AURIX’in kişisel verileri nasıl ele aldığına dair özet bilgilendirme.</p>
+                <p class="icerik-sayfa__ozet">AURIX B2B Kuyumculuk Platformu’nun kişisel verileri ve kullanım bilgilerini nasıl topladığına, kullandığına ve koruduğuna dair standart bir taslak politikadır.</p>
                 <div class="icerik-sayfa__govde">
-                    <h2>Toplanan bilgiler</h2>
-                    <p>Hesap ve firma başvurusu sırasında paylaştığınız bilgiler, kullanım sırasında oluşan teknik kayıtlar ve destek mesajlarınız.</p>
-                    <h2>Kullanım amacı</h2>
-                    <p>Platformu işletmek, güvenliği artırmak, eşleşmeleri kolaylaştırmak ve kullanıcı taleplerine yanıt vermek.</p>
-                    <h2>Paylaşım</h2>
-                    <p>Verileriniz, yasal zorunluluk veya hizmetin zorunlu altyapı sağlayıcıları dışında üçüncü taraflarla ticari amaçla paylaşılmaz.</p>
-                    <h2>Güncellemeler</h2>
-                    <p>Bu politika gerektiğinde güncellenebilir. Önemli değişiklikler platform üzerinden duyurulur.</p>
+                    <h2>1. Kapsam</h2>
+                    <p>Bu politika, AURIX web platformunu (“Platform”) kullanan üyeler, firma yetkilileri ve ziyaretçiler için geçerlidir. Kişisel verilerin işlenmesine ilişkin ayrıntılı bilgi için <a href="#kvkk" data-nav="kvkk">KVKK Aydınlatma Metni</a>’ni de inceleyebilirsiniz.</p>
+
+                    <h2>2. Toplanan Bilgiler</h2>
+                    <ul>
+                        <li>Hesap oluşturma sırasında paylaştığınız ad-soyad, e-posta ve şifre bilgileri.</li>
+                        <li>Firma başvurusu sırasında paylaşılan unvan, vergi / kimlik numarası, iletişim, faaliyet alanı ve tanıtım görselleri.</li>
+                        <li>İş talebi, teklif, sohbet mesajı ve eklerine (görsel / PDF) ait içerikler.</li>
+                        <li>Değerlendirme, puanlama ve şikâyet bildirimlerine ait kayıtlar.</li>
+                        <li>Kullanım sırasında oluşan teknik kayıtlar (oturum açma zamanı, IP adresi, tarayıcı / cihaz bilgisi) ve iletişim / destek formu mesajlarınız.</li>
+                    </ul>
+
+                    <h2>3. Kullanım Amacı</h2>
+                    <p>Toplanan bilgiler; platformu işletmek, firma başvurularını değerlendirip doğrulamak, iş talebi–teklif eşleşmelerini kolaylaştırmak, sohbet ve bildirim altyapısını çalıştırmak, güvenliği artırmak, kötüye kullanımı önlemek, destek taleplerine yanıt vermek ve yasal yükümlülükleri yerine getirmek amacıyla kullanılır.</p>
+
+                    <h2>4. Veri Güvenliği</h2>
+                    <p>Kişisel verileriniz, yetkisiz erişime, kayba veya kötüye kullanıma karşı makul teknik ve idari tedbirlerle korunur. Hesabınıza erişim, kimlik doğrulama sistemleri üzerinden sağlanır ve hassas veriler yetkilendirme kuralları (RLS / erişim politikaları) ile sınırlandırılır.</p>
+
+                    <h2>5. Paylaşım</h2>
+                    <p>Verileriniz; platformun barındırma, veritabanı ve dosya depolama altyapısını sağlayan hizmet sağlayıcıları, yasal zorunluluk hâlinde yetkili kamu kurumları dışında üçüncü taraflarla ticari amaçla paylaşılmaz, satılmaz veya kiralanmaz.</p>
+
+                    <h2>6. Çerezler</h2>
+                    <p>Platform, oturum yönetimi ve temel işlevler için çerezler veya benzeri teknolojiler kullanabilir. Ayrıntılar için <a href="#cerez" data-nav="cerez">Çerez Politikası</a> sayfasını inceleyebilirsiniz.</p>
+
+                    <h2>7. Haklarınız</h2>
+                    <p>Kişisel verilerinize erişim, düzeltme, silme veya işlenmesine itiraz etme haklarınız için <a href="#kvkk" data-nav="kvkk">KVKK Aydınlatma Metni</a>’nde yer alan başvuru yöntemini kullanabilirsiniz.</p>
+
+                    <h2>8. Güncellemeler</h2>
+                    <p>Bu politika, mevzuat veya platform işleyişindeki değişikliklere göre güncellenebilir. Önemli değişiklikler platform üzerinden duyurulur.</p>
                 </div>
             </div>
         </section>
@@ -612,11 +722,41 @@
             <div class="kapsayici icerik-sayfa">
                 <p class="icerik-sayfa__rozet">Yasal</p>
                 <h1 class="icerik-sayfa__baslik">Kullanım Koşulları</h1>
-                <p class="icerik-sayfa__ozet">Platformu kullanarak aşağıdaki genel kuralları kabul etmiş sayılırsınız.</p>
+                <p class="icerik-sayfa__ozet">AURIX B2B Kuyumculuk Platformu’nu kullanarak aşağıdaki koşulları kabul etmiş sayılırsınız. Bu metin bilgilendirme amaçlı standart bir taslaktır; hukuki danışmanlık yerine geçmez.</p>
                 <div class="icerik-sayfa__govde">
-                    <p>AURIX; firmalar arasında teklif ve iş akışını kolaylaştırmayı amaçlar. Platform üzerinden yapılan ticari anlaşmaların tarafı kullanıcılar arasındadır; AURIX aracılık taahhüdü vermez.</p>
-                    <p>Paylaştığınız içeriklerin doğru ve yasalara uygun olması sizin sorumluluğunuzdadır. Yanıltıcı, hak ihlali içeren veya sektör etiğine aykırı kullanımlar kısıtlanabilir.</p>
-                    <p>Komisyon ve ücretler için <a href="#komisyon" data-nav="komisyon">Komisyon Politikası</a> sayfasına bakın.</p>
+                    <h2>1. Taraflar ve Kapsam</h2>
+                    <p>Bu koşullar, AURIX B2B web platformunu (“Platform”) kullanan üyeler, firma yetkilileri ve ziyaretçiler ile Platform’u işleten AURIX arasında geçerlidir. Platform; kuyumculuk sektöründe iş talebi, teklif, mesajlaşma, değerlendirme ve malzeme fırsatlarını kolaylaştırmayı amaçlar.</p>
+
+                    <h2>2. Hesap ve Firma Doğrulama</h2>
+                    <ul>
+                        <li>Hesap bilgilerinizin doğru ve güncel tutulması sizin sorumluluğunuzdadır.</li>
+                        <li>Firma hesabı başvuruları AURIX tarafından incelenir; onay sonrası “Doğrulandı” rozetiyle yayına alınabilir.</li>
+                        <li>Hesap güvenliği (şifre, oturum) kullanıcıya aittir; yetkisiz kullanımı derhal bildirmelisiniz.</li>
+                    </ul>
+
+                    <h2>3. Platformun Rolü</h2>
+                    <p>AURIX; firmalar arasında teklif ve iş akışını kolaylaştıran dijital bir aracı platformdur. Platform üzerinden yapılan ticari anlaşmaların, ödemelerin, teslimatların ve mali yükümlülüklerin tarafı kullanıcılar arasındadır. AURIX, taraflar adına sözleşme, garanti veya ödeme taahhüdü vermez.</p>
+
+                    <h2>4. İçerik ve Davranış Kuralları</h2>
+                    <ul>
+                        <li>Paylaştığınız iş talepleri, teklifler, mesajlar ve görsellerin doğru, yasalara uygun ve sektör etiğine aykırı olmaması gerekir.</li>
+                        <li>Yanıltıcı bilgi, sahte belge, hak ihlali, spam veya kötüye kullanım Platform’dan kısıtlanabilir veya hesabınız askıya alınabilir.</li>
+                        <li>Başkalarının ticari sırları, kişisel verileri veya fikri mülkiyet hakları ihlal edilemez.</li>
+                    </ul>
+
+                    <h2>5. Ücretler ve Komisyon</h2>
+                    <p>Platform ücretleri, komisyon oranları ve istisnalar <a href="#komisyon" data-nav="komisyon">Komisyon Politikası</a> sayfasında duyurulur. Güncel ücret modeli netleştikçe bu sayfa güncellenir.</p>
+
+                    <h2>6. Sorumluluk Sınırı</h2>
+                    <p>AURIX, kullanıcılar arasındaki anlaşmazlıklardan, ürün / hizmet kalitesinden veya üçüncü taraf altyapı kesintilerinden doğan dolaylı zararlardan, yürürlükteki mevzuatın izin verdiği ölçüde sorumlu tutulamaz. Platform “olduğu gibi” sunulur; kesintisiz veya hatasız hizmet garantisi verilmez.</p>
+
+                    <h2>7. Fesih</h2>
+                    <p>Kullanıcı hesabını kapatabilir; AURIX, bu koşulların ihlali hâlinde hesabı askıya alma veya sonlandırma hakkını saklı tutar. Fesih sonrası yasal saklama yükümlülükleri saklıdır.</p>
+
+                    <h2>8. Değişiklikler</h2>
+                    <p>Bu koşullar gerektiğinde güncellenebilir. Önemli değişiklikler Platform üzerinden duyurulur. Güncellemeden sonra Platform’u kullanmaya devam etmeniz, güncel koşulları kabul ettiğiniz anlamına gelir.</p>
+
+                    <p class="icerik-sayfa__notrozet">Sorularınız için <a href="#iletisim" data-nav="iletisim">İletişim</a> formunu kullanabilirsiniz.</p>
                 </div>
             </div>
         </section>
@@ -627,11 +767,31 @@
             <div class="kapsayici icerik-sayfa">
                 <p class="icerik-sayfa__rozet">Yasal</p>
                 <h1 class="icerik-sayfa__baslik">Çerez Politikası</h1>
-                <p class="icerik-sayfa__ozet">Bu metin bilgilendirme amaçlıdır; gerektiğinde güncellenebilir.</p>
+                <p class="icerik-sayfa__ozet">AURIX B2B’nin çerez ve benzeri teknolojileri nasıl kullandığına dair bilgilendirme taslağıdır. Gerektiğinde güncellenebilir.</p>
                 <div class="icerik-sayfa__govde">
-                    <p>AURIX, sitenin temel işlevleri ve oturum deneyimi için gerekli çerezler veya benzeri teknolojiler kullanabilir.</p>
-                    <p>Tercih ve analitik çerezler kullanıldığında, kapsam ve amaç bu sayfada güncellenir.</p>
-                    <p>Sorularınız için <a href="#iletisim" data-nav="iletisim">İletişim</a> formunu kullanabilirsiniz.</p>
+                    <h2>1. Çerez Nedir?</h2>
+                    <p>Çerezler; ziyaret ettiğiniz web sitesinin cihazınıza bıraktığı küçük metin dosyalarıdır. Oturum yönetimi, güvenlik ve temel işlevler için kullanılırlar.</p>
+
+                    <h2>2. Kullandığımız Çerez Türleri</h2>
+                    <ul>
+                        <li><strong>Zorunlu / işlevsel çerezler:</strong> Giriş oturumu, güvenlik ve sitenin temel çalışması için gerekli çerezler. Bunlar olmadan Platform düzgün çalışmayabilir.</li>
+                        <li><strong>Tercih çerezleri:</strong> Dil veya arayüz tercihlerinizi hatırlamak için kullanılabilir.</li>
+                        <li><strong>Analitik çerezler:</strong> Trafik ve kullanım istatistikleri için kullanılmaya başlandığında bu sayfada kapsam ve amacı açıkça belirtilir.</li>
+                    </ul>
+
+                    <h2>3. Amaç</h2>
+                    <p>Çerezler; oturumunuzu sürdürmek, hesabınızı güvenli tutmak, kötüye kullanımı önlemek ve Platform deneyimini iyileştirmek amacıyla işlenir.</p>
+
+                    <h2>4. Yönetim</h2>
+                    <p>Tarayıcı ayarlarından çerezleri silebilir veya engelleyebilirsiniz. Zorunlu çerezleri engellerseniz giriş ve bazı özellikler çalışmayabilir.</p>
+
+                    <h2>5. Üçüncü Taraflar</h2>
+                    <p>Platform, barındırma ve kimlik doğrulama altyapısı (ör. Supabase) nedeniyle teknik çerezler kullanabilir. Üçüncü taraf çerez politikaları ilgili sağlayıcıların belgelerinde yer alır.</p>
+
+                    <h2>6. Güncellemeler</h2>
+                    <p>Bu politika, mevzuat veya Platform işleyişindeki değişikliklere göre güncellenebilir.</p>
+
+                    <p class="icerik-sayfa__notrozet">Sorularınız için <a href="#iletisim" data-nav="iletisim">İletişim</a> formunu veya <a href="#kvkk" data-nav="kvkk">KVKK Aydınlatma Metni</a>’ni inceleyebilirsiniz.</p>
                 </div>
             </div>
         </section>

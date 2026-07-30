@@ -3923,6 +3923,44 @@ a { color: inherit; text-decoration: none; }
     text-underline-offset: 2px;
 }
 
+.icerik-sayfa__govde h3 {
+    margin: 2px 0 0;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--aurix-text);
+}
+
+.icerik-sayfa__govde ul,
+.icerik-sayfa__govde ol {
+    margin: 0;
+    padding-left: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.icerik-sayfa__govde li {
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--aurix-text);
+}
+
+.icerik-sayfa__govde li strong {
+    color: var(--aurix-white);
+}
+
+.icerik-sayfa__govde .icerik-sayfa__notrozet {
+    display: inline-block;
+    margin: 0;
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: 1px dashed rgba(201, 169, 98, 0.35);
+    background: rgba(201, 169, 98, 0.06);
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--aurix-muted);
+}
+
 .icerik-sss {
     gap: 10px;
 }

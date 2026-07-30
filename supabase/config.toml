@@ -1,11 +1,44 @@
-# AURIX Supabase CLI yapılandırması (kısmi)
-# admin-firmalar geçici x-admin-token modeli kullandığı için JWT doğrulaması kapalıdır.
-# Uzun vadede Auth admin rolü + JWT doğrulamasına geçilmelidir.
+# AURIX Supabase CLI yapılandırması
+# Hosted projede Dashboard ayarları da bu dosyadaki marka/konu satırlarıyla
+# eşleşmelidir (Authentication → Email / SMTP).
 #
-# Hosted projede: Authentication → Providers → Email → Confirm email = ON
+# Sender (gönderen) adı: AURIX B2B
+# Sender e-posta:  info@aurixb2b.com  (veya onaylı SMTP hesabınız)
+# Site URL:        https://aurixb2b.com
+
+[auth]
+site_url = "https://aurixb2b.com"
+additional_redirect_urls = [
+  "https://aurixb2b.com",
+  "https://aurixb2b.com/",
+  "https://www.aurixb2b.com",
+  "https://www.aurixb2b.com/"
+]
+enable_signup = true
 
 [auth.email]
 enable_confirmations = true
+enable_signup = true
+double_confirm_changes = true
 
+# Konu satırları — gelen kutuda "AURIX B2B" markası görünür
+[auth.email.template.confirmation]
+subject = "AURIX B2B — E-posta doğrulama"
+content_path = "./auth-templates/confirm-signup.html"
+
+[auth.email.template.recovery]
+subject = "AURIX B2B — Parola sıfırlama"
+content_path = "./auth-templates/recovery.html"
+
+[auth.email.template.magic_link]
+subject = "AURIX B2B — Güvenli giriş"
+content_path = "./auth-templates/magic-link.html"
+
+[auth.email.template.invite]
+subject = "AURIX B2B’ye hoş geldiniz"
+content_path = "./auth-templates/welcome.html"
+
+# admin-firmalar geçici x-admin-token modeli kullandığı için JWT doğrulaması kapalıdır.
+# Uzun vadede Auth admin rolü + JWT doğrulamasına geçilmelidir.
 [functions.admin-firmalar]
 verify_jwt = false
