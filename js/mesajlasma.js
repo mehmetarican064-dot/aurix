@@ -23,8 +23,29 @@
         channel: null,
         pollTimer: null,
         gonderiliyor: false,
-        pendingFile: null
+        pendingFile: null,
+        renderedImza: null
     };
+
+    /* İmzalı URL önbelleği: path -> { url, exp }. Realtime/poll yeniden
+     * çizimlerinde aynı görselin sürekli yeniden istenip yanıp sönmesini
+     * (flicker) önler. Signed URL 3600 sn geçerli; önbelleği 55 dk tutuyoruz. */
+    var dosyaUrlOnbellek = {};
+    var ONBELLEK_SURESI_MS = 55 * 60 * 1000;
+
+    function dosyaImzaliUrlOnbellekli(path) {
+        if (!path) return Promise.resolve(null);
+        var kayit = dosyaUrlOnbellek[path];
+        if (kayit && kayit.url && kayit.exp > Date.now()) {
+            return Promise.resolve(kayit.url);
+        }
+        return dosyaImzaliUrl(path).then(function (url) {
+            if (url) {
+                dosyaUrlOnbellek[path] = { url: url, exp: Date.now() + ONBELLEK_SURESI_MS };
+            }
+            return url;
+        });
+    }
 
     function esc(s) {
         if (global.AurixUtils && typeof AurixUtils.escapeHtml === 'function') {
@@ -338,9 +359,40 @@
         lb.classList.add('galeri-lightbox--acik');
     }
 
-    function renderMesajlar() {
+    function mesajGorselHtml(dosyaUrl) {
+        var kayit = dosyaUrlOnbellek[dosyaUrl];
+        if (kayit && kayit.url && kayit.exp > Date.now()) {
+            /* Önbellekte var: doğrudan <img> ile bas, placeholder→swap yok
+             * (bu yeniden çizimlerdeki flicker'ı önler). */
+            return '<button type="button" class="msg-balon__gorsel" data-msg-gorsel="' +
+                esc(dosyaUrl) + '" data-msg-gorsel-url="' + esc(kayit.url) + '" aria-label="Görseli büyüt">' +
+                '<img class="msg-balon__gorsel-img" src="' + esc(kayit.url) +
+                '" alt="Gönderilen görsel" loading="lazy">' +
+                '</button>';
+        }
+        return '<button type="button" class="msg-balon__gorsel" data-msg-gorsel="' +
+            esc(dosyaUrl) + '" aria-label="Görseli büyüt">' +
+            '<span class="msg-balon__gorsel-yukleniyor">Görsel yükleniyor…</span>' +
+            '</button>';
+    }
+
+    function mesajlarImzasi(mesajlar) {
+        return (mesajlar || []).map(function (m) {
+            return String(m.id != null ? m.id : '') + ':' +
+                String(m.dosya_url || '') + ':' + String(m.mesaj_metni || '');
+        }).join('|');
+    }
+
+    function renderMesajlar(zorla) {
         var akis = document.getElementById('mesajAkisi');
         if (!akis) return;
+        var imza = mesajlarImzasi(state.mesajlar);
+        if (!zorla && state.renderedImza === imza && akis.children.length) {
+            /* İçerik değişmedi (poll/realtime aynı listeyi döndürdü):
+             * DOM'u yeniden kurmadan çık, görseller yanıp sönmesin. */
+            return;
+        }
+        state.renderedImza = imza;
         var me = uid();
         if (!state.mesajlar.length) {
             akis.innerHTML = '<p class="msg-bos">Henüz mesaj yok. İlk mesajı siz gönderin.</p>';
@@ -354,10 +406,7 @@
                 icerik += '<p class="msg-balon__metin">' + esc(m.mesaj_metni) + '</p>';
             }
             if (m.dosya_url && dosyaGorselMi(m.dosya_url)) {
-                icerik += '<button type="button" class="msg-balon__gorsel" data-msg-gorsel="' +
-                    esc(m.dosya_url) + '" aria-label="Görseli büyüt">' +
-                    '<span class="msg-balon__gorsel-yukleniyor">Görsel yükleniyor…</span>' +
-                    '</button>';
+                icerik += mesajGorselHtml(m.dosya_url);
             } else if (m.dosya_url) {
                 icerik += '<button type="button" class="msg-balon__dosya" data-msg-dosya="' +
                     esc(m.dosya_url) + '">' + esc(dosyaEtiket(m.dosya_url)) + '</button>';
@@ -373,7 +422,7 @@
         akis.querySelectorAll('[data-msg-dosya]').forEach(function (btn) {
             btn.addEventListener('click', function () {
                 var path = btn.getAttribute('data-msg-dosya');
-                dosyaImzaliUrl(path).then(function (url) {
+                dosyaImzaliUrlOnbellekli(path).then(function (url) {
                     if (!url) {
                         toast('Dosya açılamadı.', 'error');
                         return;
@@ -385,21 +434,25 @@
 
         akis.querySelectorAll('[data-msg-gorsel]').forEach(function (btn) {
             var path = btn.getAttribute('data-msg-gorsel');
-            dosyaImzaliUrl(path).then(function (url) {
-                if (!url) {
-                    btn.innerHTML = '<span class="msg-balon__gorsel-yukleniyor">Görsel açılamadı</span>';
-                    return;
-                }
-                btn.innerHTML = '<img class="msg-balon__gorsel-img" src="' + esc(url) +
-                    '" alt="Gönderilen görsel" loading="lazy">';
-                btn.setAttribute('data-msg-gorsel-url', url);
-            });
+            /* Yalnızca önbellekte olmayan (henüz src'i basılmamış) görseller
+             * için ağ isteği at; önbellekten gelenler zaten <img> ile basıldı. */
+            if (!btn.getAttribute('data-msg-gorsel-url')) {
+                dosyaImzaliUrlOnbellekli(path).then(function (url) {
+                    if (!url) {
+                        btn.innerHTML = '<span class="msg-balon__gorsel-yukleniyor">Görsel açılamadı</span>';
+                        return;
+                    }
+                    btn.innerHTML = '<img class="msg-balon__gorsel-img" src="' + esc(url) +
+                        '" alt="Gönderilen görsel" loading="lazy">';
+                    btn.setAttribute('data-msg-gorsel-url', url);
+                });
+            }
             btn.addEventListener('click', function () {
                 var url = btn.getAttribute('data-msg-gorsel-url');
                 if (url) {
                     gorselLightboxAc(url);
                 } else {
-                    dosyaImzaliUrl(path).then(gorselLightboxAc);
+                    dosyaImzaliUrlOnbellekli(path).then(gorselLightboxAc);
                 }
             });
         });
@@ -475,6 +528,7 @@
         state.baslik = meta.baslik || state.baslik || 'Sohbet';
         state.karsiAd = meta.karsiAd || '';
         state.pendingFile = null;
+        state.renderedImza = null;
         ensureModal();
         var secici = document.getElementById('mesajKarsiSecici');
         if (secici) {
@@ -508,6 +562,7 @@
         state.baslik = baslik || 'Sohbet';
         state.karsiAd = '';
         state.mesajlar = [];
+        state.renderedImza = null;
         baslikGuncelle();
         var form = document.getElementById('mesajForm');
         if (form) form.hidden = true;
