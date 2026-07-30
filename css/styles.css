@@ -1,37 +1,51 @@
 /* ================================================================
-   AURIX Beta v0.1 — Siyah · Altın · Premium
+   AURIX B2B — Luxury Gold & Dark Obsidian
    ================================================================ */
 
 :root {
-    --aurix-black: #0a0a0a;
-    --aurix-anthracite: #141416;
-    --aurix-surface: #1c1c1e;
-    --aurix-panel-solid: #222224;
-    --aurix-glass: rgba(28, 28, 30, 0.72);
-    --aurix-glass-light: rgba(44, 44, 46, 0.55);
+    /* —— Luxury Gold & Dark Obsidian —— */
+    --bg-main: #09090b;
+    --bg-card: #121215;
+    --primary-gold: linear-gradient(135deg, #f3e5ab 0%, #c5a059 50%, #99752f 100%);
+    --primary-gold-hover: linear-gradient(135deg, #f7edc4 0%, #d4b06a 50%, #a88338 100%);
+    --border-gold: rgba(197, 160, 89, 0.25);
+    --border-gold-strong: rgba(197, 160, 89, 0.42);
+    --text-primary: #f4f4f5;
+    --text-secondary: #a1a1aa;
+    --gold-glow: rgba(197, 160, 89, 0.22);
+    --gold-glow-soft: rgba(197, 160, 89, 0.1);
 
-    --aurix-gold: #c9a962;
-    --aurix-gold-light: #e8d5a3;
-    --aurix-gold-dark: #a8893f;
+    /* —— Geriye uyumlu AURIX token’ları —— */
+    --aurix-black: var(--bg-main);
+    --aurix-anthracite: #0e0e11;
+    --aurix-surface: var(--bg-card);
+    --aurix-panel-solid: #18181c;
+    --aurix-glass: rgba(18, 18, 21, 0.86);
+    --aurix-glass-light: rgba(28, 28, 32, 0.62);
+
+    --aurix-gold: #c5a059;
+    --aurix-gold-light: #f3e5ab;
+    --aurix-gold-dark: #99752f;
     --aurix-gold-muted: #8a7344;
     --aurix-accent: var(--aurix-gold);
     --aurix-accent-light: var(--aurix-gold-light);
     --aurix-accent-muted: var(--aurix-gold-muted);
-    --aurix-white: #f5f5f7;
-    --aurix-gold-glow: rgba(201, 169, 98, 0.18);
-    --aurix-gold-border: rgba(201, 169, 98, 0.28);
+    --aurix-white: var(--text-primary);
+    --aurix-gold-glow: var(--gold-glow-soft);
+    --aurix-gold-border: var(--border-gold);
 
-    --aurix-text: var(--aurix-white);
-    --aurix-text-secondary: #aeaeb2;
-    --aurix-muted: #86868b;
+    --aurix-text: var(--text-primary);
+    --aurix-text-secondary: var(--text-secondary);
+    --aurix-muted: var(--text-secondary);
 
-    --aurix-border: rgba(255, 255, 255, 0.08);
-    --aurix-border-strong: rgba(255, 255, 255, 0.14);
-    --aurix-glow: rgba(201, 169, 98, 0.08);
-    --aurix-shadow-sm: 0 2px 12px rgba(0, 0, 0, 0.28);
-    --aurix-shadow-md: 0 8px 32px rgba(0, 0, 0, 0.38);
-    --aurix-shadow-lg: 0 20px 56px rgba(0, 0, 0, 0.52);
-    --aurix-shadow-gold: 0 8px 32px rgba(201, 169, 98, 0.12);
+    --aurix-border: rgba(197, 160, 89, 0.12);
+    --aurix-border-strong: var(--border-gold);
+    --aurix-glow: var(--gold-glow-soft);
+    --aurix-shadow-sm: 0 2px 12px rgba(0, 0, 0, 0.4);
+    --aurix-shadow-md: 0 10px 36px rgba(0, 0, 0, 0.48);
+    --aurix-shadow-lg: 0 22px 60px rgba(0, 0, 0, 0.58);
+    --aurix-shadow-gold: 0 8px 28px rgba(197, 160, 89, 0.18);
+    --aurix-shadow-gold-hover: 0 12px 36px rgba(197, 160, 89, 0.28), 0 0 0 1px rgba(197, 160, 89, 0.18);
 
     --aurix-success: #34c759;
     --aurix-danger: #ff453a;
@@ -60,11 +74,11 @@ body {
     font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    background: var(--aurix-black);
+    background: var(--bg-main);
     background-image:
-        radial-gradient(ellipse 80% 55% at 50% -10%, var(--aurix-gold-glow), transparent 55%),
-        radial-gradient(ellipse 60% 40% at 100% 0%, rgba(201, 169, 98, 0.06), transparent 50%),
-        linear-gradient(180deg, var(--aurix-black) 0%, var(--aurix-anthracite) 100%);
+        radial-gradient(ellipse 80% 50% at 50% -12%, var(--gold-glow-soft), transparent 58%),
+        radial-gradient(ellipse 50% 35% at 100% 0%, rgba(197, 160, 89, 0.07), transparent 52%),
+        linear-gradient(180deg, var(--bg-main) 0%, #0c0c0f 55%, var(--aurix-anthracite) 100%);
     color: var(--aurix-text);
     line-height: 1.6;
     min-height: 100vh;
@@ -77,17 +91,19 @@ img { max-width: 100%; display: block; }
 
 a { color: inherit; text-decoration: none; }
 
-/* ---- NAV ---- */
+/* ---- NAV — kuyumcu vitrini —— */
 .nav {
     position: sticky;
     top: 0;
     z-index: 100;
-    background: rgba(6, 6, 6, 0.94);
+    background: rgba(9, 9, 11, 0.94);
     backdrop-filter: blur(20px) saturate(160%);
     -webkit-backdrop-filter: blur(20px) saturate(160%);
-    border-bottom: 1px solid rgba(201, 169, 98, 0.1);
+    border-bottom: 1px solid var(--border-gold);
     min-height: var(--aurix-nav-h);
-    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.04) inset, 0 8px 32px rgba(0, 0, 0, 0.42);
+    box-shadow:
+        0 1px 0 rgba(243, 229, 171, 0.06) inset,
+        0 10px 36px rgba(0, 0, 0, 0.5);
 }
 
 .nav::after {
@@ -97,8 +113,8 @@ a { color: inherit; text-decoration: none; }
     right: 0;
     bottom: 0;
     height: 1px;
-    background: linear-gradient(90deg, transparent 12%, rgba(201, 169, 98, 0.55) 50%, transparent 88%);
-    opacity: 0.35;
+    background: linear-gradient(90deg, transparent 8%, rgba(243, 229, 171, 0.55) 50%, transparent 92%);
+    opacity: 0.55;
     pointer-events: none;
 }
 
@@ -133,6 +149,7 @@ a { color: inherit; text-decoration: none; }
     display: block;
     object-fit: contain;
     object-position: center;
+    filter: drop-shadow(0 0 10px rgba(197, 160, 89, 0.22));
 }
 
 .nav__yazi {
@@ -148,8 +165,9 @@ a { color: inherit; text-decoration: none; }
     font-size: 22px;
     font-weight: 700;
     letter-spacing: 0.16em;
-    color: var(--aurix-white);
+    color: var(--text-primary);
     white-space: nowrap;
+    text-shadow: 0 0 24px rgba(197, 160, 89, 0.18);
 }
 
 .nav__tagline {
@@ -157,7 +175,7 @@ a { color: inherit; text-decoration: none; }
     font-weight: 500;
     letter-spacing: 0.07em;
     text-transform: uppercase;
-    color: var(--aurix-gold-muted);
+    color: var(--aurix-gold);
     white-space: nowrap;
 }
 
@@ -175,26 +193,26 @@ a { color: inherit; text-decoration: none; }
     font-weight: 500;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: var(--aurix-muted);
+    color: var(--text-secondary);
     border-radius: 8px;
     transition: color var(--aurix-transition), background var(--aurix-transition), box-shadow var(--aurix-transition);
     white-space: nowrap;
 }
 
 .nav__link:hover {
-    color: var(--aurix-white);
-    background: rgba(255, 255, 255, 0.04);
+    color: var(--text-primary);
+    background: rgba(197, 160, 89, 0.08);
 }
 
 .nav__link--aktif {
     color: var(--aurix-gold-light);
-    background: rgba(201, 169, 98, 0.08);
-    box-shadow: inset 0 0 0 1px rgba(201, 169, 98, 0.22);
+    background: rgba(197, 160, 89, 0.1);
+    box-shadow: inset 0 0 0 1px var(--border-gold);
 }
 
 .nav__link--cta {
-    border: 1px solid rgba(201, 169, 98, 0.28);
-    background: rgba(201, 169, 98, 0.08);
+    border: 1px solid var(--border-gold);
+    background: rgba(197, 160, 89, 0.1);
     color: var(--aurix-gold-light);
     margin-left: 4px;
 }
@@ -853,49 +871,52 @@ a { color: inherit; text-decoration: none; }
 
 .btn--primary,
 .btn--gold {
-    background: linear-gradient(165deg, #d8c48a 0%, #c9a962 48%, #a8893f 100%);
+    background: var(--primary-gold);
     color: #0a0a0a;
-    border: 1px solid rgba(232, 213, 163, 0.32);
+    border: 1px solid rgba(243, 229, 171, 0.38);
     box-shadow:
-        inset 0 1px 0 rgba(255, 255, 255, 0.28),
-        0 2px 8px rgba(0, 0, 0, 0.28);
+        inset 0 1px 0 rgba(255, 255, 255, 0.35),
+        0 2px 10px rgba(0, 0, 0, 0.35),
+        0 0 18px rgba(197, 160, 89, 0.12);
+    font-weight: 700;
+    letter-spacing: 0.02em;
 }
 
 .btn--primary:hover,
 .btn--gold:hover {
     transform: translateY(-1px);
-    background: linear-gradient(165deg, #e2cfa0 0%, #d0b16c 50%, #b8944a 100%);
-    border-color: rgba(232, 213, 163, 0.48);
+    background: var(--primary-gold-hover);
+    border-color: rgba(243, 229, 171, 0.55);
     box-shadow:
-        inset 0 1px 0 rgba(255, 255, 255, 0.34),
-        0 4px 14px rgba(201, 169, 98, 0.16);
+        inset 0 1px 0 rgba(255, 255, 255, 0.42),
+        0 6px 20px rgba(197, 160, 89, 0.28);
 }
 
 .btn--primary:active,
 .btn--gold:active {
     transform: translateY(0);
     box-shadow:
-        inset 0 1px 0 rgba(255, 255, 255, 0.18),
-        0 1px 4px rgba(0, 0, 0, 0.3);
+        inset 0 1px 0 rgba(255, 255, 255, 0.2),
+        0 1px 4px rgba(0, 0, 0, 0.35);
 }
 
 .btn--ghost {
-    background: rgba(255, 255, 255, 0.03);
-    color: var(--aurix-text);
-    border: 1px solid var(--aurix-gold-border);
+    background: rgba(197, 160, 89, 0.04);
+    color: var(--text-primary);
+    border: 1px solid var(--border-gold);
     backdrop-filter: blur(6px);
     -webkit-backdrop-filter: blur(6px);
 }
 
 .btn--ghost:hover {
-    border-color: rgba(201, 169, 98, 0.45);
+    border-color: var(--border-gold-strong);
     color: var(--aurix-gold-light);
-    background: rgba(201, 169, 98, 0.08);
+    background: rgba(197, 160, 89, 0.12);
 }
 
 .btn--ghost:active {
     transform: translateY(0);
-    background: rgba(201, 169, 98, 0.14);
+    background: rgba(197, 160, 89, 0.16);
 }
 
 .btn:focus-visible {
@@ -1083,10 +1104,10 @@ a { color: inherit; text-decoration: none; }
 }
 
 .firma-kart {
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.03) 0%, var(--bg-card) 100%);
     backdrop-filter: blur(20px) saturate(160%);
     -webkit-backdrop-filter: blur(20px) saturate(160%);
-    border: 1px solid rgba(201, 169, 98, 0.12);
+    border: 1px solid var(--border-gold);
     border-radius: var(--aurix-radius-lg);
     overflow: hidden;
     display: flex;
@@ -1095,7 +1116,7 @@ a { color: inherit; text-decoration: none; }
     min-height: 380px;
     transition: transform 0.45s var(--aurix-ease), box-shadow 0.45s var(--aurix-ease), border-color 0.45s var(--aurix-ease);
     position: relative;
-    box-shadow: 0 6px 28px rgba(0, 0, 0, 0.32);
+    box-shadow: var(--aurix-shadow-sm);
 }
 
 .firma-kart::before {
@@ -1104,23 +1125,23 @@ a { color: inherit; text-decoration: none; }
     top: 0;
     left: 0;
     right: 0;
-    height: 3px;
-    background: linear-gradient(90deg, var(--aurix-gold-dark), var(--aurix-gold-light), var(--aurix-gold-dark));
-    opacity: 0;
+    height: 2px;
+    background: var(--primary-gold);
+    opacity: 0.55;
     transition: opacity var(--aurix-transition);
     z-index: 1;
 }
 
 .firma-kart:hover {
-    transform: translateY(-6px);
-    box-shadow: var(--aurix-shadow-gold), var(--aurix-shadow-lg);
-    border-color: var(--aurix-gold-border);
+    transform: translateY(-5px);
+    box-shadow: var(--aurix-shadow-gold-hover);
+    border-color: var(--border-gold-strong);
 }
 
 .firma-kart:hover::before { opacity: 1; }
 
 .firma-kart--premium {
-    border-color: rgba(201, 169, 98, 0.32);
+    border-color: var(--border-gold-strong);
     box-shadow: var(--aurix-shadow-gold), var(--aurix-shadow-sm);
 }
 
@@ -5021,14 +5042,15 @@ a.iletisim-kurumsal__deger:hover {
 
 .btn--outline-gold {
     background: transparent;
-    border: 1px solid rgba(201, 169, 98, 0.45);
+    border: 1px solid var(--border-gold-strong);
     color: var(--aurix-gold-light);
 }
 
 .btn--outline-gold:hover {
-    background: rgba(201, 169, 98, 0.1);
-    border-color: rgba(201, 169, 98, 0.65);
-    color: var(--aurix-white);
+    background: rgba(197, 160, 89, 0.12);
+    border-color: rgba(243, 229, 171, 0.55);
+    color: var(--text-primary);
+    box-shadow: 0 0 18px rgba(197, 160, 89, 0.16);
 }
 
 /* —— Hero ticaret (mobile-first) —— */
@@ -5039,9 +5061,9 @@ a.iletisim-kurumsal__deger:hover {
     align-items: flex-start;
     overflow-x: clip;
     background:
-        radial-gradient(ellipse 90% 60% at 50% -15%, rgba(201, 169, 98, 0.1) 0%, transparent 55%),
-        linear-gradient(180deg, #090909 0%, #0e0e10 100%);
-    border-bottom: 1px solid rgba(201, 169, 98, 0.12);
+        radial-gradient(ellipse 90% 60% at 50% -15%, rgba(197, 160, 89, 0.12) 0%, transparent 55%),
+        linear-gradient(180deg, #09090b 0%, #0c0c0f 100%);
+    border-bottom: 1px solid var(--border-gold);
 }
 
 .hero--ticaret__wrap {
@@ -5313,16 +5335,17 @@ a.iletisim-kurumsal__deger:hover {
     flex-direction: column;
     gap: 10px;
     padding: 20px 18px;
-    background: linear-gradient(165deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%);
-    border: 1px solid rgba(201, 169, 98, 0.18);
+    background: linear-gradient(165deg, rgba(255, 255, 255, 0.035) 0%, var(--bg-card) 100%);
+    border: 1px solid var(--border-gold);
     border-radius: var(--aurix-radius-lg);
     box-shadow: var(--aurix-shadow-sm);
-    transition: transform 0.35s var(--aurix-ease), border-color 0.35s var(--aurix-ease);
+    transition: transform 0.35s var(--aurix-ease), border-color 0.35s var(--aurix-ease), box-shadow 0.35s var(--aurix-ease);
 }
 
 .is-talep-kart:hover {
     transform: translateY(-3px);
-    border-color: rgba(201, 169, 98, 0.35);
+    border-color: var(--border-gold-strong);
+    box-shadow: var(--aurix-shadow-gold-hover);
 }
 
 .is-talep-kart__baslik {
@@ -6144,21 +6167,24 @@ a.iletisim-kurumsal__deger:hover {
     padding: 14px 16px;
     font-size: 15px;
     font-family: inherit;
-    color: var(--aurix-white);
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(201, 169, 98, 0.22);
+    color: var(--text-primary);
+    background: rgba(18, 18, 21, 0.9);
+    border: 1px solid var(--border-gold);
     border-radius: var(--aurix-radius);
     outline: none;
     min-height: 48px;
+    box-shadow: inset 0 1px 0 rgba(243, 229, 171, 0.04);
 }
 
 .hero--ticaret__arama-input::placeholder {
-    color: var(--aurix-muted);
+    color: var(--text-secondary);
 }
 
 .hero--ticaret__arama-input:focus {
-    border-color: rgba(201, 169, 98, 0.45);
-    box-shadow: 0 0 0 2px rgba(201, 169, 98, 0.12);
+    border-color: var(--border-gold-strong);
+    box-shadow:
+        0 0 0 2px rgba(197, 160, 89, 0.16),
+        0 0 20px rgba(197, 160, 89, 0.12);
 }
 
 .hero--ticaret__hizli-chips {
@@ -6174,18 +6200,19 @@ a.iletisim-kurumsal__deger:hover {
     font-size: 11px;
     font-weight: 600;
     font-family: inherit;
-    color: var(--aurix-muted);
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(201, 169, 98, 0.16);
+    color: var(--text-secondary);
+    background: rgba(18, 18, 21, 0.85);
+    border: 1px solid var(--border-gold);
     border-radius: 20px;
     cursor: pointer;
-    transition: border-color var(--aurix-transition), color var(--aurix-transition), background var(--aurix-transition);
+    transition: border-color var(--aurix-transition), color var(--aurix-transition), background var(--aurix-transition), box-shadow var(--aurix-transition);
 }
 
 .hero-hizli-chip:hover {
     color: var(--aurix-gold-light);
-    border-color: rgba(201, 169, 98, 0.35);
-    background: rgba(201, 169, 98, 0.08);
+    border-color: var(--border-gold-strong);
+    background: rgba(197, 160, 89, 0.12);
+    box-shadow: 0 0 16px rgba(197, 160, 89, 0.14);
 }
 
 .hero-hizli-chip:active {
@@ -12327,4 +12354,92 @@ button.nav__link {
         transform: none !important;
     }
 }
+
+/* ================================================================
+   LUXURY GOLD & DARK OBSIDIAN — kart / buton / nav peşinleştirme
+   ================================================================ */
+
+.is-talep-kart--pro {
+    background: linear-gradient(165deg, rgba(255, 255, 255, 0.03) 0%, var(--bg-card) 100%);
+    border: 1px solid var(--border-gold);
+}
+
+.is-talep-kart--pro:hover {
+    border-color: var(--border-gold-strong);
+    box-shadow: var(--aurix-shadow-gold-hover);
+}
+
+.btn--success {
+    background: var(--primary-gold);
+    color: #0a0a0a;
+    border: 1px solid rgba(243, 229, 171, 0.3);
+}
+
+.nav__cta-sm,
+.nav__link--cta.nav__cta-sm {
+    background: var(--primary-gold);
+    color: #0a0a0a !important;
+    border: 1px solid rgba(243, 229, 171, 0.35);
+    font-weight: 700;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28), 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.nav__cta-sm:hover,
+.nav__link--cta.nav__cta-sm:hover {
+    background: var(--primary-gold-hover);
+    color: #0a0a0a !important;
+    box-shadow: 0 4px 16px rgba(197, 160, 89, 0.28);
+}
+
+.hero--ticaret__rozet {
+    color: var(--aurix-gold-light);
+    background: rgba(197, 160, 89, 0.1);
+    border: 1px solid var(--border-gold);
+}
+
+.filtre-panel,
+.vitrin-filtre {
+    border-color: var(--border-gold);
+    background: var(--bg-card);
+}
+
+/* Masaüstü: kartlara altın parıltı hover */
+@media (min-width: 768px) and (hover: hover) {
+    .firma-kart:hover,
+    .firma-kart--kompakt:hover,
+    .firma-kart--vitrin:hover,
+    .firma-kart--pro:hover,
+    .is-talep-kart:hover,
+    .is-talep-kart--pro:hover {
+        box-shadow: var(--aurix-shadow-gold-hover);
+        border-color: var(--border-gold-strong);
+    }
+}
+
+/* Mobil performans bloğundaki solid zeminleri obsidyen kart tonuna hizala */
+@media (max-width: 767px) {
+    .nav {
+        background: rgba(9, 9, 11, 0.98) !important;
+        border-bottom-color: var(--border-gold);
+    }
+
+    .filtre-panel,
+    .firma-kart,
+    .firma-kart--kompakt,
+    .firma-kart--ana,
+    .firma-kart--vitrin,
+    .firma-kart--pro,
+    .is-talep-kart,
+    .is-talep-kart--pro {
+        background: var(--bg-card) !important;
+        border-color: var(--border-gold);
+    }
+
+    .btn--primary,
+    .btn--gold,
+    .nav__cta-sm {
+        background: var(--primary-gold) !important;
+    }
+}
+
 
